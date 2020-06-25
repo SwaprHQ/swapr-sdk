@@ -1,4 +1,5 @@
 import JSBI from 'jsbi'
+import { proxies as kovanProxies } from 'dxswap-core/.openzeppelin/kovan.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -22,9 +23,15 @@ export enum Rounding {
   ROUND_UP
 }
 
-export const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
+export const FACTORY_ADDRESS: { [chainId: number]: string } = {
+  [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
+  [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000003',
+  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000004',
+  [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000005',
+  [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapPair'][0].address
+}
 
-export const INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
+export const INIT_CODE_HASH = '0x25dd05d38222d917e4487e1da5be545f4c08adc197eb59f87c597a13cf7791d2'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
