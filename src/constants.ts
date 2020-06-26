@@ -28,7 +28,7 @@ export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000003',
   [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000004',
   [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000005',
-  [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapPair'][0].address
+  [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapFactory'][0].address
 }
 
 export const INIT_CODE_HASH = '0x25dd05d38222d917e4487e1da5be545f4c08adc197eb59f87c597a13cf7791d2'
