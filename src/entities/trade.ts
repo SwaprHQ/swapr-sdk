@@ -18,14 +18,17 @@ function getSlippage(midPrice: Price, inputAmount: TokenAmount, outputAmount: To
 
 // minimal interface so the input output comparator may be shared across types
 interface InputOutput {
-  readonly inputAmount: TokenAmount
-  readonly outputAmount: TokenAmount
+  readonly inputAmount?: TokenAmount
+  readonly outputAmount?: TokenAmount
 }
 
 // comparator function that allows sorting trades by their output amounts, in decreasing order, and then input amounts
 // in increasing order. i.e. the best trades have the most outputs for the least inputs and are sorted first
 export function inputOutputComparator(a: InputOutput, b: InputOutput): number {
   // must have same input and output token for comparison
+  invariant(a.inputAmount !== undefined && a.outputAmount !== undefined, 'UNDEFINED_A')
+  invariant(b.inputAmount !== undefined && b.outputAmount !== undefined, 'UNDEFINED_B')
+  
   invariant(a.inputAmount.token.equals(b.inputAmount.token), 'INPUT_TOKEN')
   invariant(a.outputAmount.token.equals(b.outputAmount.token), 'OUTPUT_TOKEN')
   if (a.outputAmount.equalTo(b.outputAmount)) {
@@ -50,6 +53,9 @@ export function inputOutputComparator(a: InputOutput, b: InputOutput): number {
 
 // extension of the input output comparator that also considers other dimensions of the trade in ranking them
 export function tradeComparator(a: Trade, b: Trade) {
+  invariant(a.slippage !== undefined && b.slippage !== undefined, 'UNDEFINED_NULL')
+  invariant(a.route !== undefined && b.route !== undefined, 'UNDEFINED_NULL')
+
   const ioComp = inputOutputComparator(a, b)
   if (ioComp !== 0) {
     return ioComp
@@ -74,50 +80,59 @@ export interface BestTradeOptions {
 }
 
 export class Trade {
-  public readonly route: Route
-  public readonly tradeType: TradeType
-  public readonly inputAmount: TokenAmount
-  public readonly outputAmount: TokenAmount
-  public readonly executionPrice: Price
-  public readonly nextMidPrice: Price
-  public readonly slippage: Percent
-
-  public constructor(route: Route, amount: TokenAmount, tradeType: TradeType) {
+  public route?: Route
+  public tradeType?: TradeType
+  public amount?: TokenAmount
+  public inputAmount?: TokenAmount
+  public outputAmount?: TokenAmount
+  public executionPrice?: Price
+  public nextMidPrice?: Price
+  public slippage?: Percent
+  
+  public create = async (route: Route, amount: TokenAmount, tradeType: TradeType) => {
     invariant(amount.token.equals(tradeType === TradeType.EXACT_INPUT ? route.input : route.output), 'TOKEN')
+    let trade = new Trade()
+    trade.route = route
+    trade.tradeType = tradeType
+    trade.amount = amount
     const amounts: TokenAmount[] = new Array(route.path.length)
     const nextPairs: Pair[] = new Array(route.pairs.length)
+
     if (tradeType === TradeType.EXACT_INPUT) {
-      amounts[0] = amount
+      amounts[0] = trade.amount
       for (let i = 0; i < route.path.length - 1; i++) {
         const pair = route.pairs[i]
-        const [outputAmount, nextPair] = pair.getOutputAmount(amounts[i])
+        const [outputAmount, nextPair] = await pair.getOutputAmount(amounts[i])
         amounts[i + 1] = outputAmount
         nextPairs[i] = nextPair
       }
     } else {
-      amounts[amounts.length - 1] = amount
+      amounts[amounts.length - 1] = trade.amount
       for (let i = route.path.length - 1; i > 0; i--) {
         const pair = route.pairs[i - 1]
-        const [inputAmount, nextPair] = pair.getInputAmount(amounts[i])
+        const [inputAmount, nextPair] = await pair.getInputAmount(amounts[i])
         amounts[i - 1] = inputAmount
         nextPairs[i - 1] = nextPair
       }
     }
 
-    this.route = route
-    this.tradeType = tradeType
+    trade.route = route
+    trade.tradeType = tradeType
     const inputAmount = amounts[0]
     const outputAmount = amounts[amounts.length - 1]
-    this.inputAmount = inputAmount
-    this.outputAmount = outputAmount
-    this.executionPrice = new Price(route.input, route.output, inputAmount.raw, outputAmount.raw)
-    this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
-    this.slippage = getSlippage(route.midPrice, inputAmount, outputAmount)
+    trade.inputAmount = inputAmount
+    trade.outputAmount = outputAmount
+    trade.executionPrice = new Price(route.input, route.output, inputAmount.raw, outputAmount.raw)
+    trade.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
+    trade.slippage = getSlippage(route.midPrice, inputAmount, outputAmount)
+    
+    return trade;
   }
 
   // get the minimum amount that must be received from this trade for the given slippage tolerance
-  public minimumAmountOut(slippageTolerance: Percent): TokenAmount {
+  public minimumAmountOut(slippageTolerance: Percent): TokenAmount | undefined {
     invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(this.outputAmount !== undefined)
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return this.outputAmount
     } else {
@@ -132,8 +147,9 @@ export class Trade {
   }
 
   // get the maximum amount in that can be spent via this trade for the given slippage tolerance
-  public maximumAmountIn(slippageTolerance: Percent): TokenAmount {
+  public maximumAmountIn(slippageTolerance: Percent): TokenAmount | undefined {
     invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(this.inputAmount !== undefined)
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
@@ -148,7 +164,7 @@ export class Trade {
   // amount to an output token, making at most `maxHops` hops
   // note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
   // the amount in among multiple routes.
-  public static bestTradeExactIn(
+  public static async bestTradeExactIn(
     pairs: Pair[],
     amountIn: TokenAmount,
     tokenOut: Token,
@@ -157,7 +173,7 @@ export class Trade {
     currentPairs: Pair[] = [],
     originalAmountIn: TokenAmount = amountIn,
     bestTrades: Trade[] = []
-  ): Trade[] {
+  ): Promise<Trade[]> {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountIn === amountIn || currentPairs.length > 0, 'INVALID_RECURSION')
@@ -170,7 +186,7 @@ export class Trade {
 
       let amountOut: TokenAmount
       try {
-        ;[amountOut] = pair.getOutputAmount(amountIn)
+        ;[amountOut] = await pair.getOutputAmount(amountIn)
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -182,7 +198,7 @@ export class Trade {
       if (amountOut!.token.equals(tokenOut)) {
         sortedInsert(
           bestTrades,
-          new Trade(
+          await new Trade().create(
             new Route([...currentPairs, pair], originalAmountIn.token),
             originalAmountIn,
             TradeType.EXACT_INPUT
@@ -194,7 +210,7 @@ export class Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
-        Trade.bestTradeExactIn(
+        await Trade.bestTradeExactIn(
           pairsExcludingThisPair,
           amountOut!,
           tokenOut,
@@ -217,7 +233,7 @@ export class Trade {
   // to an output token amount, making at most `maxHops` hops
   // note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
   // the amount in among multiple routes.
-  public static bestTradeExactOut(
+  public static async bestTradeExactOut(
     pairs: Pair[],
     tokenIn: Token,
     amountOut: TokenAmount,
@@ -226,7 +242,7 @@ export class Trade {
     currentPairs: Pair[] = [],
     originalAmountOut: TokenAmount = amountOut,
     bestTrades: Trade[] = []
-  ): Trade[] {
+  ): Promise<Trade[]> {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountOut === amountOut || currentPairs.length > 0, 'INVALID_RECURSION')
@@ -239,7 +255,7 @@ export class Trade {
 
       let amountIn: TokenAmount
       try {
-        ;[amountIn] = pair.getInputAmount(amountOut)
+        ;[amountIn] = await pair.getInputAmount(amountOut)
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
@@ -251,7 +267,11 @@ export class Trade {
       if (amountIn!.token.equals(tokenIn)) {
         sortedInsert(
           bestTrades,
-          new Trade(new Route([pair, ...currentPairs], tokenIn), originalAmountOut, TradeType.EXACT_OUTPUT),
+          await new Trade().create(
+            new Route([pair, ...currentPairs], tokenIn),
+            originalAmountOut,
+            TradeType.EXACT_OUTPUT
+          ),
           maxNumResults,
           tradeComparator
         )
@@ -259,7 +279,7 @@ export class Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        Trade.bestTradeExactOut(
+        await Trade.bestTradeExactOut(
           pairsExcludingThisPair,
           tokenIn,
           amountIn!,

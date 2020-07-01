@@ -14,10 +14,11 @@ import {
   ZERO,
   ONE,
   FIVE,
-  _997,
-  _1000
+  _30,
+  _10000
 } from '../constants'
 import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json'
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json'
 import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
@@ -28,6 +29,9 @@ let CACHE: { [token0Address: string]: { [token1Address: string]: string } } = {}
 export class Pair {
   public readonly liquidityToken: Token
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
+  public readonly swapFee: Promise<BigintIsh>
+  public readonly protocolFeeDenominator: Promise<BigintIsh>
+
 
   static getAddress(tokenA: Token, tokenB: Token): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
@@ -61,6 +65,7 @@ export class Pair {
   }
 
   constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount) {
+    invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
@@ -71,6 +76,14 @@ export class Pair {
       'DXS',
       'DXswap'
     )
+    this.swapFee = new Contract(
+      this.liquidityToken.address, IDXswapPair.abi, getDefaultProvider(getNetwork(tokenAmountA.token.chainId))
+    ).swapFee().catch(() => { return _30 })
+    this.protocolFeeDenominator = new Contract(
+      FACTORY_ADDRESS[tokenAmountA.token.chainId],
+      IDXswapFactory.abi,
+      getDefaultProvider(getNetwork(tokenAmountA.token.chainId))
+    ).protocolFeeDenominator().catch(() => { return FIVE })
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
   }
 
@@ -95,16 +108,16 @@ export class Pair {
     return token.equals(this.token0) ? this.reserve0 : this.reserve1
   }
 
-  getOutputAmount(inputAmount: TokenAmount): [TokenAmount, Pair] {
+  async getOutputAmount(inputAmount: TokenAmount): Promise<[TokenAmount, Pair]> {
     invariant(inputAmount.token.equals(this.token0) || inputAmount.token.equals(this.token1), 'TOKEN')
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError()
     }
     const inputReserve = this.reserveOf(inputAmount.token)
     const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _997)
+    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, JSBI.subtract(_10000, parseBigintIsh(await this.swapFee)))
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _1000), inputAmountWithFee)
+    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.divide(numerator, denominator)
@@ -115,7 +128,7 @@ export class Pair {
     return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
   }
 
-  getInputAmount(outputAmount: TokenAmount): [TokenAmount, Pair] {
+  async getInputAmount(outputAmount: TokenAmount): Promise<[TokenAmount, Pair]> {
     invariant(outputAmount.token.equals(this.token0) || outputAmount.token.equals(this.token1), 'TOKEN')
     if (
       JSBI.equal(this.reserve0.raw, ZERO) ||
@@ -127,8 +140,10 @@ export class Pair {
 
     const outputReserve = this.reserveOf(outputAmount.token)
     const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _1000)
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _997)
+    const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
+    const denominator = JSBI.multiply(
+      JSBI.subtract(outputReserve.raw, outputAmount.raw), JSBI.subtract(_10000, parseBigintIsh(await this.swapFee))
+    )
     const inputAmount = new TokenAmount(
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE)
@@ -157,13 +172,13 @@ export class Pair {
     return new TokenAmount(this.liquidityToken, liquidity)
   }
 
-  getLiquidityValue(
+  async getLiquidityValue(
     token: Token,
     totalSupply: TokenAmount,
     liquidity: TokenAmount,
     feeOn: boolean = false,
     kLast?: BigintIsh
-  ): TokenAmount {
+  ): Promise<TokenAmount> {
     invariant(token.equals(this.token0) || token.equals(this.token1), 'TOKEN')
     invariant(totalSupply.token.equals(this.liquidityToken), 'TOTAL_SUPPLY')
     invariant(liquidity.token.equals(this.liquidityToken), 'LIQUIDITY')
@@ -180,7 +195,7 @@ export class Pair {
         const rootKLast = sqrt(kLastParsed)
         if (JSBI.greaterThan(rootK, rootKLast)) {
           const numerator = JSBI.multiply(totalSupply.raw, JSBI.subtract(rootK, rootKLast))
-          const denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast)
+          const denominator = JSBI.add(JSBI.multiply(rootK, parseBigintIsh(await this.protocolFeeDenominator)), rootKLast)
           const feeLiquidity = JSBI.divide(numerator, denominator)
           totalSupplyAdjusted = totalSupply.add(new TokenAmount(this.liquidityToken, feeLiquidity))
         } else {
