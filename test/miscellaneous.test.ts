@@ -54,7 +54,7 @@ describe('miscellaneous', () => {
     const pair = new Pair(new TokenAmount(tokenA, '1000'), new TokenAmount(tokenB, '1000'))
 
     {
-      const liquidityValue = pair.getLiquidityValue(
+      const liquidityValue = await pair.getLiquidityValue(
         tokenA,
         new TokenAmount(pair.liquidityToken, '1000'),
         new TokenAmount(pair.liquidityToken, '1000'),
@@ -66,7 +66,7 @@ describe('miscellaneous', () => {
 
     // 500
     {
-      const liquidityValue = pair.getLiquidityValue(
+      const liquidityValue = await pair.getLiquidityValue(
         tokenA,
         new TokenAmount(pair.liquidityToken, '1000'),
         new TokenAmount(pair.liquidityToken, '500'),
@@ -78,7 +78,7 @@ describe('miscellaneous', () => {
 
     // tokenB
     {
-      const liquidityValue = pair.getLiquidityValue(
+      const liquidityValue = await pair.getLiquidityValue(
         tokenB,
         new TokenAmount(pair.liquidityToken, '1000'),
         new TokenAmount(pair.liquidityToken, '1000'),
@@ -94,7 +94,7 @@ describe('miscellaneous', () => {
     const tokenB = new Token(ChainId.RINKEBY, '0x0000000000000000000000000000000000000002', 18)
     const pair = new Pair(new TokenAmount(tokenA, '1000'), new TokenAmount(tokenB, '1000'))
 
-    const liquidityValue = pair.getLiquidityValue(
+    const liquidityValue = await pair.getLiquidityValue(
       tokenA,
       new TokenAmount(pair.liquidityToken, '500'),
       new TokenAmount(pair.liquidityToken, '500'),

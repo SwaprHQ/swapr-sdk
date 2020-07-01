@@ -96,7 +96,7 @@ describe('entities', () => {
 
       describe('Trade', () => {
         let route: Route
-        it('TradeType.EXACT_INPUT', () => {
+        it('TradeType.EXACT_INPUT', async () => {
           route = new Route(
             [
               new Pair(
@@ -108,7 +108,7 @@ describe('entities', () => {
           )
           const inputAmount = new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals))
           const expectedOutputAmount = new TokenAmount(WETH, '1662497915624478906')
-          const trade = new Trade(route, inputAmount, TradeType.EXACT_INPUT)
+          const trade = await new Trade().create(route, inputAmount, TradeType.EXACT_INPUT)
           expect(trade.route).toEqual(route)
           expect(trade.tradeType).toEqual(TradeType.EXACT_INPUT)
           expect(trade.inputAmount).toEqual(inputAmount)
@@ -125,10 +125,10 @@ describe('entities', () => {
           expect(trade.slippage.toSignificant(18)).toEqual('16.8751042187760547')
         })
 
-        it('TradeType.EXACT_OUTPUT', () => {
+        it('TradeType.EXACT_OUTPUT', async () => {
           const outputAmount = new TokenAmount(WETH, '1662497915624478906')
           const expectedInputAmount = new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals))
-          const trade = new Trade(route, outputAmount, TradeType.EXACT_OUTPUT)
+          const trade = await new Trade().create(route, outputAmount, TradeType.EXACT_OUTPUT)
           expect(trade.route).toEqual(route)
           expect(trade.tradeType).toEqual(TradeType.EXACT_OUTPUT)
           expect(trade.outputAmount).toEqual(outputAmount)
@@ -145,7 +145,7 @@ describe('entities', () => {
           expect(trade.slippage.toSignificant(18)).toEqual('16.8751042187760547')
         })
 
-        it('minimum TradeType.EXACT_INPUT', () => {
+        it('minimum TradeType.EXACT_INPUT', async () => {
           if ([9, 18].includes(tokens[1].decimals)) {
             const route = new Route(
               [
@@ -161,7 +161,7 @@ describe('entities', () => {
               tokens[1]
             )
             const outputAmount = new TokenAmount(tokens[1], '1')
-            const trade = new Trade(route, outputAmount, TradeType.EXACT_INPUT)
+            const trade = await new Trade().create(route, outputAmount, TradeType.EXACT_INPUT)
 
             expect(trade.slippage.toSignificant(18)).toEqual(
               tokens[1].decimals === 9 ? '0.300000099400899902' : '0.3000000000000001'
