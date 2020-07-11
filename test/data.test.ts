@@ -10,6 +10,8 @@ describe.skip('data', () => {
   it('Token:CACHE', async () => {
     const token = await Token.fetchData(ChainId.MAINNET, '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A') // DGD
     expect(token.decimals).toEqual(9)
+    const dxd = await Token.fetchData(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715') // DGD
+    expect(dxd.decimals).toEqual(18)
   })
 
   it('Pair', async () => {
