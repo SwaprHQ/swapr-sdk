@@ -2,7 +2,7 @@ import { ChainId, Token, TokenAmount, Pair, InsufficientInputAmountError } from 
 import { sortedInsert } from '../src/utils'
 
 describe('miscellaneous', () => {
-  it('getLiquidityMinted:0', async () => {
+  it('getLiquidityMinted:0', () => {
     const tokenA = new Token(ChainId.RINKEBY, '0x0000000000000000000000000000000000000001', 18)
     const tokenB = new Token(ChainId.RINKEBY, '0x0000000000000000000000000000000000000002', 18)
     const pair = new Pair(new TokenAmount(tokenA, '0'), new TokenAmount(tokenB, '0'))
