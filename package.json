@@ -29,7 +29,7 @@
     "@ethersproject/solidity": "^5.0.0-beta.131",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
-    "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#develop",
+    "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#v0.1.0",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
@@ -48,5 +48,8 @@
     "printWidth": 120,
     "semi": false,
     "singleQuote": true
+  },
+  "jest": {
+    "testTimeout": 10000
   }
 }
