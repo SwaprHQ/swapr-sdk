@@ -4,6 +4,8 @@ import { TokenAmount } from './fractions/tokenAmount';
 export declare class Pair {
     readonly liquidityToken: Token;
     private readonly tokenAmounts;
+    readonly swapFee: Promise<BigintIsh>;
+    readonly protocolFeeDenominator: Promise<BigintIsh>;
     static getAddress(tokenA: Token, tokenB: Token): string;
     static fetchData(tokenA: Token, tokenB: Token, provider?: import("@ethersproject/providers").BaseProvider): Promise<Pair>;
     constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount);
@@ -12,8 +14,8 @@ export declare class Pair {
     get reserve0(): TokenAmount;
     get reserve1(): TokenAmount;
     reserveOf(token: Token): TokenAmount;
-    getOutputAmount(inputAmount: TokenAmount): [TokenAmount, Pair];
-    getInputAmount(outputAmount: TokenAmount): [TokenAmount, Pair];
+    getOutputAmount(inputAmount: TokenAmount): Promise<[TokenAmount, Pair]>;
+    getInputAmount(outputAmount: TokenAmount): Promise<[TokenAmount, Pair]>;
     getLiquidityMinted(totalSupply: TokenAmount, tokenAmountA: TokenAmount, tokenAmountB: TokenAmount): TokenAmount;
-    getLiquidityValue(token: Token, totalSupply: TokenAmount, liquidity: TokenAmount, feeOn?: boolean, kLast?: BigintIsh): TokenAmount;
+    getLiquidityValue(token: Token, totalSupply: TokenAmount, liquidity: TokenAmount, feeOn?: boolean, kLast?: BigintIsh): Promise<TokenAmount>;
 }

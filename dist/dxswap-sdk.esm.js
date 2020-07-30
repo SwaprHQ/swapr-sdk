@@ -9,6 +9,7 @@ import warning from 'tiny-warning';
 import { getAddress, getCreate2Address } from '@ethersproject/address';
 import { keccak256, pack } from '@ethersproject/solidity';
 import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
 import _Big from 'big.js';
 import toFormat from 'toformat';
 import _Decimal from 'decimal.js-light';
@@ -49,9 +50,9 @@ var TWO = /*#__PURE__*/JSBI.BigInt(2);
 var THREE = /*#__PURE__*/JSBI.BigInt(3);
 var FIVE = /*#__PURE__*/JSBI.BigInt(5);
 var TEN = /*#__PURE__*/JSBI.BigInt(10);
+var _30 = /*#__PURE__*/JSBI.BigInt(30);
 var _100 = /*#__PURE__*/JSBI.BigInt(100);
-var _997 = /*#__PURE__*/JSBI.BigInt(997);
-var _1000 = /*#__PURE__*/JSBI.BigInt(1000);
+var _10000 = /*#__PURE__*/JSBI.BigInt(10000);
 var SolidityType;
 
 (function (SolidityType) {
@@ -632,9 +633,16 @@ var TokenAmount = /*#__PURE__*/function (_Fraction) {
 var CACHE$1 = {};
 var Pair = /*#__PURE__*/function () {
   function Pair(tokenAmountA, tokenAmountB) {
+    !(tokenAmountA.token.chainId === tokenAmountB.token.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
     var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
     ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
     this.liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
+    this.swapFee = new Contract(this.liquidityToken.address, IDXswapPair.abi, getDefaultProvider(getNetwork(tokenAmountA.token.chainId))).swapFee()["catch"](function () {
+      return _30;
+    });
+    this.protocolFeeDenominator = new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, getDefaultProvider(getNetwork(tokenAmountA.token.chainId))).protocolFeeDenominator()["catch"](function () {
+      return FIVE;
+    });
     this.tokenAmounts = tokenAmounts;
   }
 
@@ -676,39 +684,69 @@ var Pair = /*#__PURE__*/function () {
   };
 
   _proto.getOutputAmount = function getOutputAmount(inputAmount) {
-    !(inputAmount.token.equals(this.token0) || inputAmount.token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    try {
+      var _this2 = this;
 
-    if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
-      throw new InsufficientReservesError();
+      !(inputAmount.token.equals(_this2.token0) || inputAmount.token.equals(_this2.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+
+      if (JSBI.equal(_this2.reserve0.raw, ZERO) || JSBI.equal(_this2.reserve1.raw, ZERO)) {
+        throw new InsufficientReservesError();
+      }
+
+      var inputReserve = _this2.reserveOf(inputAmount.token);
+
+      var outputReserve = _this2.reserveOf(inputAmount.token.equals(_this2.token0) ? _this2.token1 : _this2.token0);
+
+      var _multiply2 = JSBI.multiply,
+          _inputAmount$raw2 = inputAmount.raw,
+          _subtract2 = JSBI.subtract;
+      return Promise.resolve(_this2.swapFee).then(function (_this$swapFee) {
+        var inputAmountWithFee = _multiply2.call(JSBI, _inputAmount$raw2, _subtract2.call(JSBI, _10000, parseBigintIsh(_this$swapFee)));
+
+        var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
+        var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee);
+        var outputAmount = new TokenAmount(inputAmount.token.equals(_this2.token0) ? _this2.token1 : _this2.token0, JSBI.divide(numerator, denominator));
+
+        if (JSBI.equal(outputAmount.raw, ZERO)) {
+          throw new InsufficientInputAmountError();
+        }
+
+        return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
+      });
+    } catch (e) {
+      return Promise.reject(e);
     }
-
-    var inputReserve = this.reserveOf(inputAmount.token);
-    var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0);
-    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _997);
-    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
-    var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _1000), inputAmountWithFee);
-    var outputAmount = new TokenAmount(inputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.divide(numerator, denominator));
-
-    if (JSBI.equal(outputAmount.raw, ZERO)) {
-      throw new InsufficientInputAmountError();
-    }
-
-    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
   };
 
   _proto.getInputAmount = function getInputAmount(outputAmount) {
-    !(outputAmount.token.equals(this.token0) || outputAmount.token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    try {
+      var _this4 = this;
 
-    if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO) || JSBI.greaterThanOrEqual(outputAmount.raw, this.reserveOf(outputAmount.token).raw)) {
-      throw new InsufficientReservesError();
+      !(outputAmount.token.equals(_this4.token0) || outputAmount.token.equals(_this4.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+
+      if (JSBI.equal(_this4.reserve0.raw, ZERO) || JSBI.equal(_this4.reserve1.raw, ZERO) || JSBI.greaterThanOrEqual(outputAmount.raw, _this4.reserveOf(outputAmount.token).raw)) {
+        throw new InsufficientReservesError();
+      }
+
+      var outputReserve = _this4.reserveOf(outputAmount.token);
+
+      var inputReserve = _this4.reserveOf(outputAmount.token.equals(_this4.token0) ? _this4.token1 : _this4.token0);
+
+      var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000);
+
+      var _multiply4 = JSBI.multiply,
+          _JSBI$subtract2 = JSBI.subtract(outputReserve.raw, outputAmount.raw),
+          _subtract4 = JSBI.subtract;
+
+      return Promise.resolve(_this4.swapFee).then(function (_this3$swapFee) {
+        var denominator = _multiply4.call(JSBI, _JSBI$subtract2, _subtract4.call(JSBI, _10000, parseBigintIsh(_this3$swapFee)));
+
+        var inputAmount = new TokenAmount(outputAmount.token.equals(_this4.token0) ? _this4.token1 : _this4.token0, JSBI.add(JSBI.divide(numerator, denominator), ONE));
+        return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
+      });
+    } catch (e) {
+      return Promise.reject(e);
     }
-
-    var outputReserve = this.reserveOf(outputAmount.token);
-    var inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0);
-    var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _1000);
-    var denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _997);
-    var inputAmount = new TokenAmount(outputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.add(JSBI.divide(numerator, denominator), ONE));
-    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
   };
 
   _proto.getLiquidityMinted = function getLiquidityMinted(totalSupply, tokenAmountA, tokenAmountB) {
@@ -738,36 +776,61 @@ var Pair = /*#__PURE__*/function () {
       feeOn = false;
     }
 
-    !(token.equals(this.token0) || token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
-    !totalSupply.token.equals(this.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOTAL_SUPPLY') : invariant(false) : void 0;
-    !liquidity.token.equals(this.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
-    !JSBI.lessThanOrEqual(liquidity.raw, totalSupply.raw) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
-    var totalSupplyAdjusted;
+    try {
+      var _temp5 = function _temp5() {
+        return new TokenAmount(token, JSBI.divide(JSBI.multiply(liquidity.raw, _this6.reserveOf(token).raw), totalSupplyAdjusted.raw));
+      };
 
-    if (!feeOn) {
-      totalSupplyAdjusted = totalSupply;
-    } else {
-      !!!kLast ? process.env.NODE_ENV !== "production" ? invariant(false, 'K_LAST') : invariant(false) : void 0;
-      var kLastParsed = parseBigintIsh(kLast);
+      var _this6 = this;
 
-      if (!JSBI.equal(kLastParsed, ZERO)) {
-        var rootK = sqrt(JSBI.multiply(this.reserve0.raw, this.reserve1.raw));
-        var rootKLast = sqrt(kLastParsed);
+      !(token.equals(_this6.token0) || token.equals(_this6.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+      !totalSupply.token.equals(_this6.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOTAL_SUPPLY') : invariant(false) : void 0;
+      !liquidity.token.equals(_this6.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
+      !JSBI.lessThanOrEqual(liquidity.raw, totalSupply.raw) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
+      var totalSupplyAdjusted;
 
-        if (JSBI.greaterThan(rootK, rootKLast)) {
-          var numerator = JSBI.multiply(totalSupply.raw, JSBI.subtract(rootK, rootKLast));
-          var denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast);
-          var feeLiquidity = JSBI.divide(numerator, denominator);
-          totalSupplyAdjusted = totalSupply.add(new TokenAmount(this.liquidityToken, feeLiquidity));
-        } else {
+      var _temp6 = function () {
+        if (!feeOn) {
           totalSupplyAdjusted = totalSupply;
-        }
-      } else {
-        totalSupplyAdjusted = totalSupply;
-      }
-    }
+        } else {
+          !!!kLast ? process.env.NODE_ENV !== "production" ? invariant(false, 'K_LAST') : invariant(false) : void 0;
+          var kLastParsed = parseBigintIsh(kLast);
 
-    return new TokenAmount(token, JSBI.divide(JSBI.multiply(liquidity.raw, this.reserveOf(token).raw), totalSupplyAdjusted.raw));
+          var _temp7 = function () {
+            if (!JSBI.equal(kLastParsed, ZERO)) {
+              var rootK = sqrt(JSBI.multiply(_this6.reserve0.raw, _this6.reserve1.raw));
+              var rootKLast = sqrt(kLastParsed);
+
+              var _temp8 = function () {
+                if (JSBI.greaterThan(rootK, rootKLast)) {
+                  var numerator = JSBI.multiply(totalSupply.raw, JSBI.subtract(rootK, rootKLast));
+                  var _add2 = JSBI.add,
+                      _multiply6 = JSBI.multiply;
+                  return Promise.resolve(_this6.protocolFeeDenominator).then(function (_this5$protocolFeeDen) {
+                    var denominator = _add2.call(JSBI, _multiply6.call(JSBI, rootK, parseBigintIsh(_this5$protocolFeeDen)), rootKLast);
+
+                    var feeLiquidity = JSBI.divide(numerator, denominator);
+                    totalSupplyAdjusted = totalSupply.add(new TokenAmount(_this6.liquidityToken, feeLiquidity));
+                  });
+                } else {
+                  totalSupplyAdjusted = totalSupply;
+                }
+              }();
+
+              if (_temp8 && _temp8.then) return _temp8.then(function () {});
+            } else {
+              totalSupplyAdjusted = totalSupply;
+            }
+          }();
+
+          if (_temp7 && _temp7.then) return _temp7.then(function () {});
+        }
+      }();
+
+      return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   };
 
   _createClass(Pair, [{
@@ -916,6 +979,208 @@ var Route = /*#__PURE__*/function () {
   return Route;
 }();
 
+// A type of promise-like that resolves synchronously and supports only one observer
+const _Pact = /*#__PURE__*/(function() {
+	function _Pact() {}
+	_Pact.prototype.then = function(onFulfilled, onRejected) {
+		const result = new _Pact();
+		const state = this.s;
+		if (state) {
+			const callback = state & 1 ? onFulfilled : onRejected;
+			if (callback) {
+				try {
+					_settle(result, 1, callback(this.v));
+				} catch (e) {
+					_settle(result, 2, e);
+				}
+				return result;
+			} else {
+				return this;
+			}
+		}
+		this.o = function(_this) {
+			try {
+				const value = _this.v;
+				if (_this.s & 1) {
+					_settle(result, 1, onFulfilled ? onFulfilled(value) : value);
+				} else if (onRejected) {
+					_settle(result, 1, onRejected(value));
+				} else {
+					_settle(result, 2, value);
+				}
+			} catch (e) {
+				_settle(result, 2, e);
+			}
+		};
+		return result;
+	};
+	return _Pact;
+})();
+
+// Settles a pact synchronously
+function _settle(pact, state, value) {
+	if (!pact.s) {
+		if (value instanceof _Pact) {
+			if (value.s) {
+				if (state & 1) {
+					state = value.s;
+				}
+				value = value.v;
+			} else {
+				value.o = _settle.bind(null, pact, state);
+				return;
+			}
+		}
+		if (value && value.then) {
+			value.then(_settle.bind(null, pact, state), _settle.bind(null, pact, 2));
+			return;
+		}
+		pact.s = state;
+		pact.v = value;
+		const observer = pact.o;
+		if (observer) {
+			observer(pact);
+		}
+	}
+}
+
+function _isSettledPact(thenable) {
+	return thenable instanceof _Pact && thenable.s & 1;
+}
+
+// Asynchronously iterate through an object that has a length property, passing the index as the first argument to the callback (even as the length property changes)
+function _forTo(array, body, check) {
+	var i = -1, pact, reject;
+	function _cycle(result) {
+		try {
+			while (++i < array.length && (!check || !check())) {
+				result = body(i);
+				if (result && result.then) {
+					if (_isSettledPact(result)) {
+						result = result.v;
+					} else {
+						result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
+						return;
+					}
+				}
+			}
+			if (pact) {
+				_settle(pact, 1, result);
+			} else {
+				pact = result;
+			}
+		} catch (e) {
+			_settle(pact || (pact = new _Pact()), 2, e);
+		}
+	}
+	_cycle();
+	return pact;
+}
+
+const _iteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator"))) : "@@iterator";
+
+const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
+
+// Asynchronously implement a generic for loop
+function _for(test, update, body) {
+	var stage;
+	for (;;) {
+		var shouldContinue = test();
+		if (_isSettledPact(shouldContinue)) {
+			shouldContinue = shouldContinue.v;
+		}
+		if (!shouldContinue) {
+			return result;
+		}
+		if (shouldContinue.then) {
+			stage = 0;
+			break;
+		}
+		var result = body();
+		if (result && result.then) {
+			if (_isSettledPact(result)) {
+				result = result.s;
+			} else {
+				stage = 1;
+				break;
+			}
+		}
+		if (update) {
+			var updateValue = update();
+			if (updateValue && updateValue.then && !_isSettledPact(updateValue)) {
+				stage = 2;
+				break;
+			}
+		}
+	}
+	var pact = new _Pact();
+	var reject = _settle.bind(null, pact, 2);
+	(stage === 0 ? shouldContinue.then(_resumeAfterTest) : stage === 1 ? result.then(_resumeAfterBody) : updateValue.then(_resumeAfterUpdate)).then(void 0, reject);
+	return pact;
+	function _resumeAfterBody(value) {
+		result = value;
+		do {
+			if (update) {
+				updateValue = update();
+				if (updateValue && updateValue.then && !_isSettledPact(updateValue)) {
+					updateValue.then(_resumeAfterUpdate).then(void 0, reject);
+					return;
+				}
+			}
+			shouldContinue = test();
+			if (!shouldContinue || (_isSettledPact(shouldContinue) && !shouldContinue.v)) {
+				_settle(pact, 1, result);
+				return;
+			}
+			if (shouldContinue.then) {
+				shouldContinue.then(_resumeAfterTest).then(void 0, reject);
+				return;
+			}
+			result = body();
+			if (_isSettledPact(result)) {
+				result = result.v;
+			}
+		} while (!result || !result.then);
+		result.then(_resumeAfterBody).then(void 0, reject);
+	}
+	function _resumeAfterTest(shouldContinue) {
+		if (shouldContinue) {
+			result = body();
+			if (result && result.then) {
+				result.then(_resumeAfterBody).then(void 0, reject);
+			} else {
+				_resumeAfterBody(result);
+			}
+		} else {
+			_settle(pact, 1, result);
+		}
+	}
+	function _resumeAfterUpdate() {
+		if (shouldContinue = test()) {
+			if (shouldContinue.then) {
+				shouldContinue.then(_resumeAfterTest).then(void 0, reject);
+			} else {
+				_resumeAfterTest(shouldContinue);
+			}
+		} else {
+			_settle(pact, 1, result);
+		}
+	}
+}
+
+// Asynchronously call a function and send errors to recovery continuation
+function _catch(body, recover) {
+	try {
+		var result = body();
+	} catch(e) {
+		return recover(e);
+	}
+	if (result && result.then) {
+		return result.then(void 0, recover);
+	}
+	return result;
+}
+
 var _100_PERCENT = /*#__PURE__*/new Fraction(_100);
 
 var Percent = /*#__PURE__*/function (_Fraction) {
@@ -957,6 +1222,8 @@ function getSlippage(midPrice, inputAmount, outputAmount) {
 
 function inputOutputComparator(a, b) {
   // must have same input and output token for comparison
+  !(a.inputAmount !== undefined && a.outputAmount !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'UNDEFINED_A') : invariant(false) : void 0;
+  !(b.inputAmount !== undefined && b.outputAmount !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'UNDEFINED_B') : invariant(false) : void 0;
   !a.inputAmount.token.equals(b.inputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INPUT_TOKEN') : invariant(false) : void 0;
   !a.outputAmount.token.equals(b.outputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'OUTPUT_TOKEN') : invariant(false) : void 0;
 
@@ -982,6 +1249,8 @@ function inputOutputComparator(a, b) {
 } // extension of the input output comparator that also considers other dimensions of the trade in ranking them
 
 function tradeComparator(a, b) {
+  !(a.slippage !== undefined && b.slippage !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'UNDEFINED_NULL') : invariant(false) : void 0;
+  !(a.route !== undefined && b.route !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'UNDEFINED_NULL') : invariant(false) : void 0;
   var ioComp = inputOutputComparator(a, b);
 
   if (ioComp !== 0) {
@@ -999,48 +1268,78 @@ function tradeComparator(a, b) {
   return a.route.path.length - b.route.path.length;
 }
 var Trade = /*#__PURE__*/function () {
-  function Trade(route, amount, tradeType) {
-    !amount.token.equals(tradeType === TradeType.EXACT_INPUT ? route.input : route.output) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
-    var amounts = new Array(route.path.length);
-    var nextPairs = new Array(route.pairs.length);
+  function Trade() {
+    this.create = function (route, amount, tradeType) {
+      try {
+        var _temp5 = function _temp5() {
+          trade.route = route;
+          trade.tradeType = tradeType;
+          var inputAmount = amounts[0];
+          var outputAmount = amounts[amounts.length - 1];
+          trade.inputAmount = inputAmount;
+          trade.outputAmount = outputAmount;
+          trade.executionPrice = new Price(route.input, route.output, inputAmount.raw, outputAmount.raw);
+          trade.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input));
+          trade.slippage = getSlippage(route.midPrice, inputAmount, outputAmount);
+          return trade;
+        };
 
-    if (tradeType === TradeType.EXACT_INPUT) {
-      amounts[0] = amount;
+        !amount.token.equals(tradeType === TradeType.EXACT_INPUT ? route.input : route.output) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+        var trade = new Trade();
+        trade.route = route;
+        trade.tradeType = tradeType;
+        trade.amount = amount;
+        var amounts = new Array(route.path.length);
+        var nextPairs = new Array(route.pairs.length);
 
-      for (var i = 0; i < route.path.length - 1; i++) {
-        var pair = route.pairs[i];
+        var _temp6 = function () {
+          if (tradeType === TradeType.EXACT_INPUT) {
+            amounts[0] = trade.amount;
+            var _i = 0;
 
-        var _pair$getOutputAmount = pair.getOutputAmount(amounts[i]),
-            _outputAmount = _pair$getOutputAmount[0],
-            nextPair = _pair$getOutputAmount[1];
+            var _temp7 = _for(function () {
+              return _i < route.path.length - 1;
+            }, function () {
+              return _i++;
+            }, function () {
+              var pair = route.pairs[_i];
+              return Promise.resolve(pair.getOutputAmount(amounts[_i])).then(function (_ref) {
+                var outputAmount = _ref[0],
+                    nextPair = _ref[1];
+                amounts[_i + 1] = outputAmount;
+                nextPairs[_i] = nextPair;
+              });
+            });
 
-        amounts[i + 1] = _outputAmount;
-        nextPairs[i] = nextPair;
+            if (_temp7 && _temp7.then) return _temp7.then(function () {});
+          } else {
+            amounts[amounts.length - 1] = trade.amount;
+
+            var _i2 = route.path.length - 1;
+
+            var _temp8 = _for(function () {
+              return _i2 > 0;
+            }, function () {
+              return _i2--;
+            }, function () {
+              var pair = route.pairs[_i2 - 1];
+              return Promise.resolve(pair.getInputAmount(amounts[_i2])).then(function (_ref2) {
+                var inputAmount = _ref2[0],
+                    nextPair = _ref2[1];
+                amounts[_i2 - 1] = inputAmount;
+                nextPairs[_i2 - 1] = nextPair;
+              });
+            });
+
+            if (_temp8 && _temp8.then) return _temp8.then(function () {});
+          }
+        }();
+
+        return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
+      } catch (e) {
+        return Promise.reject(e);
       }
-    } else {
-      amounts[amounts.length - 1] = amount;
-
-      for (var _i = route.path.length - 1; _i > 0; _i--) {
-        var _pair = route.pairs[_i - 1];
-
-        var _pair$getInputAmount = _pair.getInputAmount(amounts[_i]),
-            _inputAmount = _pair$getInputAmount[0],
-            _nextPair = _pair$getInputAmount[1];
-
-        amounts[_i - 1] = _inputAmount;
-        nextPairs[_i - 1] = _nextPair;
-      }
-    }
-
-    this.route = route;
-    this.tradeType = tradeType;
-    var inputAmount = amounts[0];
-    var outputAmount = amounts[amounts.length - 1];
-    this.inputAmount = inputAmount;
-    this.outputAmount = outputAmount;
-    this.executionPrice = new Price(route.input, route.output, inputAmount.raw, outputAmount.raw);
-    this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input));
-    this.slippage = getSlippage(route.midPrice, inputAmount, outputAmount);
+    };
   } // get the minimum amount that must be received from this trade for the given slippage tolerance
 
 
@@ -1048,6 +1347,7 @@ var Trade = /*#__PURE__*/function () {
 
   _proto.minimumAmountOut = function minimumAmountOut(slippageTolerance) {
     !!slippageTolerance.lessThan(ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
+    !(this.outputAmount !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false) : invariant(false) : void 0;
 
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return this.outputAmount;
@@ -1059,6 +1359,7 @@ var Trade = /*#__PURE__*/function () {
 
   _proto.maximumAmountIn = function maximumAmountIn(slippageTolerance) {
     !!slippageTolerance.lessThan(ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SLIPPAGE_TOLERANCE') : invariant(false) : void 0;
+    !(this.inputAmount !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false) : invariant(false) : void 0;
 
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount;
@@ -1071,13 +1372,13 @@ var Trade = /*#__PURE__*/function () {
   // the amount in among multiple routes.
   ;
 
-  Trade.bestTradeExactIn = function bestTradeExactIn(pairs, amountIn, tokenOut, _temp, // used in recursion.
+  Trade.bestTradeExactIn = function bestTradeExactIn(pairs, amountIn, tokenOut, _temp14, // used in recursion.
   currentPairs, originalAmountIn, bestTrades) {
-    var _ref = _temp === void 0 ? {} : _temp,
-        _ref$maxNumResults = _ref.maxNumResults,
-        maxNumResults = _ref$maxNumResults === void 0 ? 3 : _ref$maxNumResults,
-        _ref$maxHops = _ref.maxHops,
-        maxHops = _ref$maxHops === void 0 ? 3 : _ref$maxHops;
+    var _ref3 = _temp14 === void 0 ? {} : _temp14,
+        _ref3$maxNumResults = _ref3.maxNumResults,
+        maxNumResults = _ref3$maxNumResults === void 0 ? 3 : _ref3$maxNumResults,
+        _ref3$maxHops = _ref3.maxHops,
+        maxHops = _ref3$maxHops === void 0 ? 3 : _ref3$maxHops;
 
     if (currentPairs === void 0) {
       currentPairs = [];
@@ -1091,47 +1392,71 @@ var Trade = /*#__PURE__*/function () {
       bestTrades = [];
     }
 
-    !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
-    !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
-    !(originalAmountIn === amountIn || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    try {
+      var _exit2 = false;
+      !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
+      !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
+      !(originalAmountIn === amountIn || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
 
-    for (var i = 0; i < pairs.length; i++) {
-      var pair = pairs[i]; // pair irrelevant
+      var _temp15 = _forTo(pairs, function (i) {
+        function _temp12(_result) {
+          if (_exit2) return _result;
 
-      if (!pair.token0.equals(amountIn.token) && !pair.token1.equals(amountIn.token)) continue;
-      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
+          var _temp10 = function () {
+            if (amountOut.token.equals(tokenOut)) {
+              return Promise.resolve(new Trade().create(new Route([].concat(currentPairs, [pair]), originalAmountIn.token), originalAmountIn, TradeType.EXACT_INPUT)).then(function (_Trade$create) {
+                sortedInsert(bestTrades, _Trade$create, maxNumResults, tradeComparator);
+              });
+            } else {
+              var _temp16 = function () {
+                if (maxHops > 1 && pairs.length > 1) {
+                  var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
 
-      var _amountOut = void 0;
+                  return Promise.resolve(Trade.bestTradeExactIn(pairsExcludingThisPair, amountOut, tokenOut, {
+                    maxNumResults: maxNumResults,
+                    maxHops: maxHops - 1
+                  }, [].concat(currentPairs, [pair]), originalAmountIn, bestTrades)).then(function () {});
+                }
+              }();
 
-      try {
-        ;
+              if (_temp16 && _temp16.then) return _temp16.then(function () {});
+            }
+          }();
 
-        var _pair$getOutputAmount2 = pair.getOutputAmount(amountIn);
-
-        _amountOut = _pair$getOutputAmount2[0];
-      } catch (error) {
-        // input too low
-        if (error.isInsufficientInputAmountError) {
-          continue;
+          if (_temp10 && _temp10.then) return _temp10.then(function () {});
         }
 
-        throw error;
-      } // we have arrived at the output token, so this is the final trade of one of the paths
+        var pair = pairs[i]; // pair irrelevant
 
+        if (!pair.token0.equals(amountIn.token) && !pair.token1.equals(amountIn.token)) return;
+        if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) return;
+        var amountOut;
 
-      if (_amountOut.token.equals(tokenOut)) {
-        sortedInsert(bestTrades, new Trade(new Route([].concat(currentPairs, [pair]), originalAmountIn.token), originalAmountIn, TradeType.EXACT_INPUT), maxNumResults, tradeComparator);
-      } else if (maxHops > 1 && pairs.length > 1) {
-        var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
+        var _temp11 = _catch(function () {
+          ;
+          return Promise.resolve(pair.getOutputAmount(amountIn)).then(function (_pair$getOutputAmount) {
+            amountOut = _pair$getOutputAmount[0];
+          });
+        }, function (error) {
+          // input too low
+          if (error.isInsufficientInputAmountError) {
+            return;
+          }
 
-        Trade.bestTradeExactIn(pairsExcludingThisPair, _amountOut, tokenOut, {
-          maxNumResults: maxNumResults,
-          maxHops: maxHops - 1
-        }, [].concat(currentPairs, [pair]), originalAmountIn, bestTrades);
-      }
+          throw error;
+        });
+
+        return _temp11 && _temp11.then ? _temp11.then(_temp12) : _temp12(_temp11); // we have arrived at the output token, so this is the final trade of one of the paths
+      }, function () {
+        return _exit2;
+      });
+
+      return Promise.resolve(_temp15 && _temp15.then ? _temp15.then(function (_result2) {
+        return _exit2 ? _result2 : bestTrades;
+      }) : _exit2 ? _temp15 : bestTrades);
+    } catch (e) {
+      return Promise.reject(e);
     }
-
-    return bestTrades;
   } // similar to the above method but instead targets a fixed output amount
   // given a list of pairs, and a fixed amount out, returns the top `maxNumResults` trades that go from an input token
   // to an output token amount, making at most `maxHops` hops
@@ -1139,13 +1464,13 @@ var Trade = /*#__PURE__*/function () {
   // the amount in among multiple routes.
   ;
 
-  Trade.bestTradeExactOut = function bestTradeExactOut(pairs, tokenIn, amountOut, _temp2, // used in recursion.
+  Trade.bestTradeExactOut = function bestTradeExactOut(pairs, tokenIn, amountOut, _temp22, // used in recursion.
   currentPairs, originalAmountOut, bestTrades) {
-    var _ref2 = _temp2 === void 0 ? {} : _temp2,
-        _ref2$maxNumResults = _ref2.maxNumResults,
-        maxNumResults = _ref2$maxNumResults === void 0 ? 3 : _ref2$maxNumResults,
-        _ref2$maxHops = _ref2.maxHops,
-        maxHops = _ref2$maxHops === void 0 ? 3 : _ref2$maxHops;
+    var _ref4 = _temp22 === void 0 ? {} : _temp22,
+        _ref4$maxNumResults = _ref4.maxNumResults,
+        maxNumResults = _ref4$maxNumResults === void 0 ? 3 : _ref4$maxNumResults,
+        _ref4$maxHops = _ref4.maxHops,
+        maxHops = _ref4$maxHops === void 0 ? 3 : _ref4$maxHops;
 
     if (currentPairs === void 0) {
       currentPairs = [];
@@ -1159,47 +1484,71 @@ var Trade = /*#__PURE__*/function () {
       bestTrades = [];
     }
 
-    !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
-    !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
-    !(originalAmountOut === amountOut || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    try {
+      var _exit4 = false;
+      !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
+      !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
+      !(originalAmountOut === amountOut || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
 
-    for (var i = 0; i < pairs.length; i++) {
-      var pair = pairs[i]; // pair irrelevant
+      var _temp23 = _forTo(pairs, function (i) {
+        function _temp20(_result3) {
+          if (_exit4) return _result3;
 
-      if (!pair.token0.equals(amountOut.token) && !pair.token1.equals(amountOut.token)) continue;
-      if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
+          var _temp18 = function () {
+            if (amountIn.token.equals(tokenIn)) {
+              return Promise.resolve(new Trade().create(new Route([pair].concat(currentPairs), tokenIn), originalAmountOut, TradeType.EXACT_OUTPUT)).then(function (_Trade$create2) {
+                sortedInsert(bestTrades, _Trade$create2, maxNumResults, tradeComparator);
+              });
+            } else {
+              var _temp24 = function () {
+                if (maxHops > 1 && pairs.length > 1) {
+                  var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
 
-      var _amountIn = void 0;
+                  return Promise.resolve(Trade.bestTradeExactOut(pairsExcludingThisPair, tokenIn, amountIn, {
+                    maxNumResults: maxNumResults,
+                    maxHops: maxHops - 1
+                  }, [pair].concat(currentPairs), originalAmountOut, bestTrades)).then(function () {});
+                }
+              }();
 
-      try {
-        ;
+              if (_temp24 && _temp24.then) return _temp24.then(function () {});
+            }
+          }();
 
-        var _pair$getInputAmount2 = pair.getInputAmount(amountOut);
-
-        _amountIn = _pair$getInputAmount2[0];
-      } catch (error) {
-        // not enough liquidity in this pair
-        if (error.isInsufficientReservesError) {
-          continue;
+          if (_temp18 && _temp18.then) return _temp18.then(function () {});
         }
 
-        throw error;
-      } // we have arrived at the input token, so this is the first trade of one of the paths
+        var pair = pairs[i]; // pair irrelevant
 
+        if (!pair.token0.equals(amountOut.token) && !pair.token1.equals(amountOut.token)) return;
+        if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) return;
+        var amountIn;
 
-      if (_amountIn.token.equals(tokenIn)) {
-        sortedInsert(bestTrades, new Trade(new Route([pair].concat(currentPairs), tokenIn), originalAmountOut, TradeType.EXACT_OUTPUT), maxNumResults, tradeComparator);
-      } else if (maxHops > 1 && pairs.length > 1) {
-        var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
+        var _temp19 = _catch(function () {
+          ;
+          return Promise.resolve(pair.getInputAmount(amountOut)).then(function (_pair$getInputAmount) {
+            amountIn = _pair$getInputAmount[0];
+          });
+        }, function (error) {
+          // not enough liquidity in this pair
+          if (error.isInsufficientReservesError) {
+            return;
+          }
 
-        Trade.bestTradeExactOut(pairsExcludingThisPair, tokenIn, _amountIn, {
-          maxNumResults: maxNumResults,
-          maxHops: maxHops - 1
-        }, [pair].concat(currentPairs), originalAmountOut, bestTrades);
-      }
+          throw error;
+        });
+
+        return _temp19 && _temp19.then ? _temp19.then(_temp20) : _temp20(_temp19); // we have arrived at the input token, so this is the first trade of one of the paths
+      }, function () {
+        return _exit4;
+      });
+
+      return Promise.resolve(_temp23 && _temp23.then ? _temp23.then(function (_result4) {
+        return _exit4 ? _result4 : bestTrades;
+      }) : _exit4 ? _temp23 : bestTrades);
+    } catch (e) {
+      return Promise.reject(e);
     }
-
-    return bestTrades;
   };
 
   return Trade;
