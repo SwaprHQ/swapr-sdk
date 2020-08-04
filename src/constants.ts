@@ -42,9 +42,13 @@ export const TWO = JSBI.BigInt(2)
 export const THREE = JSBI.BigInt(3)
 export const FIVE = JSBI.BigInt(5)
 export const TEN = JSBI.BigInt(10)
+export const _30 = JSBI.BigInt(30)
 export const _100 = JSBI.BigInt(100)
-export const _997 = JSBI.BigInt(997)
 export const _1000 = JSBI.BigInt(1000)
+export const _10000 = JSBI.BigInt(10000)
+
+export const defaultSwapFee = _30
+export const defaultProtocolFeeDenominator = FIVE
 
 export enum SolidityType {
   uint8 = 'uint8',
