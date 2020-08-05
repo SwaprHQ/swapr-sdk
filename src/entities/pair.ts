@@ -74,13 +74,11 @@ export class Pair {
       'DXS',
       'DXswap'
     )
-    const swapFee = await new Contract(
-      liquidityToken.address, IDXswapPair.abi, getDefaultProvider(getNetwork(tokenAmountA.token.chainId))
-    ).swapFee()
+    const swapFee = await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()
     const protocolFeeDenominator = await new Contract(
       FACTORY_ADDRESS[tokenAmountA.token.chainId],
       IDXswapFactory.abi,
-      getDefaultProvider(getNetwork(tokenAmountA.token.chainId))
+      provider
     ).protocolFeeDenominator()
     return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator)
   }
