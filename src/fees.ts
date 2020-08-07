@@ -73,13 +73,13 @@ export class Fees {
   
   static async fetchAllSwapFees(
     chainId: ChainId,
+    provider = getDefaultProvider(getNetwork(chainId))
   ) : Promise<{
     [key: string] : {
       fee: BigintIsh
       owner: string
     }
   }> {
-    const provider = getDefaultProvider(getNetwork(chainId))
     const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
     const allPairsLength = await factoryContract.allPairsLength()
