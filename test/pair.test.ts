@@ -1,5 +1,7 @@
 import { Token, Pair } from '../src/entities'
 import { ChainId } from '../src/constants'
+import { WETH, DXD } from '../src'
+
 
 describe('Pair', () => {
   describe('#getAddress', () => {
@@ -12,9 +14,7 @@ describe('Pair', () => {
   
   describe('#fetchData', () => {
     it('returns the correct address', async () => {
-      const tokenA = new Token(ChainId.KOVAN, '0xd0a1e359811322d97991e03f863a0c30c2cf029c', 18)
-      const tokenB = new Token(ChainId.KOVAN, '0xdd25bae0659fc06a8d00cd06c7f5a98d71bfb715', 18)
-      const pairData = await Pair.fetchData(tokenA, tokenB)
+      const pairData = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
       expect(pairData.swapFee).toEqual(20)
       expect(pairData.protocolFeeDenominator).toEqual(5)
       expect(pairData.liquidityToken.address).toEqual('0x2090339dc96Ad6366FaAfcb455FfF7D4f7c9F761')
