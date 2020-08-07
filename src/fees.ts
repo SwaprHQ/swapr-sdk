@@ -1,3 +1,4 @@
+import JSBI from 'jsbi'
 import { getNetwork } from '@ethersproject/networks'
 import { getDefaultProvider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
@@ -23,7 +24,7 @@ export class Fees {
     owner: string
   }> {
     return {
-      fee: await new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee(),
+      fee: JSBI.BigInt(await new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee()),
       owner: await new Contract(
         FACTORY_ADDRESS[tokenPair.chainId],
         IDXswapFactory.abi,
@@ -61,10 +62,10 @@ export class Fees {
     let fees = [];
     for (let resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
       fees.push({
-        fee: tokenPairContract.interface.decodeFunctionResult(
+        fee: JSBI.BigInt(tokenPairContract.interface.decodeFunctionResult(
           tokenPairContract.interface.getFunction('swapFee()'),
           result.returnData[resultIndex]
-        )[0],
+        )[0]),
         owner
       })
     }
@@ -73,6 +74,12 @@ export class Fees {
   
   static async fetchAllSwapFees(
     chainId: ChainId,
+    swapFeesCache: {
+      [key: string] : {
+        fee: BigintIsh
+        owner: string
+      }
+    } = {},
     provider = getDefaultProvider(getNetwork(chainId))
   ) : Promise<{
     [key: string] : {
@@ -91,27 +98,18 @@ export class Fees {
       })
     const result = await multicall.aggregate(calls.map(call => [call.address, call.callData]))
     let tokenPairs = [];
-    for (let resultIndex = 0; resultIndex < result.returnData.length; resultIndex++)
-      tokenPairs.push( new Token(
-        chainId,
-        factoryContract.interface.decodeFunctionResult(
-          factoryContract.interface.getFunction('allPairs(uint256)'),
-          result.returnData[resultIndex]
-        )[0],
-        18,
-        'DXS',
-        'DXswap'
-      ))
-    const swapFees = await this.fetchSwapFees(tokenPairs);
-    let fees: {
-      [key: string] : {
-        fee: BigintIsh
-        owner: string
-      }
-    } = {}
+    for (let resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
+      const tokenPairAddress = factoryContract.interface.decodeFunctionResult(
+        factoryContract.interface.getFunction('allPairs(uint256)'),
+        result.returnData[resultIndex]
+      )[0]
+      if (!swapFeesCache[tokenPairAddress])
+        tokenPairs.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'))
+    }
+    const swapFees = await this.fetchSwapFees(tokenPairs, provider);
     for (let tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++)
-      fees[tokenPairs[tokenPairsIndex].address] = swapFees[tokenPairsIndex]
-    return fees
+      swapFeesCache[tokenPairs[tokenPairsIndex].address] = swapFees[tokenPairsIndex]
+    return swapFeesCache
   }
   
   static async fetchProtocolFee(
