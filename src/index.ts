@@ -11,5 +11,7 @@ export {
   MINIMUM_LIQUIDITY
 } from './constants'
 
+export * from './fees'
+
 export * from './errors'
 export * from './entities'
