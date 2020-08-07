@@ -74,12 +74,12 @@ export class Pair {
       'DXS',
       'DXswap'
     )
-    const swapFee = await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()
-    const protocolFeeDenominator = await new Contract(
+    const swapFee = JSBI.BigInt(await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee())
+    const protocolFeeDenominator = JSBI.BigInt(await new Contract(
       FACTORY_ADDRESS[tokenAmountA.token.chainId],
       IDXswapFactory.abi,
       provider
-    ).protocolFeeDenominator()
+    ).protocolFeeDenominator())
     return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator)
   }
 

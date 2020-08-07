@@ -42,6 +42,10 @@ describe('fees', () => {
         [WETH_DXD_KOVAN.liquidityToken.address] : {
           fee: JSBI.BigInt(20),
           owner: ZERO_ADDRESS
+        },
+        [WETH_WEENUS_KOVAN.liquidityToken.address] : {
+          fee: JSBI.BigInt(30),
+          owner: ZERO_ADDRESS
         }
       })
       expect(fees[WETH_DXD_KOVAN.liquidityToken.address].fee).toEqual(JSBI.BigInt(20))

@@ -90,26 +90,44 @@ export class Fees {
     const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
     const allPairsLength = await factoryContract.allPairsLength()
+    let allSwapPairs: {
+      [key: string] : {
+        fee: BigintIsh
+        owner: string
+      }
+    } = {}
+    
+    // Get first token pairs from cache
+    let tokenPairsCache = Object.keys(swapFeesCache);
+    let tokenPairsToFetch: Token[] = []
+    for (let tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
+        allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
+          fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
+          owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
+        }
+    }
+    
+    // Get rest of the token pairs that are not cached
     let calls = []
-    for (let pairIndex = 0; pairIndex < allPairsLength; pairIndex++)
+    for (let pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++)
       calls.push({
         address: factoryContract.address,
         callData: factoryContract.interface.encodeFunctionData(factoryContract.interface.getFunction('allPairs(uint)'), [pairIndex])
       })
     const result = await multicall.aggregate(calls.map(call => [call.address, call.callData]))
-    let tokenPairs = [];
     for (let resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
       const tokenPairAddress = factoryContract.interface.decodeFunctionResult(
         factoryContract.interface.getFunction('allPairs(uint256)'),
         result.returnData[resultIndex]
       )[0]
-      if (!swapFeesCache[tokenPairAddress])
-        tokenPairs.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'))
+      tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'))
     }
-    const swapFees = await this.fetchSwapFees(tokenPairs, provider);
-    for (let tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++)
-      swapFeesCache[tokenPairs[tokenPairsIndex].address] = swapFees[tokenPairsIndex]
-    return swapFeesCache
+    
+    // Fetch the pairs that we dont have the fee and owner
+    const swapFeesFetched = await this.fetchSwapFees(tokenPairsToFetch, provider);
+    for (let tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++)
+      allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex]
+    return allSwapPairs
   }
   
   static async fetchProtocolFee(
