@@ -51,6 +51,6 @@
     "singleQuote": true
   },
   "jest": {
-    "testTimeout": 20000
+    "testTimeout": 10000
   }
 }
