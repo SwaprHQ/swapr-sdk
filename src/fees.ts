@@ -18,7 +18,7 @@ export interface Fee {
   owner: string
 }
 
-export interface Fees {
+export interface IndexedFees {
   [key: string] : Fee
 }
 
@@ -76,7 +76,7 @@ export class Fees {
   
   static async fetchAllSwapFees(
     chainId: ChainId,
-  ) : Promise<Fees> {
+  ) : Promise<IndexedFees> {
     const provider = getDefaultProvider(getNetwork(chainId))
     const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
@@ -101,10 +101,9 @@ export class Fees {
         'DXswap'
       ))
     const swapFees = await this.fetchSwapFees(tokenPairs);
-    let fees: Fees = {}
+    let fees: IndexedFees = {}
     for (let tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++)
       fees[tokenPairs[tokenPairsIndex].address] = swapFees[tokenPairsIndex]
-      
     return fees
   }
   
