@@ -13,21 +13,15 @@ import {
 } from './constants'
 import { Token } from './entities/token'
 
-export interface Fee {
-  fee: BigintIsh
-  owner: string
-}
-
-export interface IndexedFees {
-  [key: string] : Fee
-}
-
 export class Fees {
 
   static async fetchSwapFee(
     tokenPair: Token,
     provider = getDefaultProvider(getNetwork(tokenPair.chainId)),
-  ) : Promise<Fee> {
+  ) : Promise<{
+    fee: BigintIsh
+    owner: string
+  }> {
     return {
       fee: await new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee(),
       owner: await new Contract(
@@ -41,7 +35,10 @@ export class Fees {
   static async fetchSwapFees(
     tokenPairs: Token[],
     provider = getDefaultProvider(getNetwork(tokenPairs[0].chainId)),
-  ) : Promise<Fee[]> {
+  ) : Promise<{
+    fee: BigintIsh
+    owner: string
+  }[]> {
     const multicall = new Contract(MULTICALL_ADDRESS[tokenPairs[0].chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[tokenPairs[0].chainId], IDXswapFactory.abi, provider);
     const tokenPairContract = new Contract(tokenPairs[0].address, IDXswapPair.abi, provider)
@@ -76,7 +73,12 @@ export class Fees {
   
   static async fetchAllSwapFees(
     chainId: ChainId,
-  ) : Promise<IndexedFees> {
+  ) : Promise<{
+    [key: string] : {
+      fee: BigintIsh
+      owner: string
+    }
+  }> {
     const provider = getDefaultProvider(getNetwork(chainId))
     const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
@@ -101,7 +103,12 @@ export class Fees {
         'DXswap'
       ))
     const swapFees = await this.fetchSwapFees(tokenPairs);
-    let fees: IndexedFees = {}
+    let fees: {
+      [key: string] : {
+        fee: BigintIsh
+        owner: string
+      }
+    } = {}
     for (let tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++)
       fees[tokenPairs[tokenPairsIndex].address] = swapFees[tokenPairsIndex]
     return fees
