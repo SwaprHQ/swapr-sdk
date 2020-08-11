@@ -2,18 +2,168 @@ import JSBI from 'jsbi';
 export { default as JSBI } from 'jsbi';
 import { proxies } from 'dxswap-core/.openzeppelin/kovan.json';
 import invariant from 'tiny-invariant';
+import warning from 'tiny-warning';
+import { getAddress, getCreate2Address } from '@ethersproject/address';
 import { getNetwork } from '@ethersproject/networks';
 import { getDefaultProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import warning from 'tiny-warning';
-import { getAddress, getCreate2Address } from '@ethersproject/address';
-import { keccak256, pack } from '@ethersproject/solidity';
 import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
+import { keccak256, pack } from '@ethersproject/solidity';
 import _Big from 'big.js';
 import toFormat from 'toformat';
 import _Decimal from 'decimal.js-light';
 
-var _FACTORY_ADDRESS, _SOLIDITY_TYPE_MAXIMA;
+var MULTICALL_ABI = [
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "getCurrentBlockTimestamp",
+		outputs: [
+			{
+				name: "timestamp",
+				type: "uint256"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+			{
+				components: [
+					{
+						name: "target",
+						type: "address"
+					},
+					{
+						name: "callData",
+						type: "bytes"
+					}
+				],
+				name: "calls",
+				type: "tuple[]"
+			}
+		],
+		name: "aggregate",
+		outputs: [
+			{
+				name: "blockNumber",
+				type: "uint256"
+			},
+			{
+				name: "returnData",
+				type: "bytes[]"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "getLastBlockHash",
+		outputs: [
+			{
+				name: "blockHash",
+				type: "bytes32"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+			{
+				name: "addr",
+				type: "address"
+			}
+		],
+		name: "getEthBalance",
+		outputs: [
+			{
+				name: "balance",
+				type: "uint256"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "getCurrentBlockDifficulty",
+		outputs: [
+			{
+				name: "difficulty",
+				type: "uint256"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "getCurrentBlockGasLimit",
+		outputs: [
+			{
+				name: "gaslimit",
+				type: "uint256"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "getCurrentBlockCoinbase",
+		outputs: [
+			{
+				name: "coinbase",
+				type: "address"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+			{
+				name: "blockNumber",
+				type: "uint256"
+			}
+		],
+		name: "getBlockHash",
+		outputs: [
+			{
+				name: "blockHash",
+				type: "bytes32"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	}
+];
+
+var _FACTORY_ADDRESS, _SOLIDITY_TYPE_MAXIMA, _MULTICALL_ADDRESS;
 var ChainId;
 
 (function (ChainId) {
@@ -38,7 +188,6 @@ var Rounding;
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
-
 var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[ChainId.ROPSTEN] = '0x0000000000000000000000000000000000000003', _FACTORY_ADDRESS[ChainId.RINKEBY] = '0x0000000000000000000000000000000000000004', _FACTORY_ADDRESS[ChainId.GÖRLI] = '0x0000000000000000000000000000000000000005', _FACTORY_ADDRESS[ChainId.KOVAN] = proxies['dxswap-core/DXswapFactory'][0].address, _FACTORY_ADDRESS);
 var INIT_CODE_HASH = '0x25dd05d38222d917e4487e1da5be545f4c08adc197eb59f87c597a13cf7791d2';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
@@ -49,9 +198,11 @@ var TWO = /*#__PURE__*/JSBI.BigInt(2);
 var THREE = /*#__PURE__*/JSBI.BigInt(3);
 var FIVE = /*#__PURE__*/JSBI.BigInt(5);
 var TEN = /*#__PURE__*/JSBI.BigInt(10);
+var _30 = /*#__PURE__*/JSBI.BigInt(30);
 var _100 = /*#__PURE__*/JSBI.BigInt(100);
-var _997 = /*#__PURE__*/JSBI.BigInt(997);
-var _1000 = /*#__PURE__*/JSBI.BigInt(1000);
+var _10000 = /*#__PURE__*/JSBI.BigInt(10000);
+var defaultSwapFee = _30;
+var defaultProtocolFeeDenominator = FIVE;
 var SolidityType;
 
 (function (SolidityType) {
@@ -60,6 +211,79 @@ var SolidityType;
 })(SolidityType || (SolidityType = {}));
 
 var SOLIDITY_TYPE_MAXIMA = (_SOLIDITY_TYPE_MAXIMA = {}, _SOLIDITY_TYPE_MAXIMA[SolidityType.uint8] = /*#__PURE__*/JSBI.BigInt('0xff'), _SOLIDITY_TYPE_MAXIMA[SolidityType.uint256] = /*#__PURE__*/JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'), _SOLIDITY_TYPE_MAXIMA);
+var MULTICALL_ADDRESS = (_MULTICALL_ADDRESS = {}, _MULTICALL_ADDRESS[ChainId.MAINNET] = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441', _MULTICALL_ADDRESS[ChainId.ROPSTEN] = '0x53C43764255c17BD724F74c4eF150724AC50a3ed', _MULTICALL_ADDRESS[ChainId.KOVAN] = '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A', _MULTICALL_ADDRESS[ChainId.RINKEBY] = '0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821', _MULTICALL_ADDRESS[ChainId.GÖRLI] = '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e', _MULTICALL_ADDRESS);
+
+function validateSolidityTypeInstance(value, solidityType) {
+  !JSBI.greaterThanOrEqual(value, ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, value + " is not a " + solidityType + ".") : invariant(false) : void 0;
+  !JSBI.lessThanOrEqual(value, SOLIDITY_TYPE_MAXIMA[solidityType]) ? process.env.NODE_ENV !== "production" ? invariant(false, value + " is not a " + solidityType + ".") : invariant(false) : void 0;
+} // warns if addresses are not checksummed
+
+function validateAndParseAddress(address) {
+  try {
+    var checksummedAddress = getAddress(address);
+    process.env.NODE_ENV !== "production" ? warning(address === checksummedAddress, address + " is not checksummed.") : void 0;
+    return checksummedAddress;
+  } catch (error) {
+     process.env.NODE_ENV !== "production" ? invariant(false, address + " is not a valid address.") : invariant(false) ;
+  }
+}
+function parseBigintIsh(bigintIsh) {
+  return bigintIsh instanceof JSBI ? bigintIsh : typeof bigintIsh === 'bigint' ? JSBI.BigInt(bigintIsh.toString()) : JSBI.BigInt(bigintIsh);
+} // mock the on-chain sqrt function
+
+function sqrt(y) {
+  validateSolidityTypeInstance(y, SolidityType.uint256);
+  var z = ZERO;
+  var x;
+
+  if (JSBI.greaterThan(y, THREE)) {
+    z = y;
+    x = JSBI.add(JSBI.divide(y, TWO), ONE);
+
+    while (JSBI.lessThan(x, z)) {
+      z = x;
+      x = JSBI.divide(JSBI.add(JSBI.divide(y, x), x), TWO);
+    }
+  } else if (JSBI.notEqual(y, ZERO)) {
+    z = ONE;
+  }
+
+  return z;
+} // given an array of items sorted by `comparator`, insert an item into its sort index and constrain the size to
+// `maxSize` by removing the last item
+
+function sortedInsert(items, add, maxSize, comparator) {
+  !(maxSize > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_SIZE_ZERO') : invariant(false) : void 0; // this is an invariant because the interface cannot return multiple removed items if items.length exceeds maxSize
+
+  !(items.length <= maxSize) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ITEMS_SIZE') : invariant(false) : void 0; // short circuit first item add
+
+  if (items.length === 0) {
+    items.push(add);
+    return null;
+  } else {
+    var isFull = items.length === maxSize; // short circuit if full and the additional item does not come before the last item
+
+    if (isFull && comparator(items[items.length - 1], add) <= 0) {
+      return add;
+    }
+
+    var lo = 0,
+        hi = items.length;
+
+    while (lo < hi) {
+      var mid = lo + hi >>> 1;
+
+      if (comparator(items[mid], add) <= 0) {
+        lo = mid + 1;
+      } else {
+        hi = mid;
+      }
+    }
+
+    items.splice(lo, 0, add);
+    return isFull ? items.pop() : null;
+  }
+}
 
 function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
@@ -230,39 +454,6 @@ function _createForOfIteratorHelperLoose(o) {
   return i.next.bind(i);
 }
 
-// see https://stackoverflow.com/a/41102306
-var CAN_SET_PROTOTYPE = ('setPrototypeOf' in Object);
-var InsufficientReservesError = /*#__PURE__*/function (_Error) {
-  _inheritsLoose(InsufficientReservesError, _Error);
-
-  function InsufficientReservesError() {
-    var _this;
-
-    _this = _Error.call(this) || this;
-    _this.isInsufficientReservesError = true;
-    _this.name = _this.constructor.name;
-    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this), (this instanceof InsufficientReservesError ? this.constructor : void 0).prototype);
-    return _this;
-  }
-
-  return InsufficientReservesError;
-}( /*#__PURE__*/_wrapNativeSuper(Error));
-var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
-  _inheritsLoose(InsufficientInputAmountError, _Error2);
-
-  function InsufficientInputAmountError() {
-    var _this2;
-
-    _this2 = _Error2.call(this) || this;
-    _this2.isInsufficientInputAmountError = true;
-    _this2.name = _this2.constructor.name;
-    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this2), (this instanceof InsufficientInputAmountError ? this.constructor : void 0).prototype);
-    return _this2;
-  }
-
-  return InsufficientInputAmountError;
-}( /*#__PURE__*/_wrapNativeSuper(Error));
-
 var ERC20 = [
 	{
 		constant: true,
@@ -300,79 +491,7 @@ var ERC20 = [
 	}
 ];
 
-function validateSolidityTypeInstance(value, solidityType) {
-  !JSBI.greaterThanOrEqual(value, ZERO) ? process.env.NODE_ENV !== "production" ? invariant(false, value + " is not a " + solidityType + ".") : invariant(false) : void 0;
-  !JSBI.lessThanOrEqual(value, SOLIDITY_TYPE_MAXIMA[solidityType]) ? process.env.NODE_ENV !== "production" ? invariant(false, value + " is not a " + solidityType + ".") : invariant(false) : void 0;
-} // warns if addresses are not checksummed
-
-function validateAndParseAddress(address) {
-  try {
-    var checksummedAddress = getAddress(address);
-    process.env.NODE_ENV !== "production" ? warning(address === checksummedAddress, address + " is not checksummed.") : void 0;
-    return checksummedAddress;
-  } catch (error) {
-     process.env.NODE_ENV !== "production" ? invariant(false, address + " is not a valid address.") : invariant(false) ;
-  }
-}
-function parseBigintIsh(bigintIsh) {
-  return bigintIsh instanceof JSBI ? bigintIsh : typeof bigintIsh === 'bigint' ? JSBI.BigInt(bigintIsh.toString()) : JSBI.BigInt(bigintIsh);
-} // mock the on-chain sqrt function
-
-function sqrt(y) {
-  validateSolidityTypeInstance(y, SolidityType.uint256);
-  var z = ZERO;
-  var x;
-
-  if (JSBI.greaterThan(y, THREE)) {
-    z = y;
-    x = JSBI.add(JSBI.divide(y, TWO), ONE);
-
-    while (JSBI.lessThan(x, z)) {
-      z = x;
-      x = JSBI.divide(JSBI.add(JSBI.divide(y, x), x), TWO);
-    }
-  } else if (JSBI.notEqual(y, ZERO)) {
-    z = ONE;
-  }
-
-  return z;
-} // given an array of items sorted by `comparator`, insert an item into its sort index and constrain the size to
-// `maxSize` by removing the last item
-
-function sortedInsert(items, add, maxSize, comparator) {
-  !(maxSize > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_SIZE_ZERO') : invariant(false) : void 0; // this is an invariant because the interface cannot return multiple removed items if items.length exceeds maxSize
-
-  !(items.length <= maxSize) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ITEMS_SIZE') : invariant(false) : void 0; // short circuit first item add
-
-  if (items.length === 0) {
-    items.push(add);
-    return null;
-  } else {
-    var isFull = items.length === maxSize; // short circuit if full and the additional item does not come before the last item
-
-    if (isFull && comparator(items[items.length - 1], add) <= 0) {
-      return add;
-    }
-
-    var lo = 0,
-        hi = items.length;
-
-    while (lo < hi) {
-      var mid = lo + hi >>> 1;
-
-      if (comparator(items[mid], add) <= 0) {
-        lo = mid + 1;
-      } else {
-        hi = mid;
-      }
-    }
-
-    items.splice(lo, 0, add);
-    return isFull ? items.pop() : null;
-  }
-}
-
-var _CACHE, _WETH;
+var _CACHE, _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS;
 var CACHE = (_CACHE = {}, _CACHE[ChainId.MAINNET] = {
   '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': 9 // DGD
 
@@ -433,6 +552,184 @@ var Token = /*#__PURE__*/function () {
   return Token;
 }();
 var WETH = (_WETH = {}, _WETH[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.ROPSTEN] = /*#__PURE__*/new Token(ChainId.ROPSTEN, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.GÖRLI] = /*#__PURE__*/new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'), _WETH);
+var DXD = (_DXD = {}, _DXD[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD);
+var TEST_TOKENS = {
+  WEENUS: (_WEENUS = {}, _WEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
+  XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
+  YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
+};
+
+var Fees = /*#__PURE__*/function () {
+  function Fees() {}
+
+  Fees.fetchSwapFee = function fetchSwapFee(tokenPair, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPair.chainId));
+      var _BigInt2 = JSBI.BigInt;
+      return Promise.resolve(new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
+        var _BigInt$call = _BigInt2.call(JSBI, _Contract$swapFee);
+
+        return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenPair.chainId], IDXswapFactory.abi, provider).feeToSetter()).then(function (_Contract$feeToSetter) {
+          return {
+            fee: _BigInt$call,
+            owner: _Contract$feeToSetter
+          };
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+
+  Fees.fetchSwapFees = function fetchSwapFees(tokenPairs, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPairs[0].chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[tokenPairs[0].chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[tokenPairs[0].chainId], IDXswapFactory.abi, provider);
+      var tokenPairContract = new Contract(tokenPairs[0].address, IDXswapPair.abi, provider);
+      var calls = [];
+      calls.push({
+        address: factoryContract.address,
+        callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('feeToSetter()'))
+      });
+
+      for (var tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++) {
+        calls.push({
+          address: tokenPairs[tokenPairsIndex].address,
+          callData: tokenPairContract["interface"].encodeFunctionData(tokenPairContract["interface"].getFunction('swapFee()'))
+        });
+      }
+
+      return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+        return [call.address, call.callData];
+      }))).then(function (result) {
+        var owner = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('feeToSetter()'), result.returnData[0])[0];
+        var fees = [];
+
+        for (var resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
+          fees.push({
+            fee: JSBI.BigInt(tokenPairContract["interface"].decodeFunctionResult(tokenPairContract["interface"].getFunction('swapFee()'), result.returnData[resultIndex])[0]),
+            owner: owner
+          });
+        }
+
+        return fees;
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+
+  Fees.fetchAllSwapFees = function fetchAllSwapFees(chainId, swapFeesCache, provider) {
+    if (swapFeesCache === void 0) {
+      swapFeesCache = {};
+    }
+
+    try {
+      var _this2 = this;
+
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
+      return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
+        var allSwapPairs = {}; // Get first token pairs from cache
+
+        var tokenPairsCache = Object.keys(swapFeesCache);
+        var tokenPairsToFetch = [];
+
+        for (var tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
+          allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
+            fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
+            owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
+          };
+        } // Get rest of the token pairs that are not cached
+
+
+        var calls = [];
+
+        for (var pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++) {
+          calls.push({
+            address: factoryContract.address,
+            callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('allPairs(uint)'), [pairIndex])
+          });
+        }
+
+        return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+          return [call.address, call.callData];
+        }))).then(function (result) {
+          for (var resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
+            var tokenPairAddress = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('allPairs(uint256)'), result.returnData[resultIndex])[0];
+            tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'));
+          } // Fetch the pairs that we dont have the fee and owner
+
+
+          return Promise.resolve(_this2.fetchSwapFees(tokenPairsToFetch, provider)).then(function (swapFeesFetched) {
+            for (var tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++) {
+              allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex];
+            }
+
+            return allSwapPairs;
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+
+  Fees.fetchProtocolFee = function fetchProtocolFee(chainId, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      return Promise.resolve(new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)).then(function (factoryContract) {
+        return Promise.resolve(factoryContract.protocolFeeDenominator()).then(function (feeDenominator) {
+          return Promise.resolve(factoryContract.feeTo()).then(function (feeReceiver) {
+            return {
+              feeDenominator: feeDenominator,
+              feeReceiver: feeReceiver
+            };
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+
+  return Fees;
+}();
+
+// see https://stackoverflow.com/a/41102306
+var CAN_SET_PROTOTYPE = ('setPrototypeOf' in Object);
+var InsufficientReservesError = /*#__PURE__*/function (_Error) {
+  _inheritsLoose(InsufficientReservesError, _Error);
+
+  function InsufficientReservesError() {
+    var _this;
+
+    _this = _Error.call(this) || this;
+    _this.isInsufficientReservesError = true;
+    _this.name = _this.constructor.name;
+    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this), (this instanceof InsufficientReservesError ? this.constructor : void 0).prototype);
+    return _this;
+  }
+
+  return InsufficientReservesError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
+  _inheritsLoose(InsufficientInputAmountError, _Error2);
+
+  function InsufficientInputAmountError() {
+    var _this2;
+
+    _this2 = _Error2.call(this) || this;
+    _this2.isInsufficientInputAmountError = true;
+    _this2.name = _this2.constructor.name;
+    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this2), (this instanceof InsufficientInputAmountError ? this.constructor : void 0).prototype);
+    return _this2;
+  }
+
+  return InsufficientInputAmountError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
 
 var _toSignificantRoundin, _toFixedRounding;
 var Decimal = /*#__PURE__*/toFormat(_Decimal);
@@ -631,10 +928,15 @@ var TokenAmount = /*#__PURE__*/function (_Fraction) {
 
 var CACHE$1 = {};
 var Pair = /*#__PURE__*/function () {
-  function Pair(tokenAmountA, tokenAmountB) {
+  function Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator) {
+    this.swapFee = defaultSwapFee;
+    this.protocolFeeDenominator = defaultProtocolFeeDenominator;
+    !(tokenAmountA.token.chainId === tokenAmountB.token.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
     var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
     ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
     this.liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
+    this.swapFee = swapFee ? swapFee : defaultSwapFee;
+    this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator;
     this.tokenAmounts = tokenAmounts;
   }
 
@@ -661,7 +963,22 @@ var Pair = /*#__PURE__*/function () {
         var reserves0 = _ref[0],
             reserves1 = _ref[1];
         var balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
-        return new Pair(new TokenAmount(tokenA, balances[0]), new TokenAmount(tokenB, balances[1]));
+        var tokenAmountA = new TokenAmount(tokenA, balances[0]);
+        var tokenAmountB = new TokenAmount(tokenB, balances[1]);
+        var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
+        ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
+        var liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
+        var _BigInt = JSBI.BigInt;
+        return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
+          var swapFee = _BigInt.call(JSBI, _Contract$swapFee);
+
+          var _BigInt2 = JSBI.BigInt;
+          return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, provider).protocolFeeDenominator()).then(function (_Contract$protocolFee) {
+            var protocolFeeDenominator = _BigInt2.call(JSBI, _Contract$protocolFee);
+
+            return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator);
+          });
+        });
       });
     } catch (e) {
       return Promise.reject(e);
@@ -684,16 +1001,16 @@ var Pair = /*#__PURE__*/function () {
 
     var inputReserve = this.reserveOf(inputAmount.token);
     var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0);
-    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _997);
+    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, JSBI.subtract(_10000, parseBigintIsh(this.swapFee)));
     var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
-    var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _1000), inputAmountWithFee);
+    var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee);
     var outputAmount = new TokenAmount(inputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.divide(numerator, denominator));
 
     if (JSBI.equal(outputAmount.raw, ZERO)) {
       throw new InsufficientInputAmountError();
     }
 
-    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
+    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.swapFee, this.protocolFeeDenominator)];
   };
 
   _proto.getInputAmount = function getInputAmount(outputAmount) {
@@ -705,10 +1022,10 @@ var Pair = /*#__PURE__*/function () {
 
     var outputReserve = this.reserveOf(outputAmount.token);
     var inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0);
-    var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _1000);
-    var denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _997);
+    var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000);
+    var denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), JSBI.subtract(_10000, parseBigintIsh(this.swapFee)));
     var inputAmount = new TokenAmount(outputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.add(JSBI.divide(numerator, denominator), ONE));
-    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
+    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.swapFee, this.protocolFeeDenominator)];
   };
 
   _proto.getLiquidityMinted = function getLiquidityMinted(totalSupply, tokenAmountA, tokenAmountB) {
@@ -756,7 +1073,7 @@ var Pair = /*#__PURE__*/function () {
 
         if (JSBI.greaterThan(rootK, rootKLast)) {
           var numerator = JSBI.multiply(totalSupply.raw, JSBI.subtract(rootK, rootKLast));
-          var denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast);
+          var denominator = JSBI.add(JSBI.multiply(rootK, parseBigintIsh(this.protocolFeeDenominator)), rootKLast);
           var feeLiquidity = JSBI.divide(numerator, denominator);
           totalSupplyAdjusted = totalSupply.add(new TokenAmount(this.liquidityToken, feeLiquidity));
         } else {
@@ -1205,5 +1522,5 @@ var Trade = /*#__PURE__*/function () {
   return Trade;
 }();
 
-export { ChainId, FACTORY_ADDRESS, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Token, TokenAmount, Trade, TradeType, WETH, inputOutputComparator, tradeComparator };
+export { ChainId, DXD, FACTORY_ADDRESS, Fees, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, inputOutputComparator, parseBigintIsh, tradeComparator };
 //# sourceMappingURL=dxswap-sdk.esm.js.map

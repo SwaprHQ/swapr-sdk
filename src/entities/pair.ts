@@ -13,11 +13,13 @@ import {
   MINIMUM_LIQUIDITY,
   ZERO,
   ONE,
-  FIVE,
-  _997,
-  _1000
+  _30,
+  _10000,
+  defaultSwapFee,
+  defaultProtocolFeeDenominator
 } from '../constants'
 import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json'
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json'
 import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
@@ -28,6 +30,9 @@ let CACHE: { [token0Address: string]: { [token1Address: string]: string } } = {}
 export class Pair {
   public readonly liquidityToken: Token
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
+  public readonly swapFee: BigintIsh = defaultSwapFee
+  public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
+
 
   static getAddress(tokenA: Token, tokenB: Token): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
@@ -57,10 +62,34 @@ export class Pair {
     const address = Pair.getAddress(tokenA, tokenB)
     const [reserves0, reserves1] = await new Contract(address, IDXswapPair.abi, provider).getReserves()
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
-    return new Pair(new TokenAmount(tokenA, balances[0]), new TokenAmount(tokenB, balances[1]))
+    const tokenAmountA = new TokenAmount(tokenA, balances[0])
+    const tokenAmountB = new TokenAmount(tokenB, balances[1])
+    const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
+      ? [tokenAmountA, tokenAmountB]
+      : [tokenAmountB, tokenAmountA]
+    const liquidityToken = new Token(
+      tokenAmounts[0].token.chainId,
+      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
+      18,
+      'DXS',
+      'DXswap'
+    )
+    const swapFee = JSBI.BigInt(await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee())
+    const protocolFeeDenominator = JSBI.BigInt(await new Contract(
+      FACTORY_ADDRESS[tokenAmountA.token.chainId],
+      IDXswapFactory.abi,
+      provider
+    ).protocolFeeDenominator())
+    return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator)
   }
 
-  constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount) {
+  constructor(
+    tokenAmountA: TokenAmount,
+    tokenAmountB: TokenAmount,
+    swapFee?: BigintIsh,
+    protocolFeeDenominator?: BigintIsh
+  ) {
+    invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
@@ -71,6 +100,8 @@ export class Pair {
       'DXS',
       'DXswap'
     )
+    this.swapFee = swapFee ? swapFee : defaultSwapFee
+    this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
   }
 
@@ -102,9 +133,11 @@ export class Pair {
     }
     const inputReserve = this.reserveOf(inputAmount.token)
     const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _997)
+    const inputAmountWithFee = JSBI.multiply(
+      inputAmount.raw, JSBI.subtract(_10000, parseBigintIsh(this.swapFee))
+    )
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _1000), inputAmountWithFee)
+    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.divide(numerator, denominator)
@@ -112,7 +145,7 @@ export class Pair {
     if (JSBI.equal(outputAmount.raw, ZERO)) {
       throw new InsufficientInputAmountError()
     }
-    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
+    return [outputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.swapFee, this.protocolFeeDenominator)]
   }
 
   getInputAmount(outputAmount: TokenAmount): [TokenAmount, Pair] {
@@ -127,13 +160,15 @@ export class Pair {
 
     const outputReserve = this.reserveOf(outputAmount.token)
     const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _1000)
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _997)
+    const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
+    const denominator = JSBI.multiply(
+      JSBI.subtract(outputReserve.raw, outputAmount.raw), JSBI.subtract(_10000, parseBigintIsh(this.swapFee))
+    )
     const inputAmount = new TokenAmount(
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE)
     )
-    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))]
+    return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount), this.swapFee, this.protocolFeeDenominator)]
   }
 
   getLiquidityMinted(totalSupply: TokenAmount, tokenAmountA: TokenAmount, tokenAmountB: TokenAmount): TokenAmount {
@@ -180,7 +215,7 @@ export class Pair {
         const rootKLast = sqrt(kLastParsed)
         if (JSBI.greaterThan(rootK, rootKLast)) {
           const numerator = JSBI.multiply(totalSupply.raw, JSBI.subtract(rootK, rootKLast))
-          const denominator = JSBI.add(JSBI.multiply(rootK, FIVE), rootKLast)
+          const denominator = JSBI.add(JSBI.multiply(rootK, parseBigintIsh(this.protocolFeeDenominator)), rootKLast)
           const feeLiquidity = JSBI.divide(numerator, denominator)
           totalSupplyAdjusted = totalSupply.add(new TokenAmount(this.liquidityToken, feeLiquidity))
         } else {

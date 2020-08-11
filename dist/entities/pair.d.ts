@@ -4,9 +4,11 @@ import { TokenAmount } from './fractions/tokenAmount';
 export declare class Pair {
     readonly liquidityToken: Token;
     private readonly tokenAmounts;
+    readonly swapFee: BigintIsh;
+    readonly protocolFeeDenominator: BigintIsh;
     static getAddress(tokenA: Token, tokenB: Token): string;
     static fetchData(tokenA: Token, tokenB: Token, provider?: import("@ethersproject/providers").BaseProvider): Promise<Pair>;
-    constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount);
+    constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount, swapFee?: BigintIsh, protocolFeeDenominator?: BigintIsh);
     get token0(): Token;
     get token1(): Token;
     get reserve0(): TokenAmount;

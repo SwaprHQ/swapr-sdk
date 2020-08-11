@@ -11,5 +11,11 @@ export {
   MINIMUM_LIQUIDITY
 } from './constants'
 
+export {
+  parseBigintIsh
+} from './utils'
+
+export * from './fees'
+
 export * from './errors'
 export * from './entities'

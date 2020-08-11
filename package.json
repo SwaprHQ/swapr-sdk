@@ -27,6 +27,7 @@
     "@ethersproject/networks": "^5.0.0-beta.135",
     "@ethersproject/providers": "^5.0.0-beta.153",
     "@ethersproject/solidity": "^5.0.0-beta.131",
+    "@makerdao/multicall": "^0.11.0",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
     "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#v0.1.0",
@@ -48,5 +49,8 @@
     "printWidth": 120,
     "semi": false,
     "singleQuote": true
+  },
+  "jest": {
+    "testTimeout": 10000
   }
 }

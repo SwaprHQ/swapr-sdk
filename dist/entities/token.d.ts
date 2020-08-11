@@ -17,3 +17,21 @@ export declare const WETH: {
     5: Token;
     42: Token;
 };
+export declare const DXD: {
+    1: Token;
+    42: Token;
+};
+export declare const TEST_TOKENS: {
+    WEENUS: {
+        1: Token;
+        42: Token;
+    };
+    XEENUS: {
+        1: Token;
+        42: Token;
+    };
+    YEENUS: {
+        1: Token;
+        42: Token;
+    };
+};
