@@ -5,3 +5,5 @@ export { parseBigintIsh } from './utils';
 export * from './fees';
 export * from './errors';
 export * from './entities';
+export * from './router';
+export * from './fetcher';
