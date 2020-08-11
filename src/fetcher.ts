@@ -72,7 +72,25 @@ export abstract class Fetcher {
     const address = Pair.getAddress(tokenA, tokenB)
     const [reserves0, reserves1] = await new Contract(address, IDXswapPair.abi, provider).getReserves()
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
-    return new Pair(new TokenAmount(tokenA, balances[0]), new TokenAmount(tokenB, balances[1]))
+    const tokenAmountA = new TokenAmount(tokenA, balances[0])
+    const tokenAmountB = new TokenAmount(tokenB, balances[1])
+    const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
+      ? [tokenAmountA, tokenAmountB]
+      : [tokenAmountB, tokenAmountA]
+    const liquidityToken = new Token(
+      tokenAmounts[0].token.chainId,
+      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
+      18,
+      'DXS',
+      'DXswap'
+    )
+    const swapFee = JSBI.BigInt(await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee())
+    const protocolFeeDenominator = JSBI.BigInt(await new Contract(
+      FACTORY_ADDRESS[tokenAmountA.token.chainId],
+      IDXswapFactory.abi,
+      provider
+    ).protocolFeeDenominator())
+    return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator)
   }
   
   /**

@@ -1,4 +1,4 @@
-import { ChainId, Token, Pair, TokenAmount, WETH, DXD, JSBI, Price } from '../src'
+import { ChainId, Token, Pair, Fetcher, TokenAmount, WETH, DXD, JSBI, Price } from '../src'
 
 describe('Pair', () => {
   const USDC = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
@@ -22,7 +22,7 @@ describe('Pair', () => {
   
   describe('#fetchData', () => {
     it('returns the correct address', async () => {
-      const pairData = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
+      const pairData = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
       expect(pairData.swapFee).toEqual(JSBI.BigInt(20))
       expect(pairData.protocolFeeDenominator).toEqual(JSBI.BigInt(5))
       expect(pairData.liquidityToken.address).toEqual('0x2090339dc96Ad6366FaAfcb455FfF7D4f7c9F761')

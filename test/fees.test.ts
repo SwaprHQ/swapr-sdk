@@ -1,11 +1,11 @@
-import { ChainId, Pair, WETH, DXD, Fetcher, TEST_TOKENS, JSBI } from '../src'
+import { ChainId, WETH, DXD, Fetcher, TEST_TOKENS, JSBI } from '../src'
 import { ZERO_ADDRESS } from '../src/constants'
 
 describe('fees', () => {
   describe('fetchSwapFee', () => {
     it('Get WETH-DXD kovan fee', async () => {
-      const WETH_DXD_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
-      const DXD_WEENUS_KOVAN = await Pair.fetchData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const WETH_DXD_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
+      const DXD_WEENUS_KOVAN = await Fetcher.fetchPairData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
       const DXDKovanFee = await Fetcher.fetchSwapFee(WETH_DXD_KOVAN.liquidityToken)
       expect(DXDKovanFee.fee).toEqual(JSBI.BigInt(20))
       const DXD_WEENUS_KOVAN_FEES = await Fetcher.fetchSwapFee(DXD_WEENUS_KOVAN.liquidityToken)
@@ -15,8 +15,8 @@ describe('fees', () => {
   
   describe('fetchSwapFees', () => {
     it('Get WETH-DXD kovan fee', async () => {
-      const WETH_DXD_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
-      const DXD_WEENUS_KOVAN = await Pair.fetchData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const WETH_DXD_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
+      const DXD_WEENUS_KOVAN = await Fetcher.fetchPairData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
       const fees = await Fetcher.fetchSwapFees([WETH_DXD_KOVAN.liquidityToken, DXD_WEENUS_KOVAN.liquidityToken])
       expect(fees[0].fee).toEqual(JSBI.BigInt(20))
       expect(fees[1].fee).toEqual(JSBI.BigInt(30))
@@ -25,9 +25,9 @@ describe('fees', () => {
   
   describe('fetchAllSwapFees', () => {
     it('Get all kovan fees', async () => {
-      const WETH_DXD_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
-      const WETH_WEENUS_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
-      const DXD_WEENUS_KOVAN = await Pair.fetchData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const WETH_DXD_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
+      const WETH_WEENUS_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const DXD_WEENUS_KOVAN = await Fetcher.fetchPairData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
       const fees = await Fetcher.fetchAllSwapFees(ChainId.KOVAN)
       expect(fees[WETH_DXD_KOVAN.liquidityToken.address].fee).toEqual(JSBI.BigInt(20))
       expect(fees[WETH_WEENUS_KOVAN.liquidityToken.address].fee).toEqual(JSBI.BigInt(30))
@@ -35,9 +35,9 @@ describe('fees', () => {
     })
 
     it('Get kovan fees with cache', async () => {
-      const WETH_DXD_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
-      const WETH_WEENUS_KOVAN = await Pair.fetchData(WETH[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
-      const DXD_WEENUS_KOVAN = await Pair.fetchData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const WETH_DXD_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], DXD[ChainId.KOVAN])
+      const WETH_WEENUS_KOVAN = await Fetcher.fetchPairData(WETH[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
+      const DXD_WEENUS_KOVAN = await Fetcher.fetchPairData(DXD[ChainId.KOVAN], TEST_TOKENS.WEENUS[ChainId.KOVAN])
       const fees = await Fetcher.fetchAllSwapFees(ChainId.KOVAN, {
         [WETH_DXD_KOVAN.liquidityToken.address] : {
           fee: JSBI.BigInt(20),

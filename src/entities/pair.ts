@@ -4,9 +4,6 @@ import invariant from 'tiny-invariant'
 import JSBI from 'jsbi'
 import { pack, keccak256 } from '@ethersproject/solidity'
 import { getCreate2Address } from '@ethersproject/address'
-import { Contract } from '@ethersproject/contracts'
-import { getNetwork } from '@ethersproject/networks'
-import { getDefaultProvider } from '@ethersproject/providers'
 
 import {
   BigintIsh,
@@ -20,8 +17,6 @@ import {
   defaultSwapFee,
   defaultProtocolFeeDenominator
 } from '../constants'
-import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json'
-import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json'
 import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
@@ -52,36 +47,6 @@ export class Pair {
       }
     }
     return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address]
-  }
-
-  static async fetchData(
-    tokenA: Token,
-    tokenB: Token,
-    provider = getDefaultProvider(getNetwork(tokenA.chainId))
-  ): Promise<Pair> {
-    invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
-    const address = Pair.getAddress(tokenA, tokenB)
-    const [reserves0, reserves1] = await new Contract(address, IDXswapPair.abi, provider).getReserves()
-    const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
-    const tokenAmountA = new TokenAmount(tokenA, balances[0])
-    const tokenAmountB = new TokenAmount(tokenB, balances[1])
-    const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
-      ? [tokenAmountA, tokenAmountB]
-      : [tokenAmountB, tokenAmountA]
-    const liquidityToken = new Token(
-      tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
-      18,
-      'DXS',
-      'DXswap'
-    )
-    const swapFee = JSBI.BigInt(await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee())
-    const protocolFeeDenominator = JSBI.BigInt(await new Contract(
-      FACTORY_ADDRESS[tokenAmountA.token.chainId],
-      IDXswapFactory.abi,
-      provider
-    ).protocolFeeDenominator())
-    return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator)
   }
 
   constructor(
