@@ -4,15 +4,15 @@ import { proxies } from 'dxswap-core/.openzeppelin/kovan.json';
 import invariant from 'tiny-invariant';
 import warning from 'tiny-warning';
 import { getAddress, getCreate2Address } from '@ethersproject/address';
-import { getNetwork } from '@ethersproject/networks';
-import { getDefaultProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
-import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
-import { keccak256, pack } from '@ethersproject/solidity';
 import _Big from 'big.js';
 import toFormat from 'toformat';
 import _Decimal from 'decimal.js-light';
+import { keccak256, pack } from '@ethersproject/solidity';
+import { Contract } from '@ethersproject/contracts';
+import { getNetwork } from '@ethersproject/networks';
+import { getDefaultProvider } from '@ethersproject/providers';
+import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
 
 var MULTICALL_ABI = [
 	{
@@ -434,272 +434,38 @@ function _arrayLikeToArray(arr, len) {
   return arr2;
 }
 
-function _createForOfIteratorHelperLoose(o) {
-  var i = 0;
+function _createForOfIteratorHelperLoose(o, allowArrayLike) {
+  var it;
 
   if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
-    if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) return function () {
-      if (i >= o.length) return {
-        done: true
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+      return function () {
+        if (i >= o.length) return {
+          done: true
+        };
+        return {
+          done: false,
+          value: o[i++]
+        };
       };
-      return {
-        done: false,
-        value: o[i++]
-      };
-    };
+    }
+
     throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  i = o[Symbol.iterator]();
-  return i.next.bind(i);
+  it = o[Symbol.iterator]();
+  return it.next.bind(it);
 }
-
-var ERC20 = [
-	{
-		constant: true,
-		inputs: [
-		],
-		name: "decimals",
-		outputs: [
-			{
-				name: "",
-				type: "uint8"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-			{
-				name: "",
-				type: "address"
-			}
-		],
-		name: "balanceOf",
-		outputs: [
-			{
-				name: "",
-				type: "uint256"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	}
-];
-
-var _CACHE, _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS;
-var CACHE = (_CACHE = {}, _CACHE[ChainId.MAINNET] = {
-  '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': 9 // DGD
-
-}, _CACHE);
-var Token = /*#__PURE__*/function () {
-  function Token(chainId, address, decimals, symbol, name) {
-    validateSolidityTypeInstance(JSBI.BigInt(decimals), SolidityType.uint8);
-    this.chainId = chainId;
-    this.address = validateAndParseAddress(address);
-    this.decimals = decimals;
-    if (typeof symbol === 'string') this.symbol = symbol;
-    if (typeof name === 'string') this.name = name;
-  }
-
-  Token.fetchData = function fetchData(chainId, address, provider, symbol, name) {
-    try {
-      var _CACHE2, _CACHE2$chainId;
-
-      var _temp3 = function _temp3(parsedDecimals) {
-        return new Token(chainId, address, parsedDecimals, symbol, name);
-      };
-
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
-
-      var _temp4 = typeof ((_CACHE2 = CACHE) === null || _CACHE2 === void 0 ? void 0 : (_CACHE2$chainId = _CACHE2[chainId]) === null || _CACHE2$chainId === void 0 ? void 0 : _CACHE2$chainId[address]) === 'number';
-
-      return Promise.resolve(_temp4 ? _temp3(CACHE[chainId][address]) : Promise.resolve(new Contract(address, ERC20, provider).decimals().then(function (decimals) {
-        var _CACHE3, _extends2, _extends3;
-
-        CACHE = _extends(_extends({}, CACHE), {}, (_extends3 = {}, _extends3[chainId] = _extends(_extends({}, (_CACHE3 = CACHE) === null || _CACHE3 === void 0 ? void 0 : _CACHE3[chainId]), {}, (_extends2 = {}, _extends2[address] = decimals, _extends2)), _extends3));
-        return decimals;
-      })).then(_temp3));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  var _proto = Token.prototype;
-
-  _proto.equals = function equals(other) {
-    var equal = this.chainId === other.chainId && this.address === other.address;
-
-    if (equal) {
-      !(this.decimals === other.decimals) ? process.env.NODE_ENV !== "production" ? invariant(false, 'DECIMALS') : invariant(false) : void 0;
-      if (this.symbol && other.symbol) !(this.symbol === other.symbol) ? process.env.NODE_ENV !== "production" ? invariant(false, 'SYMBOL') : invariant(false) : void 0;
-      if (this.name && other.name) !(this.name === other.name) ? process.env.NODE_ENV !== "production" ? invariant(false, 'NAME') : invariant(false) : void 0;
-    }
-
-    return equal;
-  };
-
-  _proto.sortsBefore = function sortsBefore(other) {
-    !(this.chainId === other.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_IDS') : invariant(false) : void 0;
-    !(this.address !== other.address) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ADDRESSES') : invariant(false) : void 0;
-    return this.address.toLowerCase() < other.address.toLowerCase();
-  };
-
-  return Token;
-}();
-var WETH = (_WETH = {}, _WETH[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.ROPSTEN] = /*#__PURE__*/new Token(ChainId.ROPSTEN, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.GÖRLI] = /*#__PURE__*/new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'), _WETH);
-var DXD = (_DXD = {}, _DXD[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD);
-var TEST_TOKENS = {
-  WEENUS: (_WEENUS = {}, _WEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
-  XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
-  YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
-};
-
-var Fees = /*#__PURE__*/function () {
-  function Fees() {}
-
-  Fees.fetchSwapFee = function fetchSwapFee(tokenPair, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPair.chainId));
-      var _BigInt2 = JSBI.BigInt;
-      return Promise.resolve(new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
-        var _BigInt$call = _BigInt2.call(JSBI, _Contract$swapFee);
-
-        return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenPair.chainId], IDXswapFactory.abi, provider).feeToSetter()).then(function (_Contract$feeToSetter) {
-          return {
-            fee: _BigInt$call,
-            owner: _Contract$feeToSetter
-          };
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchSwapFees = function fetchSwapFees(tokenPairs, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPairs[0].chainId));
-      var multicall = new Contract(MULTICALL_ADDRESS[tokenPairs[0].chainId], MULTICALL_ABI, provider);
-      var factoryContract = new Contract(FACTORY_ADDRESS[tokenPairs[0].chainId], IDXswapFactory.abi, provider);
-      var tokenPairContract = new Contract(tokenPairs[0].address, IDXswapPair.abi, provider);
-      var calls = [];
-      calls.push({
-        address: factoryContract.address,
-        callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('feeToSetter()'))
-      });
-
-      for (var tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++) {
-        calls.push({
-          address: tokenPairs[tokenPairsIndex].address,
-          callData: tokenPairContract["interface"].encodeFunctionData(tokenPairContract["interface"].getFunction('swapFee()'))
-        });
-      }
-
-      return Promise.resolve(multicall.aggregate(calls.map(function (call) {
-        return [call.address, call.callData];
-      }))).then(function (result) {
-        var owner = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('feeToSetter()'), result.returnData[0])[0];
-        var fees = [];
-
-        for (var resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
-          fees.push({
-            fee: JSBI.BigInt(tokenPairContract["interface"].decodeFunctionResult(tokenPairContract["interface"].getFunction('swapFee()'), result.returnData[resultIndex])[0]),
-            owner: owner
-          });
-        }
-
-        return fees;
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchAllSwapFees = function fetchAllSwapFees(chainId, swapFeesCache, provider) {
-    if (swapFeesCache === void 0) {
-      swapFeesCache = {};
-    }
-
-    try {
-      var _this2 = this;
-
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
-      var multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
-      var factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
-      return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
-        var allSwapPairs = {}; // Get first token pairs from cache
-
-        var tokenPairsCache = Object.keys(swapFeesCache);
-        var tokenPairsToFetch = [];
-
-        for (var tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
-          allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
-            fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
-            owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
-          };
-        } // Get rest of the token pairs that are not cached
-
-
-        var calls = [];
-
-        for (var pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++) {
-          calls.push({
-            address: factoryContract.address,
-            callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('allPairs(uint)'), [pairIndex])
-          });
-        }
-
-        return Promise.resolve(multicall.aggregate(calls.map(function (call) {
-          return [call.address, call.callData];
-        }))).then(function (result) {
-          for (var resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
-            var tokenPairAddress = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('allPairs(uint256)'), result.returnData[resultIndex])[0];
-            tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'));
-          } // Fetch the pairs that we dont have the fee and owner
-
-
-          return Promise.resolve(_this2.fetchSwapFees(tokenPairsToFetch, provider)).then(function (swapFeesFetched) {
-            for (var tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++) {
-              allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex];
-            }
-
-            return allSwapPairs;
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchProtocolFee = function fetchProtocolFee(chainId, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
-      return Promise.resolve(new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)).then(function (factoryContract) {
-        return Promise.resolve(factoryContract.protocolFeeDenominator()).then(function (feeDenominator) {
-          return Promise.resolve(factoryContract.feeTo()).then(function (feeReceiver) {
-            return {
-              feeDenominator: feeDenominator,
-              feeReceiver: feeReceiver
-            };
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  return Fees;
-}();
 
 // see https://stackoverflow.com/a/41102306
 var CAN_SET_PROTOTYPE = ('setPrototypeOf' in Object);
+/**
+ * Indicates that the pair has insufficient reserves for a desired output amount. I.e. the amount of output cannot be
+ * obtained by sending any amount of input.
+ */
+
 var InsufficientReservesError = /*#__PURE__*/function (_Error) {
   _inheritsLoose(InsufficientReservesError, _Error);
 
@@ -715,6 +481,11 @@ var InsufficientReservesError = /*#__PURE__*/function (_Error) {
 
   return InsufficientReservesError;
 }( /*#__PURE__*/_wrapNativeSuper(Error));
+/**
+ * Indicates that the input amount is too small to produce any amount of output. I.e. the amount of input sent is less
+ * than the price of a single unit of output after fees.
+ */
+
 var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
   _inheritsLoose(InsufficientInputAmountError, _Error2);
 
@@ -730,6 +501,103 @@ var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
 
   return InsufficientInputAmountError;
 }( /*#__PURE__*/_wrapNativeSuper(Error));
+
+/**
+ * A currency is any fungible financial instrument on Ethereum, including Ether and all ERC20 tokens.
+ *
+ * The only instance of the base class `Currency` is Ether.
+ */
+
+var Currency =
+/**
+ * Constructs an instance of the base class `Currency`. The only instance of the base class `Currency` is `Currency.ETHER`.
+ * @param decimals decimals of the currency
+ * @param symbol symbol of the currency
+ * @param name of the currency
+ */
+function Currency(decimals, symbol, name) {
+  validateSolidityTypeInstance(JSBI.BigInt(decimals), SolidityType.uint8);
+  this.decimals = decimals;
+  this.symbol = symbol;
+  this.name = name;
+};
+/**
+ * The only instance of the base class `Currency`.
+ */
+
+Currency.ETHER = /*#__PURE__*/new Currency(18, 'ETH', 'Ether');
+var ETHER = Currency.ETHER;
+
+var _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS;
+/**
+ * Represents an ERC20 token with a unique address and some metadata.
+ */
+
+var Token = /*#__PURE__*/function (_Currency) {
+  _inheritsLoose(Token, _Currency);
+
+  function Token(chainId, address, decimals, symbol, name) {
+    var _this;
+
+    _this = _Currency.call(this, decimals, symbol, name) || this;
+    _this.chainId = chainId;
+    _this.address = validateAndParseAddress(address);
+    return _this;
+  }
+  /**
+   * Returns true if the two tokens are equivalent, i.e. have the same chainId and address.
+   * @param other other token to compare
+   */
+
+
+  var _proto = Token.prototype;
+
+  _proto.equals = function equals(other) {
+    // short circuit on reference equality
+    if (this === other) {
+      return true;
+    }
+
+    return this.chainId === other.chainId && this.address === other.address;
+  }
+  /**
+   * Returns true if the address of this token sorts before the address of the other token
+   * @param other other token to compare
+   * @throws if the tokens have the same address
+   * @throws if the tokens are on different chains
+   */
+  ;
+
+  _proto.sortsBefore = function sortsBefore(other) {
+    !(this.chainId === other.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_IDS') : invariant(false) : void 0;
+    !(this.address !== other.address) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ADDRESSES') : invariant(false) : void 0;
+    return this.address.toLowerCase() < other.address.toLowerCase();
+  };
+
+  return Token;
+}(Currency);
+/**
+ * Compares two currencies for equality
+ */
+
+function currencyEquals(currencyA, currencyB) {
+  if (currencyA instanceof Token && currencyB instanceof Token) {
+    return currencyA.equals(currencyB);
+  } else if (currencyA instanceof Token) {
+    return false;
+  } else if (currencyB instanceof Token) {
+    return false;
+  } else {
+    return currencyA === currencyB;
+  }
+}
+var WETH = (_WETH = {}, _WETH[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.ROPSTEN] = /*#__PURE__*/new Token(ChainId.ROPSTEN, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.GÖRLI] = /*#__PURE__*/new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'), _WETH);
+var DXD = (_DXD = {}, _DXD[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD);
+var TEST_TOKENS = {
+  WEENUS: (_WEENUS = {}, _WEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
+  XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
+  YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
+};
 
 var _toSignificantRoundin, _toFixedRounding;
 var Decimal = /*#__PURE__*/toFormat(_Decimal);
@@ -854,30 +722,39 @@ var Fraction = /*#__PURE__*/function () {
 }();
 
 var Big$1 = /*#__PURE__*/toFormat(_Big);
-var TokenAmount = /*#__PURE__*/function (_Fraction) {
-  _inheritsLoose(TokenAmount, _Fraction);
+var CurrencyAmount = /*#__PURE__*/function (_Fraction) {
+  _inheritsLoose(CurrencyAmount, _Fraction);
 
   // amount _must_ be raw, i.e. in the native representation
-  function TokenAmount(token, amount) {
+  function CurrencyAmount(currency, amount) {
     var _this;
 
     var parsedAmount = parseBigintIsh(amount);
     validateSolidityTypeInstance(parsedAmount, SolidityType.uint256);
-    _this = _Fraction.call(this, parsedAmount, JSBI.exponentiate(TEN, JSBI.BigInt(token.decimals))) || this;
-    _this.token = token;
+    _this = _Fraction.call(this, parsedAmount, JSBI.exponentiate(TEN, JSBI.BigInt(currency.decimals))) || this;
+    _this.currency = currency;
     return _this;
   }
+  /**
+   * Helper that calls the constructor with the ETHER currency
+   * @param amount ether amount in wei
+   */
 
-  var _proto = TokenAmount.prototype;
+
+  CurrencyAmount.ether = function ether(amount) {
+    return new CurrencyAmount(ETHER, amount);
+  };
+
+  var _proto = CurrencyAmount.prototype;
 
   _proto.add = function add(other) {
-    !this.token.equals(other.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
-    return new TokenAmount(this.token, JSBI.add(this.raw, other.raw));
+    !currencyEquals(this.currency, other.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    return new CurrencyAmount(this.currency, JSBI.add(this.raw, other.raw));
   };
 
   _proto.subtract = function subtract(other) {
-    !this.token.equals(other.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
-    return new TokenAmount(this.token, JSBI.subtract(this.raw, other.raw));
+    !currencyEquals(this.currency, other.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    return new CurrencyAmount(this.currency, JSBI.subtract(this.raw, other.raw));
   };
 
   _proto.toSignificant = function toSignificant(significantDigits, format, rounding) {
@@ -894,14 +771,14 @@ var TokenAmount = /*#__PURE__*/function (_Fraction) {
 
   _proto.toFixed = function toFixed(decimalPlaces, format, rounding) {
     if (decimalPlaces === void 0) {
-      decimalPlaces = this.token.decimals;
+      decimalPlaces = this.currency.decimals;
     }
 
     if (rounding === void 0) {
       rounding = Rounding.ROUND_DOWN;
     }
 
-    !(decimalPlaces <= this.token.decimals) ? process.env.NODE_ENV !== "production" ? invariant(false, 'DECIMALS') : invariant(false) : void 0;
+    !(decimalPlaces <= this.currency.decimals) ? process.env.NODE_ENV !== "production" ? invariant(false, 'DECIMALS') : invariant(false) : void 0;
     return _Fraction.prototype.toFixed.call(this, decimalPlaces, format, rounding);
   };
 
@@ -912,21 +789,133 @@ var TokenAmount = /*#__PURE__*/function (_Fraction) {
       };
     }
 
-    Big$1.DP = this.token.decimals;
+    Big$1.DP = this.currency.decimals;
     return new Big$1(this.numerator.toString()).div(this.denominator.toString()).toFormat(format);
   };
 
-  _createClass(TokenAmount, [{
+  _createClass(CurrencyAmount, [{
     key: "raw",
     get: function get() {
       return this.numerator;
     }
   }]);
 
-  return TokenAmount;
+  return CurrencyAmount;
 }(Fraction);
 
-var CACHE$1 = {};
+var TokenAmount = /*#__PURE__*/function (_CurrencyAmount) {
+  _inheritsLoose(TokenAmount, _CurrencyAmount);
+
+  // amount _must_ be raw, i.e. in the native representation
+  function TokenAmount(token, amount) {
+    var _this;
+
+    _this = _CurrencyAmount.call(this, token, amount) || this;
+    _this.token = token;
+    return _this;
+  }
+
+  var _proto = TokenAmount.prototype;
+
+  _proto.add = function add(other) {
+    !this.token.equals(other.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    return new TokenAmount(this.token, JSBI.add(this.raw, other.raw));
+  };
+
+  _proto.subtract = function subtract(other) {
+    !this.token.equals(other.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    return new TokenAmount(this.token, JSBI.subtract(this.raw, other.raw));
+  };
+
+  return TokenAmount;
+}(CurrencyAmount);
+
+var Price = /*#__PURE__*/function (_Fraction) {
+  _inheritsLoose(Price, _Fraction);
+
+  // denominator and numerator _must_ be raw, i.e. in the native representation
+  function Price(baseCurrency, quoteCurrency, denominator, numerator) {
+    var _this;
+
+    _this = _Fraction.call(this, numerator, denominator) || this;
+    _this.baseCurrency = baseCurrency;
+    _this.quoteCurrency = quoteCurrency;
+    _this.scalar = new Fraction(JSBI.exponentiate(TEN, JSBI.BigInt(baseCurrency.decimals)), JSBI.exponentiate(TEN, JSBI.BigInt(quoteCurrency.decimals)));
+    return _this;
+  }
+
+  Price.fromRoute = function fromRoute(route) {
+    var prices = [];
+
+    for (var _iterator = _createForOfIteratorHelperLoose(route.pairs.entries()), _step; !(_step = _iterator()).done;) {
+      var _step$value = _step.value,
+          i = _step$value[0],
+          pair = _step$value[1];
+      prices.push(route.path[i].equals(pair.token0) ? new Price(pair.reserve0.currency, pair.reserve1.currency, pair.reserve0.raw, pair.reserve1.raw) : new Price(pair.reserve1.currency, pair.reserve0.currency, pair.reserve1.raw, pair.reserve0.raw));
+    }
+
+    return prices.slice(1).reduce(function (accumulator, currentValue) {
+      return accumulator.multiply(currentValue);
+    }, prices[0]);
+  };
+
+  var _proto = Price.prototype;
+
+  _proto.invert = function invert() {
+    return new Price(this.quoteCurrency, this.baseCurrency, this.numerator, this.denominator);
+  };
+
+  _proto.multiply = function multiply(other) {
+    !currencyEquals(this.quoteCurrency, other.baseCurrency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+
+    var fraction = _Fraction.prototype.multiply.call(this, other);
+
+    return new Price(this.baseCurrency, other.quoteCurrency, fraction.denominator, fraction.numerator);
+  } // performs floor division on overflow
+  ;
+
+  _proto.quote = function quote(currencyAmount) {
+    !currencyEquals(currencyAmount.currency, this.baseCurrency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+
+    if (this.quoteCurrency instanceof Token) {
+      return new TokenAmount(this.quoteCurrency, _Fraction.prototype.multiply.call(this, currencyAmount.raw).quotient);
+    }
+
+    return CurrencyAmount.ether(_Fraction.prototype.multiply.call(this, currencyAmount.raw).quotient);
+  };
+
+  _proto.toSignificant = function toSignificant(significantDigits, format, rounding) {
+    if (significantDigits === void 0) {
+      significantDigits = 6;
+    }
+
+    return this.adjusted.toSignificant(significantDigits, format, rounding);
+  };
+
+  _proto.toFixed = function toFixed(decimalPlaces, format, rounding) {
+    if (decimalPlaces === void 0) {
+      decimalPlaces = 4;
+    }
+
+    return this.adjusted.toFixed(decimalPlaces, format, rounding);
+  };
+
+  _createClass(Price, [{
+    key: "raw",
+    get: function get() {
+      return new Fraction(this.numerator, this.denominator);
+    }
+  }, {
+    key: "adjusted",
+    get: function get() {
+      return _Fraction.prototype.multiply.call(this, this.scalar);
+    }
+  }]);
+
+  return Price;
+}(Fraction);
+
+var PAIR_ADDRESS_CACHE = {};
 var Pair = /*#__PURE__*/function () {
   function Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator) {
     this.swapFee = defaultSwapFee;
@@ -941,59 +930,54 @@ var Pair = /*#__PURE__*/function () {
   }
 
   Pair.getAddress = function getAddress(tokenA, tokenB) {
-    var _CACHE, _CACHE$tokens$0$addre;
+    var _PAIR_ADDRESS_CACHE, _PAIR_ADDRESS_CACHE$t;
 
     var tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
 
-    if (((_CACHE = CACHE$1) === null || _CACHE === void 0 ? void 0 : (_CACHE$tokens$0$addre = _CACHE[tokens[0].address]) === null || _CACHE$tokens$0$addre === void 0 ? void 0 : _CACHE$tokens$0$addre[tokens[1].address]) === undefined) {
-      var _CACHE2, _extends2, _extends3;
+    if (((_PAIR_ADDRESS_CACHE = PAIR_ADDRESS_CACHE) === null || _PAIR_ADDRESS_CACHE === void 0 ? void 0 : (_PAIR_ADDRESS_CACHE$t = _PAIR_ADDRESS_CACHE[tokens[0].address]) === null || _PAIR_ADDRESS_CACHE$t === void 0 ? void 0 : _PAIR_ADDRESS_CACHE$t[tokens[1].address]) === undefined) {
+      var _PAIR_ADDRESS_CACHE2, _extends2, _extends3;
 
-      CACHE$1 = _extends(_extends({}, CACHE$1), {}, (_extends3 = {}, _extends3[tokens[0].address] = _extends(_extends({}, (_CACHE2 = CACHE$1) === null || _CACHE2 === void 0 ? void 0 : _CACHE2[tokens[0].address]), {}, (_extends2 = {}, _extends2[tokens[1].address] = getCreate2Address(FACTORY_ADDRESS[tokenA.chainId], keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]), INIT_CODE_HASH), _extends2)), _extends3));
+      PAIR_ADDRESS_CACHE = _extends({}, PAIR_ADDRESS_CACHE, (_extends3 = {}, _extends3[tokens[0].address] = _extends({}, (_PAIR_ADDRESS_CACHE2 = PAIR_ADDRESS_CACHE) === null || _PAIR_ADDRESS_CACHE2 === void 0 ? void 0 : _PAIR_ADDRESS_CACHE2[tokens[0].address], (_extends2 = {}, _extends2[tokens[1].address] = getCreate2Address(FACTORY_ADDRESS[tokenA.chainId], keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]), INIT_CODE_HASH), _extends2)), _extends3));
     }
 
-    return CACHE$1[tokens[0].address][tokens[1].address];
-  };
-
-  Pair.fetchData = function fetchData(tokenA, tokenB, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenA.chainId));
-      !(tokenA.chainId === tokenB.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
-      var address = Pair.getAddress(tokenA, tokenB);
-      return Promise.resolve(new Contract(address, IDXswapPair.abi, provider).getReserves()).then(function (_ref) {
-        var reserves0 = _ref[0],
-            reserves1 = _ref[1];
-        var balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
-        var tokenAmountA = new TokenAmount(tokenA, balances[0]);
-        var tokenAmountB = new TokenAmount(tokenB, balances[1]);
-        var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
-        ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
-        var liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
-        var _BigInt = JSBI.BigInt;
-        return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
-          var swapFee = _BigInt.call(JSBI, _Contract$swapFee);
-
-          var _BigInt2 = JSBI.BigInt;
-          return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, provider).protocolFeeDenominator()).then(function (_Contract$protocolFee) {
-            var protocolFeeDenominator = _BigInt2.call(JSBI, _Contract$protocolFee);
-
-            return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator);
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
+    return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address];
+  }
+  /**
+   * Returns true if the token is either token0 or token1
+   * @param token to check
+   */
+  ;
 
   var _proto = Pair.prototype;
 
+  _proto.involvesToken = function involvesToken(token) {
+    return token.equals(this.token0) || token.equals(this.token1);
+  }
+  /**
+   * Returns the current mid price of the pair in terms of token0, i.e. the ratio of reserve1 to reserve0
+   */
+  ;
+
+  /**
+   * Return the price of the given token in terms of the other token in the pair.
+   * @param token token to return price of
+   */
+  _proto.priceOf = function priceOf(token) {
+    !this.involvesToken(token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    return token.equals(this.token0) ? this.token0Price : this.token1Price;
+  }
+  /**
+   * Returns the chain ID of the tokens in the pair.
+   */
+  ;
+
   _proto.reserveOf = function reserveOf(token) {
-    !(token.equals(this.token0) || token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    !this.involvesToken(token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
     return token.equals(this.token0) ? this.reserve0 : this.reserve1;
   };
 
   _proto.getOutputAmount = function getOutputAmount(inputAmount) {
-    !(inputAmount.token.equals(this.token0) || inputAmount.token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    !this.involvesToken(inputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
 
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError();
@@ -1014,7 +998,7 @@ var Pair = /*#__PURE__*/function () {
   };
 
   _proto.getInputAmount = function getInputAmount(outputAmount) {
-    !(outputAmount.token.equals(this.token0) || outputAmount.token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    !this.involvesToken(outputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
 
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO) || JSBI.greaterThanOrEqual(outputAmount.raw, this.reserveOf(outputAmount.token).raw)) {
       throw new InsufficientReservesError();
@@ -1055,7 +1039,7 @@ var Pair = /*#__PURE__*/function () {
       feeOn = false;
     }
 
-    !(token.equals(this.token0) || token.equals(this.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
+    !this.involvesToken(token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
     !totalSupply.token.equals(this.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOTAL_SUPPLY') : invariant(false) : void 0;
     !liquidity.token.equals(this.liquidityToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
     !JSBI.lessThanOrEqual(liquidity.raw, totalSupply.raw) ? process.env.NODE_ENV !== "production" ? invariant(false, 'LIQUIDITY') : invariant(false) : void 0;
@@ -1088,6 +1072,25 @@ var Pair = /*#__PURE__*/function () {
   };
 
   _createClass(Pair, [{
+    key: "token0Price",
+    get: function get() {
+      return new Price(this.token0, this.token1, this.tokenAmounts[0].raw, this.tokenAmounts[1].raw);
+    }
+    /**
+     * Returns the current mid price of the pair in terms of token1, i.e. the ratio of reserve0 to reserve1
+     */
+
+  }, {
+    key: "token1Price",
+    get: function get() {
+      return new Price(this.token1, this.token0, this.tokenAmounts[1].raw, this.tokenAmounts[0].raw);
+    }
+  }, {
+    key: "chainId",
+    get: function get() {
+      return this.token0.chainId;
+    }
+  }, {
     key: "token0",
     get: function get() {
       return this.tokenAmounts[0].token;
@@ -1112,95 +1115,15 @@ var Pair = /*#__PURE__*/function () {
   return Pair;
 }();
 
-var Price = /*#__PURE__*/function (_Fraction) {
-  _inheritsLoose(Price, _Fraction);
-
-  // denominator and numerator _must_ be raw, i.e. in the native representation
-  function Price(baseToken, quoteToken, denominator, numerator) {
-    var _this;
-
-    _this = _Fraction.call(this, numerator, denominator) || this;
-    _this.baseToken = baseToken;
-    _this.quoteToken = quoteToken;
-    _this.scalar = new Fraction(JSBI.exponentiate(TEN, JSBI.BigInt(baseToken.decimals)), JSBI.exponentiate(TEN, JSBI.BigInt(quoteToken.decimals)));
-    return _this;
-  }
-
-  Price.fromRoute = function fromRoute(route) {
-    var prices = [];
-
-    for (var _iterator = _createForOfIteratorHelperLoose(route.pairs.entries()), _step; !(_step = _iterator()).done;) {
-      var _step$value = _step.value,
-          i = _step$value[0],
-          pair = _step$value[1];
-      prices.push(route.path[i].equals(pair.token0) ? new Price(pair.reserve0.token, pair.reserve1.token, pair.reserve0.raw, pair.reserve1.raw) : new Price(pair.reserve1.token, pair.reserve0.token, pair.reserve1.raw, pair.reserve0.raw));
-    }
-
-    return prices.slice(1).reduce(function (accumulator, currentValue) {
-      return accumulator.multiply(currentValue);
-    }, prices[0]);
-  };
-
-  var _proto = Price.prototype;
-
-  _proto.invert = function invert() {
-    return new Price(this.quoteToken, this.baseToken, this.numerator, this.denominator);
-  };
-
-  _proto.multiply = function multiply(other) {
-    !this.quoteToken.equals(other.baseToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'BASE') : invariant(false) : void 0;
-
-    var fraction = _Fraction.prototype.multiply.call(this, other);
-
-    return new Price(this.baseToken, other.quoteToken, fraction.denominator, fraction.numerator);
-  } // performs floor division on overflow
-  ;
-
-  _proto.quote = function quote(tokenAmount) {
-    !tokenAmount.token.equals(this.baseToken) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
-    return new TokenAmount(this.quoteToken, _Fraction.prototype.multiply.call(this, tokenAmount.raw).quotient);
-  };
-
-  _proto.toSignificant = function toSignificant(significantDigits, format, rounding) {
-    if (significantDigits === void 0) {
-      significantDigits = 6;
-    }
-
-    return this.adjusted.toSignificant(significantDigits, format, rounding);
-  };
-
-  _proto.toFixed = function toFixed(decimalPlaces, format, rounding) {
-    if (decimalPlaces === void 0) {
-      decimalPlaces = 4;
-    }
-
-    return this.adjusted.toFixed(decimalPlaces, format, rounding);
-  };
-
-  _createClass(Price, [{
-    key: "raw",
-    get: function get() {
-      return new Fraction(this.numerator, this.denominator);
-    }
-  }, {
-    key: "adjusted",
-    get: function get() {
-      return _Fraction.prototype.multiply.call(this, this.scalar);
-    }
-  }]);
-
-  return Price;
-}(Fraction);
-
 var Route = /*#__PURE__*/function () {
-  function Route(pairs, input) {
+  function Route(pairs, input, output) {
     !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
-    !pairs.map(function (pair) {
-      return pair.token0.chainId === pairs[0].token0.chainId;
-    }).every(function (x) {
-      return x;
+    !pairs.every(function (pair) {
+      return pair.chainId === pairs[0].chainId;
     }) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_IDS') : invariant(false) : void 0;
-    var path = [input];
+    !(input instanceof Token && pairs[0].involvesToken(input) || input === ETHER && pairs[0].involvesToken(WETH[pairs[0].chainId])) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INPUT') : invariant(false) : void 0;
+    !(typeof output === 'undefined' || output instanceof Token && pairs[pairs.length - 1].involvesToken(output) || output === ETHER && pairs[pairs.length - 1].involvesToken(WETH[pairs[0].chainId])) ? process.env.NODE_ENV !== "production" ? invariant(false, 'OUTPUT') : invariant(false) : void 0;
+    var path = [input instanceof Token ? input : WETH[pairs[0].chainId]];
 
     for (var _iterator = _createForOfIteratorHelperLoose(pairs.entries()), _step; !(_step = _iterator()).done;) {
       var _step$value = _step.value,
@@ -1208,25 +1131,23 @@ var Route = /*#__PURE__*/function () {
           pair = _step$value[1];
       var currentInput = path[i];
       !(currentInput.equals(pair.token0) || currentInput.equals(pair.token1)) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PATH') : invariant(false) : void 0;
-      var output = currentInput.equals(pair.token0) ? pair.token1 : pair.token0;
-      path.push(output);
+
+      var _output = currentInput.equals(pair.token0) ? pair.token1 : pair.token0;
+
+      path.push(_output);
     }
 
-    !(path.length === new Set(path).size) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PATH') : invariant(false) : void 0;
     this.pairs = pairs;
     this.path = path;
     this.midPrice = Price.fromRoute(this);
+    this.input = input;
+    this.output = output !== null && output !== void 0 ? output : path[path.length - 1];
   }
 
   _createClass(Route, [{
-    key: "input",
+    key: "chainId",
     get: function get() {
-      return this.path[0];
-    }
-  }, {
-    key: "output",
-    get: function get() {
-      return this.path[this.path.length - 1];
+      return this.pairs[0].chainId;
     }
   }]);
 
@@ -1263,7 +1184,14 @@ var Percent = /*#__PURE__*/function (_Fraction) {
   return Percent;
 }(Fraction);
 
-function getSlippage(midPrice, inputAmount, outputAmount) {
+/**
+ * Returns the percent difference between the mid price and the execution price, i.e. price impact.
+ * @param midPrice mid price before the trade
+ * @param inputAmount the input amount of the trade
+ * @param outputAmount the output amount of the trade
+ */
+
+function computePriceImpact(midPrice, inputAmount, outputAmount) {
   var exactQuote = midPrice.raw.multiply(inputAmount.raw); // calculate slippage := (exactQuote - outputAmount) / exactQuote
 
   var slippage = exactQuote.subtract(outputAmount.raw).divide(exactQuote);
@@ -1274,8 +1202,8 @@ function getSlippage(midPrice, inputAmount, outputAmount) {
 
 function inputOutputComparator(a, b) {
   // must have same input and output token for comparison
-  !a.inputAmount.token.equals(b.inputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INPUT_TOKEN') : invariant(false) : void 0;
-  !a.outputAmount.token.equals(b.outputAmount.token) ? process.env.NODE_ENV !== "production" ? invariant(false, 'OUTPUT_TOKEN') : invariant(false) : void 0;
+  !currencyEquals(a.inputAmount.currency, b.inputAmount.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INPUT_CURRENCY') : invariant(false) : void 0;
+  !currencyEquals(a.outputAmount.currency, b.outputAmount.currency) ? process.env.NODE_ENV !== "production" ? invariant(false, 'OUTPUT_CURRENCY') : invariant(false) : void 0;
 
   if (a.outputAmount.equalTo(b.outputAmount)) {
     if (a.inputAmount.equalTo(b.inputAmount)) {
@@ -1306,60 +1234,106 @@ function tradeComparator(a, b) {
   } // consider lowest slippage next, since these are less likely to fail
 
 
-  if (a.slippage.lessThan(b.slippage)) {
+  if (a.priceImpact.lessThan(b.priceImpact)) {
     return -1;
-  } else if (a.slippage.greaterThan(b.slippage)) {
+  } else if (a.priceImpact.greaterThan(b.priceImpact)) {
     return 1;
   } // finally consider the number of hops since each hop costs gas
 
 
   return a.route.path.length - b.route.path.length;
 }
+/**
+ * Given a currency amount and a chain ID, returns the equivalent representation as the token amount.
+ * In other words, if the currency is ETHER, returns the WETH token amount for the given chain. Otherwise, returns
+ * the input currency amount.
+ */
+
+function wrappedAmount(currencyAmount, chainId) {
+  if (currencyAmount instanceof TokenAmount) return currencyAmount;
+  if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw);
+   process.env.NODE_ENV !== "production" ? invariant(false, 'CURRENCY') : invariant(false) ;
+}
+
+function wrappedCurrency(currency, chainId) {
+  if (currency instanceof Token) return currency;
+  if (currency === ETHER) return WETH[chainId];
+   process.env.NODE_ENV !== "production" ? invariant(false, 'CURRENCY') : invariant(false) ;
+}
+/**
+ * Represents a trade executed against a list of pairs.
+ * Does not account for slippage, i.e. trades that front run this trade and move the price.
+ */
+
+
 var Trade = /*#__PURE__*/function () {
   function Trade(route, amount, tradeType) {
-    !amount.token.equals(tradeType === TradeType.EXACT_INPUT ? route.input : route.output) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TOKEN') : invariant(false) : void 0;
     var amounts = new Array(route.path.length);
     var nextPairs = new Array(route.pairs.length);
 
     if (tradeType === TradeType.EXACT_INPUT) {
-      amounts[0] = amount;
+      !currencyEquals(amount.currency, route.input) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INPUT') : invariant(false) : void 0;
+      amounts[0] = wrappedAmount(amount, route.chainId);
 
       for (var i = 0; i < route.path.length - 1; i++) {
         var pair = route.pairs[i];
 
         var _pair$getOutputAmount = pair.getOutputAmount(amounts[i]),
-            _outputAmount = _pair$getOutputAmount[0],
+            outputAmount = _pair$getOutputAmount[0],
             nextPair = _pair$getOutputAmount[1];
 
-        amounts[i + 1] = _outputAmount;
+        amounts[i + 1] = outputAmount;
         nextPairs[i] = nextPair;
       }
     } else {
-      amounts[amounts.length - 1] = amount;
+      !currencyEquals(amount.currency, route.output) ? process.env.NODE_ENV !== "production" ? invariant(false, 'OUTPUT') : invariant(false) : void 0;
+      amounts[amounts.length - 1] = wrappedAmount(amount, route.chainId);
 
       for (var _i = route.path.length - 1; _i > 0; _i--) {
         var _pair = route.pairs[_i - 1];
 
         var _pair$getInputAmount = _pair.getInputAmount(amounts[_i]),
-            _inputAmount = _pair$getInputAmount[0],
+            inputAmount = _pair$getInputAmount[0],
             _nextPair = _pair$getInputAmount[1];
 
-        amounts[_i - 1] = _inputAmount;
+        amounts[_i - 1] = inputAmount;
         nextPairs[_i - 1] = _nextPair;
       }
     }
 
     this.route = route;
     this.tradeType = tradeType;
-    var inputAmount = amounts[0];
-    var outputAmount = amounts[amounts.length - 1];
-    this.inputAmount = inputAmount;
-    this.outputAmount = outputAmount;
-    this.executionPrice = new Price(route.input, route.output, inputAmount.raw, outputAmount.raw);
+    this.inputAmount = tradeType === TradeType.EXACT_INPUT ? amount : route.input === ETHER ? CurrencyAmount.ether(amounts[0].raw) : amounts[0];
+    this.outputAmount = tradeType === TradeType.EXACT_OUTPUT ? amount : route.output === ETHER ? CurrencyAmount.ether(amounts[amounts.length - 1].raw) : amounts[amounts.length - 1];
+    this.executionPrice = new Price(this.inputAmount.currency, this.outputAmount.currency, this.inputAmount.raw, this.outputAmount.raw);
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input));
-    this.slippage = getSlippage(route.midPrice, inputAmount, outputAmount);
-  } // get the minimum amount that must be received from this trade for the given slippage tolerance
+    this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount);
+  }
+  /**
+   * Constructs an exact in trade with the given amount in and route
+   * @param route route of the exact in trade
+   * @param amountIn the amount being passed in
+   */
 
+
+  Trade.exactIn = function exactIn(route, amountIn) {
+    return new Trade(route, amountIn, TradeType.EXACT_INPUT);
+  }
+  /**
+   * Constructs an exact out trade with the given amount out and route
+   * @param route route of the exact out trade
+   * @param amountOut the amount returned by the trade
+   */
+  ;
+
+  Trade.exactOut = function exactOut(route, amountOut) {
+    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT);
+  }
+  /**
+   * Get the minimum amount that must be received from this trade for the given slippage tolerance
+   * @param slippageTolerance tolerance of unfavorable slippage from the execution price of this trade
+   */
+  ;
 
   var _proto = Trade.prototype;
 
@@ -1369,9 +1343,14 @@ var Trade = /*#__PURE__*/function () {
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return this.outputAmount;
     } else {
-      return new TokenAmount(this.outputAmount.token, new Fraction(ONE).add(slippageTolerance).invert().multiply(this.outputAmount.raw).quotient);
+      var slippageAdjustedAmountOut = new Fraction(ONE).add(slippageTolerance).invert().multiply(this.outputAmount.raw).quotient;
+      return this.outputAmount instanceof TokenAmount ? new TokenAmount(this.outputAmount.token, slippageAdjustedAmountOut) : CurrencyAmount.ether(slippageAdjustedAmountOut);
     }
-  } // get the maximum amount in that can be spent via this trade for the given slippage tolerance
+  }
+  /**
+   * Get the maximum amount in that can be spent via this trade for the given slippage tolerance
+   * @param slippageTolerance tolerance of unfavorable slippage from the execution price of this trade
+   */
   ;
 
   _proto.maximumAmountIn = function maximumAmountIn(slippageTolerance) {
@@ -1380,15 +1359,27 @@ var Trade = /*#__PURE__*/function () {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount;
     } else {
-      return new TokenAmount(this.inputAmount.token, new Fraction(ONE).add(slippageTolerance).multiply(this.inputAmount.raw).quotient);
+      var slippageAdjustedAmountIn = new Fraction(ONE).add(slippageTolerance).multiply(this.inputAmount.raw).quotient;
+      return this.inputAmount instanceof TokenAmount ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn) : CurrencyAmount.ether(slippageAdjustedAmountIn);
     }
-  } // given a list of pairs, and a fixed amount in, returns the top `maxNumResults` trades that go from an input token
-  // amount to an output token, making at most `maxHops` hops
-  // note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
-  // the amount in among multiple routes.
+  }
+  /**
+   * Given a list of pairs, and a fixed amount in, returns the top `maxNumResults` trades that go from an input token
+   * amount to an output token, making at most `maxHops` hops.
+   * Note this does not consider aggregation, as routes are linear. It's possible a better route exists by splitting
+   * the amount in among multiple routes.
+   * @param pairs the pairs to consider in finding the best trade
+   * @param currencyAmountIn exact amount of input currency to spend
+   * @param currencyOut the desired currency out
+   * @param maxNumResults maximum number of results to return
+   * @param maxHops maximum number of hops a returned trade can make, e.g. 1 hop goes through a single pair
+   * @param currentPairs used in recursion; the current list of pairs
+   * @param originalAmountIn used in recursion; the original value of the currencyAmountIn parameter
+   * @param bestTrades used in recursion; the current list of best trades
+   */
   ;
 
-  Trade.bestTradeExactIn = function bestTradeExactIn(pairs, amountIn, tokenOut, _temp, // used in recursion.
+  Trade.bestTradeExactIn = function bestTradeExactIn(pairs, currencyAmountIn, currencyOut, _temp, // used in recursion.
   currentPairs, originalAmountIn, bestTrades) {
     var _ref = _temp === void 0 ? {} : _temp,
         _ref$maxNumResults = _ref.maxNumResults,
@@ -1401,7 +1392,7 @@ var Trade = /*#__PURE__*/function () {
     }
 
     if (originalAmountIn === void 0) {
-      originalAmountIn = amountIn;
+      originalAmountIn = currencyAmountIn;
     }
 
     if (bestTrades === void 0) {
@@ -1410,22 +1401,25 @@ var Trade = /*#__PURE__*/function () {
 
     !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
     !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
-    !(originalAmountIn === amountIn || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    !(originalAmountIn === currencyAmountIn || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    var chainId = currencyAmountIn instanceof TokenAmount ? currencyAmountIn.token.chainId : currencyOut instanceof Token ? currencyOut.chainId : undefined;
+    !(chainId !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
+    var amountIn = wrappedAmount(currencyAmountIn, chainId);
+    var tokenOut = wrappedCurrency(currencyOut, chainId);
 
     for (var i = 0; i < pairs.length; i++) {
       var pair = pairs[i]; // pair irrelevant
 
       if (!pair.token0.equals(amountIn.token) && !pair.token1.equals(amountIn.token)) continue;
       if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
-
-      var _amountOut = void 0;
+      var amountOut = void 0;
 
       try {
         ;
 
         var _pair$getOutputAmount2 = pair.getOutputAmount(amountIn);
 
-        _amountOut = _pair$getOutputAmount2[0];
+        amountOut = _pair$getOutputAmount2[0];
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -1436,12 +1430,12 @@ var Trade = /*#__PURE__*/function () {
       } // we have arrived at the output token, so this is the final trade of one of the paths
 
 
-      if (_amountOut.token.equals(tokenOut)) {
-        sortedInsert(bestTrades, new Trade(new Route([].concat(currentPairs, [pair]), originalAmountIn.token), originalAmountIn, TradeType.EXACT_INPUT), maxNumResults, tradeComparator);
+      if (amountOut.token.equals(tokenOut)) {
+        sortedInsert(bestTrades, new Trade(new Route([].concat(currentPairs, [pair]), originalAmountIn.currency, currencyOut), originalAmountIn, TradeType.EXACT_INPUT), maxNumResults, tradeComparator);
       } else if (maxHops > 1 && pairs.length > 1) {
         var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
 
-        Trade.bestTradeExactIn(pairsExcludingThisPair, _amountOut, tokenOut, {
+        Trade.bestTradeExactIn(pairsExcludingThisPair, amountOut, currencyOut, {
           maxNumResults: maxNumResults,
           maxHops: maxHops - 1
         }, [].concat(currentPairs, [pair]), originalAmountIn, bestTrades);
@@ -1449,14 +1443,25 @@ var Trade = /*#__PURE__*/function () {
     }
 
     return bestTrades;
-  } // similar to the above method but instead targets a fixed output amount
-  // given a list of pairs, and a fixed amount out, returns the top `maxNumResults` trades that go from an input token
-  // to an output token amount, making at most `maxHops` hops
-  // note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
-  // the amount in among multiple routes.
+  }
+  /**
+   * similar to the above method but instead targets a fixed output amount
+   * given a list of pairs, and a fixed amount out, returns the top `maxNumResults` trades that go from an input token
+   * to an output token amount, making at most `maxHops` hops
+   * note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
+   * the amount in among multiple routes.
+   * @param pairs the pairs to consider in finding the best trade
+   * @param currencyIn the currency to spend
+   * @param currencyAmountOut the exact amount of currency out
+   * @param maxNumResults maximum number of results to return
+   * @param maxHops maximum number of hops a returned trade can make, e.g. 1 hop goes through a single pair
+   * @param currentPairs used in recursion; the current list of pairs
+   * @param originalAmountOut used in recursion; the original value of the currencyAmountOut parameter
+   * @param bestTrades used in recursion; the current list of best trades
+   */
   ;
 
-  Trade.bestTradeExactOut = function bestTradeExactOut(pairs, tokenIn, amountOut, _temp2, // used in recursion.
+  Trade.bestTradeExactOut = function bestTradeExactOut(pairs, currencyIn, currencyAmountOut, _temp2, // used in recursion.
   currentPairs, originalAmountOut, bestTrades) {
     var _ref2 = _temp2 === void 0 ? {} : _temp2,
         _ref2$maxNumResults = _ref2.maxNumResults,
@@ -1469,7 +1474,7 @@ var Trade = /*#__PURE__*/function () {
     }
 
     if (originalAmountOut === void 0) {
-      originalAmountOut = amountOut;
+      originalAmountOut = currencyAmountOut;
     }
 
     if (bestTrades === void 0) {
@@ -1478,22 +1483,25 @@ var Trade = /*#__PURE__*/function () {
 
     !(pairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'PAIRS') : invariant(false) : void 0;
     !(maxHops > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'MAX_HOPS') : invariant(false) : void 0;
-    !(originalAmountOut === amountOut || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    !(originalAmountOut === currencyAmountOut || currentPairs.length > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'INVALID_RECURSION') : invariant(false) : void 0;
+    var chainId = currencyAmountOut instanceof TokenAmount ? currencyAmountOut.token.chainId : currencyIn instanceof Token ? currencyIn.chainId : undefined;
+    !(chainId !== undefined) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
+    var amountOut = wrappedAmount(currencyAmountOut, chainId);
+    var tokenIn = wrappedCurrency(currencyIn, chainId);
 
     for (var i = 0; i < pairs.length; i++) {
       var pair = pairs[i]; // pair irrelevant
 
       if (!pair.token0.equals(amountOut.token) && !pair.token1.equals(amountOut.token)) continue;
       if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue;
-
-      var _amountIn = void 0;
+      var amountIn = void 0;
 
       try {
         ;
 
         var _pair$getInputAmount2 = pair.getInputAmount(amountOut);
 
-        _amountIn = _pair$getInputAmount2[0];
+        amountIn = _pair$getInputAmount2[0];
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
@@ -1504,12 +1512,12 @@ var Trade = /*#__PURE__*/function () {
       } // we have arrived at the input token, so this is the first trade of one of the paths
 
 
-      if (_amountIn.token.equals(tokenIn)) {
-        sortedInsert(bestTrades, new Trade(new Route([pair].concat(currentPairs), tokenIn), originalAmountOut, TradeType.EXACT_OUTPUT), maxNumResults, tradeComparator);
+      if (amountIn.token.equals(tokenIn)) {
+        sortedInsert(bestTrades, new Trade(new Route([pair].concat(currentPairs), currencyIn, originalAmountOut.currency), originalAmountOut, TradeType.EXACT_OUTPUT), maxNumResults, tradeComparator);
       } else if (maxHops > 1 && pairs.length > 1) {
         var pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length)); // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
 
-        Trade.bestTradeExactOut(pairsExcludingThisPair, tokenIn, _amountIn, {
+        Trade.bestTradeExactOut(pairsExcludingThisPair, currencyIn, amountIn, {
           maxNumResults: maxNumResults,
           maxHops: maxHops - 1
         }, [pair].concat(currentPairs), originalAmountOut, bestTrades);
@@ -1522,5 +1530,381 @@ var Trade = /*#__PURE__*/function () {
   return Trade;
 }();
 
-export { ChainId, DXD, FACTORY_ADDRESS, Fees, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, inputOutputComparator, parseBigintIsh, tradeComparator };
+function toHex(currencyAmount) {
+  return "0x" + currencyAmount.raw.toString(16);
+}
+
+var ZERO_HEX = '0x0';
+/**
+ * Represents the Uniswap V2 Router, and has static methods for helping execute trades.
+ */
+
+var Router = /*#__PURE__*/function () {
+  /**
+   * Cannot be constructed.
+   */
+  function Router() {}
+  /**
+   * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
+   * @param trade to produce call parameters for
+   * @param options options for the call parameters
+   */
+
+
+  Router.swapCallParameters = function swapCallParameters(trade, options) {
+    var etherIn = trade.inputAmount.currency === ETHER;
+    var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
+
+    !!(etherIn && etherOut) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ETHER_IN_OUT') : invariant(false) : void 0;
+    !(options.ttl > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TTL') : invariant(false) : void 0;
+    var to = validateAndParseAddress(options.recipient);
+    var amountIn = toHex(trade.maximumAmountIn(options.allowedSlippage));
+    var amountOut = toHex(trade.minimumAmountOut(options.allowedSlippage));
+    var path = trade.route.path.map(function (token) {
+      return token.address;
+    });
+    var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
+    var useFeeOnTransfer = Boolean(options.feeOnTransfer);
+    var methodName;
+    var args;
+    var value;
+
+    switch (trade.tradeType) {
+      case TradeType.EXACT_INPUT:
+        if (etherIn) {
+          methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'; // (uint amountOutMin, address[] calldata path, address to, uint deadline)
+
+          args = [amountOut, path, to, deadline];
+          value = amountIn;
+        } else if (etherOut) {
+          methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
+        } else {
+          methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
+        }
+
+        break;
+
+      case TradeType.EXACT_OUTPUT:
+        !!useFeeOnTransfer ? process.env.NODE_ENV !== "production" ? invariant(false, 'EXACT_OUT_FOT') : invariant(false) : void 0;
+
+        if (etherIn) {
+          methodName = 'swapETHForExactTokens'; // (uint amountOut, address[] calldata path, address to, uint deadline)
+
+          args = [amountOut, path, to, deadline];
+          value = amountIn;
+        } else if (etherOut) {
+          methodName = 'swapTokensForExactETH'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
+        } else {
+          methodName = 'swapTokensForExactTokens'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
+        }
+
+        break;
+    }
+
+    return {
+      methodName: methodName,
+      args: args,
+      value: value
+    };
+  };
+
+  return Router;
+}();
+
+var ERC20 = [
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "decimals",
+		outputs: [
+			{
+				name: "",
+				type: "uint8"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+			{
+				name: "",
+				type: "address"
+			}
+		],
+		name: "balanceOf",
+		outputs: [
+			{
+				name: "",
+				type: "uint256"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	}
+];
+
+var _TOKEN_DECIMALS_CACHE;
+var TOKEN_DECIMALS_CACHE = (_TOKEN_DECIMALS_CACHE = {}, _TOKEN_DECIMALS_CACHE[ChainId.MAINNET] = {
+  '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': 9 // DGD
+
+}, _TOKEN_DECIMALS_CACHE);
+/**
+ * Contains methods for constructing instances of pairs and tokens from on-chain data.
+ */
+
+var Fetcher = /*#__PURE__*/function () {
+  /**
+   * Cannot be constructed.
+   */
+  function Fetcher() {}
+  /**
+   * Fetch information for a given token on the given chain, using the given ethers provider.
+   * @param chainId chain of the token
+   * @param address address of the token on the chain
+   * @param provider provider used to fetch the token
+   * @param symbol optional symbol of the token
+   * @param name optional name of the token
+   */
+
+
+  Fetcher.fetchTokenData = function fetchTokenData(chainId, address, provider, symbol, name) {
+    try {
+      var _TOKEN_DECIMALS_CACHE2, _TOKEN_DECIMALS_CACHE3;
+
+      var _temp3 = function _temp3(parsedDecimals) {
+        return new Token(chainId, address, parsedDecimals, symbol, name);
+      };
+
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+
+      var _temp4 = typeof ((_TOKEN_DECIMALS_CACHE2 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE2 === void 0 ? void 0 : (_TOKEN_DECIMALS_CACHE3 = _TOKEN_DECIMALS_CACHE2[chainId]) === null || _TOKEN_DECIMALS_CACHE3 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE3[address]) === 'number';
+
+      return Promise.resolve(_temp4 ? _temp3(TOKEN_DECIMALS_CACHE[chainId][address]) : Promise.resolve(new Contract(address, ERC20, provider).decimals().then(function (decimals) {
+        var _TOKEN_DECIMALS_CACHE4, _extends2, _extends3;
+
+        TOKEN_DECIMALS_CACHE = _extends({}, TOKEN_DECIMALS_CACHE, (_extends3 = {}, _extends3[chainId] = _extends({}, (_TOKEN_DECIMALS_CACHE4 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE4 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE4[chainId], (_extends2 = {}, _extends2[address] = decimals, _extends2)), _extends3));
+        return decimals;
+      })).then(_temp3));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches information about a pair and constructs a pair from the given two tokens.
+   * @param tokenA first token
+   * @param tokenB second token
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchPairData = function fetchPairData(tokenA, tokenB, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenA.chainId));
+      !(tokenA.chainId === tokenB.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
+      var address = Pair.getAddress(tokenA, tokenB);
+      return Promise.resolve(new Contract(address, IDXswapPair.abi, provider).getReserves()).then(function (_ref) {
+        var reserves0 = _ref[0],
+            reserves1 = _ref[1];
+        var balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
+        var tokenAmountA = new TokenAmount(tokenA, balances[0]);
+        var tokenAmountB = new TokenAmount(tokenB, balances[1]);
+        var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
+        ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
+        var liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
+        var _BigInt = JSBI.BigInt;
+        return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
+          var swapFee = _BigInt.call(JSBI, _Contract$swapFee);
+
+          var _BigInt2 = JSBI.BigInt;
+          return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, provider).protocolFeeDenominator()).then(function (_Contract$protocolFee) {
+            var protocolFeeDenominator = _BigInt2.call(JSBI, _Contract$protocolFee);
+
+            return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator);
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information from a liquidity token of a token pair
+   * @param liquidityToken the liquidity token from which the swap fee info will be fetched
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchSwapFee = function fetchSwapFee(liquidityToken, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(liquidityToken.chainId));
+      var _BigInt4 = JSBI.BigInt;
+      return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee2) {
+        var _BigInt3$call = _BigInt4.call(JSBI, _Contract$swapFee2);
+
+        return Promise.resolve(new Contract(FACTORY_ADDRESS[liquidityToken.chainId], IDXswapFactory.abi, provider).feeToSetter()).then(function (_Contract$feeToSetter) {
+          return {
+            fee: _BigInt3$call,
+            owner: _Contract$feeToSetter
+          };
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information from liquidity tokens of token pairs
+   * @param liquidityToken the liquidity tokens from which the swap fee info will be fetched
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchSwapFees = function fetchSwapFees(liquidityTokens, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(liquidityTokens[0].chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider);
+      var liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider);
+      var calls = [];
+      calls.push({
+        address: factoryContract.address,
+        callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('feeToSetter()'))
+      });
+
+      for (var tokenPairsIndex = 0; tokenPairsIndex < liquidityTokens.length; tokenPairsIndex++) {
+        calls.push({
+          address: liquidityTokens[tokenPairsIndex].address,
+          callData: liquidityTokenContract["interface"].encodeFunctionData(liquidityTokenContract["interface"].getFunction('swapFee()'))
+        });
+      }
+
+      return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+        return [call.address, call.callData];
+      }))).then(function (result) {
+        var owner = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('feeToSetter()'), result.returnData[0])[0];
+        var fees = [];
+
+        for (var resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
+          fees.push({
+            fee: JSBI.BigInt(liquidityTokenContract["interface"].decodeFunctionResult(liquidityTokenContract["interface"].getFunction('swapFee()'), result.returnData[resultIndex])[0]),
+            owner: owner
+          });
+        }
+
+        return fees;
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information of all registered token pairs from factory
+   * @param chainId the chainId of the network to fecth the swap fees
+   * @param swapFeesCache a cache of already fetched fees to be skiped
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchAllSwapFees = function fetchAllSwapFees(chainId, swapFeesCache, provider) {
+    if (swapFeesCache === void 0) {
+      swapFeesCache = {};
+    }
+
+    try {
+      var _this2 = this;
+
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
+      return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
+        var allSwapPairs = {}; // Get first token pairs from cache
+
+        var tokenPairsCache = Object.keys(swapFeesCache);
+        var tokenPairsToFetch = [];
+
+        for (var tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
+          allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
+            fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
+            owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
+          };
+        } // Get rest of the token pairs that are not cached
+
+
+        var calls = [];
+
+        for (var pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++) {
+          calls.push({
+            address: factoryContract.address,
+            callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('allPairs(uint)'), [pairIndex])
+          });
+        }
+
+        return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+          return [call.address, call.callData];
+        }))).then(function (result) {
+          for (var resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
+            var tokenPairAddress = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('allPairs(uint256)'), result.returnData[resultIndex])[0];
+            tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'));
+          } // Fetch the pairs that we dont have the fee and owner
+
+
+          return Promise.resolve(_this2.fetchSwapFees(tokenPairsToFetch, provider)).then(function (swapFeesFetched) {
+            for (var tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++) {
+              allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex];
+            }
+
+            return allSwapPairs;
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches protocol fee information from the token pair factory
+   * @param chainId the chainId of the network to fecth the protocol fee
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchProtocolFee = function fetchProtocolFee(chainId, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      return Promise.resolve(new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)).then(function (factoryContract) {
+        return Promise.resolve(factoryContract.protocolFeeDenominator()).then(function (feeDenominator) {
+          return Promise.resolve(factoryContract.feeTo()).then(function (feeReceiver) {
+            return {
+              feeDenominator: feeDenominator,
+              feeReceiver: feeReceiver
+            };
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+
+  return Fetcher;
+}();
+
+export { ChainId, Currency, CurrencyAmount, DXD, ETHER, FACTORY_ADDRESS, Fetcher, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Router, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, currencyEquals, inputOutputComparator, parseBigintIsh, tradeComparator };
 //# sourceMappingURL=dxswap-sdk.esm.js.map
