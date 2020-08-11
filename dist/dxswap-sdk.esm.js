@@ -4,15 +4,15 @@ import { proxies } from 'dxswap-core/.openzeppelin/kovan.json';
 import invariant from 'tiny-invariant';
 import warning from 'tiny-warning';
 import { getAddress, getCreate2Address } from '@ethersproject/address';
-import { getNetwork } from '@ethersproject/networks';
-import { getDefaultProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
-import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
 import _Big from 'big.js';
 import toFormat from 'toformat';
 import _Decimal from 'decimal.js-light';
 import { keccak256, pack } from '@ethersproject/solidity';
+import { Contract } from '@ethersproject/contracts';
+import { getNetwork } from '@ethersproject/networks';
+import { getDefaultProvider } from '@ethersproject/providers';
+import IDXswapPair from 'dxswap-core/build/contracts/IDXswapPair.json';
+import IDXswapFactory from 'dxswap-core/build/contracts/IDXswapFactory.json';
 
 var MULTICALL_ABI = [
 	{
@@ -434,25 +434,73 @@ function _arrayLikeToArray(arr, len) {
   return arr2;
 }
 
-function _createForOfIteratorHelperLoose(o) {
-  var i = 0;
+function _createForOfIteratorHelperLoose(o, allowArrayLike) {
+  var it;
 
   if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
-    if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) return function () {
-      if (i >= o.length) return {
-        done: true
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+      return function () {
+        if (i >= o.length) return {
+          done: true
+        };
+        return {
+          done: false,
+          value: o[i++]
+        };
       };
-      return {
-        done: false,
-        value: o[i++]
-      };
-    };
+    }
+
     throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  i = o[Symbol.iterator]();
-  return i.next.bind(i);
+  it = o[Symbol.iterator]();
+  return it.next.bind(it);
 }
+
+// see https://stackoverflow.com/a/41102306
+var CAN_SET_PROTOTYPE = ('setPrototypeOf' in Object);
+/**
+ * Indicates that the pair has insufficient reserves for a desired output amount. I.e. the amount of output cannot be
+ * obtained by sending any amount of input.
+ */
+
+var InsufficientReservesError = /*#__PURE__*/function (_Error) {
+  _inheritsLoose(InsufficientReservesError, _Error);
+
+  function InsufficientReservesError() {
+    var _this;
+
+    _this = _Error.call(this) || this;
+    _this.isInsufficientReservesError = true;
+    _this.name = _this.constructor.name;
+    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this), (this instanceof InsufficientReservesError ? this.constructor : void 0).prototype);
+    return _this;
+  }
+
+  return InsufficientReservesError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+/**
+ * Indicates that the input amount is too small to produce any amount of output. I.e. the amount of input sent is less
+ * than the price of a single unit of output after fees.
+ */
+
+var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
+  _inheritsLoose(InsufficientInputAmountError, _Error2);
+
+  function InsufficientInputAmountError() {
+    var _this2;
+
+    _this2 = _Error2.call(this) || this;
+    _this2.isInsufficientInputAmountError = true;
+    _this2.name = _this2.constructor.name;
+    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this2), (this instanceof InsufficientInputAmountError ? this.constructor : void 0).prototype);
+    return _this2;
+  }
+
+  return InsufficientInputAmountError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
 
 /**
  * A currency is any fungible financial instrument on Ethereum, including Ether and all ERC20 tokens.
@@ -550,188 +598,6 @@ var TEST_TOKENS = {
   XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
   YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
 };
-
-var Fees = /*#__PURE__*/function () {
-  function Fees() {}
-
-  Fees.fetchSwapFee = function fetchSwapFee(tokenPair, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPair.chainId));
-      var _BigInt2 = JSBI.BigInt;
-      return Promise.resolve(new Contract(tokenPair.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
-        var _BigInt$call = _BigInt2.call(JSBI, _Contract$swapFee);
-
-        return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenPair.chainId], IDXswapFactory.abi, provider).feeToSetter()).then(function (_Contract$feeToSetter) {
-          return {
-            fee: _BigInt$call,
-            owner: _Contract$feeToSetter
-          };
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchSwapFees = function fetchSwapFees(tokenPairs, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenPairs[0].chainId));
-      var multicall = new Contract(MULTICALL_ADDRESS[tokenPairs[0].chainId], MULTICALL_ABI, provider);
-      var factoryContract = new Contract(FACTORY_ADDRESS[tokenPairs[0].chainId], IDXswapFactory.abi, provider);
-      var tokenPairContract = new Contract(tokenPairs[0].address, IDXswapPair.abi, provider);
-      var calls = [];
-      calls.push({
-        address: factoryContract.address,
-        callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('feeToSetter()'))
-      });
-
-      for (var tokenPairsIndex = 0; tokenPairsIndex < tokenPairs.length; tokenPairsIndex++) {
-        calls.push({
-          address: tokenPairs[tokenPairsIndex].address,
-          callData: tokenPairContract["interface"].encodeFunctionData(tokenPairContract["interface"].getFunction('swapFee()'))
-        });
-      }
-
-      return Promise.resolve(multicall.aggregate(calls.map(function (call) {
-        return [call.address, call.callData];
-      }))).then(function (result) {
-        var owner = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('feeToSetter()'), result.returnData[0])[0];
-        var fees = [];
-
-        for (var resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
-          fees.push({
-            fee: JSBI.BigInt(tokenPairContract["interface"].decodeFunctionResult(tokenPairContract["interface"].getFunction('swapFee()'), result.returnData[resultIndex])[0]),
-            owner: owner
-          });
-        }
-
-        return fees;
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchAllSwapFees = function fetchAllSwapFees(chainId, swapFeesCache, provider) {
-    if (swapFeesCache === void 0) {
-      swapFeesCache = {};
-    }
-
-    try {
-      var _this2 = this;
-
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
-      var multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
-      var factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
-      return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
-        var allSwapPairs = {}; // Get first token pairs from cache
-
-        var tokenPairsCache = Object.keys(swapFeesCache);
-        var tokenPairsToFetch = [];
-
-        for (var tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
-          allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
-            fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
-            owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
-          };
-        } // Get rest of the token pairs that are not cached
-
-
-        var calls = [];
-
-        for (var pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++) {
-          calls.push({
-            address: factoryContract.address,
-            callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('allPairs(uint)'), [pairIndex])
-          });
-        }
-
-        return Promise.resolve(multicall.aggregate(calls.map(function (call) {
-          return [call.address, call.callData];
-        }))).then(function (result) {
-          for (var resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
-            var tokenPairAddress = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('allPairs(uint256)'), result.returnData[resultIndex])[0];
-            tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'));
-          } // Fetch the pairs that we dont have the fee and owner
-
-
-          return Promise.resolve(_this2.fetchSwapFees(tokenPairsToFetch, provider)).then(function (swapFeesFetched) {
-            for (var tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++) {
-              allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex];
-            }
-
-            return allSwapPairs;
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  Fees.fetchProtocolFee = function fetchProtocolFee(chainId, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
-      return Promise.resolve(new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)).then(function (factoryContract) {
-        return Promise.resolve(factoryContract.protocolFeeDenominator()).then(function (feeDenominator) {
-          return Promise.resolve(factoryContract.feeTo()).then(function (feeReceiver) {
-            return {
-              feeDenominator: feeDenominator,
-              feeReceiver: feeReceiver
-            };
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-
-  return Fees;
-}();
-
-// see https://stackoverflow.com/a/41102306
-var CAN_SET_PROTOTYPE = ('setPrototypeOf' in Object);
-/**
- * Indicates that the pair has insufficient reserves for a desired output amount. I.e. the amount of output cannot be
- * obtained by sending any amount of input.
- */
-
-var InsufficientReservesError = /*#__PURE__*/function (_Error) {
-  _inheritsLoose(InsufficientReservesError, _Error);
-
-  function InsufficientReservesError() {
-    var _this;
-
-    _this = _Error.call(this) || this;
-    _this.isInsufficientReservesError = true;
-    _this.name = _this.constructor.name;
-    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this), (this instanceof InsufficientReservesError ? this.constructor : void 0).prototype);
-    return _this;
-  }
-
-  return InsufficientReservesError;
-}( /*#__PURE__*/_wrapNativeSuper(Error));
-/**
- * Indicates that the input amount is too small to produce any amount of output. I.e. the amount of input sent is less
- * than the price of a single unit of output after fees.
- */
-
-var InsufficientInputAmountError = /*#__PURE__*/function (_Error2) {
-  _inheritsLoose(InsufficientInputAmountError, _Error2);
-
-  function InsufficientInputAmountError() {
-    var _this2;
-
-    _this2 = _Error2.call(this) || this;
-    _this2.isInsufficientInputAmountError = true;
-    _this2.name = _this2.constructor.name;
-    if (CAN_SET_PROTOTYPE) Object.setPrototypeOf(_assertThisInitialized(_this2), (this instanceof InsufficientInputAmountError ? this.constructor : void 0).prototype);
-    return _this2;
-  }
-
-  return InsufficientInputAmountError;
-}( /*#__PURE__*/_wrapNativeSuper(Error));
 
 var _toSignificantRoundin, _toFixedRounding;
 var Decimal = /*#__PURE__*/toFormat(_Decimal);
@@ -1071,41 +937,10 @@ var Pair = /*#__PURE__*/function () {
     if (((_PAIR_ADDRESS_CACHE = PAIR_ADDRESS_CACHE) === null || _PAIR_ADDRESS_CACHE === void 0 ? void 0 : (_PAIR_ADDRESS_CACHE$t = _PAIR_ADDRESS_CACHE[tokens[0].address]) === null || _PAIR_ADDRESS_CACHE$t === void 0 ? void 0 : _PAIR_ADDRESS_CACHE$t[tokens[1].address]) === undefined) {
       var _PAIR_ADDRESS_CACHE2, _extends2, _extends3;
 
-      PAIR_ADDRESS_CACHE = _extends(_extends({}, PAIR_ADDRESS_CACHE), {}, (_extends3 = {}, _extends3[tokens[0].address] = _extends(_extends({}, (_PAIR_ADDRESS_CACHE2 = PAIR_ADDRESS_CACHE) === null || _PAIR_ADDRESS_CACHE2 === void 0 ? void 0 : _PAIR_ADDRESS_CACHE2[tokens[0].address]), {}, (_extends2 = {}, _extends2[tokens[1].address] = getCreate2Address(FACTORY_ADDRESS[tokenA.chainId], keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]), INIT_CODE_HASH), _extends2)), _extends3));
+      PAIR_ADDRESS_CACHE = _extends({}, PAIR_ADDRESS_CACHE, (_extends3 = {}, _extends3[tokens[0].address] = _extends({}, (_PAIR_ADDRESS_CACHE2 = PAIR_ADDRESS_CACHE) === null || _PAIR_ADDRESS_CACHE2 === void 0 ? void 0 : _PAIR_ADDRESS_CACHE2[tokens[0].address], (_extends2 = {}, _extends2[tokens[1].address] = getCreate2Address(FACTORY_ADDRESS[tokenA.chainId], keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]), INIT_CODE_HASH), _extends2)), _extends3));
     }
 
     return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address];
-  };
-
-  Pair.fetchData = function fetchData(tokenA, tokenB, provider) {
-    try {
-      if (provider === undefined) provider = getDefaultProvider(getNetwork(tokenA.chainId));
-      !(tokenA.chainId === tokenB.chainId) ? process.env.NODE_ENV !== "production" ? invariant(false, 'CHAIN_ID') : invariant(false) : void 0;
-      var address = Pair.getAddress(tokenA, tokenB);
-      return Promise.resolve(new Contract(address, IDXswapPair.abi, provider).getReserves()).then(function (_ref) {
-        var reserves0 = _ref[0],
-            reserves1 = _ref[1];
-        var balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
-        var tokenAmountA = new TokenAmount(tokenA, balances[0]);
-        var tokenAmountB = new TokenAmount(tokenB, balances[1]);
-        var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
-        ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
-        var liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
-        var _BigInt = JSBI.BigInt;
-        return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
-          var swapFee = _BigInt.call(JSBI, _Contract$swapFee);
-
-          var _BigInt2 = JSBI.BigInt;
-          return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, provider).protocolFeeDenominator()).then(function (_Contract$protocolFee) {
-            var protocolFeeDenominator = _BigInt2.call(JSBI, _Contract$protocolFee);
-
-            return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator);
-          });
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
   }
   /**
    * Returns true if the token is either token0 or token1
@@ -1864,7 +1699,7 @@ var Fetcher = /*#__PURE__*/function () {
       return Promise.resolve(_temp4 ? _temp3(TOKEN_DECIMALS_CACHE[chainId][address]) : Promise.resolve(new Contract(address, ERC20, provider).decimals().then(function (decimals) {
         var _TOKEN_DECIMALS_CACHE4, _extends2, _extends3;
 
-        TOKEN_DECIMALS_CACHE = _extends(_extends({}, TOKEN_DECIMALS_CACHE), {}, (_extends3 = {}, _extends3[chainId] = _extends(_extends({}, (_TOKEN_DECIMALS_CACHE4 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE4 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE4[chainId]), {}, (_extends2 = {}, _extends2[address] = decimals, _extends2)), _extends3));
+        TOKEN_DECIMALS_CACHE = _extends({}, TOKEN_DECIMALS_CACHE, (_extends3 = {}, _extends3[chainId] = _extends({}, (_TOKEN_DECIMALS_CACHE4 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE4 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE4[chainId], (_extends2 = {}, _extends2[address] = decimals, _extends2)), _extends3));
         return decimals;
       })).then(_temp3));
     } catch (e) {
@@ -1888,7 +1723,180 @@ var Fetcher = /*#__PURE__*/function () {
         var reserves0 = _ref[0],
             reserves1 = _ref[1];
         var balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
-        return new Pair(new TokenAmount(tokenA, balances[0]), new TokenAmount(tokenB, balances[1]));
+        var tokenAmountA = new TokenAmount(tokenA, balances[0]);
+        var tokenAmountB = new TokenAmount(tokenB, balances[1]);
+        var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
+        ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
+        var liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'DXS', 'DXswap');
+        var _BigInt = JSBI.BigInt;
+        return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee) {
+          var swapFee = _BigInt.call(JSBI, _Contract$swapFee);
+
+          var _BigInt2 = JSBI.BigInt;
+          return Promise.resolve(new Contract(FACTORY_ADDRESS[tokenAmountA.token.chainId], IDXswapFactory.abi, provider).protocolFeeDenominator()).then(function (_Contract$protocolFee) {
+            var protocolFeeDenominator = _BigInt2.call(JSBI, _Contract$protocolFee);
+
+            return new Pair(tokenAmountA, tokenAmountB, swapFee, protocolFeeDenominator);
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information from a liquidity token of a token pair
+   * @param liquidityToken the liquidity token from which the swap fee info will be fetched
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchSwapFee = function fetchSwapFee(liquidityToken, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(liquidityToken.chainId));
+      var _BigInt4 = JSBI.BigInt;
+      return Promise.resolve(new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()).then(function (_Contract$swapFee2) {
+        var _BigInt3$call = _BigInt4.call(JSBI, _Contract$swapFee2);
+
+        return Promise.resolve(new Contract(FACTORY_ADDRESS[liquidityToken.chainId], IDXswapFactory.abi, provider).feeToSetter()).then(function (_Contract$feeToSetter) {
+          return {
+            fee: _BigInt3$call,
+            owner: _Contract$feeToSetter
+          };
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information from liquidity tokens of token pairs
+   * @param liquidityToken the liquidity tokens from which the swap fee info will be fetched
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchSwapFees = function fetchSwapFees(liquidityTokens, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(liquidityTokens[0].chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider);
+      var liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider);
+      var calls = [];
+      calls.push({
+        address: factoryContract.address,
+        callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('feeToSetter()'))
+      });
+
+      for (var tokenPairsIndex = 0; tokenPairsIndex < liquidityTokens.length; tokenPairsIndex++) {
+        calls.push({
+          address: liquidityTokens[tokenPairsIndex].address,
+          callData: liquidityTokenContract["interface"].encodeFunctionData(liquidityTokenContract["interface"].getFunction('swapFee()'))
+        });
+      }
+
+      return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+        return [call.address, call.callData];
+      }))).then(function (result) {
+        var owner = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('feeToSetter()'), result.returnData[0])[0];
+        var fees = [];
+
+        for (var resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
+          fees.push({
+            fee: JSBI.BigInt(liquidityTokenContract["interface"].decodeFunctionResult(liquidityTokenContract["interface"].getFunction('swapFee()'), result.returnData[resultIndex])[0]),
+            owner: owner
+          });
+        }
+
+        return fees;
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches swap fee information of all registered token pairs from factory
+   * @param chainId the chainId of the network to fecth the swap fees
+   * @param swapFeesCache a cache of already fetched fees to be skiped
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchAllSwapFees = function fetchAllSwapFees(chainId, swapFeesCache, provider) {
+    if (swapFeesCache === void 0) {
+      swapFeesCache = {};
+    }
+
+    try {
+      var _this2 = this;
+
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      var multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
+      var factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
+      return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
+        var allSwapPairs = {}; // Get first token pairs from cache
+
+        var tokenPairsCache = Object.keys(swapFeesCache);
+        var tokenPairsToFetch = [];
+
+        for (var tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
+          allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
+            fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
+            owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
+          };
+        } // Get rest of the token pairs that are not cached
+
+
+        var calls = [];
+
+        for (var pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++) {
+          calls.push({
+            address: factoryContract.address,
+            callData: factoryContract["interface"].encodeFunctionData(factoryContract["interface"].getFunction('allPairs(uint)'), [pairIndex])
+          });
+        }
+
+        return Promise.resolve(multicall.aggregate(calls.map(function (call) {
+          return [call.address, call.callData];
+        }))).then(function (result) {
+          for (var resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
+            var tokenPairAddress = factoryContract["interface"].decodeFunctionResult(factoryContract["interface"].getFunction('allPairs(uint256)'), result.returnData[resultIndex])[0];
+            tokenPairsToFetch.push(new Token(chainId, tokenPairAddress, 18, 'DXS', 'DXswap'));
+          } // Fetch the pairs that we dont have the fee and owner
+
+
+          return Promise.resolve(_this2.fetchSwapFees(tokenPairsToFetch, provider)).then(function (swapFeesFetched) {
+            for (var tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++) {
+              allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex];
+            }
+
+            return allSwapPairs;
+          });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches protocol fee information from the token pair factory
+   * @param chainId the chainId of the network to fecth the protocol fee
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchProtocolFee = function fetchProtocolFee(chainId, provider) {
+    try {
+      if (provider === undefined) provider = getDefaultProvider(getNetwork(chainId));
+      return Promise.resolve(new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)).then(function (factoryContract) {
+        return Promise.resolve(factoryContract.protocolFeeDenominator()).then(function (feeDenominator) {
+          return Promise.resolve(factoryContract.feeTo()).then(function (feeReceiver) {
+            return {
+              feeDenominator: feeDenominator,
+              feeReceiver: feeReceiver
+            };
+          });
+        });
       });
     } catch (e) {
       return Promise.reject(e);
@@ -1898,5 +1906,5 @@ var Fetcher = /*#__PURE__*/function () {
   return Fetcher;
 }();
 
-export { ChainId, Currency, CurrencyAmount, DXD, ETHER, FACTORY_ADDRESS, Fees, Fetcher, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Router, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, currencyEquals, inputOutputComparator, parseBigintIsh, tradeComparator };
+export { ChainId, Currency, CurrencyAmount, DXD, ETHER, FACTORY_ADDRESS, Fetcher, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Router, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, currencyEquals, inputOutputComparator, parseBigintIsh, tradeComparator };
 //# sourceMappingURL=dxswap-sdk.esm.js.map
