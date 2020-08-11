@@ -9,7 +9,6 @@ export declare class Pair {
     readonly swapFee: BigintIsh;
     readonly protocolFeeDenominator: BigintIsh;
     static getAddress(tokenA: Token, tokenB: Token): string;
-    static fetchData(tokenA: Token, tokenB: Token, provider?: import("@ethersproject/providers").BaseProvider): Promise<Pair>;
     constructor(tokenAmountA: TokenAmount, tokenAmountB: TokenAmount, swapFee?: BigintIsh, protocolFeeDenominator?: BigintIsh);
     /**
      * Returns true if the token is either token0 or token1
