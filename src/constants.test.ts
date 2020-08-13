@@ -9,7 +9,7 @@ const COMPUTED_INIT_CODE_HASH = keccak256(['bytes'], [`${bytecode}`])
 
 describe('constants', () => {
   describe('INIT_CODE_HASH', () => {
-    it('matches computed bytecode hash', () => {
+    it.only('matches computed bytecode hash', () => {
       expect(COMPUTED_INIT_CODE_HASH).toEqual(INIT_CODE_HASH)
     })
   })
