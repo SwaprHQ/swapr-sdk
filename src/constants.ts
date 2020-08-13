@@ -34,7 +34,7 @@ export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapFactory'][0].address
 }
 
-export const INIT_CODE_HASH = '0x25dd05d38222d917e4487e1da5be545f4c08adc197eb59f87c597a13cf7791d2'
+export const INIT_CODE_HASH = '0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
