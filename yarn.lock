@@ -2575,9 +2575,9 @@ domexception@^1.0.1:
   dependencies:
     webidl-conversions "^4.0.2"
 
-"dxswap-core@git://github.com/levelkdev/dxswap-core.git#v0.1.0":
+"dxswap-core@git://github.com/levelkdev/dxswap-core.git#ca021f47415d3f35360e136946fb97cdafb5163e":
   version "0.1.0"
-  resolved "git://github.com/levelkdev/dxswap-core.git#ad6c3885ebbb8d8c9a1a12af09fcbc5f66b9d43d"
+  resolved "git://github.com/levelkdev/dxswap-core.git#ca021f47415d3f35360e136946fb97cdafb5163e"
   dependencies:
     typescript "^3.9.5"
 

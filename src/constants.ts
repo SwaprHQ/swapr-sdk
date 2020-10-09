@@ -42,7 +42,7 @@ export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
 
 export const DXSWAP_TOKEN_LIST_ID = 1
 
-export const INIT_CODE_HASH = '0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0'
+export const INIT_CODE_HASH = '0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
