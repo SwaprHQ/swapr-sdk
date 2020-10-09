@@ -32,6 +32,7 @@
     "toformat": "^2.0.0"
   },
   "peerDependencies": {
+    "@ethersproject/abi": "^5.0.7",
     "@ethersproject/address": "^5.0.0-beta",
     "@ethersproject/contracts": "^5.0.0-beta",
     "@ethersproject/networks": "^5.0.0-beta",
@@ -39,6 +40,7 @@
     "@ethersproject/solidity": "^5.0.0-beta"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.0.7",
     "@ethersproject/address": "^5.0.2",
     "@ethersproject/contracts": "^5.0.2",
     "@ethersproject/networks": "^5.0.2",

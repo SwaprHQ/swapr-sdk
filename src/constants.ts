@@ -34,6 +34,14 @@ export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapFactory'][0].address
 }
 
+// FIXME: what about other networks?
+export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
+  [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
+  [ChainId.RINKEBY]: '0x03165DF66d9448E45c2f5137486af3E7e752a352'
+}
+
+export const DXSWAP_TOKEN_LIST_ID = 1
+
 export const INIT_CODE_HASH = '0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
