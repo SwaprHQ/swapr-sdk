@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import { proxies as kovanProxies } from 'dxswap-core/.openzeppelin/kovan.json'
+import { rinkeby } from 'dxswap-core/.contracts.json'
 import MULTICALL_ABI from './abis/Multicall.json'
 
 // exports for external consumption
@@ -29,12 +29,12 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
   [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000003',
-  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000004',
+  [ChainId.RINKEBY]: rinkeby.factory,
   [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000005',
-  [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapFactory'][0].address
+  [ChainId.KOVAN]: '0x0000000000000000000000000000000000000006'
 }
 
-export const INIT_CODE_HASH = '0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a'
+export const INIT_CODE_HASH = '0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
