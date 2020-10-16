@@ -21,7 +21,7 @@ export declare const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 export declare const FACTORY_ADDRESS: {
     [chainId: number]: string;
 };
-export declare const INIT_CODE_HASH = "0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0";
+export declare const INIT_CODE_HASH = "0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6";
 export declare const MINIMUM_LIQUIDITY: JSBI;
 export declare const ZERO: JSBI;
 export declare const ONE: JSBI;
