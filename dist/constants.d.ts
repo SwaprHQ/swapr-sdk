@@ -1,5 +1,6 @@
 import JSBI from 'jsbi';
-import MULTICALL_ABI from './abis/Multicall.json';
+import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json';
+import TOKEN_REGISTRY_ABI from './abis/token-registry.json';
 export declare type BigintIsh = JSBI | bigint | string;
 export declare enum ChainId {
     MAINNET = 1,
@@ -21,7 +22,11 @@ export declare const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 export declare const FACTORY_ADDRESS: {
     [chainId: number]: string;
 };
-export declare const INIT_CODE_HASH = "0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0";
+export declare const TOKEN_REGISTRY_ADDRESS: {
+    [chainId: number]: string;
+};
+export declare const DXSWAP_TOKEN_LIST_ID = 1;
+export declare const INIT_CODE_HASH = "0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a";
 export declare const MINIMUM_LIQUIDITY: JSBI;
 export declare const ZERO: JSBI;
 export declare const ONE: JSBI;
@@ -43,7 +48,7 @@ export declare const SOLIDITY_TYPE_MAXIMA: {
     uint8: JSBI;
     uint256: JSBI;
 };
-declare const MULTICALL_ADDRESS: {
+declare const PERMISSIVE_MULTICALL_ADDRESS: {
     [chainId: number]: string;
 };
-export { MULTICALL_ABI, MULTICALL_ADDRESS };
+export { PERMISSIVE_MULTICALL_ABI, TOKEN_REGISTRY_ABI, PERMISSIVE_MULTICALL_ADDRESS };
