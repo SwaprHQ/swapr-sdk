@@ -5,7 +5,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var JSBI = _interopDefault(require('jsbi'));
-var kovan_json = require('dxswap-core/.openzeppelin/kovan.json');
+var _contracts_json = require('dxswap-core/.contracts.json');
 var invariant = _interopDefault(require('tiny-invariant'));
 var warning = _interopDefault(require('tiny-warning'));
 var address = require('@ethersproject/address');
@@ -16,8 +16,8 @@ var solidity = require('@ethersproject/solidity');
 var contracts = require('@ethersproject/contracts');
 var networks = require('@ethersproject/networks');
 var providers = require('@ethersproject/providers');
-var IDXswapPair = _interopDefault(require('dxswap-core/build/contracts/IDXswapPair.json'));
-var IDXswapFactory = _interopDefault(require('dxswap-core/build/contracts/IDXswapFactory.json'));
+var IDXswapPair = _interopDefault(require('dxswap-core/build/IDXswapPair.json'));
+var IDXswapFactory = _interopDefault(require('dxswap-core/build/IDXswapFactory.json'));
 var abi = require('@ethersproject/abi');
 
 var PERMISSIVE_MULTICALL_ABI = [
@@ -468,11 +468,11 @@ var _FACTORY_ADDRESS, _TOKEN_REGISTRY_ADDRE, _SOLIDITY_TYPE_MAXIMA, _PERMISSIVE_
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(exports.Rounding || (exports.Rounding = {}));
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0x0000000000000000000000000000000000000003', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = '0x0000000000000000000000000000000000000004', _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '0x0000000000000000000000000000000000000005', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = kovan_json.proxies['dxswap-core/DXswapFactory'][0].address, _FACTORY_ADDRESS); // FIXME: what about other networks?
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0x0000000000000000000000000000000000000003', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = _contracts_json.rinkeby.factory, _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '0x0000000000000000000000000000000000000005', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = '0x0000000000000000000000000000000000000006', _FACTORY_ADDRESS); // FIXME: what about other networks?
 
 var TOKEN_REGISTRY_ADDRESS = (_TOKEN_REGISTRY_ADDRE = {}, _TOKEN_REGISTRY_ADDRE[exports.ChainId.MAINNET] = '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8', _TOKEN_REGISTRY_ADDRE[exports.ChainId.RINKEBY] = '0x03165DF66d9448E45c2f5137486af3E7e752a352', _TOKEN_REGISTRY_ADDRE);
 var DXSWAP_TOKEN_LIST_ID = 5;
-var INIT_CODE_HASH = '0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a';
+var INIT_CODE_HASH = '0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
