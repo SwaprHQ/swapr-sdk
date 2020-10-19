@@ -25,7 +25,7 @@ export declare const FACTORY_ADDRESS: {
 export declare const TOKEN_REGISTRY_ADDRESS: {
     [chainId: number]: string;
 };
-export declare const DXSWAP_TOKEN_LIST_ID = 1;
+export declare const DXSWAP_TOKEN_LIST_ID = 5;
 export declare const INIT_CODE_HASH = "0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a";
 export declare const MINIMUM_LIQUIDITY: JSBI;
 export declare const ZERO: JSBI;

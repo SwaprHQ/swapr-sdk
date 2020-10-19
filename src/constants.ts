@@ -41,7 +41,7 @@ export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.RINKEBY]: '0x03165DF66d9448E45c2f5137486af3E7e752a352'
 }
 
-export const DXSWAP_TOKEN_LIST_ID = 1
+export const DXSWAP_TOKEN_LIST_ID = 5
 
 export const INIT_CODE_HASH = '0x4e9705def664ab284f8d926dd36c91628cc804185ca7ea83ac2c65d79f51524a'
 
