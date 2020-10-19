@@ -15,7 +15,7 @@ describe('constants', () => {
   })
   describe('FACTORY_ADDRESS', () => {
     it('matches computed bytecode hash', () => {
-      expect(FACTORY_ADDRESS[ChainId.RINKEBY]).toEqual('0xc590D61Bf56B8E33D5E3563a4C37af748FEa2CA4')
+      expect(FACTORY_ADDRESS[ChainId.RINKEBY]).toEqual('0x01DBa8425F7d8A5E999d2271b40eb869afcee6d4')
     })
   })
 })
