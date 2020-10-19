@@ -374,11 +374,9 @@ export abstract class Fetcher {
           address: token.address,
           name: token.name!,
           decimals: token.decimals,
-          symbol: token.symbol!,
-          logoURI: ''
+          symbol: token.symbol!
         })
-      ),
-      logoURI: ''
+      )
     }
   }
 }

@@ -812,7 +812,7 @@ function Currency(decimals, symbol, name) {
 Currency.ETHER = /*#__PURE__*/new Currency(18, 'ETH', 'Ether');
 var ETHER = Currency.ETHER;
 
-var _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS;
+var _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS, _ZEENUS;
 /**
  * Represents an ERC20 token with a unique address and some metadata.
  */
@@ -876,11 +876,12 @@ function currencyEquals(currencyA, currencyB) {
   }
 }
 var WETH = (_WETH = {}, _WETH[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.ROPSTEN] = /*#__PURE__*/new Token(ChainId.ROPSTEN, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.GÖRLI] = /*#__PURE__*/new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'), _WETH[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'), _WETH);
-var DXD = (_DXD = {}, _DXD[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD);
+var DXD = (_DXD = {}, _DXD[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXDao'), _DXD);
 var TEST_TOKENS = {
-  WEENUS: (_WEENUS = {}, _WEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
-  XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
-  YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.KOVAN] = /*#__PURE__*/new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
+  WEENUS: (_WEENUS = {}, _WEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
+  XEENUS: (_XEENUS = {}, _XEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
+  YEENUS: (_YEENUS = {}, _YEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS),
+  ZEENUS: (_ZEENUS = {}, _ZEENUS[ChainId.MAINNET] = /*#__PURE__*/new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'ZEENUS', 'Zeenus'), _ZEENUS[ChainId.RINKEBY] = /*#__PURE__*/new Token(ChainId.RINKEBY, '0x1f9061B953bBa0E36BF50F21876132DcF276fC6e', 8, 'ZEENUS', 'Zeenus'), _ZEENUS)
 };
 
 var _toSignificantRoundin, _toFixedRounding;

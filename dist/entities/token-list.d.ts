@@ -4,15 +4,8 @@ export interface TokenInfo {
     readonly name: string;
     readonly decimals: number;
     readonly symbol: string;
-    readonly logoURI?: string;
-}
-export interface Version {
-    readonly major: number;
-    readonly minor: number;
-    readonly patch: number;
 }
 export interface TokenList {
     readonly name: string;
     readonly tokens: TokenInfo[];
-    readonly logoURI?: string;
 }
