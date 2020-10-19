@@ -13,14 +13,15 @@ import {
   ChainId,
   BigintIsh,
   FACTORY_ADDRESS,
-  MULTICALL_ADDRESS,
-  MULTICALL_ABI,
+  PERMISSIVE_MULTICALL_ADDRESS,
+  PERMISSIVE_MULTICALL_ABI,
   TOKEN_REGISTRY_ADDRESS,
   DXSWAP_TOKEN_LIST_ID
 } from './constants'
 import { Token } from './entities/token'
 import { Currency } from './entities/currency'
 import { Interface } from '@ethersproject/abi'
+import { TokenList, TokenInfo } from 'entities/token-list'
 
 const TOKEN_DATA_CACHE: {
   [chainId: number]: { [address: string]: Currency }
@@ -54,7 +55,7 @@ export abstract class Fetcher {
     if (TOKEN_DATA_CACHE?.[chainId]?.[address]) {
       tokenData = TOKEN_DATA_CACHE[chainId][address]
     } else {
-      const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
+      const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
       const erc20Interface = new Contract(address, ERC20Abi, provider).interface
       const symbolFunction = erc20Interface.getFunction('symbol()')
       const nameFunction = erc20Interface.getFunction('name()')
@@ -117,7 +118,7 @@ export abstract class Fetcher {
       const getSymbolFunction = erc20Interface.getFunction('symbol()')
       const getNameFunction = erc20Interface.getFunction('name()')
       const getDecimalsFunction = erc20Interface.getFunction('decimals()')
-      const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
+      const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
       const aggregatedCalls = missingTokens.reduce<[string, string][]>(
         (
           accumulator: [string, string][],
@@ -132,18 +133,27 @@ export abstract class Fetcher {
         },
         []
       )
-      const result = await multicall.aggregate(aggregatedCalls)
+      const result = await multicall.aggregateWithPermissiveness(aggregatedCalls)
+      const returnData = result[1]
       missingTokens.forEach((address: string, index: number) => {
-        const tokenDataFromAggregatedCall = result.returnData.slice(index * 3, index * 3 + 3)
-        tokenData.push(
-          new Token(
-            chainId,
-            address,
-            erc20Interface.decodeFunctionResult(getDecimalsFunction, tokenDataFromAggregatedCall[2])[0],
-            erc20Interface.decodeFunctionResult(getSymbolFunction, tokenDataFromAggregatedCall[0])[0],
-            erc20Interface.decodeFunctionResult(getNameFunction, tokenDataFromAggregatedCall[1])[0]
+        const [wrappedSymbol, wrappedName, wrappedDecimals] = returnData.slice(index * 3, index * 3 + 3)
+        if (!wrappedSymbol.success || !wrappedName.success || !wrappedDecimals.success) {
+          console.warn(`could not fetch ERC20 data for address ${address}`)
+          return
+        }
+        try {
+          tokenData.push(
+            new Token(
+              chainId,
+              address,
+              erc20Interface.decodeFunctionResult(getDecimalsFunction, wrappedDecimals.data)[0],
+              erc20Interface.decodeFunctionResult(getSymbolFunction, wrappedSymbol.data)[0],
+              erc20Interface.decodeFunctionResult(getNameFunction, wrappedName.data)[0]
+            )
           )
-        )
+        } catch (error) {
+          console.error(`error decoding ERC20 data for address ${address}`)
+        }
       })
     }
     return tokenData
@@ -219,7 +229,11 @@ export abstract class Fetcher {
       owner: string
     }[]
   > {
-    const multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider)
+    const multicall = new Contract(
+      PERMISSIVE_MULTICALL_ADDRESS[liquidityTokens[0].chainId],
+      PERMISSIVE_MULTICALL_ABI,
+      provider
+    )
     const factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider)
     const liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider)
     let calls = []
@@ -276,7 +290,7 @@ export abstract class Fetcher {
       owner: string
     }
   }> {
-    const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
+    const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)
     const allPairsLength = await factoryContract.allPairsLength()
     let allSwapPairs: {
@@ -348,12 +362,23 @@ export abstract class Fetcher {
   public static async fetchDxDaoTokenList(
     chainId: ChainId,
     provider = getDefaultProvider(getNetwork(chainId))
-  ): Promise<Token[]> {
+  ): Promise<TokenList> {
     const tokenRegistryContract = new Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider)
     const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID)
-    if (tokenAddresses.length === 0) {
-      return []
+    const tokens = await this.fetchMultipleTokensData(chainId, tokenAddresses)
+    return {
+      name: 'DXswap default token list',
+      tokens: tokens.map(
+        (token: Token): TokenInfo => ({
+          chainId,
+          address: token.address,
+          name: token.name!,
+          decimals: token.decimals,
+          symbol: token.symbol!,
+          logoURI: ''
+        })
+      ),
+      logoURI: ''
     }
-    return this.fetchMultipleTokensData(chainId, tokenAddresses.slice(0, 15))
   }
 }

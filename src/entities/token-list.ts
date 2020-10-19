@@ -5,7 +5,6 @@ export interface TokenInfo {
   readonly decimals: number
   readonly symbol: string
   readonly logoURI?: string
-  readonly tags?: string[]
 }
 
 export interface Version {
@@ -16,9 +15,6 @@ export interface Version {
 
 export interface TokenList {
   readonly name: string
-  readonly timestamp: string
-  readonly version: Version
   readonly tokens: TokenInfo[]
-  readonly keywords?: string[]
   readonly logoURI?: string
 }
