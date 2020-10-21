@@ -5,7 +5,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var JSBI = _interopDefault(require('jsbi'));
-var kovan_json = require('dxswap-core/.openzeppelin/kovan.json');
+var _contracts_json = require('dxswap-core/.contracts.json');
 var invariant = _interopDefault(require('tiny-invariant'));
 var warning = _interopDefault(require('tiny-warning'));
 var address = require('@ethersproject/address');
@@ -16,39 +16,27 @@ var solidity = require('@ethersproject/solidity');
 var contracts = require('@ethersproject/contracts');
 var networks = require('@ethersproject/networks');
 var providers = require('@ethersproject/providers');
-var IDXswapPair = _interopDefault(require('dxswap-core/build/contracts/IDXswapPair.json'));
-var IDXswapFactory = _interopDefault(require('dxswap-core/build/contracts/IDXswapFactory.json'));
+var IDXswapPair = _interopDefault(require('dxswap-core/build/IDXswapPair.json'));
+var IDXswapFactory = _interopDefault(require('dxswap-core/build/IDXswapFactory.json'));
+var abi = require('@ethersproject/abi');
 
-var MULTICALL_ABI = [
+var PERMISSIVE_MULTICALL_ABI = [
 	{
-		constant: true,
-		inputs: [
-		],
-		name: "getCurrentBlockTimestamp",
-		outputs: [
-			{
-				name: "timestamp",
-				type: "uint256"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
 		inputs: [
 			{
 				components: [
 					{
+						internalType: "address",
 						name: "target",
 						type: "address"
 					},
 					{
+						internalType: "bytes",
 						name: "callData",
 						type: "bytes"
 					}
 				],
+				internalType: "struct PermissiveMulticall.Call[]",
 				name: "calls",
 				type: "tuple[]"
 			}
@@ -56,119 +44,411 @@ var MULTICALL_ABI = [
 		name: "aggregate",
 		outputs: [
 			{
+				internalType: "uint256",
 				name: "blockNumber",
 				type: "uint256"
 			},
 			{
+				internalType: "bytes[]",
 				name: "returnData",
 				type: "bytes[]"
 			}
 		],
-		payable: false,
 		stateMutability: "view",
 		type: "function"
 	},
 	{
-		constant: true,
 		inputs: [
+			{
+				components: [
+					{
+						internalType: "address",
+						name: "target",
+						type: "address"
+					},
+					{
+						internalType: "bytes",
+						name: "callData",
+						type: "bytes"
+					}
+				],
+				internalType: "struct PermissiveMulticall.Call[]",
+				name: "calls",
+				type: "tuple[]"
+			}
 		],
-		name: "getLastBlockHash",
+		name: "aggregateWithPermissiveness",
 		outputs: [
 			{
-				name: "blockHash",
-				type: "bytes32"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-			{
-				name: "addr",
-				type: "address"
-			}
-		],
-		name: "getEthBalance",
-		outputs: [
-			{
-				name: "balance",
-				type: "uint256"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-		],
-		name: "getCurrentBlockDifficulty",
-		outputs: [
-			{
-				name: "difficulty",
-				type: "uint256"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-		],
-		name: "getCurrentBlockGasLimit",
-		outputs: [
-			{
-				name: "gaslimit",
-				type: "uint256"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-		],
-		name: "getCurrentBlockCoinbase",
-		outputs: [
-			{
-				name: "coinbase",
-				type: "address"
-			}
-		],
-		payable: false,
-		stateMutability: "view",
-		type: "function"
-	},
-	{
-		constant: true,
-		inputs: [
-			{
+				internalType: "uint256",
 				name: "blockNumber",
 				type: "uint256"
-			}
-		],
-		name: "getBlockHash",
-		outputs: [
+			},
 			{
-				name: "blockHash",
-				type: "bytes32"
+				components: [
+					{
+						internalType: "bool",
+						name: "success",
+						type: "bool"
+					},
+					{
+						internalType: "bytes",
+						name: "data",
+						type: "bytes"
+					}
+				],
+				internalType: "struct PermissiveMulticall.CallOutcome[]",
+				name: "callOutcomes",
+				type: "tuple[]"
 			}
 		],
-		payable: false,
 		stateMutability: "view",
 		type: "function"
 	}
 ];
 
-var _FACTORY_ADDRESS, _SOLIDITY_TYPE_MAXIMA, _MULTICALL_ADDRESS;
+var TokenRegistryAbi = [
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "listId",
+				type: "uint256"
+			},
+			{
+				indexed: false,
+				internalType: "string",
+				name: "listName",
+				type: "string"
+			}
+		],
+		name: "AddList",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "listId",
+				type: "uint256"
+			},
+			{
+				indexed: false,
+				internalType: "address",
+				name: "token",
+				type: "address"
+			}
+		],
+		name: "AddToken",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: "address",
+				name: "previousOwner",
+				type: "address"
+			},
+			{
+				indexed: true,
+				internalType: "address",
+				name: "newOwner",
+				type: "address"
+			}
+		],
+		name: "OwnershipTransferred",
+		type: "event"
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: false,
+				internalType: "uint256",
+				name: "listId",
+				type: "uint256"
+			},
+			{
+				indexed: false,
+				internalType: "address",
+				name: "token",
+				type: "address"
+			}
+		],
+		name: "RemoveToken",
+		type: "event"
+	},
+	{
+		inputs: [
+			{
+				internalType: "string",
+				name: "_listName",
+				type: "string"
+			}
+		],
+		name: "addList",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "_listId",
+				type: "uint256"
+			},
+			{
+				internalType: "address[]",
+				name: "_tokens",
+				type: "address[]"
+			}
+		],
+		name: "addTokens",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "_trader",
+				type: "address"
+			},
+			{
+				internalType: "address[]",
+				name: "_assetAddresses",
+				type: "address[]"
+			}
+		],
+		name: "getExternalBalances",
+		outputs: [
+			{
+				internalType: "uint256[]",
+				name: "",
+				type: "uint256[]"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "_listId",
+				type: "uint256"
+			}
+		],
+		name: "getTokens",
+		outputs: [
+			{
+				internalType: "address[]",
+				name: "",
+				type: "address[]"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address[]",
+				name: "_tokens",
+				type: "address[]"
+			}
+		],
+		name: "getTokensData",
+		outputs: [
+			{
+				internalType: "string[]",
+				name: "names",
+				type: "string[]"
+			},
+			{
+				internalType: "string[]",
+				name: "symbols",
+				type: "string[]"
+			},
+			{
+				internalType: "uint256[]",
+				name: "decimals",
+				type: "uint256[]"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "_listId",
+				type: "uint256"
+			},
+			{
+				internalType: "uint256",
+				name: "_start",
+				type: "uint256"
+			},
+			{
+				internalType: "uint256",
+				name: "_end",
+				type: "uint256"
+			}
+		],
+		name: "getTokensRange",
+		outputs: [
+			{
+				internalType: "address[]",
+				name: "tokensRange",
+				type: "address[]"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "_listId",
+				type: "uint256"
+			},
+			{
+				internalType: "address",
+				name: "_token",
+				type: "address"
+			}
+		],
+		name: "isTokenActive",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "",
+				type: "bool"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "listCount",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "owner",
+		outputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "_listId",
+				type: "uint256"
+			},
+			{
+				internalType: "address[]",
+				name: "_tokens",
+				type: "address[]"
+			}
+		],
+		name: "removeTokens",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+		],
+		name: "renounceOwnership",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256"
+			}
+		],
+		name: "tcrs",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "listId",
+				type: "uint256"
+			},
+			{
+				internalType: "string",
+				name: "listName",
+				type: "string"
+			},
+			{
+				internalType: "uint256",
+				name: "activeTokenCount",
+				type: "uint256"
+			}
+		],
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "newOwner",
+				type: "address"
+			}
+		],
+		name: "transferOwnership",
+		outputs: [
+		],
+		stateMutability: "nonpayable",
+		type: "function"
+	}
+];
+
+var _FACTORY_ADDRESS, _TOKEN_REGISTRY_ADDRE, _DXSWAP_TOKEN_LIST_ID, _SOLIDITY_TYPE_MAXIMA, _PERMISSIVE_MULTICALL;
 
 (function (ChainId) {
   ChainId[ChainId["MAINNET"] = 1] = "MAINNET";
@@ -188,8 +468,12 @@ var _FACTORY_ADDRESS, _SOLIDITY_TYPE_MAXIMA, _MULTICALL_ADDRESS;
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(exports.Rounding || (exports.Rounding = {}));
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0x0000000000000000000000000000000000000003', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = '0x0000000000000000000000000000000000000004', _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '0x0000000000000000000000000000000000000005', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = kovan_json.proxies['dxswap-core/DXswapFactory'][0].address, _FACTORY_ADDRESS);
-var INIT_CODE_HASH = '0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0';
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0x0000000000000000000000000000000000000003', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = _contracts_json.rinkeby.factory, _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '0x0000000000000000000000000000000000000005', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = '0x0000000000000000000000000000000000000006', _FACTORY_ADDRESS); // FIXME: what about other networks?
+
+var TOKEN_REGISTRY_ADDRESS = (_TOKEN_REGISTRY_ADDRE = {}, _TOKEN_REGISTRY_ADDRE[exports.ChainId.MAINNET] = '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8', _TOKEN_REGISTRY_ADDRE[exports.ChainId.RINKEBY] = '0x03165DF66d9448E45c2f5137486af3E7e752a352', _TOKEN_REGISTRY_ADDRE); // FIXME: what about other networks?
+
+var DXSWAP_TOKEN_LIST_ID = (_DXSWAP_TOKEN_LIST_ID = {}, _DXSWAP_TOKEN_LIST_ID[exports.ChainId.MAINNET] = 5, _DXSWAP_TOKEN_LIST_ID[exports.ChainId.RINKEBY] = 5, _DXSWAP_TOKEN_LIST_ID);
+var INIT_CODE_HASH = '0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -210,8 +494,9 @@ var SolidityType;
   SolidityType["uint256"] = "uint256";
 })(SolidityType || (SolidityType = {}));
 
-var SOLIDITY_TYPE_MAXIMA = (_SOLIDITY_TYPE_MAXIMA = {}, _SOLIDITY_TYPE_MAXIMA[SolidityType.uint8] = /*#__PURE__*/JSBI.BigInt('0xff'), _SOLIDITY_TYPE_MAXIMA[SolidityType.uint256] = /*#__PURE__*/JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'), _SOLIDITY_TYPE_MAXIMA);
-var MULTICALL_ADDRESS = (_MULTICALL_ADDRESS = {}, _MULTICALL_ADDRESS[exports.ChainId.MAINNET] = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441', _MULTICALL_ADDRESS[exports.ChainId.ROPSTEN] = '0x53C43764255c17BD724F74c4eF150724AC50a3ed', _MULTICALL_ADDRESS[exports.ChainId.KOVAN] = '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A', _MULTICALL_ADDRESS[exports.ChainId.RINKEBY] = '0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821', _MULTICALL_ADDRESS[exports.ChainId.GÖRLI] = '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e', _MULTICALL_ADDRESS);
+var SOLIDITY_TYPE_MAXIMA = (_SOLIDITY_TYPE_MAXIMA = {}, _SOLIDITY_TYPE_MAXIMA[SolidityType.uint8] = /*#__PURE__*/JSBI.BigInt('0xff'), _SOLIDITY_TYPE_MAXIMA[SolidityType.uint256] = /*#__PURE__*/JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'), _SOLIDITY_TYPE_MAXIMA); // TODO: add other networks' addresses
+
+var PERMISSIVE_MULTICALL_ADDRESS = (_PERMISSIVE_MULTICALL = {}, _PERMISSIVE_MULTICALL[exports.ChainId.MAINNET] = '0x0946f567d0ed891e6566c1da8e5093517f43571d', _PERMISSIVE_MULTICALL[exports.ChainId.RINKEBY] = '0x798d8ced4dff8f054a5153762187e84751a73344', _PERMISSIVE_MULTICALL);
 
 function validateSolidityTypeInstance(value, solidityType) {
   !JSBI.greaterThanOrEqual(value, ZERO) ?  invariant(false, value + " is not a " + solidityType + ".")  : void 0;
@@ -528,7 +813,7 @@ function Currency(decimals, symbol, name) {
 Currency.ETHER = /*#__PURE__*/new Currency(18, 'ETH', 'Ether');
 var ETHER = Currency.ETHER;
 
-var _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS;
+var _WETH, _DXD, _WEENUS, _XEENUS, _YEENUS, _ZEENUS;
 /**
  * Represents an ERC20 token with a unique address and some metadata.
  */
@@ -592,11 +877,12 @@ function currencyEquals(currencyA, currencyB) {
   }
 }
 var WETH = (_WETH = {}, _WETH[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH', 'Wrapped Ether'), _WETH[exports.ChainId.ROPSTEN] = /*#__PURE__*/new Token(exports.ChainId.ROPSTEN, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0xc778417E063141139Fce010982780140Aa0cD5Ab', 18, 'WETH', 'Wrapped Ether'), _WETH[exports.ChainId.GÖRLI] = /*#__PURE__*/new Token(exports.ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'), _WETH[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'), _WETH);
-var DXD = (_DXD = {}, _DXD[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXDao'), _DXD[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao'), _DXD);
+var DXD = (_DXD = {}, _DXD[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'), _DXD[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXdao'), _DXD[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'), _DXD);
 var TEST_TOKENS = {
-  WEENUS: (_WEENUS = {}, _WEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'), _WEENUS[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus'), _WEENUS),
-  XEENUS: (_XEENUS = {}, _XEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'), _XEENUS[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus'), _XEENUS),
-  YEENUS: (_YEENUS = {}, _YEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'), _YEENUS[exports.ChainId.KOVAN] = /*#__PURE__*/new Token(exports.ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus'), _YEENUS)
+  WEENUS: (_WEENUS = {}, _WEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus 💪'), _WEENUS[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus 💪'), _WEENUS),
+  XEENUS: (_XEENUS = {}, _XEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus 💪'), _XEENUS[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus 💪'), _XEENUS),
+  YEENUS: (_YEENUS = {}, _YEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus 💪'), _YEENUS[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus 💪'), _YEENUS),
+  ZEENUS: (_ZEENUS = {}, _ZEENUS[exports.ChainId.MAINNET] = /*#__PURE__*/new Token(exports.ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'ZEENUS', 'Zeenus 💪'), _ZEENUS[exports.ChainId.RINKEBY] = /*#__PURE__*/new Token(exports.ChainId.RINKEBY, '0x1f9061B953bBa0E36BF50F21876132DcF276fC6e', 8, 'ZEENUS', 'Zeenus 💪'), _ZEENUS)
 };
 
 var _toSignificantRoundin, _toFixedRounding;
@@ -1556,14 +1842,14 @@ var Router = /*#__PURE__*/function () {
     var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
 
     !!(etherIn && etherOut) ?  invariant(false, 'ETHER_IN_OUT')  : void 0;
-    !(options.ttl > 0) ?  invariant(false, 'TTL')  : void 0;
+    !(!('ttl' in options) || options.ttl > 0) ?  invariant(false, 'TTL')  : void 0;
     var to = validateAndParseAddress(options.recipient);
     var amountIn = toHex(trade.maximumAmountIn(options.allowedSlippage));
     var amountOut = toHex(trade.minimumAmountOut(options.allowedSlippage));
     var path = trade.route.path.map(function (token) {
       return token.address;
     });
-    var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
+    var deadline = 'ttl' in options ? "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16) : "0x" + options.deadline.toString(16);
     var useFeeOnTransfer = Boolean(options.feeOnTransfer);
     var methodName;
     var args;
@@ -1623,7 +1909,7 @@ var Router = /*#__PURE__*/function () {
   return Router;
 }();
 
-var ERC20 = [
+var ERC20Abi = [
 	{
 		constant: true,
 		inputs: [
@@ -1633,6 +1919,36 @@ var ERC20 = [
 			{
 				name: "",
 				type: "uint8"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "symbol",
+		outputs: [
+			{
+				name: "",
+				type: "string"
+			}
+		],
+		payable: false,
+		stateMutability: "view",
+		type: "function"
+	},
+	{
+		constant: true,
+		inputs: [
+		],
+		name: "name",
+		outputs: [
+			{
+				name: "",
+				type: "string"
 			}
 		],
 		payable: false,
@@ -1660,11 +1976,15 @@ var ERC20 = [
 	}
 ];
 
-var _TOKEN_DECIMALS_CACHE;
-var TOKEN_DECIMALS_CACHE = (_TOKEN_DECIMALS_CACHE = {}, _TOKEN_DECIMALS_CACHE[exports.ChainId.MAINNET] = {
-  '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': 9 // DGD
+var _TOKEN_DATA_CACHE;
+var TOKEN_DATA_CACHE = (_TOKEN_DATA_CACHE = {}, _TOKEN_DATA_CACHE[exports.ChainId.MAINNET] = {
+  '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': {
+    decimals: 9,
+    symbol: 'DGD',
+    name: 'DigixDAO'
+  } // DGD
 
-}, _TOKEN_DECIMALS_CACHE);
+}, _TOKEN_DATA_CACHE);
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
  */
@@ -1679,29 +1999,117 @@ var Fetcher = /*#__PURE__*/function () {
    * @param chainId chain of the token
    * @param address address of the token on the chain
    * @param provider provider used to fetch the token
-   * @param symbol optional symbol of the token
-   * @param name optional name of the token
    */
 
 
-  Fetcher.fetchTokenData = function fetchTokenData(chainId, address, provider, symbol, name) {
+  Fetcher.fetchTokenData = function fetchTokenData(chainId, address, provider) {
     try {
-      var _TOKEN_DECIMALS_CACHE2, _TOKEN_DECIMALS_CACHE3;
-
-      var _temp3 = function _temp3(parsedDecimals) {
-        return new Token(chainId, address, parsedDecimals, symbol, name);
+      var _temp3 = function _temp3() {
+        return new Token(chainId, address, tokenData.decimals, tokenData.symbol, tokenData.name);
       };
 
       if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(chainId));
+      var tokenData;
 
-      var _temp4 = typeof ((_TOKEN_DECIMALS_CACHE2 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE2 === void 0 ? void 0 : (_TOKEN_DECIMALS_CACHE3 = _TOKEN_DECIMALS_CACHE2[chainId]) === null || _TOKEN_DECIMALS_CACHE3 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE3[address]) === 'number';
+      var _temp4 = function () {
+        var _TOKEN_DATA_CACHE$cha;
 
-      return Promise.resolve(_temp4 ? _temp3(TOKEN_DECIMALS_CACHE[chainId][address]) : Promise.resolve(new contracts.Contract(address, ERC20, provider).decimals().then(function (decimals) {
-        var _TOKEN_DECIMALS_CACHE4, _extends2, _extends3;
+        if (TOKEN_DATA_CACHE === null || TOKEN_DATA_CACHE === void 0 ? void 0 : (_TOKEN_DATA_CACHE$cha = TOKEN_DATA_CACHE[chainId]) === null || _TOKEN_DATA_CACHE$cha === void 0 ? void 0 : _TOKEN_DATA_CACHE$cha[address]) {
+          tokenData = TOKEN_DATA_CACHE[chainId][address];
+        } else {
+          var multicall = new contracts.Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider);
+          var erc20Interface = new contracts.Contract(address, ERC20Abi, provider)["interface"];
+          var symbolFunction = erc20Interface.getFunction('symbol()');
+          var nameFunction = erc20Interface.getFunction('name()');
+          var decimalsFunction = erc20Interface.getFunction('decimals()');
+          return Promise.resolve(multicall.aggregate([[address, erc20Interface.encodeFunctionData(symbolFunction)], [address, erc20Interface.encodeFunctionData(nameFunction)], [address, erc20Interface.encodeFunctionData(decimalsFunction)]])).then(function (result) {
+            tokenData = {
+              symbol: erc20Interface.decodeFunctionResult(symbolFunction, result.returnData[0])[0],
+              name: erc20Interface.decodeFunctionResult(nameFunction, result.returnData[1])[0],
+              decimals: erc20Interface.decodeFunctionResult(decimalsFunction, result.returnData[2])[0]
+            };
+            TOKEN_DATA_CACHE[chainId][address] = tokenData;
+          });
+        }
+      }();
 
-        TOKEN_DECIMALS_CACHE = _extends({}, TOKEN_DECIMALS_CACHE, (_extends3 = {}, _extends3[chainId] = _extends({}, (_TOKEN_DECIMALS_CACHE4 = TOKEN_DECIMALS_CACHE) === null || _TOKEN_DECIMALS_CACHE4 === void 0 ? void 0 : _TOKEN_DECIMALS_CACHE4[chainId], (_extends2 = {}, _extends2[address] = decimals, _extends2)), _extends3));
-        return decimals;
-      })).then(_temp3));
+      return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetch on-chain, information on multiple given ERC20 token addresses, using the given ethers provider
+   * (or a default one if not provided). The results are cached for efficient subsequent accesses.
+   * @param chainId chain of the token
+   * @param addresses addresses of the tokens for which the data is needed
+   * @param provider provider used to fetch the token
+   */
+  ;
+
+  Fetcher.fetchMultipleTokensData = function fetchMultipleTokensData(chainId, addresses, provider) {
+    try {
+      if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(chainId));
+
+      var _addresses$reduce = addresses.reduce(function (accumulator, address, _currentIndex, _array) {
+        var _TOKEN_DATA_CACHE$cha2;
+
+        if (TOKEN_DATA_CACHE === null || TOKEN_DATA_CACHE === void 0 ? void 0 : (_TOKEN_DATA_CACHE$cha2 = TOKEN_DATA_CACHE[chainId]) === null || _TOKEN_DATA_CACHE$cha2 === void 0 ? void 0 : _TOKEN_DATA_CACHE$cha2[address]) {
+          var cachedToken = TOKEN_DATA_CACHE[chainId][address];
+          accumulator.previouslyCachedTokens.push(new Token(chainId, address, cachedToken.decimals, cachedToken.symbol, cachedToken.name));
+        } else {
+          accumulator.missingTokens.push(address);
+        }
+
+        return accumulator;
+      }, {
+        previouslyCachedTokens: [],
+        missingTokens: []
+      }),
+          previouslyCachedTokens = _addresses$reduce.previouslyCachedTokens,
+          missingTokens = _addresses$reduce.missingTokens;
+
+      var tokenData = previouslyCachedTokens;
+
+      var _temp6 = function () {
+        if (missingTokens.length > 0) {
+          var erc20Interface = new abi.Interface(ERC20Abi);
+          var getSymbolFunction = erc20Interface.getFunction('symbol()');
+          var getNameFunction = erc20Interface.getFunction('name()');
+          var getDecimalsFunction = erc20Interface.getFunction('decimals()');
+          var multicall = new contracts.Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider);
+          var aggregatedCalls = missingTokens.reduce(function (accumulator, address, _currentIndex, _array) {
+            accumulator.push([address, erc20Interface.encodeFunctionData(getSymbolFunction)]);
+            accumulator.push([address, erc20Interface.encodeFunctionData(getNameFunction)]);
+            accumulator.push([address, erc20Interface.encodeFunctionData(getDecimalsFunction)]);
+            return accumulator;
+          }, []);
+          return Promise.resolve(multicall.aggregateWithPermissiveness(aggregatedCalls)).then(function (result) {
+            var returnData = result[1];
+            missingTokens.forEach(function (address, index) {
+              var _returnData$slice = returnData.slice(index * 3, index * 3 + 3),
+                  wrappedSymbol = _returnData$slice[0],
+                  wrappedName = _returnData$slice[1],
+                  wrappedDecimals = _returnData$slice[2];
+
+              if (!wrappedSymbol.success || !wrappedName.success || !wrappedDecimals.success) {
+                console.warn("could not fetch ERC20 data for address " + address);
+                return;
+              }
+
+              try {
+                tokenData.push(new Token(chainId, address, erc20Interface.decodeFunctionResult(getDecimalsFunction, wrappedDecimals.data)[0], erc20Interface.decodeFunctionResult(getSymbolFunction, wrappedSymbol.data)[0], erc20Interface.decodeFunctionResult(getNameFunction, wrappedName.data)[0]));
+              } catch (error) {
+                console.error("error decoding ERC20 data for address " + address);
+              }
+            });
+          });
+        }
+      }();
+
+      return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function () {
+        return tokenData;
+      }) : tokenData);
     } catch (e) {
       return Promise.reject(e);
     }
@@ -1779,7 +2187,7 @@ var Fetcher = /*#__PURE__*/function () {
   Fetcher.fetchSwapFees = function fetchSwapFees(liquidityTokens, provider) {
     try {
       if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(liquidityTokens[0].chainId));
-      var multicall = new contracts.Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider);
+      var multicall = new contracts.Contract(PERMISSIVE_MULTICALL_ADDRESS[liquidityTokens[0].chainId], PERMISSIVE_MULTICALL_ABI, provider);
       var factoryContract = new contracts.Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider);
       var liquidityTokenContract = new contracts.Contract(liquidityTokens[0].address, IDXswapPair.abi, provider);
       var calls = [];
@@ -1831,7 +2239,7 @@ var Fetcher = /*#__PURE__*/function () {
       var _this2 = this;
 
       if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(chainId));
-      var multicall = new contracts.Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider);
+      var multicall = new contracts.Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider);
       var factoryContract = new contracts.Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider);
       return Promise.resolve(factoryContract.allPairsLength()).then(function (allPairsLength) {
         var allSwapPairs = {}; // Get first token pairs from cache
@@ -1896,6 +2304,39 @@ var Fetcher = /*#__PURE__*/function () {
               feeReceiver: feeReceiver
             };
           });
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  /**
+   * Fetches the default DXdao token list from the token registry scheme.
+   * @param chainId the chainId of the network to fecth the protocol fee
+   * @param provider the provider to use to fetch the data
+   */
+  ;
+
+  Fetcher.fetchDxDaoTokenList = function fetchDxDaoTokenList(chainId, provider) {
+    try {
+      var _this4 = this;
+
+      if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(chainId));
+      var tokenRegistryContract = new contracts.Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider);
+      return Promise.resolve(tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[chainId])).then(function (tokenAddresses) {
+        return Promise.resolve(_this4.fetchMultipleTokensData(chainId, tokenAddresses)).then(function (tokens) {
+          return {
+            name: 'DXswap default token list',
+            tokens: tokens.map(function (token) {
+              return {
+                chainId: chainId,
+                address: token.address,
+                name: token.name,
+                decimals: token.decimals,
+                symbol: token.symbol
+              };
+            })
+          };
         });
       });
     } catch (e) {

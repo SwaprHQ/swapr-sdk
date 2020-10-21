@@ -1,7 +1,7 @@
 {
   "name": "dxswap-sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "An SDK for building applications on top of DXswap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -25,13 +25,15 @@
     "@makerdao/multicall": "^0.11.0",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
-    "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#v0.1.0",
+    "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#develop",
+    "dxswap-periphery": "git://github.com/levelkdev/dxswap-periphery.git#v0.2.1",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
     "toformat": "^2.0.0"
   },
   "peerDependencies": {
+    "@ethersproject/abi": "^5.0.7",
     "@ethersproject/address": "^5.0.0-beta",
     "@ethersproject/contracts": "^5.0.0-beta",
     "@ethersproject/networks": "^5.0.0-beta",
@@ -39,6 +41,7 @@
     "@ethersproject/solidity": "^5.0.0-beta"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.0.7",
     "@ethersproject/address": "^5.0.2",
     "@ethersproject/contracts": "^5.0.2",
     "@ethersproject/networks": "^5.0.2",
@@ -58,6 +61,6 @@
     "singleQuote": true
   },
   "jest": {
-    "testTimeout": 10000
+    "testTimeout": 20000
   }
 }
