@@ -2,39 +2,39 @@ import { Contract } from '@ethersproject/contracts'
 import { getNetwork } from '@ethersproject/networks'
 import { getDefaultProvider } from '@ethersproject/providers'
 import { TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_ABI, DXSWAP_TOKEN_LIST_ID } from '../src/constants'
-import { ChainId, WETH, Token, Fetcher } from '../src'
+import { ChainId, Fetcher, DXD, TEST_TOKENS } from '../src'
 import { TokenInfo } from '../src/entities/token-list'
 
 // TODO: replace the provider in these tests
-describe.skip('data', () => {
+describe('data', () => {
   it('Token', async () => {
-    const token = await Fetcher.fetchTokenData(ChainId.MAINNET, '0x6B175474E89094C44Da98b954EedeAC495271d0F') // DAI
-    expect(token.decimals).toEqual(18)
+    const token = await Fetcher.fetchTokenData(ChainId.MAINNET, TEST_TOKENS.WEENUS[ChainId.MAINNET].address) // DAI
+    expect(token.decimals).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].decimals)
+    expect(token.symbol).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].symbol)
+    expect(token.name).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].name)
   })
 
   it('Token:multiple', async () => {
     const tokens = await Fetcher.fetchMultipleTokensData(ChainId.MAINNET, [
-      '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
-      '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521' // DXD
+      TEST_TOKENS.WEENUS[ChainId.MAINNET].address,
+      DXD[ChainId.MAINNET].address
     ])
-    const [dai, dxd] = tokens
+    const [weenus, dxd] = tokens
 
-    expect(dai.decimals).toEqual(18)
-    expect(dai.symbol).toEqual('DAI')
-    expect(dai.name).toEqual('Dai Stablecoin')
+    expect(weenus.decimals).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].decimals)
+    expect(weenus.symbol).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].symbol)
+    expect(weenus.name).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].name)
 
-    expect(dxd.decimals).toEqual(18)
-    expect(dxd.symbol).toEqual('DXD')
-    expect(dxd.name).toEqual('DXdao')
+    expect(dxd.decimals).toEqual(DXD[ChainId.MAINNET].decimals)
+    expect(dxd.symbol).toEqual(DXD[ChainId.MAINNET].symbol)
+    expect(dxd.name).toEqual(DXD[ChainId.MAINNET].name)
   })
 
-  it.only('TokenList', async () => {
-    const chainId = ChainId.MAINNET
-    const provider = getDefaultProvider(getNetwork(chainId))
+  it('TokenList', async () => {
+    const provider = getDefaultProvider(getNetwork(ChainId.MAINNET))
     const tokenRegistryContract = new Contract(TOKEN_REGISTRY_ADDRESS[ChainId.MAINNET], TOKEN_REGISTRY_ABI, provider)
-    const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID)
+    const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[ChainId.MAINNET])
     const tokenList = await Fetcher.fetchDxDaoTokenList(ChainId.MAINNET)
-    console.log(tokenList)
     expect(tokenList.name).toBe('DXswap default token list')
     const { tokens } = tokenList
     expect(tokens.length <= tokenAddresses.length).toBe(true)
@@ -47,15 +47,10 @@ describe.skip('data', () => {
   })
 
   it('Token:CACHE', async () => {
-    const token = await Fetcher.fetchTokenData(ChainId.MAINNET, '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A') // DGD
-    expect(token.decimals).toEqual(9)
-    const dxd = await Fetcher.fetchTokenData(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715') // DD
-    expect(dxd.decimals).toEqual(18)
+    const token = await Fetcher.fetchTokenData(ChainId.MAINNET, TEST_TOKENS.WEENUS[ChainId.MAINNET].address)
+    expect(token.decimals).toEqual(TEST_TOKENS.WEENUS[ChainId.MAINNET].decimals)
+    const dxd = await Fetcher.fetchTokenData(ChainId.MAINNET, DXD[ChainId.MAINNET].address)
+    expect(dxd.decimals).toEqual(DXD[ChainId.MAINNET].decimals)
   })
 
-  it('Pair', async () => {
-    const token = new Token(ChainId.RINKEBY, '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735', 18) // DAI
-    const pair = await Fetcher.fetchPairData(WETH[ChainId.RINKEBY], token)
-    expect(pair.liquidityToken.address).toEqual('0x8B22F85d0c844Cf793690F6D9DFE9F11Ddb35449')
-  })
 })
