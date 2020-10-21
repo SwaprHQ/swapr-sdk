@@ -89,23 +89,28 @@ export const DXD: {[key:number]: Token} = {
     '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521',
     18,
     'DXD',
-    'DXDao'
+    'DXdao'
   ),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXDao')
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXdao'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao')
 }
 
 export const TEST_TOKENS: {[key:string]: {[key:number]: Token}} = {
   WEENUS : {
-    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus'),
-    [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus')
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x2823589Ae095D99bD64dEeA80B4690313e2fB519', 18, 'WEENUS', 'Weenus 💪'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0xaFF4481D10270F50f203E0763e2597776068CBc5', 18, 'WEENUS', 'Weenus 💪')
   },
   XEENUS : {
-    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus'),
-    [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus')
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xeEf5E2d8255E973d587217f9509B416b41CA5870', 18, 'XEENUS', 'Xeenus 💪'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c', 18, 'XEENUS', 'Xeenus 💪')
   },
   YEENUS : {
-    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus'),
-    [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus')
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'YEENUS', 'Yeenus 💪'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7', 8, 'YEENUS', 'Yeenus 💪')
+  },
+  ZEENUS : {
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1', 8, 'ZEENUS', 'Zeenus 💪'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x1f9061B953bBa0E36BF50F21876132DcF276fC6e', 8, 'ZEENUS', 'Zeenus 💪')
   },
 }
   

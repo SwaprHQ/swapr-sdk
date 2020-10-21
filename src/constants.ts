@@ -1,6 +1,7 @@
 import JSBI from 'jsbi'
-import { proxies as kovanProxies } from 'dxswap-core/.openzeppelin/kovan.json'
-import MULTICALL_ABI from './abis/Multicall.json'
+import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
+import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
+import { rinkeby } from 'dxswap-core/.contracts.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -29,12 +30,25 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
   [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000003',
-  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000004',
+  [ChainId.RINKEBY]: rinkeby.factory,
   [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000005',
-  [ChainId.KOVAN]: kovanProxies['dxswap-core/DXswapFactory'][0].address
+  [ChainId.KOVAN]: '0x0000000000000000000000000000000000000006'
 }
 
-export const INIT_CODE_HASH = '0xb0684f1b0fba5d87fe556c21dfae31932c0bf63ec050742e69a058b875af50b0'
+// FIXME: what about other networks?
+export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
+  [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
+  [ChainId.RINKEBY]: '0x03165DF66d9448E45c2f5137486af3E7e752a352'
+}
+
+// FIXME: what about other networks?
+export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
+  [ChainId.MAINNET]: 5,
+  // FIXME: is this value right?
+  [ChainId.RINKEBY]: 5,
+}
+
+export const INIT_CODE_HASH = '0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
@@ -63,12 +77,10 @@ export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 }
 
-const MULTICALL_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441',
-  [ChainId.ROPSTEN]: '0x53C43764255c17BD724F74c4eF150724AC50a3ed',
-  [ChainId.KOVAN]: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
-  [ChainId.RINKEBY]: '0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821',
-  [ChainId.GÖRLI]: '0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e'
+// TODO: add other networks' addresses
+const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
+  [ChainId.MAINNET]: '0x0946f567d0ed891e6566c1da8e5093517f43571d',
+  [ChainId.RINKEBY]: '0x798d8ced4dff8f054a5153762187e84751a73344'
 }
 
-export { MULTICALL_ABI, MULTICALL_ADDRESS }
+export { PERMISSIVE_MULTICALL_ABI, TOKEN_REGISTRY_ABI, PERMISSIVE_MULTICALL_ADDRESS }
