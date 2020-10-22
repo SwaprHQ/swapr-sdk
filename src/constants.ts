@@ -38,14 +38,13 @@ export const FACTORY_ADDRESS: { [chainId: number]: string } = {
 // FIXME: what about other networks?
 export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
-  [ChainId.RINKEBY]: '0x03165DF66d9448E45c2f5137486af3E7e752a352'
+  [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253'
 }
 
 // FIXME: what about other networks?
 export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
   [ChainId.MAINNET]: 5,
-  // FIXME: is this value right?
-  [ChainId.RINKEBY]: 5,
+  [ChainId.RINKEBY]: 1,
 }
 
 export const INIT_CODE_HASH = '0x2db943b381c6ef706828ea5e89f480bd449d4d3a2b98e6da97b30d0eb41fb6d6'
