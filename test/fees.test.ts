@@ -1,10 +1,12 @@
 import { ChainId, WETH, Fetcher, TEST_TOKENS, JSBI } from '../src'
 import { ZERO_ADDRESS } from '../src/constants'
+import { rinkeby } from 'dxswap-core/.contracts.json'
+import { getAddress } from '@ethersproject/address'
 
 describe('fees', () => {
   // skip because uses old implementations, update tests with new local deployment
   describe('fetchSwapFee', () => {
-    it('Get WETH-WEENUS rinkeby fee', async () => {
+    it.skip('Get WETH-WEENUS rinkeby fee', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY])
       const WETH_WEENUS_RINKEBY_FEE = await Fetcher.fetchSwapFee(WETH_WEENUS_RINKEBY.liquidityToken)
       expect(WETH_WEENUS_RINKEBY_FEE.fee).toEqual(JSBI.BigInt(10))
@@ -12,7 +14,7 @@ describe('fees', () => {
   })
   
   describe('fetchSwapFees', () => {
-    it('Get WETH-WEENUS rinkeby fee', async () => {
+    it.skip('Get WETH-WEENUS rinkeby fee', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY]
       )
@@ -26,7 +28,7 @@ describe('fees', () => {
   })
   
   describe('fetchAllSwapFees', () => {
-    it('Get all rinkeby fees', async () => {
+    it.skip('Get all rinkeby fees', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY]
       )
@@ -42,7 +44,7 @@ describe('fees', () => {
       expect(fees[WEENUS_XEENUS_RINKEBY.liquidityToken.address].fee).toEqual(JSBI.BigInt(20))
     })
 
-    it('Get rinkeby fees with cache', async () => {
+    it.skip('Get rinkeby fees with cache', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY]
       )
@@ -72,7 +74,7 @@ describe('fees', () => {
     it('Get protocol fee on rinkeby', async () => {
       const protocolFee = await Fetcher.fetchProtocolFee(ChainId.RINKEBY)
       expect(protocolFee.feeDenominator).toEqual(9)
-      expect(protocolFee.feeReceiver).toEqual('0x79f6Df44bED3f15EdED9d154712E98FEF40E1614')
+      expect(protocolFee.feeReceiver).toEqual(getAddress(rinkeby.feeReceiver))
     })
   })
 })
