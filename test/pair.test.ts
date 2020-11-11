@@ -21,7 +21,7 @@ describe('Pair', () => {
   })
   
   describe('#fetchData', () => {
-    it('returns the correct address', async () => {
+    it.skip('returns the correct address', async () => {
       const pairAddress = Pair.getAddress(WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY]);
       const pairData = await Fetcher.fetchPairData(WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY])
       expect(pairData.swapFee).toEqual(JSBI.BigInt(10))
