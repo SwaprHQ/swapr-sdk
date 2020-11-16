@@ -2575,17 +2575,17 @@ domexception@^1.0.1:
   dependencies:
     webidl-conversions "^4.0.2"
 
-"dxswap-core@git://github.com/levelkdev/dxswap-core.git#v0.3.0":
+"dxswap-core@git://github.com/levelkdev/dxswap-core.git#v0.3.1":
   version "0.3.0"
-  resolved "git://github.com/levelkdev/dxswap-core.git#eeefa874239307ca59c96341793560a0f3fa39d4"
+  resolved "git://github.com/levelkdev/dxswap-core.git#ea38ac67256e514eaf3acd0cfc84d7135e59e64e"
   dependencies:
     typescript "^3.9.5"
 
-"dxswap-periphery@git://github.com/levelkdev/dxswap-periphery.git#v0.3.1":
+"dxswap-periphery@git://github.com/levelkdev/dxswap-periphery.git#v0.3.2":
   version "0.3.1"
-  resolved "git://github.com/levelkdev/dxswap-periphery.git#63ddd0435f8d2c7bbffd5d64c0bb8482630dc82f"
+  resolved "git://github.com/levelkdev/dxswap-periphery.git#c02b8d7166c158d39e2ba21bb5db0d6bc3920505"
   dependencies:
-    dxswap-core "git://github.com/levelkdev/dxswap-core.git#v0.3.0"
+    dxswap-core "git://github.com/levelkdev/dxswap-core.git#v0.3.1"
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
