@@ -2351,6 +2351,7 @@ exports.JSBI = JSBI;
 exports.Currency = Currency;
 exports.CurrencyAmount = CurrencyAmount;
 exports.DXD = DXD;
+exports.DXSWAP_TOKEN_LIST_ID = DXSWAP_TOKEN_LIST_ID;
 exports.ETHER = ETHER;
 exports.FACTORY_ADDRESS = FACTORY_ADDRESS;
 exports.Fetcher = Fetcher;

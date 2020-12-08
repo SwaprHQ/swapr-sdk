@@ -2347,5 +2347,5 @@ var Fetcher = /*#__PURE__*/function () {
   return Fetcher;
 }();
 
-export { ChainId, Currency, CurrencyAmount, DXD, ETHER, FACTORY_ADDRESS, Fetcher, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Router, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, currencyEquals, inputOutputComparator, parseBigintIsh, tradeComparator };
+export { ChainId, Currency, CurrencyAmount, DXD, DXSWAP_TOKEN_LIST_ID, ETHER, FACTORY_ADDRESS, Fetcher, Fraction, INIT_CODE_HASH, InsufficientInputAmountError, InsufficientReservesError, MINIMUM_LIQUIDITY, Pair, Percent, Price, Rounding, Route, Router, TEST_TOKENS, Token, TokenAmount, Trade, TradeType, WETH, currencyEquals, inputOutputComparator, parseBigintIsh, tradeComparator };
 //# sourceMappingURL=dxswap-sdk.esm.js.map
