@@ -1,7 +1,7 @@
 {
   "name": "dxswap-sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "An SDK for building applications on top of DXswap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
