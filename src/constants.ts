@@ -29,7 +29,7 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
-  [ChainId.RINKEBY]: rinkeby.factory,
+  [ChainId.RINKEBY]: rinkeby.factory
 }
 
 // FIXME: what about other networks?
@@ -40,8 +40,8 @@ export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
 
 // FIXME: what about other networks?
 export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
-  [ChainId.MAINNET]: 5,
-  [ChainId.RINKEBY]: 1,
+  [ChainId.MAINNET]: 1,
+  [ChainId.RINKEBY]: 1
 }
 
 export const INIT_CODE_HASH = '0xd306a548755b9295ee49cc729e13ca4a45e00199bbd890fa146da43a50571776'
