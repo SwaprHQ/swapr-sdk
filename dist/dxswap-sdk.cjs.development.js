@@ -2324,7 +2324,7 @@ var Fetcher = /*#__PURE__*/function () {
       if (provider === undefined) provider = providers.getDefaultProvider(networks.getNetwork(chainId));
       var tokenRegistryContract = new contracts.Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider);
       return Promise.resolve(tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[chainId])).then(function (tokenAddresses) {
-        return Promise.resolve(_this4.fetchMultipleTokensData(chainId, tokenAddresses)).then(function (tokens) {
+        return Promise.resolve(_this4.fetchMultipleTokensData(chainId, tokenAddresses, provider)).then(function (tokens) {
           return {
             name: 'DXswap default token list',
             tokens: tokens.map(function (token) {
