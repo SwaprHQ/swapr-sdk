@@ -365,7 +365,7 @@ export abstract class Fetcher {
   ): Promise<TokenList> {
     const tokenRegistryContract = new Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider)
     const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[chainId])
-    const tokens = await this.fetchMultipleTokensData(chainId, tokenAddresses)
+    const tokens = await this.fetchMultipleTokensData(chainId, tokenAddresses, provider)
     return {
       name: 'DXswap default token list',
       tokens: tokens.map(
