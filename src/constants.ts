@@ -1,7 +1,7 @@
 import JSBI from 'jsbi'
 import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
-import { rinkeby } from 'dxswap-core/.contracts.json'
+import { rinkeby, mainnet } from 'dxswap-core/.contracts.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -28,7 +28,7 @@ export enum Rounding {
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
+  [ChainId.MAINNET]: mainnet.factory,
   [ChainId.RINKEBY]: rinkeby.factory
 }
 
