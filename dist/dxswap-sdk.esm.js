@@ -1,6 +1,6 @@
 import JSBI from 'jsbi';
 export { default as JSBI } from 'jsbi';
-import { rinkeby } from 'dxswap-core/.contracts.json';
+import { mainnet, rinkeby } from 'dxswap-core/.contracts.json';
 import invariant from 'tiny-invariant';
 import warning from 'tiny-warning';
 import { getAddress, getCreate2Address } from '@ethersproject/address';
@@ -468,7 +468,7 @@ var Rounding;
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[ChainId.RINKEBY] = rinkeby.factory, _FACTORY_ADDRESS); // FIXME: what about other networks?
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = mainnet.factory, _FACTORY_ADDRESS[ChainId.RINKEBY] = rinkeby.factory, _FACTORY_ADDRESS); // FIXME: what about other networks?
 
 var TOKEN_REGISTRY_ADDRESS = (_TOKEN_REGISTRY_ADDRE = {}, _TOKEN_REGISTRY_ADDRE[ChainId.MAINNET] = '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8', _TOKEN_REGISTRY_ADDRE[ChainId.RINKEBY] = '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253', _TOKEN_REGISTRY_ADDRE); // FIXME: what about other networks?
 

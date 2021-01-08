@@ -468,7 +468,7 @@ var _FACTORY_ADDRESS, _TOKEN_REGISTRY_ADDRE, _DXSWAP_TOKEN_LIST_ID, _SOLIDITY_TY
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(exports.Rounding || (exports.Rounding = {}));
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x0000000000000000000000000000000000000001', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = _contracts_json.rinkeby.factory, _FACTORY_ADDRESS); // FIXME: what about other networks?
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = _contracts_json.mainnet.factory, _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = _contracts_json.rinkeby.factory, _FACTORY_ADDRESS); // FIXME: what about other networks?
 
 var TOKEN_REGISTRY_ADDRESS = (_TOKEN_REGISTRY_ADDRE = {}, _TOKEN_REGISTRY_ADDRE[exports.ChainId.MAINNET] = '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8', _TOKEN_REGISTRY_ADDRE[exports.ChainId.RINKEBY] = '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253', _TOKEN_REGISTRY_ADDRE); // FIXME: what about other networks?
 
