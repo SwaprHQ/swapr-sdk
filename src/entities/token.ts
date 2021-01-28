@@ -82,7 +82,7 @@ export const WETH: { [key: number]: Token } = {
   [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'),
   [ChainId.ARBITRUM_TESTNET_V3]: new Token(
     ChainId.ARBITRUM_TESTNET_V3,
-    '0xaE909196e549587b8Dc0D26cdbf05B754BB580B3',
+    '0xf8456e5e6A225C2C1D74D8C9a4cB2B1d5dc1153b',
     18,
     'WETH',
     'Wrapped Ether'
