@@ -1,5 +1,6 @@
 import JSBI from 'jsbi'
 import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
+import STAKING_REWARDS_DISTRIBUTION_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
 import { rinkeby, mainnet, arbitrumTestnetV3 } from 'dxswap-core/.contracts.json'
 
@@ -40,6 +41,11 @@ export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F'
 }
 
+export const STAKING_REWARDS_DISTRIBUTION_FACTORY: { [chainId: number]: string } = {
+  [ChainId.RINKEBY]: '0xE2b87e8681dE078e75EBc5D446FCcDe1410e5282'
+}
+
+// FIXME: what about other networks?
 export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
   [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253',
@@ -88,4 +94,9 @@ const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
   [ChainId.ARBITRUM_TESTNET_V3]: '0x73a08DC74eF4ed2c360199244bb69F1464204E7C'
 }
 
-export { PERMISSIVE_MULTICALL_ABI, TOKEN_REGISTRY_ABI, PERMISSIVE_MULTICALL_ADDRESS }
+export {
+  PERMISSIVE_MULTICALL_ABI,
+  TOKEN_REGISTRY_ABI,
+  PERMISSIVE_MULTICALL_ADDRESS,
+  STAKING_REWARDS_DISTRIBUTION_FACTORY_ABI
+}
