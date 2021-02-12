@@ -1,4 +1,5 @@
-import { ChainId, Token, Pair, Fetcher, TokenAmount, WETH, TEST_TOKENS, JSBI, Price } from '../src'
+import { ChainId, Token, Pair, Fetcher, TokenAmount, JSBI, Price } from '../src'
+import { TEST_TOKENS } from './commons'
 
 describe('Pair', () => {
   const USDC = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
@@ -6,7 +7,7 @@ describe('Pair', () => {
 
   describe('constructor', () => {
     it('cannot be used for tokens on different chains', () => {
-      expect(() => new Pair(new TokenAmount(USDC, '100'), new TokenAmount(WETH[ChainId.RINKEBY], '100'))).toThrow(
+      expect(() => new Pair(new TokenAmount(USDC, '100'), new TokenAmount(Token.WETH[ChainId.RINKEBY], '100'))).toThrow(
         'CHAIN_ID'
       )
     })
@@ -16,14 +17,14 @@ describe('Pair', () => {
     it('returns the correct address', () => {
       const usdc = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 18, 'USDC', 'USD Coin')
       const dai = new Token(ChainId.MAINNET, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'DAI Stablecoin')
-      expect(Pair.getAddress(usdc, dai)).toEqual('0xEb5C8a5231F189b57799b668B85dA375feDAB49c')
+      expect(Pair.getAddress(usdc, dai)).toEqual('0x0e18852eE5CE266E2Ce6f4844Ba04cd9CD11AF5B')
     })
   })
-  
+
   describe('#fetchData', () => {
     it.skip('returns the correct address', async () => {
-      const pairAddress = Pair.getAddress(WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY]);
-      const pairData = await Fetcher.fetchPairData(WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY])
+      const pairAddress = Pair.getAddress(Token.WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY])
+      const pairData = await Fetcher.fetchPairData(Token.WETH[ChainId.RINKEBY], TEST_TOKENS.WEENUS[ChainId.RINKEBY])
       expect(pairData.swapFee).toEqual(JSBI.BigInt(10))
       expect(pairData.protocolFeeDenominator).toEqual(JSBI.BigInt(9))
       expect(pairData.liquidityToken.address).toEqual(pairAddress)
@@ -97,7 +98,7 @@ describe('Pair', () => {
     })
 
     it('throws if invalid token', () => {
-      expect(() => pair.priceOf(WETH[ChainId.MAINNET])).toThrow('TOKEN')
+      expect(() => pair.priceOf(Token.WETH[ChainId.MAINNET])).toThrow('TOKEN')
     })
   })
 
@@ -113,7 +114,7 @@ describe('Pair', () => {
 
     it('throws if not in the pair', () => {
       expect(() =>
-        new Pair(new TokenAmount(DAI, '101'), new TokenAmount(USDC, '100')).reserveOf(WETH[ChainId.MAINNET])
+        new Pair(new TokenAmount(DAI, '101'), new TokenAmount(USDC, '100')).reserveOf(Token.WETH[ChainId.MAINNET])
       ).toThrow('TOKEN')
     })
   })
@@ -128,7 +129,7 @@ describe('Pair', () => {
     expect(new Pair(new TokenAmount(USDC, '100'), new TokenAmount(DAI, '100')).involvesToken(USDC)).toEqual(true)
     expect(new Pair(new TokenAmount(USDC, '100'), new TokenAmount(DAI, '100')).involvesToken(DAI)).toEqual(true)
     expect(
-      new Pair(new TokenAmount(USDC, '100'), new TokenAmount(DAI, '100')).involvesToken(WETH[ChainId.MAINNET])
+      new Pair(new TokenAmount(USDC, '100'), new TokenAmount(DAI, '100')).involvesToken(Token.WETH[ChainId.MAINNET])
     ).toEqual(false)
   })
 })
