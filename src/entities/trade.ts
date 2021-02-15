@@ -11,6 +11,7 @@ import { TokenAmount } from './fractions/tokenAmount'
 import { Pair } from './pair'
 import { Route } from './route'
 import { currencyEquals, Token } from './token'
+import BigNumber from 'bignumber.js'
 
 /**
  * Returns the percent difference between the mid price and the execution price, i.e. price impact.
@@ -275,10 +276,12 @@ export class Trade {
         : undefined
     invariant(chainId !== undefined, 'CHAIN_ID')
 
+    const mostLiquidPairs = this.getMostLiquidPairs(pairs)
+
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
     const tokenOut = wrappedCurrency(currencyOut, chainId)
-    for (let i = 0; i < pairs.length; i++) {
-      const pair = pairs[i]
+    for (let i = 0; i < mostLiquidPairs.length; i++) {
+      const pair = mostLiquidPairs[i]
       // pair irrelevant
       if (!pair.token0.equals(amountIn.token) && !pair.token1.equals(amountIn.token)) continue
       if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
@@ -305,8 +308,10 @@ export class Trade {
           maxNumResults,
           tradeComparator
         )
-      } else if (maxHops > 1 && pairs.length > 1) {
-        const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
+      } else if (maxHops > 1 && mostLiquidPairs.length > 1) {
+        const pairsExcludingThisPair = mostLiquidPairs
+          .slice(0, i)
+          .concat(mostLiquidPairs.slice(i + 1, mostLiquidPairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
         Trade.bestTradeExactIn(
@@ -363,10 +368,12 @@ export class Trade {
         : undefined
     invariant(chainId !== undefined, 'CHAIN_ID')
 
+    const mostLiquidPairs = this.getMostLiquidPairs(pairs)
+
     const amountOut = wrappedAmount(currencyAmountOut, chainId)
     const tokenIn = wrappedCurrency(currencyIn, chainId)
-    for (let i = 0; i < pairs.length; i++) {
-      const pair = pairs[i]
+    for (let i = 0; i < mostLiquidPairs.length; i++) {
+      const pair = mostLiquidPairs[i]
       // pair irrelevant
       if (!pair.token0.equals(amountOut.token) && !pair.token1.equals(amountOut.token)) continue
       if (pair.reserve0.equalTo(ZERO) || pair.reserve1.equalTo(ZERO)) continue
@@ -393,8 +400,10 @@ export class Trade {
           maxNumResults,
           tradeComparator
         )
-      } else if (maxHops > 1 && pairs.length > 1) {
-        const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
+      } else if (maxHops > 1 && mostLiquidPairs.length > 1) {
+        const pairsExcludingThisPair = mostLiquidPairs
+          .slice(0, i)
+          .concat(mostLiquidPairs.slice(i + 1, mostLiquidPairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
         Trade.bestTradeExactOut(
@@ -413,5 +422,46 @@ export class Trade {
     }
 
     return bestTrades
+  }
+
+  /**
+   * Given a potentially mixed-platform array of pairs, some of which duplicated among platforms,
+   * extracts the single pair which has the most liquidity cross-platform.
+   * @param pairs The pairs array used to extract the most liquid ones.
+   */
+  public static getMostLiquidPairs(pairs: Pair[]): Pair[] {
+    // before constructing the route, filter duplicated pairs from
+    // different platforms and only take into consideration those
+    // that have the most liquidity
+    const groupedPairs = Object.values(
+      pairs.reduce((groupedPairs: { [token0And1Address: string]: Pair[] }, pair) => {
+        // we use the concatenation of the token0 and token1 address as the grouping key
+        const groupingKey = pair.token0.address + pair.token1.address
+        if (!groupedPairs[groupingKey]) {
+          groupedPairs[groupingKey] = [pair]
+        } else {
+          groupedPairs[groupingKey].push(pair)
+        }
+        return groupedPairs
+      }, {})
+    )
+    return groupedPairs.reduce((maximumLiquidityPairs: Pair[], pairs) => {
+      let maximumLiquidityPair = pairs[0]
+      let maximumLiquidityPairLiquidity = new BigNumber(maximumLiquidityPair.reserve0.toExact()).plus(
+        maximumLiquidityPair.reserve1.toExact()
+      )
+      for (let i = 1; i < pairs.length; i++) {
+        const analyzedPair = pairs[i]
+        const analyzedPairLiquidity = new BigNumber(analyzedPair.reserve0.toExact()).plus(
+          analyzedPair.reserve1.toExact()
+        )
+        if (analyzedPairLiquidity.isGreaterThan(maximumLiquidityPairLiquidity)) {
+          maximumLiquidityPair = analyzedPair
+          maximumLiquidityPairLiquidity = analyzedPairLiquidity
+        }
+      }
+      maximumLiquidityPairs.push(maximumLiquidityPair)
+      return maximumLiquidityPairs
+    }, [])
   }
 }
