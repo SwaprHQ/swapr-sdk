@@ -39,6 +39,10 @@ export class Token extends Currency {
     [ChainId.SOKOL]: new Token(ChainId.SOKOL, '0xc655c6D80ac92d75fBF4F40e95280aEb855B1E87', 18, 'WSPOA', 'Wrapped SPOA')
   }
 
+  public static readonly WXDAI: { [key: number]: Token } = {
+    [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI')
+  }
+
   public static readonly DXD: { [key: number]: Token } = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao')
@@ -48,7 +52,8 @@ export class Token extends Currency {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.ARBITRUM_TESTNET_V3]: Token.WETH[ChainId.ARBITRUM_TESTNET_V3],
-    [ChainId.SOKOL]: Token.WSPOA[ChainId.SOKOL]
+    [ChainId.SOKOL]: Token.WSPOA[ChainId.SOKOL],
+    [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI]
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
@@ -105,3 +110,4 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
 export const WETH = Token.WETH
 export const WSPOA = Token.WSPOA
 export const DXD = Token.DXD
+export const WXDAI = Token.WXDAI

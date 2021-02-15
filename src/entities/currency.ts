@@ -23,7 +23,8 @@ export class Currency {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
     [ChainId.ARBITRUM_TESTNET_V3]: Currency.ETHER,
-    [ChainId.SOKOL]: Currency.SPOA
+    [ChainId.SOKOL]: Currency.SPOA,
+    [ChainId.XDAI]: Currency.XDAI
   }
 
   /**
