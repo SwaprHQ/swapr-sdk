@@ -10,6 +10,47 @@ export class Token extends Currency {
   public readonly chainId: ChainId
   public readonly address: string
 
+  public static readonly WETH: { [key: number]: Token } = {
+    [ChainId.MAINNET]: new Token(
+      ChainId.MAINNET,
+      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
+    [ChainId.RINKEBY]: new Token(
+      ChainId.RINKEBY,
+      '0xc778417E063141139Fce010982780140Aa0cD5Ab',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
+    [ChainId.ARBITRUM_TESTNET_V3]: new Token(
+      ChainId.ARBITRUM_TESTNET_V3,
+      '0xf8456e5e6A225C2C1D74D8C9a4cB2B1d5dc1153b',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
+    [ChainId.SOKOL]: new Token(ChainId.SOKOL, '0xfDc50eF6b67F65Dddc36e56729a9D07BAe1A1f68', 18, 'WETH', 'Wrapped Ether')
+  }
+
+  public static readonly WSPOA: { [key: number]: Token } = {
+    [ChainId.SOKOL]: new Token(ChainId.SOKOL, '0xc655c6D80ac92d75fBF4F40e95280aEb855B1E87', 18, 'WSPOA', 'Wrapped SPOA')
+  }
+
+  public static readonly DXD: { [key: number]: Token } = {
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao')
+  }
+
+  private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
+    [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
+    [ChainId.ARBITRUM_TESTNET_V3]: Token.WETH[ChainId.ARBITRUM_TESTNET_V3],
+    [ChainId.SOKOL]: Token.WSPOA[ChainId.SOKOL]
+  }
+
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
     super(decimals, symbol, name)
     this.chainId = chainId
@@ -39,6 +80,10 @@ export class Token extends Currency {
     invariant(this.address !== other.address, 'ADDRESSES')
     return this.address.toLowerCase() < other.address.toLowerCase()
   }
+
+  public static getNativeWrapper(chainId: ChainId): Token {
+    return Token.NATIVE_CURRENCY_WRAPPER[chainId]
+  }
 }
 
 /**
@@ -56,108 +101,7 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
   }
 }
 
-export const WETH: { [key: number]: Token } = {
-  [ChainId.MAINNET]: new Token(
-    ChainId.MAINNET,
-    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.ROPSTEN]: new Token(
-    ChainId.ROPSTEN,
-    '0xc778417E063141139Fce010982780140Aa0cD5Ab',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.RINKEBY]: new Token(
-    ChainId.RINKEBY,
-    '0xc778417E063141139Fce010982780140Aa0cD5Ab',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'),
-  [ChainId.ARBITRUM_TESTNET_V3]: new Token(
-    ChainId.ARBITRUM_TESTNET_V3,
-    '0xf8456e5e6A225C2C1D74D8C9a4cB2B1d5dc1153b',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  )
-}
-
-export const DXD: { [key: number]: Token } = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xDd25BaE0659fC06a8d00CD06C7f5A98D71bfB715', 18, 'DXD', 'DXdao'),
-  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao')
-}
-
-export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
-  WEENUS: {
-    [ChainId.MAINNET]: new Token(
-      ChainId.MAINNET,
-      '0x2823589Ae095D99bD64dEeA80B4690313e2fB519',
-      18,
-      'WEENUS',
-      'Weenus 💪'
-    ),
-    [ChainId.RINKEBY]: new Token(
-      ChainId.RINKEBY,
-      '0xaFF4481D10270F50f203E0763e2597776068CBc5',
-      18,
-      'WEENUS',
-      'Weenus 💪'
-    )
-  },
-  XEENUS: {
-    [ChainId.MAINNET]: new Token(
-      ChainId.MAINNET,
-      '0xeEf5E2d8255E973d587217f9509B416b41CA5870',
-      18,
-      'XEENUS',
-      'Xeenus 💪'
-    ),
-    [ChainId.RINKEBY]: new Token(
-      ChainId.RINKEBY,
-      '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c',
-      18,
-      'XEENUS',
-      'Xeenus 💪'
-    )
-  },
-  YEENUS: {
-    [ChainId.MAINNET]: new Token(
-      ChainId.MAINNET,
-      '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1',
-      8,
-      'YEENUS',
-      'Yeenus 💪'
-    ),
-    [ChainId.RINKEBY]: new Token(
-      ChainId.RINKEBY,
-      '0xc6fDe3FD2Cc2b173aEC24cc3f267cb3Cd78a26B7',
-      8,
-      'YEENUS',
-      'Yeenus 💪'
-    )
-  },
-  ZEENUS: {
-    [ChainId.MAINNET]: new Token(
-      ChainId.MAINNET,
-      '0x187E63F9eBA692A0ac98d3edE6fEb870AF0079e1',
-      8,
-      'ZEENUS',
-      'Zeenus 💪'
-    ),
-    [ChainId.RINKEBY]: new Token(
-      ChainId.RINKEBY,
-      '0x1f9061B953bBa0E36BF50F21876132DcF276fC6e',
-      8,
-      'ZEENUS',
-      'Zeenus 💪'
-    )
-  }
-}
+// reexport for convenience
+export const WETH = Token.WETH
+export const WSPOA = Token.WSPOA
+export const DXD = Token.DXD

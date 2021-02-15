@@ -2,7 +2,7 @@ import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType, ZERO } from '../constants'
 import { sortedInsert } from '../utils'
-import { Currency, ETHER } from './currency'
+import { Currency } from './currency'
 import { CurrencyAmount } from './fractions/currencyAmount'
 import { Fraction } from './fractions/fraction'
 import { Percent } from './fractions/percent'
@@ -10,7 +10,7 @@ import { Price } from './fractions/price'
 import { TokenAmount } from './fractions/tokenAmount'
 import { Pair } from './pair'
 import { Route } from './route'
-import { currencyEquals, Token, WETH } from './token'
+import { currencyEquals, Token } from './token'
 
 /**
  * Returns the percent difference between the mid price and the execution price, i.e. price impact.
@@ -89,13 +89,14 @@ export interface BestTradeOptions {
  */
 function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId): TokenAmount {
   if (currencyAmount instanceof TokenAmount) return currencyAmount
-  if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
+  if (Currency.isNative(currencyAmount.currency))
+    return new TokenAmount(Token.getNativeWrapper(chainId), currencyAmount.raw)
   invariant(false, 'CURRENCY')
 }
 
 function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   if (currency instanceof Token) return currency
-  if (currency === ETHER) return WETH[chainId]
+  if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
   invariant(false, 'CURRENCY')
 }
 
@@ -132,6 +133,10 @@ export class Trade {
    * The percent difference between the mid price before the trade and the trade execution price.
    */
   public readonly priceImpact: Percent
+  /**
+   * The unique identifier of the chain on which the swap is being performed (used to correctly handle the native currency).
+   */
+  public readonly chainId: ChainId
 
   /**
    * Constructs an exact in trade with the given amount in and route
@@ -152,6 +157,8 @@ export class Trade {
   }
 
   public constructor(route: Route, amount: CurrencyAmount, tradeType: TradeType) {
+    this.chainId = route.chainId
+
     const amounts: TokenAmount[] = new Array(route.path.length)
     const nextPairs: Pair[] = new Array(route.pairs.length)
     if (tradeType === TradeType.EXACT_INPUT) {
@@ -179,14 +186,14 @@ export class Trade {
     this.inputAmount =
       tradeType === TradeType.EXACT_INPUT
         ? amount
-        : route.input === ETHER
-        ? CurrencyAmount.ether(amounts[0].raw)
+        : Currency.isNative(route.input)
+        ? CurrencyAmount.nativeCurrency(amounts[0].raw, this.chainId)
         : amounts[0]
     this.outputAmount =
       tradeType === TradeType.EXACT_OUTPUT
         ? amount
-        : route.output === ETHER
-        ? CurrencyAmount.ether(amounts[amounts.length - 1].raw)
+        : Currency.isNative(route.output)
+        ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, this.chainId)
         : amounts[amounts.length - 1]
     this.executionPrice = new Price(
       this.inputAmount.currency,
@@ -213,7 +220,7 @@ export class Trade {
         .multiply(this.outputAmount.raw).quotient
       return this.outputAmount instanceof TokenAmount
         ? new TokenAmount(this.outputAmount.token, slippageAdjustedAmountOut)
-        : CurrencyAmount.ether(slippageAdjustedAmountOut)
+        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountOut, this.chainId)
     }
   }
 
@@ -229,7 +236,7 @@ export class Trade {
       const slippageAdjustedAmountIn = new Fraction(ONE).add(slippageTolerance).multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
-        : CurrencyAmount.ether(slippageAdjustedAmountIn)
+        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
     }
   }
 

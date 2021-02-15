@@ -2,8 +2,9 @@ import { Contract } from '@ethersproject/contracts'
 import { getNetwork } from '@ethersproject/networks'
 import { getDefaultProvider } from '@ethersproject/providers'
 import { TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_ABI, DXSWAP_TOKEN_LIST_ID } from '../src/constants'
-import { ChainId, Fetcher, DXD, TEST_TOKENS } from '../src'
+import { ChainId, Fetcher, DXD } from '../src'
 import { TokenInfo } from '../src/entities/token-list'
+import { TEST_TOKENS } from './commons'
 
 // TODO: replace the provider in these tests
 describe('data', () => {
@@ -52,5 +53,4 @@ describe('data', () => {
     const dxd = await Fetcher.fetchTokenData(ChainId.MAINNET, DXD[ChainId.MAINNET].address)
     expect(dxd.decimals).toEqual(DXD[ChainId.MAINNET].decimals)
   })
-
 })

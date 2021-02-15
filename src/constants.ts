@@ -2,18 +2,16 @@ import JSBI from 'jsbi'
 import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
-import { rinkeby, mainnet, arbitrumTestnetV3 } from 'dxswap-core/.contracts.json'
+import { rinkeby, mainnet, arbitrumTestnetV3, sokol } from 'dxswap-core/.contracts.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
 
 export enum ChainId {
   MAINNET = 1,
-  ROPSTEN = 3,
   RINKEBY = 4,
-  GÖRLI = 5,
-  KOVAN = 42,
-  ARBITRUM_TESTNET_V3 = 79377087078960
+  ARBITRUM_TESTNET_V3 = 79377087078960,
+  SOKOL = 77
 }
 
 export enum TradeType {
@@ -32,26 +30,30 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: mainnet.factory,
   [ChainId.RINKEBY]: rinkeby.factory,
-  [ChainId.ARBITRUM_TESTNET_V3]: arbitrumTestnetV3.factory
+  [ChainId.ARBITRUM_TESTNET_V3]: arbitrumTestnetV3.factory,
+  [ChainId.SOKOL]: sokol.factory
 }
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
   [ChainId.RINKEBY]: '0x021Eedd456F872c952B1E58670aaD7DF4C5693f2',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F'
+  [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F',
+  [ChainId.SOKOL]: '0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068'
 }
 
 // FIXME: what about other networks?
 export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
   [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x9d6f6d86b81289e40e07fcda805c06f6e9b8f629'
+  [ChainId.ARBITRUM_TESTNET_V3]: '0x9d6f6d86b81289e40e07fcda805c06f6e9b8f629',
+  [ChainId.SOKOL]: '0x681c3836a5589b933062ACA4fd846c1287a2865F'
 }
 
 export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
   [ChainId.MAINNET]: 1,
   [ChainId.RINKEBY]: 1,
-  [ChainId.ARBITRUM_TESTNET_V3]: 1
+  [ChainId.ARBITRUM_TESTNET_V3]: 1,
+  [ChainId.SOKOL]: 1
 }
 
 export const INIT_CODE_HASH = '0xd306a548755b9295ee49cc729e13ca4a45e00199bbd890fa146da43a50571776'
@@ -83,11 +85,11 @@ export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 }
 
-// TODO: add other networks' addresses
 const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0946f567d0ed891e6566c1da8e5093517f43571d',
   [ChainId.RINKEBY]: '0x798d8ced4dff8f054a5153762187e84751a73344',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x73a08DC74eF4ed2c360199244bb69F1464204E7C'
+  [ChainId.ARBITRUM_TESTNET_V3]: '0x73a08DC74eF4ed2c360199244bb69F1464204E7C',
+  [ChainId.SOKOL]: '0x4D97Bd8eFaCf46b33c4438Ed0B7B6AABfa2359FB'
 }
 
 export { PERMISSIVE_MULTICALL_ABI, TOKEN_REGISTRY_ABI, PERMISSIVE_MULTICALL_ADDRESS, STAKING_REWARDS_FACTORY_ABI }
