@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts'
 import { getNetwork } from '@ethersproject/networks'
 import { getDefaultProvider, Provider } from '@ethersproject/providers'
 import { TokenAmount } from './entities/fractions/tokenAmount'
-import { Pair } from './entities/pair'
+import { Pair, SupportedPlatform } from './entities/pair'
 import IDXswapPair from 'dxswap-core/build/IDXswapPair.json'
 import IDXswapFactory from 'dxswap-core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
@@ -168,10 +168,11 @@ export abstract class Fetcher {
   public static async fetchPairData(
     tokenA: Token,
     tokenB: Token,
-    provider = getDefaultProvider(getNetwork(tokenA.chainId))
+    provider = getDefaultProvider(getNetwork(tokenA.chainId)),
+    platform: SupportedPlatform = SupportedPlatform.SWAPR
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
-    const address = Pair.getAddress(tokenA, tokenB)
+    const address = Pair.getAddress(tokenA, tokenB, platform)
     const [reserves0, reserves1] = await new Contract(address, IDXswapPair.abi, provider).getReserves()
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
     const tokenAmountA = new TokenAmount(tokenA, balances[0])
@@ -181,7 +182,7 @@ export abstract class Fetcher {
       : [tokenAmountB, tokenAmountA]
     const liquidityToken = new Token(
       tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
+      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform),
       18,
       'DXS',
       'DXswap'

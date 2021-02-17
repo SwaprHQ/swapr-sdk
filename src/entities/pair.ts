@@ -22,13 +22,75 @@ import { InsufficientReservesError, InsufficientInputAmountError } from '../erro
 import { Token } from './token'
 import { ChainId } from '../constants'
 
-let PAIR_ADDRESS_CACHE: { [token0Address: string]: { [token1Address: string]: string } } = {}
+export enum SupportedPlatform {
+  SWAPR,
+  UNISWAP,
+  SUSHISWAP
+}
+
+let PAIR_ADDRESS_CACHE: {
+  [supportedPlatform in SupportedPlatform]: {
+    [chainId: number]: { [token0Address: string]: { [token1Address: string]: string } }
+  }
+} = {
+  [SupportedPlatform.SWAPR]: {
+    [ChainId.MAINNET]: {},
+    [ChainId.RINKEBY]: {},
+    [ChainId.ARBITRUM_TESTNET_V3]: {},
+    [ChainId.SOKOL]: {},
+    [ChainId.XDAI]: {}
+  },
+  [SupportedPlatform.SUSHISWAP]: {
+    [ChainId.MAINNET]: {},
+    [ChainId.RINKEBY]: {},
+    [ChainId.ARBITRUM_TESTNET_V3]: {},
+    [ChainId.SOKOL]: {},
+    [ChainId.XDAI]: {}
+  },
+  [SupportedPlatform.UNISWAP]: {
+    [ChainId.MAINNET]: {},
+    [ChainId.RINKEBY]: {},
+    [ChainId.ARBITRUM_TESTNET_V3]: {},
+    [ChainId.SOKOL]: {},
+    [ChainId.XDAI]: {}
+  }
+}
+
+const PLATFORM_INIT_CODE_HASH: { [supportedPlatform in SupportedPlatform]: string } = {
+  [SupportedPlatform.SWAPR]: INIT_CODE_HASH,
+  [SupportedPlatform.SUSHISWAP]: '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
+  [SupportedPlatform.UNISWAP]: '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
+}
+
+const UNISWAP_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
+const SUSHISWAP_FACTORY_ADDRESS = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
+
+const PLATFORM_FACTORY_ADDRESSES: { [supportedPlatform in SupportedPlatform]: { [chainId: number]: string } } = {
+  [SupportedPlatform.SWAPR]: {
+    ...FACTORY_ADDRESS
+  },
+  [SupportedPlatform.SUSHISWAP]: {
+    [ChainId.MAINNET]: SUSHISWAP_FACTORY_ADDRESS,
+    [ChainId.RINKEBY]: SUSHISWAP_FACTORY_ADDRESS
+  },
+  [SupportedPlatform.UNISWAP]: {
+    [ChainId.MAINNET]: UNISWAP_FACTORY_ADDRESS,
+    [ChainId.RINKEBY]: UNISWAP_FACTORY_ADDRESS
+  }
+}
+
+const SWAP_FEES: { [supportedPlatform in SupportedPlatform]: JSBI } = {
+  [SupportedPlatform.SWAPR]: defaultSwapFee,
+  [SupportedPlatform.SUSHISWAP]: _30,
+  [SupportedPlatform.UNISWAP]: _30
+}
 
 export class Pair {
   public readonly liquidityToken: Token
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
   public readonly swapFee: BigintIsh = defaultSwapFee
   public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
+  public readonly platform: SupportedPlatform
 
   /**
    * Returns true if the two pairs are equivalent, i.e. have the same address (calculated using create2).
@@ -42,44 +104,59 @@ export class Pair {
     return this.liquidityToken.address === other.liquidityToken.address
   }
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
+  public static getAddress(
+    tokenA: Token,
+    tokenB: Token,
+    platform: SupportedPlatform = SupportedPlatform.SWAPR
+  ): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
-    if (PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address] === undefined) {
+    const chainId = tokenA.chainId
+    if (PAIR_ADDRESS_CACHE?.[platform]?.[chainId]?.[tokens[0].address]?.[tokens[1].address] === undefined) {
       PAIR_ADDRESS_CACHE = {
         ...PAIR_ADDRESS_CACHE,
-        [tokens[0].address]: {
-          ...PAIR_ADDRESS_CACHE?.[tokens[0].address],
-          [tokens[1].address]: getCreate2Address(
-            FACTORY_ADDRESS[tokenA.chainId],
-            keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
-            INIT_CODE_HASH
-          )
+        [platform]: {
+          ...PAIR_ADDRESS_CACHE[platform],
+          [chainId]: {
+            ...PAIR_ADDRESS_CACHE[platform][chainId],
+            [tokens[0].address]: {
+              ...PAIR_ADDRESS_CACHE?.[platform]?.[chainId]?.[tokens[0].address],
+              [tokens[1].address]: getCreate2Address(
+                PLATFORM_FACTORY_ADDRESSES[platform][chainId],
+                keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
+                PLATFORM_INIT_CODE_HASH[platform]
+              )
+            }
+          }
         }
       }
     }
-    return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address]
+    return PAIR_ADDRESS_CACHE[platform][chainId][tokens[0].address][tokens[1].address]
   }
 
   constructor(
     tokenAmountA: TokenAmount,
     tokenAmountB: TokenAmount,
     swapFee?: BigintIsh,
-    protocolFeeDenominator?: BigintIsh
+    protocolFeeDenominator?: BigintIsh,
+    platform?: SupportedPlatform
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
+
+    this.platform = platform ? platform : SupportedPlatform.SWAPR
+
     this.liquidityToken = new Token(
       tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
+      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform),
       18,
       'DXS',
       'DXswap'
     )
-    this.swapFee = swapFee ? swapFee : defaultSwapFee
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
+    this.swapFee = swapFee ? swapFee : SWAP_FEES[this.platform]
   }
 
   /**
