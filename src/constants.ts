@@ -1,6 +1,7 @@
 import JSBI from 'jsbi'
 import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
+import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
 import { rinkeby, mainnet, arbitrumTestnetV3, sokol, xdai } from 'dxswap-core/.contracts.json'
 
@@ -38,7 +39,7 @@ export const FACTORY_ADDRESS: { [chainId: number]: string } = {
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
-  [ChainId.RINKEBY]: '0x021Eedd456F872c952B1E58670aaD7DF4C5693f2',
+  [ChainId.RINKEBY]: '0x6549A32e37Dc87056D5AaF42d586Fcf4D1685C9d',
   [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F',
   [ChainId.SOKOL]: '0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068',
   [ChainId.XDAI]: '0xA6f48C8190be8F92A4c31aAE4756289Ef3d91477'
@@ -97,4 +98,10 @@ const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
   [ChainId.XDAI]: '0x4E75068ED2338fCa56631E740B0723A6dbc1d5CD'
 }
 
-export { PERMISSIVE_MULTICALL_ABI, TOKEN_REGISTRY_ABI, PERMISSIVE_MULTICALL_ADDRESS, STAKING_REWARDS_FACTORY_ABI }
+export {
+  PERMISSIVE_MULTICALL_ABI,
+  TOKEN_REGISTRY_ABI,
+  PERMISSIVE_MULTICALL_ADDRESS,
+  STAKING_REWARDS_FACTORY_ABI,
+  STAKING_REWARDS_DISTRIBUTION_ABI
+}
