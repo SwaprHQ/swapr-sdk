@@ -1,6 +1,6 @@
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType, ZERO } from '../constants'
+import { ChainId, ONE, SupportedPlatform, TradeType, ZERO } from '../constants'
 import { sortedInsert } from '../utils'
 import { Currency } from './currency'
 import { CurrencyAmount } from './fractions/currencyAmount'
@@ -137,6 +137,10 @@ export class Trade {
    * The unique identifier of the chain on which the swap is being performed (used to correctly handle the native currency).
    */
   public readonly chainId: ChainId
+  /**
+   * The swap platform this trade will execute on
+   */
+  public readonly platform: SupportedPlatform
 
   /**
    * Constructs an exact in trade with the given amount in and route
@@ -203,6 +207,7 @@ export class Trade {
     )
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
     this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
+    this.platform = this.route.pairs[0].platform
   }
 
   /**

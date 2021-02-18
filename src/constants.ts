@@ -27,6 +27,12 @@ export enum Rounding {
   ROUND_UP
 }
 
+export enum SupportedPlatform {
+  SWAPR,
+  UNISWAP,
+  SUSHISWAP
+}
+
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {

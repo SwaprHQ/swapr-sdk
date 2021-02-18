@@ -10,6 +10,7 @@ import {
   FACTORY_ADDRESS,
   INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
+  SupportedPlatform,
   ZERO,
   ONE,
   _30,
@@ -21,12 +22,6 @@ import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
 import { ChainId } from '../constants'
-
-export enum SupportedPlatform {
-  SWAPR,
-  UNISWAP,
-  SUSHISWAP
-}
 
 let PAIR_ADDRESS_CACHE: {
   [supportedPlatform in SupportedPlatform]: {

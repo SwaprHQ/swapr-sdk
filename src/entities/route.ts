@@ -20,6 +20,10 @@ export class Route {
       'CHAIN_IDS'
     )
     invariant(
+      pairs.every(pair => pair.platform === pairs[0].platform),
+      'PLATFORM'
+    )
+    invariant(
       (input instanceof Token && pairs[0].involvesToken(input)) ||
         (Currency.isNative(input) && pairs[0].involvesToken(Token.getNativeWrapper(pairs[0].chainId))),
       'INPUT'

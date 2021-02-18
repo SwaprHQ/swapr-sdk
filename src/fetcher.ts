@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts'
 import { getNetwork } from '@ethersproject/networks'
 import { getDefaultProvider, Provider } from '@ethersproject/providers'
 import { TokenAmount } from './entities/fractions/tokenAmount'
-import { Pair, SupportedPlatform } from './entities/pair'
+import { Pair } from './entities/pair'
 import IDXswapPair from 'dxswap-core/build/IDXswapPair.json'
 import IDXswapFactory from 'dxswap-core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
@@ -15,6 +15,7 @@ import {
   FACTORY_ADDRESS,
   PERMISSIVE_MULTICALL_ADDRESS,
   PERMISSIVE_MULTICALL_ABI,
+  SupportedPlatform,
   TOKEN_REGISTRY_ADDRESS,
   DXSWAP_TOKEN_LIST_ID
 } from './constants'
