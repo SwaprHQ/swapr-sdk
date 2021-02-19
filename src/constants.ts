@@ -10,10 +10,7 @@ export type BigintIsh = JSBI | bigint | string
 
 export enum ChainId {
   MAINNET = 1,
-  ROPSTEN = 3,
   RINKEBY = 4,
-  GÖRLI = 5,
-  KOVAN = 42,
   ARBITRUM_TESTNET_V3 = 79377087078960,
   SOKOL = 77,
   XDAI = 100
