@@ -19,49 +19,19 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
-        "name": "creator",
+        "name": "owner",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "address[]",
-        "name": "rewardsTokenAddresses",
-        "type": "address[]"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
-        "name": "stakableTokenAddresses",
+        "name": "deployedAt",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "rewardsAmounts",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "startingTimestamp",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "endingTimestamp",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "locked",
-        "type": "bool"
       }
     ],
-    "name": "Created",
+    "name": "DistributionCreated",
     "type": "event"
   },
   {
