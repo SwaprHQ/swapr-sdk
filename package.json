@@ -26,6 +26,7 @@
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
     "dxswap-core": "git://github.com/levelkdev/dxswap-core.git#v0.3.6",
+    "dxswap-periphery": "git://github.com/levelkdev/dxswap-periphery.git#v0.3.7",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",

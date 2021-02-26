@@ -1,6 +1,6 @@
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, SupportedPlatform, TradeType, ZERO } from '../constants'
+import { ChainId, ONE, TradeType, ZERO } from '../constants'
 import { sortedInsert } from '../utils'
 import { Currency } from './currency'
 import { CurrencyAmount } from './fractions/currencyAmount'
@@ -9,6 +9,7 @@ import { Percent } from './fractions/percent'
 import { Price } from './fractions/price'
 import { TokenAmount } from './fractions/tokenAmount'
 import { Pair } from './pair'
+import { RoutablePlatform } from './routable-platform'
 import { Route } from './route'
 import { currencyEquals, Token } from './token'
 
@@ -140,7 +141,7 @@ export class Trade {
   /**
    * The swap platform this trade will execute on
    */
-  public readonly platform: SupportedPlatform
+  public readonly platform: RoutablePlatform
 
   /**
    * Constructs an exact in trade with the given amount in and route

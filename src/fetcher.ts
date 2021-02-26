@@ -15,14 +15,14 @@ import {
   FACTORY_ADDRESS,
   PERMISSIVE_MULTICALL_ADDRESS,
   PERMISSIVE_MULTICALL_ABI,
-  SupportedPlatform,
   TOKEN_REGISTRY_ADDRESS,
   DXSWAP_TOKEN_LIST_ID
 } from './constants'
 import { Token } from './entities/token'
 import { Currency } from './entities/currency'
 import { Interface } from '@ethersproject/abi'
-import { TokenList, TokenInfo } from 'entities/token-list'
+import { TokenList, TokenInfo } from './entities/token-list'
+import { RoutablePlatform } from './entities/routable-platform'
 
 const TOKEN_DATA_CACHE: {
   [chainId: number]: { [address: string]: Currency }
@@ -170,7 +170,7 @@ export abstract class Fetcher {
     tokenA: Token,
     tokenB: Token,
     provider = getDefaultProvider(getNetwork(tokenA.chainId)),
-    platform: SupportedPlatform = SupportedPlatform.SWAPR
+    platform: RoutablePlatform = RoutablePlatform.SWAPR
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
     const address = Pair.getAddress(tokenA, tokenB, platform)

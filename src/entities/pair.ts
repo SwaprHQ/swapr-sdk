@@ -7,10 +7,7 @@ import { getCreate2Address } from '@ethersproject/address'
 
 import {
   BigintIsh,
-  FACTORY_ADDRESS,
-  INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
-  SupportedPlatform,
   ZERO,
   ONE,
   _30,
@@ -22,62 +19,33 @@ import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
 import { ChainId } from '../constants'
+import { RoutablePlatform } from './routable-platform'
+
+const INITIAL_CACHE_STATE = {
+  [ChainId.MAINNET]: {},
+  [ChainId.RINKEBY]: {},
+  [ChainId.ARBITRUM_TESTNET_V3]: {},
+  [ChainId.SOKOL]: {},
+  [ChainId.XDAI]: {}
+}
 
 let PAIR_ADDRESS_CACHE: {
-  [supportedPlatform in SupportedPlatform]: {
+  [supportedPlatformName: string]: {
     [chainId: number]: { [token0Address: string]: { [token1Address: string]: string } }
   }
-} = {
-  [SupportedPlatform.SWAPR]: {
-    [ChainId.MAINNET]: {},
-    [ChainId.RINKEBY]: {},
-    [ChainId.ARBITRUM_TESTNET_V3]: {},
-    [ChainId.SOKOL]: {},
-    [ChainId.XDAI]: {}
+} =   {
+  [RoutablePlatform.SWAPR.name]: {
+    ...INITIAL_CACHE_STATE
   },
-  [SupportedPlatform.SUSHISWAP]: {
-    [ChainId.MAINNET]: {},
-    [ChainId.RINKEBY]: {},
-    [ChainId.ARBITRUM_TESTNET_V3]: {},
-    [ChainId.SOKOL]: {},
-    [ChainId.XDAI]: {}
+  [RoutablePlatform.SUSHISWAP.name]: {
+    ...INITIAL_CACHE_STATE
   },
-  [SupportedPlatform.UNISWAP]: {
-    [ChainId.MAINNET]: {},
-    [ChainId.RINKEBY]: {},
-    [ChainId.ARBITRUM_TESTNET_V3]: {},
-    [ChainId.SOKOL]: {},
-    [ChainId.XDAI]: {}
+  [RoutablePlatform.UNISWAP.name]: {
+    ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.HONEYSWAP.name]: {
+    ...INITIAL_CACHE_STATE
   }
-}
-
-const PLATFORM_INIT_CODE_HASH: { [supportedPlatform in SupportedPlatform]: string } = {
-  [SupportedPlatform.SWAPR]: INIT_CODE_HASH,
-  [SupportedPlatform.SUSHISWAP]: '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
-  [SupportedPlatform.UNISWAP]: '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
-}
-
-const UNISWAP_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
-const SUSHISWAP_FACTORY_ADDRESS = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
-
-const PLATFORM_FACTORY_ADDRESSES: { [supportedPlatform in SupportedPlatform]: { [chainId: number]: string } } = {
-  [SupportedPlatform.SWAPR]: {
-    ...FACTORY_ADDRESS
-  },
-  [SupportedPlatform.SUSHISWAP]: {
-    [ChainId.MAINNET]: SUSHISWAP_FACTORY_ADDRESS,
-    [ChainId.RINKEBY]: SUSHISWAP_FACTORY_ADDRESS
-  },
-  [SupportedPlatform.UNISWAP]: {
-    [ChainId.MAINNET]: UNISWAP_FACTORY_ADDRESS,
-    [ChainId.RINKEBY]: UNISWAP_FACTORY_ADDRESS
-  }
-}
-
-const SWAP_FEES: { [supportedPlatform in SupportedPlatform]: JSBI } = {
-  [SupportedPlatform.SWAPR]: defaultSwapFee,
-  [SupportedPlatform.SUSHISWAP]: _30,
-  [SupportedPlatform.UNISWAP]: _30
 }
 
 export class Pair {
@@ -85,7 +53,7 @@ export class Pair {
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
   public readonly swapFee: BigintIsh = defaultSwapFee
   public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
-  public readonly platform: SupportedPlatform
+  public readonly platform: RoutablePlatform
 
   /**
    * Returns true if the two pairs are equivalent, i.e. have the same address (calculated using create2).
@@ -99,33 +67,30 @@ export class Pair {
     return this.liquidityToken.address === other.liquidityToken.address
   }
 
-  public static getAddress(
-    tokenA: Token,
-    tokenB: Token,
-    platform: SupportedPlatform = SupportedPlatform.SWAPR
-  ): string {
+  public static getAddress(tokenA: Token, tokenB: Token, platform: RoutablePlatform = RoutablePlatform.SWAPR): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
     const chainId = tokenA.chainId
-    if (PAIR_ADDRESS_CACHE?.[platform]?.[chainId]?.[tokens[0].address]?.[tokens[1].address] === undefined) {
+    invariant(platform.supportsChain(chainId), 'INVALID_PLATFORM_CHAIN_ID')
+    if (PAIR_ADDRESS_CACHE?.[platform.name]?.[chainId]?.[tokens[0].address]?.[tokens[1].address] === undefined) {
       PAIR_ADDRESS_CACHE = {
         ...PAIR_ADDRESS_CACHE,
-        [platform]: {
-          ...PAIR_ADDRESS_CACHE[platform],
+        [platform.name]: {
+          ...PAIR_ADDRESS_CACHE[platform.name],
           [chainId]: {
-            ...PAIR_ADDRESS_CACHE[platform][chainId],
+            ...PAIR_ADDRESS_CACHE[platform.name][chainId],
             [tokens[0].address]: {
-              ...PAIR_ADDRESS_CACHE?.[platform]?.[chainId]?.[tokens[0].address],
+              ...PAIR_ADDRESS_CACHE?.[platform.name]?.[chainId]?.[tokens[0].address],
               [tokens[1].address]: getCreate2Address(
-                PLATFORM_FACTORY_ADDRESSES[platform][chainId],
+                platform.factoryAddress[chainId] as string,
                 keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
-                PLATFORM_INIT_CODE_HASH[platform]
+                platform.initCodeHash
               )
             }
           }
         }
       }
     }
-    return PAIR_ADDRESS_CACHE[platform][chainId][tokens[0].address][tokens[1].address]
+    return PAIR_ADDRESS_CACHE[platform.name][chainId][tokens[0].address][tokens[1].address]
   }
 
   constructor(
@@ -133,25 +98,19 @@ export class Pair {
     tokenAmountB: TokenAmount,
     swapFee?: BigintIsh,
     protocolFeeDenominator?: BigintIsh,
-    platform?: SupportedPlatform
+    platform: RoutablePlatform = RoutablePlatform.SWAPR
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
 
-    this.platform = platform ? platform : SupportedPlatform.SWAPR
-
-    this.liquidityToken = new Token(
-      tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform),
-      18,
-      'DXS',
-      'DXswap'
-    )
+    this.platform = platform ? platform : RoutablePlatform.SWAPR
+    const liquidityTokenAddress = Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform)
+    this.liquidityToken = new Token(tokenAmounts[0].token.chainId, liquidityTokenAddress, 18, 'DXS', 'DXswap')
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
-    this.swapFee = swapFee ? swapFee : SWAP_FEES[this.platform]
+    this.swapFee = swapFee ? swapFee : platform.defaultSwapFee
   }
 
   /**
