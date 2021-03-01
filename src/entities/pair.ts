@@ -7,8 +7,6 @@ import { getCreate2Address } from '@ethersproject/address'
 
 import {
   BigintIsh,
-  FACTORY_ADDRESS,
-  INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
   ZERO,
   ONE,
@@ -21,14 +19,41 @@ import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
 import { ChainId } from '../constants'
+import { RoutablePlatform } from './routable-platform'
 
-let PAIR_ADDRESS_CACHE: { [token0Address: string]: { [token1Address: string]: string } } = {}
+const INITIAL_CACHE_STATE = {
+  [ChainId.MAINNET]: {},
+  [ChainId.RINKEBY]: {},
+  [ChainId.ARBITRUM_TESTNET_V3]: {},
+  [ChainId.SOKOL]: {},
+  [ChainId.XDAI]: {}
+}
+
+let PAIR_ADDRESS_CACHE: {
+  [supportedPlatformName: string]: {
+    [chainId: number]: { [token0Address: string]: { [token1Address: string]: string } }
+  }
+} =   {
+  [RoutablePlatform.SWAPR.name]: {
+    ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.SUSHISWAP.name]: {
+    ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.UNISWAP.name]: {
+    ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.HONEYSWAP.name]: {
+    ...INITIAL_CACHE_STATE
+  }
+}
 
 export class Pair {
   public readonly liquidityToken: Token
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
   public readonly swapFee: BigintIsh = defaultSwapFee
   public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
+  public readonly platform: RoutablePlatform
 
   /**
    * Returns true if the two pairs are equivalent, i.e. have the same address (calculated using create2).
@@ -42,44 +67,50 @@ export class Pair {
     return this.liquidityToken.address === other.liquidityToken.address
   }
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
+  public static getAddress(tokenA: Token, tokenB: Token, platform: RoutablePlatform = RoutablePlatform.SWAPR): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
-    if (PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address] === undefined) {
+    const chainId = tokenA.chainId
+    invariant(platform.supportsChain(chainId), 'INVALID_PLATFORM_CHAIN_ID')
+    if (PAIR_ADDRESS_CACHE?.[platform.name]?.[chainId]?.[tokens[0].address]?.[tokens[1].address] === undefined) {
       PAIR_ADDRESS_CACHE = {
         ...PAIR_ADDRESS_CACHE,
-        [tokens[0].address]: {
-          ...PAIR_ADDRESS_CACHE?.[tokens[0].address],
-          [tokens[1].address]: getCreate2Address(
-            FACTORY_ADDRESS[tokenA.chainId],
-            keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
-            INIT_CODE_HASH
-          )
+        [platform.name]: {
+          ...PAIR_ADDRESS_CACHE[platform.name],
+          [chainId]: {
+            ...PAIR_ADDRESS_CACHE[platform.name][chainId],
+            [tokens[0].address]: {
+              ...PAIR_ADDRESS_CACHE?.[platform.name]?.[chainId]?.[tokens[0].address],
+              [tokens[1].address]: getCreate2Address(
+                platform.factoryAddress[chainId] as string,
+                keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
+                platform.initCodeHash
+              )
+            }
+          }
         }
       }
     }
-    return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address]
+    return PAIR_ADDRESS_CACHE[platform.name][chainId][tokens[0].address][tokens[1].address]
   }
 
   constructor(
     tokenAmountA: TokenAmount,
     tokenAmountB: TokenAmount,
     swapFee?: BigintIsh,
-    protocolFeeDenominator?: BigintIsh
+    protocolFeeDenominator?: BigintIsh,
+    platform: RoutablePlatform = RoutablePlatform.SWAPR
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
-    this.liquidityToken = new Token(
-      tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
-      18,
-      'DXS',
-      'DXswap'
-    )
-    this.swapFee = swapFee ? swapFee : defaultSwapFee
+
+    this.platform = platform ? platform : RoutablePlatform.SWAPR
+    const liquidityTokenAddress = Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform)
+    this.liquidityToken = new Token(tokenAmounts[0].token.chainId, liquidityTokenAddress, 18, 'DXS', 'DXswap')
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
+    this.swapFee = swapFee ? swapFee : platform.defaultSwapFee
   }
 
   /**
