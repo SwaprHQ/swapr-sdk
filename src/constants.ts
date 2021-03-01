@@ -3,7 +3,20 @@ import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
-import { rinkeby, mainnet, arbitrumTestnetV3, sokol, xdai } from 'dxswap-core/.contracts.json'
+import {
+  rinkeby as coreRinkeby,
+  mainnet as coreMainnet,
+  arbitrumTestnetV3 as coreArbitrumTestnetV3,
+  sokol as coreSokol,
+  xdai as coreXDai
+} from 'dxswap-core/.contracts.json'
+import {
+  rinkeby as peripheryRinkeby,
+  mainnet as peripheryMainnet,
+  arbitrumTestnetV3 as peripheryArbitrumTestnetV3,
+  sokol as peripherySokol,
+  xdai as peripheryXDai
+} from 'dxswap-periphery/.contracts.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -30,11 +43,19 @@ export enum Rounding {
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const FACTORY_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: mainnet.factory,
-  [ChainId.RINKEBY]: rinkeby.factory,
-  [ChainId.ARBITRUM_TESTNET_V3]: arbitrumTestnetV3.factory,
-  [ChainId.SOKOL]: sokol.factory,
-  [ChainId.XDAI]: xdai.factory
+  [ChainId.MAINNET]: coreMainnet.factory,
+  [ChainId.RINKEBY]: coreRinkeby.factory,
+  [ChainId.ARBITRUM_TESTNET_V3]: coreArbitrumTestnetV3.factory,
+  [ChainId.SOKOL]: coreSokol.factory,
+  [ChainId.XDAI]: coreXDai.factory
+}
+
+export const ROUTER_ADDRESS: { [chainId in ChainId]?: string } = {
+  [ChainId.RINKEBY]: peripheryRinkeby.router,
+  [ChainId.MAINNET]: peripheryMainnet.router,
+  [ChainId.ARBITRUM_TESTNET_V3]: peripheryArbitrumTestnetV3.router,
+  [ChainId.SOKOL]: peripherySokol.router,
+  [ChainId.XDAI]: peripheryXDai.router
 }
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
