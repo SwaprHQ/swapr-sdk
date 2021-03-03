@@ -9,6 +9,7 @@ import { Percent } from './fractions/percent'
 import { Price } from './fractions/price'
 import { TokenAmount } from './fractions/tokenAmount'
 import { Pair } from './pair'
+import { RoutablePlatform } from './routable-platform'
 import { Route } from './route'
 import { currencyEquals, Token } from './token'
 
@@ -137,6 +138,10 @@ export class Trade {
    * The unique identifier of the chain on which the swap is being performed (used to correctly handle the native currency).
    */
   public readonly chainId: ChainId
+  /**
+   * The swap platform this trade will execute on
+   */
+  public readonly platform: RoutablePlatform
 
   /**
    * Constructs an exact in trade with the given amount in and route
@@ -203,6 +208,7 @@ export class Trade {
     )
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
     this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
+    this.platform = this.route.pairs[0].platform
   }
 
   /**

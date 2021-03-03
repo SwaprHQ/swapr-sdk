@@ -21,7 +21,8 @@ import {
 import { Token } from './entities/token'
 import { Currency } from './entities/currency'
 import { Interface } from '@ethersproject/abi'
-import { TokenList, TokenInfo } from 'entities/token-list'
+import { TokenList, TokenInfo } from './entities/token-list'
+import { RoutablePlatform } from './entities/routable-platform'
 
 const TOKEN_DATA_CACHE: {
   [chainId: number]: { [address: string]: Currency }
@@ -168,10 +169,11 @@ export abstract class Fetcher {
   public static async fetchPairData(
     tokenA: Token,
     tokenB: Token,
-    provider = getDefaultProvider(getNetwork(tokenA.chainId))
+    provider = getDefaultProvider(getNetwork(tokenA.chainId)),
+    platform: RoutablePlatform = RoutablePlatform.SWAPR
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
-    const address = Pair.getAddress(tokenA, tokenB)
+    const address = Pair.getAddress(tokenA, tokenB, platform)
     const [reserves0, reserves1] = await new Contract(address, IDXswapPair.abi, provider).getReserves()
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
     const tokenAmountA = new TokenAmount(tokenA, balances[0])
@@ -181,7 +183,7 @@ export abstract class Fetcher {
       : [tokenAmountB, tokenAmountA]
     const liquidityToken = new Token(
       tokenAmounts[0].token.chainId,
-      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
+      Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform),
       18,
       'DXS',
       'DXswap'
