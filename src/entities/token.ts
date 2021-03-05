@@ -32,7 +32,14 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
-    [ChainId.SOKOL]: new Token(ChainId.SOKOL, '0xfDc50eF6b67F65Dddc36e56729a9D07BAe1A1f68', 18, 'WETH', 'Wrapped Ether')
+    [ChainId.SOKOL]: new Token(
+      ChainId.SOKOL,
+      '0xfDc50eF6b67F65Dddc36e56729a9D07BAe1A1f68',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
+    [ChainId.XDAI]: new Token(ChainId.XDAI, '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1', 18, 'WETH', 'Wrapped Ether on xDai')
   }
 
   public static readonly WSPOA: { [key: number]: Token } = {
