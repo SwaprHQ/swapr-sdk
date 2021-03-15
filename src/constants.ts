@@ -60,7 +60,7 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]?: string } = {
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
-  [ChainId.RINKEBY]: '0x6549A32e37Dc87056D5AaF42d586Fcf4D1685C9d',
+  [ChainId.RINKEBY]: '0xE14929d0483e61Cb3335BA1Ba9aA5a8C4b59ded7',
   [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F',
   [ChainId.SOKOL]: '0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068',
   [ChainId.XDAI]: '0xA6f48C8190be8F92A4c31aAE4756289Ef3d91477'
@@ -94,6 +94,7 @@ export const THREE = JSBI.BigInt(3)
 export const FIVE = JSBI.BigInt(5)
 export const TEN = JSBI.BigInt(10)
 export const _25 = JSBI.BigInt(25)
+export const SECONDS_IN_YEAR = JSBI.BigInt(31536000)
 export const _30 = JSBI.BigInt(30)
 export const _100 = JSBI.BigInt(100)
 export const _1000 = JSBI.BigInt(1000)

@@ -14,6 +14,9 @@ export class Currency {
   public readonly symbol?: string
   public readonly name?: string
 
+  // fiat currencies used to represent countervalues
+  public static readonly USD: Currency = new Currency(18, 'USD', 'US dollar')
+
   // Native currencies for deployment chains
   public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether')
   public static readonly SPOA: Currency = new Currency(18, 'SPOA', 'Sokol POA')
@@ -49,6 +52,8 @@ export class Currency {
     return Currency.NATIVE_CURRENCY[chainId]
   }
 }
+
+export const USD = Currency.USD
 
 export const ETHER = Currency.ETHER
 export const SPOA = Currency.SPOA

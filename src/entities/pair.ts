@@ -20,6 +20,7 @@ import { InsufficientReservesError, InsufficientInputAmountError } from '../erro
 import { Token } from './token'
 import { ChainId } from '../constants'
 import { RoutablePlatform } from './routable-platform'
+import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
 
 const INITIAL_CACHE_STATE = {
   [ChainId.MAINNET]: {},
@@ -33,7 +34,7 @@ let PAIR_ADDRESS_CACHE: {
   [supportedPlatformName: string]: {
     [chainId: number]: { [token0Address: string]: { [token1Address: string]: string } }
   }
-} =   {
+} = {
   [RoutablePlatform.SWAPR.name]: {
     ...INITIAL_CACHE_STATE
   },
@@ -54,6 +55,7 @@ export class Pair {
   public readonly swapFee: BigintIsh = defaultSwapFee
   public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
   public readonly platform: RoutablePlatform
+  public liquidityMiningCampaigns: LiquidityMiningCampaign[]
 
   /**
    * Returns true if the two pairs are equivalent, i.e. have the same address (calculated using create2).
@@ -98,7 +100,8 @@ export class Pair {
     tokenAmountB: TokenAmount,
     swapFee?: BigintIsh,
     protocolFeeDenominator?: BigintIsh,
-    platform: RoutablePlatform = RoutablePlatform.SWAPR
+    platform: RoutablePlatform = RoutablePlatform.SWAPR,
+    liquidityMiningCampaigns: LiquidityMiningCampaign[] = []
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
@@ -111,6 +114,7 @@ export class Pair {
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
     this.swapFee = swapFee ? swapFee : platform.defaultSwapFee
+    this.liquidityMiningCampaigns = liquidityMiningCampaigns
   }
 
   /**
