@@ -1,5 +1,5 @@
 import { currencyEquals } from '../token'
-import { Currency } from '../currency'
+import { Currency, USD } from '../currency'
 import invariant from 'tiny-invariant'
 import JSBI from 'jsbi'
 import _Big from 'big.js'
@@ -22,6 +22,14 @@ export class CurrencyAmount extends Fraction {
     const nativeCurrency = Currency.getNative(chainId)
     invariant(!!nativeCurrency, 'NO_NATIVE_CURRENCY')
     return new CurrencyAmount(nativeCurrency, amount)
+  }
+
+  /**
+   * Helper that calls the constructor with the USD currency
+   * @param amount amount of usd experessed in wei (with 18 decimals resolution)
+   */
+  public static usd(amount: BigintIsh): CurrencyAmount {
+    return new CurrencyAmount(USD, amount)
   }
 
   // amount _must_ be raw, i.e. in the native representation
