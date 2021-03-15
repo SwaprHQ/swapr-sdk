@@ -52,7 +52,7 @@ export class LiquidityMiningCampaign {
     locked: boolean,
     address?: string
   ) {
-    invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCINSISTENT_DATES')
+    invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
     invariant(staked.token.equals(targetedPair.liquidityToken), 'STAKED_LP_TOKEN')
     for (const reward of rewards) {
       invariant(staked.token.chainId === reward.token.chainId, 'CHAIN_ID')
