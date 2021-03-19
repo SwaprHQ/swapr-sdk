@@ -46,6 +46,9 @@ let PAIR_ADDRESS_CACHE: {
   },
   [RoutablePlatform.HONEYSWAP.name]: {
     ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.BAOSWAP.name]: {
+    ...INITIAL_CACHE_STATE
   }
 }
 
