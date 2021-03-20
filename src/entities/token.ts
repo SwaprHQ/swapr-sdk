@@ -39,7 +39,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
-    [ChainId.XDAI]: new Token(ChainId.XDAI, '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1', 18, 'WETH', 'Wrapped Ether on xDai')
+    [ChainId.XDAI]: new Token(
+      ChainId.XDAI,
+      '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+      18,
+      'WETH',
+      'Wrapped Ether on xDai'
+    )
   }
 
   public static readonly WSPOA: { [key: number]: Token } = {
@@ -95,6 +101,10 @@ export class Token extends Currency {
 
   public static getNativeWrapper(chainId: ChainId): Token {
     return Token.NATIVE_CURRENCY_WRAPPER[chainId]
+  }
+
+  public static isNativeWrapper(token: Token): boolean {
+    return Token.NATIVE_CURRENCY_WRAPPER[token.chainId].equals(token)
   }
 }
 

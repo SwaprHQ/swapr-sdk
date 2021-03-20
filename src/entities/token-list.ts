@@ -4,6 +4,7 @@ export interface TokenInfo {
   readonly name: string
   readonly decimals: number
   readonly symbol: string
+  readonly logoURI: string
 }
 
 export interface TokenList {
