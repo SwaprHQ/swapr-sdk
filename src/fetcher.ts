@@ -23,6 +23,7 @@ import { Currency } from './entities/currency'
 import { Interface } from '@ethersproject/abi'
 import { TokenList, TokenInfo } from './entities/token-list'
 import { RoutablePlatform } from './entities/routable-platform'
+import fetch from 'node-fetch'
 
 const TOKEN_DATA_CACHE: {
   [chainId: number]: { [address: string]: Currency }
@@ -30,6 +31,16 @@ const TOKEN_DATA_CACHE: {
   [ChainId.MAINNET]: {
     '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': { decimals: 9, symbol: 'DGD', name: 'DigixDAO' } // DGD
   }
+}
+
+const TOKEN_LOGO_URI_CACHE: {
+  [chainId in ChainId]: { [address: string]: string }
+} = {
+  [ChainId.MAINNET]: {},
+  [ChainId.XDAI]: {},
+  [ChainId.SOKOL]: {},
+  [ChainId.ARBITRUM_TESTNET_V3]: {},
+  [ChainId.RINKEBY]: {}
 }
 
 /**
@@ -368,17 +379,53 @@ export abstract class Fetcher {
     const tokenRegistryContract = new Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider)
     const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[chainId])
     const tokens = await this.fetchMultipleTokensData(chainId, tokenAddresses, provider)
+    const tokenList = []
+    for (const token of tokens) {
+      tokenList.push({
+        chainId,
+        address: token.address,
+        name: token.name!,
+        decimals: token.decimals,
+        symbol: token.symbol!,
+        logoURI: await this.fetchTokenLogoUri(token)
+      })
+    }
     return {
       name: 'DXswap default token list',
-      tokens: tokens.map(
-        (token: Token): TokenInfo => ({
-          chainId,
-          address: token.address,
-          name: token.name!,
-          decimals: token.decimals,
-          symbol: token.symbol!
-        })
-      )
+      tokens: tokenList
     }
+  }
+
+  private static async fetchTokenLogoUri(token: Token): Promise<string> {
+    const chainId = token.chainId
+    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
+      return '' // token logos not fully supported for testnets
+    }
+    if (Object.keys(TOKEN_LOGO_URI_CACHE[chainId]).length === 0) {
+      await this.populateTokenLogoCache(chainId)
+    }
+    return TOKEN_LOGO_URI_CACHE[chainId][token.address.toLowerCase()]
+  }
+
+  private static async populateTokenLogoCache(chainId: ChainId): Promise<void> {
+    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
+      return
+    }
+    let tokenListURL = ''
+    if (chainId == ChainId.MAINNET) {
+      tokenListURL = 'https://tokens.coingecko.com/uniswap/all.json' // coingecko list used for mainnet
+    } else {
+      tokenListURL = 'http://tokens.honeyswap.org' // honeyswap list used for xdai
+    }
+    const response = await fetch(tokenListURL)
+    if (!response.ok) {
+      console.warn(`could not fetch token list at ${tokenListURL}`)
+      return
+    }
+    const { tokens }: { tokens: TokenInfo[] } = await response.json()
+    TOKEN_LOGO_URI_CACHE[chainId] = tokens.reduce((cache: { [tokenAddress: string]: string }, token) => {
+      cache[token.address.toLowerCase()] = token.logoURI
+      return cache
+    }, {})
   }
 }
