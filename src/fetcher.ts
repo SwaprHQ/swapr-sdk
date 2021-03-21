@@ -415,7 +415,7 @@ export abstract class Fetcher {
     if (chainId == ChainId.MAINNET) {
       tokenListURL = 'https://tokens.coingecko.com/uniswap/all.json' // coingecko list used for mainnet
     } else {
-      tokenListURL = 'http://tokens.honeyswap.org' // honeyswap list used for xdai
+      tokenListURL = 'https://tokens.honeyswap.org' // honeyswap list used for xdai
     }
     const response = await fetch(tokenListURL)
     if (!response.ok) {
