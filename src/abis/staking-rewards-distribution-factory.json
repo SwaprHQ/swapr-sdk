@@ -84,6 +84,11 @@
         "internalType": "bool",
         "name": "_locked",
         "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_stakingCap",
+        "type": "uint256"
       }
     ],
     "name": "createDistribution",

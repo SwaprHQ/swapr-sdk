@@ -1,7 +1,7 @@
 import { BigintIsh, ChainId, SECONDS_IN_YEAR } from '../constants'
 import JSBI from 'jsbi'
 import { parseBigintIsh } from '../utils'
-import { CurrencyAmount, Fraction, Percent } from './fractions'
+import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
 import { Pair } from './pair'
 import invariant from 'tiny-invariant'
@@ -42,6 +42,7 @@ export class LiquidityMiningCampaign {
   public readonly staked: PricedTokenAmount
   public readonly duration: BigintIsh
   public readonly locked: boolean
+  public readonly stakingCap: TokenAmount
 
   constructor(
     startsAt: BigintIsh,
@@ -50,6 +51,7 @@ export class LiquidityMiningCampaign {
     rewards: PricedTokenAmount[],
     staked: PricedTokenAmount,
     locked: boolean,
+    stakingCap: TokenAmount,
     address?: string
   ) {
     invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
@@ -65,6 +67,7 @@ export class LiquidityMiningCampaign {
     this.staked = staked
     this.duration = JSBI.subtract(parseBigintIsh(endsAt), parseBigintIsh(startsAt))
     this.locked = locked
+    this.stakingCap = stakingCap
     this.address = address
   }
 
