@@ -428,4 +428,12 @@ export abstract class Fetcher {
       return cache
     }, {})
   }
+
+  public static getCachedTokenLogo(token: Token): string {
+    const { chainId } = token
+    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
+      return ''
+    }
+    return TOKEN_LOGO_URI_CACHE[chainId][token.address.toLowerCase()] || ''
+  }
 }
