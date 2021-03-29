@@ -1,8 +1,9 @@
 import { BigintIsh } from '../../constants'
 import { PricedToken } from '../priced-token'
 import { CurrencyAmount } from './currencyAmount'
+import { TokenAmount } from './tokenAmount'
 
-export class PricedTokenAmount extends CurrencyAmount {
+export class PricedTokenAmount extends TokenAmount {
   public readonly token: PricedToken
 
   // amount _must_ be raw, i.e. in the native representation
