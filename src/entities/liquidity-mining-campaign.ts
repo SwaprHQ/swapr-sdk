@@ -109,6 +109,13 @@ export class LiquidityMiningCampaign {
   }
 
   public get currentlyActive(): boolean {
-    return JSBI.lessThanOrEqual(parseBigintIsh(this.startsAt), JSBI.BigInt(Math.floor(Date.now() / 1000)))
+    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
+    return (
+      JSBI.lessThanOrEqual(parseBigintIsh(this.startsAt), now) && JSBI.greaterThan(parseBigintIsh(this.endsAt), now)
+    )
+  }
+
+  public get ended(): boolean {
+    return JSBI.greaterThan(JSBI.BigInt(Math.floor(Date.now() / 1000)), parseBigintIsh(this.endsAt))
   }
 }
