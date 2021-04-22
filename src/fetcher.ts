@@ -407,7 +407,7 @@ export abstract class Fetcher {
     return TOKEN_LOGO_URI_CACHE[chainId][token.address.toLowerCase()]
   }
 
-  private static async populateTokenLogoCache(chainId: ChainId): Promise<void> {
+  public static async populateTokenLogoCache(chainId: ChainId): Promise<void> {
     if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
       return
     }
