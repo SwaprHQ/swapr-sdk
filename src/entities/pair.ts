@@ -49,6 +49,9 @@ let PAIR_ADDRESS_CACHE: {
   },
   [RoutablePlatform.BAOSWAP.name]: {
     ...INITIAL_CACHE_STATE
+  },
+  [RoutablePlatform.LEVINSWAP.name]: {
+    ...INITIAL_CACHE_STATE
   }
 }
 
