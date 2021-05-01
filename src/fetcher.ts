@@ -40,7 +40,8 @@ const TOKEN_LOGO_URI_CACHE: {
   [ChainId.XDAI]: {},
   [ChainId.SOKOL]: {},
   [ChainId.ARBITRUM_TESTNET_V3]: {},
-  [ChainId.RINKEBY]: {}
+  [ChainId.RINKEBY]: {},
+  [ChainId.MATIC]: {}
 }
 
 /**

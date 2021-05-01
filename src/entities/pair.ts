@@ -27,7 +27,8 @@ const INITIAL_CACHE_STATE = {
   [ChainId.RINKEBY]: {},
   [ChainId.ARBITRUM_TESTNET_V3]: {},
   [ChainId.SOKOL]: {},
-  [ChainId.XDAI]: {}
+  [ChainId.XDAI]: {},
+  [ChainId.MATIC]: {}
 }
 
 let PAIR_ADDRESS_CACHE: {

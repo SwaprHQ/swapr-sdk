@@ -45,6 +45,13 @@ export class Token extends Currency {
       18,
       'WETH',
       'Wrapped Ether on xDai'
+    ),
+    [ChainId.MATIC]: new Token(
+      ChainId.MATIC,
+      '0x8cc8538d60901d19692F5ba22684732Bc28F54A3',
+      18,
+      'Plasma-WETH',
+      'Wrapped Ether on Matic'
     )
   }
 
@@ -54,6 +61,10 @@ export class Token extends Currency {
 
   public static readonly WXDAI: { [key: number]: Token } = {
     [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI')
+  }
+
+  public static readonly WMATIC: { [key: number]: Token } = {
+    [ChainId.MATIC]: new Token(ChainId.MATIC, '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 18, 'WMATIC', 'Wrapped Matic')
   }
 
   public static readonly DXD: { [key: number]: Token } = {
@@ -73,7 +84,8 @@ export class Token extends Currency {
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.ARBITRUM_TESTNET_V3]: Token.WETH[ChainId.ARBITRUM_TESTNET_V3],
     [ChainId.SOKOL]: Token.WSPOA[ChainId.SOKOL],
-    [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI]
+    [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
+    [ChainId.MATIC]: Token.WMATIC[ChainId.MATIC]
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
@@ -135,3 +147,4 @@ export const WETH = Token.WETH
 export const WSPOA = Token.WSPOA
 export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
+export const WMATIC = Token.WMATIC

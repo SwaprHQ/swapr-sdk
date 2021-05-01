@@ -2621,7 +2621,7 @@ domexception@^1.0.1:
 
 "dxswap-core@git://github.com/danivega1912/dxswap-core#useMatic":
   version "0.3.7"
-  resolved "git://github.com/danivega1912/dxswap-core#60080f506192a11b592ca8569f9eaae36ee53fcd"
+  resolved "git://github.com/danivega1912/dxswap-core#8d1a00eb1ce1f8c784f8eb1f17e10b981264118a"
   dependencies:
     typescript "^3.9.5"
 
@@ -2633,7 +2633,7 @@ domexception@^1.0.1:
 
 "dxswap-periphery@git://github.com/danivega1912/dxswap-periphery#useMatic":
   version "0.3.8"
-  resolved "git://github.com/danivega1912/dxswap-periphery#9434f3652020544999385fa0bb6da86c12dec127"
+  resolved "git://github.com/danivega1912/dxswap-periphery#03a49c8049c186f983b44ff4c74f113c0606ab23"
   dependencies:
     dxswap-core "git://github.com/levelkdev/dxswap-core.git#v0.3.1"
 
