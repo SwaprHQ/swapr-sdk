@@ -50,7 +50,7 @@ export class Token extends Currency {
       ChainId.MATIC,
       '0x8cc8538d60901d19692F5ba22684732Bc28F54A3',
       18,
-      'Plasma-WETH',
+      'WETH',
       'Wrapped Ether on Matic'
     )
   }
