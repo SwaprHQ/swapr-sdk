@@ -3,6 +3,7 @@ import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
 import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
+import SWPR_CLAIMER_ABI from './abis/swpr-claimer.json'
 import {
   rinkeby as coreRinkeby,
   mainnet as coreMainnet,
@@ -66,6 +67,14 @@ export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.XDAI]: '0xCD2A45F36464FdB1065160e03A2353996Ea8Ff57'
 }
 
+export const SWPR_CLAIMER_ADDRESS: { [chainId: number]: string } = {
+  [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
+  [ChainId.RINKEBY]: '0x2E6eB6847CfFA5719233F9A430Af526Dc94641eF',
+  [ChainId.ARBITRUM_TESTNET_V3]: '0x0000000000000000000000000000000000001234',
+  [ChainId.SOKOL]: '0x0000000000000000000000000000000000001234',
+  [ChainId.XDAI]: '0x0000000000000000000000000000000000001234'
+}
+
 export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
   [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253',
@@ -126,5 +135,6 @@ export {
   TOKEN_REGISTRY_ABI,
   PERMISSIVE_MULTICALL_ADDRESS,
   STAKING_REWARDS_FACTORY_ABI,
-  STAKING_REWARDS_DISTRIBUTION_ABI
+  STAKING_REWARDS_DISTRIBUTION_ABI,
+  SWPR_CLAIMER_ABI
 }

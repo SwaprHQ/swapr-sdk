@@ -68,6 +68,10 @@ export class Token extends Currency {
     )
   }
 
+  public static readonly SWPR: { [key: number]: Token } = {
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x2f638Ec35b429d788bA480210B38e73E58920a09', 18, 'SWPR', 'Swapr')
+  }
+
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
@@ -135,3 +139,4 @@ export const WETH = Token.WETH
 export const WSPOA = Token.WSPOA
 export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
+export const SWPR = Token.SWPR
