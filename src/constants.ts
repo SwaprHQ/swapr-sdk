@@ -2,7 +2,6 @@ import JSBI from 'jsbi'
 import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
-import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
 import {
   rinkeby as coreRinkeby,
   mainnet as coreMainnet,
@@ -60,18 +59,10 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]?: string } = {
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
-  [ChainId.RINKEBY]: '0x6384c36BB2661b40E92996d07447e04F6c393233',
+  [ChainId.RINKEBY]: '0x163a3640Ce993A0b4c11885a6D4dAc16DFC188e1',
   [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F',
   [ChainId.SOKOL]: '0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068',
   [ChainId.XDAI]: '0xCD2A45F36464FdB1065160e03A2353996Ea8Ff57'
-}
-
-export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
-  [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x9d6f6d86b81289e40e07fcda805c06f6e9b8f629',
-  [ChainId.SOKOL]: '0x681c3836a5589b933062ACA4fd846c1287a2865F',
-  [ChainId.XDAI]: '0x85E001DfFF16F388Bc32Cd18009ceDF8F9b62C9E'
 }
 
 export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
@@ -123,7 +114,6 @@ const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
 
 export {
   PERMISSIVE_MULTICALL_ABI,
-  TOKEN_REGISTRY_ABI,
   PERMISSIVE_MULTICALL_ADDRESS,
   STAKING_REWARDS_FACTORY_ABI,
   STAKING_REWARDS_DISTRIBUTION_ABI
