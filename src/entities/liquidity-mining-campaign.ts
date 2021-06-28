@@ -71,6 +71,15 @@ export class LiquidityMiningCampaign {
     this.address = address
   }
 
+  public get remainingDuration(): JSBI {
+    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
+    const jsbiStartsAt = parseBigintIsh(this.startsAt)
+    const jsbiEndsAt = parseBigintIsh(this.endsAt)
+    if (JSBI.lessThan(now, jsbiStartsAt)) return JSBI.subtract(jsbiEndsAt, jsbiStartsAt)
+    if (JSBI.greaterThanOrEqual(now, jsbiEndsAt)) return JSBI.BigInt('0')
+    return JSBI.subtract(jsbiEndsAt, now)
+  }
+
   public get remainingDistributionPercentage(): Percent {
     const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
     const jsbiStartsAt = parseBigintIsh(this.startsAt)
@@ -103,7 +112,7 @@ export class LiquidityMiningCampaign {
     )
 
     const yieldInPeriod = cumulativeRemainingRewardAmountNativeCurrency.divide(stakedValueNativeCurrency)
-    const annualizationMultiplier = new Fraction(SECONDS_IN_YEAR.toString(), this.duration.toString())
+    const annualizationMultiplier = new Fraction(SECONDS_IN_YEAR.toString(), this.remainingDuration.toString())
     const rawApy = yieldInPeriod.multiply(annualizationMultiplier)
     return new Percent(rawApy.numerator, rawApy.denominator)
   }
