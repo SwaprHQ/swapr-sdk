@@ -23,7 +23,7 @@ export class Currency {
   private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
-    [ChainId.ARBITRUM]: Currency.ETHER,
+    [ChainId.ARBITRUM_ONE]: Currency.ETHER,
     [ChainId.XDAI]: Currency.XDAI
   }
 

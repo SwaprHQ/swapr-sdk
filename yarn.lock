@@ -2594,15 +2594,15 @@ domexception@^1.0.1:
   dependencies:
     typescript "^3.9.5"
 
-"dxswap-core@git://github.com/levelkdev/dxswap-core.git#v0.3.7":
-  version "0.3.7"
-  resolved "git://github.com/levelkdev/dxswap-core.git#967a394c4e7f4e101faf2ebcd67e6a972d06aba2"
+"dxswap-core@git://github.com/levelkdev/dxswap-core.git#v0.3.8":
+  version "0.3.8"
+  resolved "git://github.com/levelkdev/dxswap-core.git#4004126b25eccf30379475a2415ab02959ba4adc"
   dependencies:
     typescript "^3.9.5"
 
-"dxswap-periphery@git://github.com/levelkdev/dxswap-periphery.git#v0.3.8":
-  version "0.3.8"
-  resolved "git://github.com/levelkdev/dxswap-periphery.git#9b0d792ea8fe1c9f483bd11a5d8e83634d6814b5"
+"dxswap-periphery@git://github.com/levelkdev/dxswap-periphery.git#v0.3.9":
+  version "0.3.9"
+  resolved "git://github.com/levelkdev/dxswap-periphery.git#a364e63d6b5c03e921dc8beb5d69b2708564264d"
   dependencies:
     dxswap-core "git://github.com/levelkdev/dxswap-core.git#v0.3.1"
 
