@@ -5,13 +5,15 @@ import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distributio
 import {
   rinkeby as coreRinkeby,
   mainnet as coreMainnet,
-  arbitrum as coreArbitrumOne,
+  arbitrumOne as coreArbitrumOne,
+  arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
   xdai as coreXDai
 } from 'dxswap-core/.contracts.json'
 import {
   rinkeby as peripheryRinkeby,
   mainnet as peripheryMainnet,
-  arbitrum as peripheryArbitrumOne,
+  arbitrumOne as peripheryArbitrumOne,
+  arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
   xdai as peripheryXDai
 } from 'dxswap-periphery/.contracts.json'
 
@@ -22,7 +24,8 @@ export enum ChainId {
   MAINNET = 1,
   RINKEBY = 4,
   XDAI = 100,
-  ARBITRUM_ONE = 42161
+  ARBITRUM_ONE = 42161,
+  ARBITRUM_RINKEBY = 421611
 }
 
 export enum TradeType {
@@ -38,25 +41,28 @@ export enum Rounding {
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-export const FACTORY_ADDRESS: { [chainId: number]: string } = {
+export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: coreMainnet.factory,
   [ChainId.RINKEBY]: coreRinkeby.factory,
   [ChainId.ARBITRUM_ONE]: coreArbitrumOne.factory,
+  [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
   [ChainId.XDAI]: coreXDai.factory
 }
 
-export const ROUTER_ADDRESS: { [chainId in ChainId]?: string } = {
+export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: peripheryRinkeby.router,
   [ChainId.MAINNET]: peripheryMainnet.router,
   [ChainId.XDAI]: peripheryXDai.router,
-  [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router
+  [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
+  [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router
 }
 
-export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
+export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
   [ChainId.RINKEBY]: '0x163a3640Ce993A0b4c11885a6D4dAc16DFC188e1',
   [ChainId.XDAI]: '0xCD2A45F36464FdB1065160e03A2353996Ea8Ff57',
-  [ChainId.ARBITRUM_ONE]: '0x0000000000000000000000000000000000001234'
+  [ChainId.ARBITRUM_ONE]: '0x0000000000000000000000000000000000001234',
+  [ChainId.ARBITRUM_RINKEBY]: '0x0000000000000000000000000000000000001234'
 }
 
 export const INIT_CODE_HASH = '0xd306a548755b9295ee49cc729e13ca4a45e00199bbd890fa146da43a50571776'
@@ -90,11 +96,12 @@ export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 }
 
-const MULTICALL_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
-  [ChainId.RINKEBY]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+const MULTICALL_ADDRESS: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+  [ChainId.RINKEBY]: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
   [ChainId.ARBITRUM_ONE]: '0xF718F2bd590E5621e53f7b89398e52f7Acced8ca',
-  [ChainId.XDAI]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696'
+  [ChainId.XDAI]: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
+  [ChainId.ARBITRUM_RINKEBY]: '0xf1f8AAc64036cdd399886b1C157B7e3b361093F3'
 }
 
 export { MULTICALL_ABI, MULTICALL_ADDRESS, STAKING_REWARDS_FACTORY_ABI, STAKING_REWARDS_DISTRIBUTION_ABI }

@@ -25,6 +25,10 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
   [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
     utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
     ChainId.ARBITRUM_ONE
+  ),
+  [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
+    ChainId.ARBITRUM_RINKEBY
   )
 }
 

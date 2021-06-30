@@ -188,7 +188,7 @@ export abstract class Fetcher {
     }
 
     // Fetch the pairs that we dont have the fee and owner
-    const swapFeesFetched = await this.fetchSwapFees(tokenPairsToFetch, provider)
+    const swapFeesFetched = tokenPairsToFetch.length === 0 ? [] : await this.fetchSwapFees(tokenPairsToFetch, provider)
     for (let tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++)
       allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex]
     return allSwapPairs

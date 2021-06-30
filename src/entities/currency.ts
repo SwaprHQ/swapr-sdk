@@ -24,6 +24,7 @@ export class Currency {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
     [ChainId.ARBITRUM_ONE]: Currency.ETHER,
+    [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
     [ChainId.XDAI]: Currency.XDAI
   }
 

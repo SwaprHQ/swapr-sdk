@@ -32,6 +32,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
       '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
@@ -54,6 +61,20 @@ export class Token extends Currency {
       18,
       'DXD',
       'DXdao from Ethereum'
+    ),
+    [ChainId.ARBITRUM_ONE]: new Token(
+      ChainId.ARBITRUM_ONE,
+      '0xC3Ae0333F0F34aa734D5493276223d95B8F9Cb37',
+      18,
+      'DXD',
+      'DXdao from Ethereum'
+    ),
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0x417A288152A5a13b843135Db5Dc72Ea007a9EB8d',
+      18,
+      'DXD',
+      'DXdao from Ethereum'
     )
   }
 
@@ -61,6 +82,7 @@ export class Token extends Currency {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.ARBITRUM_ONE]: Token.WETH[ChainId.ARBITRUM_ONE],
+    [ChainId.ARBITRUM_RINKEBY]: Token.WETH[ChainId.ARBITRUM_RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI]
   }
 
