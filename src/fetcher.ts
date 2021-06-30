@@ -7,13 +7,7 @@ import { Pair } from './entities/pair'
 import IDXswapPair from 'dxswap-core/build/IDXswapPair.json'
 import IDXswapFactory from 'dxswap-core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
-import {
-  ChainId,
-  BigintIsh,
-  FACTORY_ADDRESS,
-  PERMISSIVE_MULTICALL_ADDRESS,
-  PERMISSIVE_MULTICALL_ABI
-} from './constants'
+import { ChainId, BigintIsh, FACTORY_ADDRESS, MULTICALL_ADDRESS, MULTICALL_ABI } from './constants'
 import { Token } from './entities/token'
 import { RoutablePlatform } from './entities/routable-platform'
 
@@ -97,11 +91,7 @@ export abstract class Fetcher {
       owner: string
     }[]
   > {
-    const multicall = new Contract(
-      PERMISSIVE_MULTICALL_ADDRESS[liquidityTokens[0].chainId],
-      PERMISSIVE_MULTICALL_ABI,
-      provider
-    )
+    const multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider)
     const liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider)
     let calls = []
@@ -158,7 +148,7 @@ export abstract class Fetcher {
       owner: string
     }
   }> {
-    const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
+    const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)
     const allPairsLength = await factoryContract.allPairsLength()
     let allSwapPairs: {
@@ -198,7 +188,7 @@ export abstract class Fetcher {
     }
 
     // Fetch the pairs that we dont have the fee and owner
-    const swapFeesFetched = await this.fetchSwapFees(tokenPairsToFetch, provider)
+    const swapFeesFetched = tokenPairsToFetch.length === 0 ? [] : await this.fetchSwapFees(tokenPairsToFetch, provider)
     for (let tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++)
       allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex]
     return allSwapPairs

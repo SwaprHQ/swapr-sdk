@@ -22,11 +22,11 @@ import { ChainId } from '../constants'
 import { RoutablePlatform } from './routable-platform'
 import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
 
-const INITIAL_CACHE_STATE = {
+const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.MAINNET]: {},
   [ChainId.RINKEBY]: {},
-  [ChainId.ARBITRUM_TESTNET_V3]: {},
-  [ChainId.SOKOL]: {},
+  [ChainId.ARBITRUM_ONE]: {},
+  [ChainId.ARBITRUM_RINKEBY]: {},
   [ChainId.XDAI]: {}
 }
 
