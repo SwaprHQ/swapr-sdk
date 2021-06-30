@@ -6,8 +6,7 @@ import { validateSolidityTypeInstance } from '../utils'
 /**
  * A currency is any fungible financial instrument on the target chain.
  *
- * The only instances of the base class `Currency` are native currencies such as Ether for Ethereum,
- * SPOA for the Sokol testnet and xDAI for xDAI.
+ * The only instances of the base class `Currency` are native currencies such as Ether for Ethereum and xDAI for xDAI.
  */
 export class Currency {
   public readonly decimals: number
@@ -19,14 +18,13 @@ export class Currency {
 
   // Native currencies for deployment chains
   public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether')
-  public static readonly SPOA: Currency = new Currency(18, 'SPOA', 'Sokol POA')
   public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI')
 
   private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
-    [ChainId.ARBITRUM_TESTNET_V3]: Currency.ETHER,
-    [ChainId.SOKOL]: Currency.SPOA,
+    [ChainId.ARBITRUM_ONE]: Currency.ETHER,
+    [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
     [ChainId.XDAI]: Currency.XDAI
   }
 
@@ -56,5 +54,4 @@ export class Currency {
 export const USD = Currency.USD
 
 export const ETHER = Currency.ETHER
-export const SPOA = Currency.SPOA
 export const XDAI = Currency.XDAI

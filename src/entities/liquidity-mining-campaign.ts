@@ -22,13 +22,13 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
     utils.parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
     ChainId.XDAI
   ),
-  [ChainId.SOKOL]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('1000', Token.getNative(ChainId.SOKOL).decimals).toString(),
-    ChainId.SOKOL
+  [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
+    ChainId.ARBITRUM_ONE
   ),
-  [ChainId.ARBITRUM_TESTNET_V3]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_TESTNET_V3).decimals).toString(),
-    ChainId.ARBITRUM_TESTNET_V3
+  [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
+    ChainId.ARBITRUM_RINKEBY
   )
 }
 
