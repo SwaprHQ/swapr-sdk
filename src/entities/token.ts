@@ -71,7 +71,7 @@ export class Token extends Currency {
     ),
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
-      '0x417A288152A5a13b843135Db5Dc72Ea007a9EB8d',
+      '0x5d47100B0854525685907D5D773b92c22c0c745e',
       18,
       'DXD',
       'DXdao from Ethereum'
