@@ -97,6 +97,9 @@ export class LiquidityMiningCampaign {
   }
 
   public get apy(): Percent {
+    // when the campaign has ended, apy is returned as 0
+    if (this.remainingDuration.toString() === '0') return new Percent('0', '1')
+
     const remainingRewards = this.remainingRewards
 
     let stakedValueNativeCurrency = this.staked.nativeCurrencyAmount
