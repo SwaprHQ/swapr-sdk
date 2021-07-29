@@ -1,21 +1,20 @@
 import JSBI from 'jsbi'
-import PERMISSIVE_MULTICALL_ABI from './abis/PermissiveMulticall.json'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
-import TOKEN_REGISTRY_ABI from './abis/token-registry.json'
 import SWPR_CLAIMER_ABI from './abis/swpr-claimer.json'
+import MULTICALL_ABI from './abis/multicall.json'
 import {
   rinkeby as coreRinkeby,
   mainnet as coreMainnet,
-  arbitrumTestnetV3 as coreArbitrumTestnetV3,
-  sokol as coreSokol,
+  arbitrumOne as coreArbitrumOne,
+  arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
   xdai as coreXDai
 } from 'dxswap-core/.contracts.json'
 import {
   rinkeby as peripheryRinkeby,
   mainnet as peripheryMainnet,
-  arbitrumTestnetV3 as peripheryArbitrumTestnetV3,
-  sokol as peripherySokol,
+  arbitrumOne as peripheryArbitrumOne,
+  arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
   xdai as peripheryXDai
 } from 'dxswap-periphery/.contracts.json'
 
@@ -25,9 +24,9 @@ export type BigintIsh = JSBI | bigint | string
 export enum ChainId {
   MAINNET = 1,
   RINKEBY = 4,
-  ARBITRUM_TESTNET_V3 = 79377087078960,
-  SOKOL = 77,
-  XDAI = 100
+  XDAI = 100,
+  ARBITRUM_ONE = 42161,
+  ARBITRUM_RINKEBY = 421611
 }
 
 export enum TradeType {
@@ -43,52 +42,36 @@ export enum Rounding {
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-export const FACTORY_ADDRESS: { [chainId: number]: string } = {
+export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: coreMainnet.factory,
   [ChainId.RINKEBY]: coreRinkeby.factory,
-  [ChainId.ARBITRUM_TESTNET_V3]: coreArbitrumTestnetV3.factory,
-  [ChainId.SOKOL]: coreSokol.factory,
+  [ChainId.ARBITRUM_ONE]: coreArbitrumOne.factory,
+  [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
   [ChainId.XDAI]: coreXDai.factory
 }
 
-export const ROUTER_ADDRESS: { [chainId in ChainId]?: string } = {
+export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: peripheryRinkeby.router,
   [ChainId.MAINNET]: peripheryMainnet.router,
-  [ChainId.ARBITRUM_TESTNET_V3]: peripheryArbitrumTestnetV3.router,
-  [ChainId.SOKOL]: peripherySokol.router,
-  [ChainId.XDAI]: peripheryXDai.router
+  [ChainId.XDAI]: peripheryXDai.router,
+  [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
+  [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router
 }
 
-export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId: number]: string } = {
+export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
-  [ChainId.RINKEBY]: '0xabD8180cdDe7F40aA87490B3FfB7323D9202f08a',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0xB95Ad562EDE8DD78BBFC287fA18150e802b09D9F',
-  [ChainId.SOKOL]: '0xD436e756Cf41318ADeC62E8dCbEF2608753Ae068',
-  [ChainId.XDAI]: '0xCD2A45F36464FdB1065160e03A2353996Ea8Ff57'
+  [ChainId.RINKEBY]: '0x163a3640Ce993A0b4c11885a6D4dAc16DFC188e1',
+  [ChainId.XDAI]: '0xCD2A45F36464FdB1065160e03A2353996Ea8Ff57',
+  [ChainId.ARBITRUM_ONE]: '0x0000000000000000000000000000000000001234',
+  [ChainId.ARBITRUM_RINKEBY]: '0x55Bfae77D9980702e5b60D984983AE3B776Ab91C'
 }
 
-export const SWPR_CLAIMER_ADDRESS: { [chainId: number]: string } = {
+export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: '0x0000000000000000000000000000000000001234',
-  [ChainId.RINKEBY]: '0x2E6eB6847CfFA5719233F9A430Af526Dc94641eF',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x0000000000000000000000000000000000001234',
-  [ChainId.SOKOL]: '0x0000000000000000000000000000000000001234',
+  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000001234',
+  [ChainId.ARBITRUM_RINKEBY]: '0x3c3eaa7B2953170BbffF0a477f9Cbcb0280B9c95',
+  [ChainId.ARBITRUM_ONE]: '0x0000000000000000000000000000000000001234',
   [ChainId.XDAI]: '0x0000000000000000000000000000000000001234'
-}
-
-export const TOKEN_REGISTRY_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0x93DB90445B76329e9ed96ECd74e76D8fbf2590d8',
-  [ChainId.RINKEBY]: '0x815d1b18f6baaeb3853b0f637475a5c2b28e2253',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x9d6f6d86b81289e40e07fcda805c06f6e9b8f629',
-  [ChainId.SOKOL]: '0x681c3836a5589b933062ACA4fd846c1287a2865F',
-  [ChainId.XDAI]: '0x85E001DfFF16F388Bc32Cd18009ceDF8F9b62C9E'
-}
-
-export const DXSWAP_TOKEN_LIST_ID: { [chainId: number]: number } = {
-  [ChainId.MAINNET]: 1,
-  [ChainId.RINKEBY]: 1,
-  [ChainId.ARBITRUM_TESTNET_V3]: 1,
-  [ChainId.SOKOL]: 1,
-  [ChainId.XDAI]: 5
 }
 
 export const INIT_CODE_HASH = '0xd306a548755b9295ee49cc729e13ca4a45e00199bbd890fa146da43a50571776'
@@ -122,18 +105,17 @@ export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 }
 
-const PERMISSIVE_MULTICALL_ADDRESS: { [chainId: number]: string } = {
-  [ChainId.MAINNET]: '0x0946f567d0ed891e6566c1da8e5093517f43571d',
-  [ChainId.RINKEBY]: '0x798d8ced4dff8f054a5153762187e84751a73344',
-  [ChainId.ARBITRUM_TESTNET_V3]: '0x73a08DC74eF4ed2c360199244bb69F1464204E7C',
-  [ChainId.SOKOL]: '0x4D97Bd8eFaCf46b33c4438Ed0B7B6AABfa2359FB',
-  [ChainId.XDAI]: '0x4E75068ED2338fCa56631E740B0723A6dbc1d5CD'
+const MULTICALL_ADDRESS: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+  [ChainId.RINKEBY]: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
+  [ChainId.ARBITRUM_ONE]: '0xF718F2bd590E5621e53f7b89398e52f7Acced8ca',
+  [ChainId.XDAI]: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
+  [ChainId.ARBITRUM_RINKEBY]: '0xf1f8AAc64036cdd399886b1C157B7e3b361093F3'
 }
 
 export {
-  PERMISSIVE_MULTICALL_ABI,
-  TOKEN_REGISTRY_ABI,
-  PERMISSIVE_MULTICALL_ADDRESS,
+  MULTICALL_ABI,
+  MULTICALL_ADDRESS,
   STAKING_REWARDS_FACTORY_ABI,
   STAKING_REWARDS_DISTRIBUTION_ABI,
   SWPR_CLAIMER_ABI

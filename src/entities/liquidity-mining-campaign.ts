@@ -22,13 +22,13 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
     utils.parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
     ChainId.XDAI
   ),
-  [ChainId.SOKOL]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('1000', Token.getNative(ChainId.SOKOL).decimals).toString(),
-    ChainId.SOKOL
+  [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
+    ChainId.ARBITRUM_ONE
   ),
-  [ChainId.ARBITRUM_TESTNET_V3]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_TESTNET_V3).decimals).toString(),
-    ChainId.ARBITRUM_TESTNET_V3
+  [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
+    ChainId.ARBITRUM_RINKEBY
   )
 }
 
@@ -71,6 +71,15 @@ export class LiquidityMiningCampaign {
     this.address = address
   }
 
+  public get remainingDuration(): JSBI {
+    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
+    const jsbiStartsAt = parseBigintIsh(this.startsAt)
+    const jsbiEndsAt = parseBigintIsh(this.endsAt)
+    if (JSBI.lessThan(now, jsbiStartsAt)) return JSBI.subtract(jsbiEndsAt, jsbiStartsAt)
+    if (JSBI.greaterThanOrEqual(now, jsbiEndsAt)) return JSBI.BigInt('0')
+    return JSBI.subtract(jsbiEndsAt, now)
+  }
+
   public get remainingDistributionPercentage(): Percent {
     const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
     const jsbiStartsAt = parseBigintIsh(this.startsAt)
@@ -88,6 +97,9 @@ export class LiquidityMiningCampaign {
   }
 
   public get apy(): Percent {
+    // when the campaign has ended, apy is returned as 0
+    if (this.remainingDuration.toString() === '0') return new Percent('0', '1')
+
     const remainingRewards = this.remainingRewards
 
     let stakedValueNativeCurrency = this.staked.nativeCurrencyAmount
@@ -103,7 +115,7 @@ export class LiquidityMiningCampaign {
     )
 
     const yieldInPeriod = cumulativeRemainingRewardAmountNativeCurrency.divide(stakedValueNativeCurrency)
-    const annualizationMultiplier = new Fraction(SECONDS_IN_YEAR.toString(), this.duration.toString())
+    const annualizationMultiplier = new Fraction(SECONDS_IN_YEAR.toString(), this.remainingDuration.toString())
     const rawApy = yieldInPeriod.multiply(annualizationMultiplier)
     return new Percent(rawApy.numerator, rawApy.denominator)
   }

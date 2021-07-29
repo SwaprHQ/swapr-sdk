@@ -1,47 +1,15 @@
 import JSBI from 'jsbi'
 import { Contract } from '@ethersproject/contracts'
 import { getNetwork } from '@ethersproject/networks'
-import { getDefaultProvider, Provider } from '@ethersproject/providers'
+import { getDefaultProvider } from '@ethersproject/providers'
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import IDXswapPair from 'dxswap-core/build/IDXswapPair.json'
 import IDXswapFactory from 'dxswap-core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
-import ERC20Abi from './abis/ERC20.json'
-import TokenRegistryAbi from './abis/token-registry.json'
-import {
-  ChainId,
-  BigintIsh,
-  FACTORY_ADDRESS,
-  PERMISSIVE_MULTICALL_ADDRESS,
-  PERMISSIVE_MULTICALL_ABI,
-  TOKEN_REGISTRY_ADDRESS,
-  DXSWAP_TOKEN_LIST_ID
-} from './constants'
+import { ChainId, BigintIsh, FACTORY_ADDRESS, MULTICALL_ADDRESS, MULTICALL_ABI } from './constants'
 import { Token } from './entities/token'
-import { Currency } from './entities/currency'
-import { Interface } from '@ethersproject/abi'
-import { TokenList, TokenInfo } from './entities/token-list'
 import { RoutablePlatform } from './entities/routable-platform'
-import fetch from 'node-fetch'
-
-const TOKEN_DATA_CACHE: {
-  [chainId: number]: { [address: string]: Currency }
-} = {
-  [ChainId.MAINNET]: {
-    '0xE0B7927c4aF23765Cb51314A0E0521A9645F0E2A': { decimals: 9, symbol: 'DGD', name: 'DigixDAO' } // DGD
-  }
-}
-
-const TOKEN_LOGO_URI_CACHE: {
-  [chainId in ChainId]: { [address: string]: string }
-} = {
-  [ChainId.MAINNET]: {},
-  [ChainId.XDAI]: {},
-  [ChainId.SOKOL]: {},
-  [ChainId.ARBITRUM_TESTNET_V3]: {},
-  [ChainId.RINKEBY]: {}
-}
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
@@ -51,125 +19,6 @@ export abstract class Fetcher {
    * Cannot be constructed.
    */
   private constructor() {}
-
-  /**
-   * Fetch information for a given token on the given chain, using the given ethers provider.
-   * @param chainId chain of the token
-   * @param address address of the token on the chain
-   * @param provider provider used to fetch the token
-   */
-  public static async fetchTokenData(
-    chainId: ChainId,
-    address: string,
-    provider: Provider = getDefaultProvider(getNetwork(chainId))
-  ): Promise<Token> {
-    let tokenData: Currency
-    if (TOKEN_DATA_CACHE?.[chainId]?.[address]) {
-      tokenData = TOKEN_DATA_CACHE[chainId][address]
-    } else {
-      const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
-      const erc20Interface = new Contract(address, ERC20Abi, provider).interface
-      const symbolFunction = erc20Interface.getFunction('symbol()')
-      const nameFunction = erc20Interface.getFunction('name()')
-      const decimalsFunction = erc20Interface.getFunction('decimals()')
-      const result = await multicall.aggregate([
-        [address, erc20Interface.encodeFunctionData(symbolFunction)],
-        [address, erc20Interface.encodeFunctionData(nameFunction)],
-        [address, erc20Interface.encodeFunctionData(decimalsFunction)]
-      ])
-      tokenData = {
-        symbol: erc20Interface.decodeFunctionResult(symbolFunction, result.returnData[0])[0],
-        name: erc20Interface.decodeFunctionResult(nameFunction, result.returnData[1])[0],
-        decimals: erc20Interface.decodeFunctionResult(decimalsFunction, result.returnData[2])[0]
-      }
-      TOKEN_DATA_CACHE[chainId][address] = tokenData
-    }
-    return new Token(chainId, address, tokenData.decimals, tokenData.symbol, tokenData.name)
-  }
-
-  /**
-   * Fetch on-chain, information on multiple given ERC20 token addresses, using the given ethers provider
-   * (or a default one if not provided). The results are cached for efficient subsequent accesses.
-   * @param chainId chain of the token
-   * @param addresses addresses of the tokens for which the data is needed
-   * @param provider provider used to fetch the token
-   */
-  public static async fetchMultipleTokensData(
-    chainId: ChainId,
-    addresses: string[],
-    provider: Provider = getDefaultProvider(getNetwork(chainId))
-  ): Promise<Token[]> {
-    const { previouslyCachedTokens, missingTokens } = addresses.reduce<{
-      previouslyCachedTokens: Token[]
-      missingTokens: string[]
-    }>(
-      (
-        accumulator: {
-          previouslyCachedTokens: Token[]
-          missingTokens: string[]
-        },
-        address: string,
-        _currentIndex: number,
-        _array: string[]
-      ): { previouslyCachedTokens: Token[]; missingTokens: string[] } => {
-        if (TOKEN_DATA_CACHE?.[chainId]?.[address]) {
-          const cachedToken = TOKEN_DATA_CACHE[chainId][address]
-          accumulator.previouslyCachedTokens.push(
-            new Token(chainId, address, cachedToken.decimals, cachedToken.symbol, cachedToken.name)
-          )
-        } else {
-          accumulator.missingTokens.push(address)
-        }
-        return accumulator
-      },
-      { previouslyCachedTokens: [], missingTokens: [] }
-    )
-    const tokenData = previouslyCachedTokens
-    if (missingTokens.length > 0) {
-      const erc20Interface = new Interface(ERC20Abi)
-      const getSymbolFunction = erc20Interface.getFunction('symbol()')
-      const getNameFunction = erc20Interface.getFunction('name()')
-      const getDecimalsFunction = erc20Interface.getFunction('decimals()')
-      const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
-      const aggregatedCalls = missingTokens.reduce<[string, string][]>(
-        (
-          accumulator: [string, string][],
-          address: string,
-          _currentIndex: number,
-          _array: string[]
-        ): [string, string][] => {
-          accumulator.push([address, erc20Interface.encodeFunctionData(getSymbolFunction)])
-          accumulator.push([address, erc20Interface.encodeFunctionData(getNameFunction)])
-          accumulator.push([address, erc20Interface.encodeFunctionData(getDecimalsFunction)])
-          return accumulator
-        },
-        []
-      )
-      const result = await multicall.aggregateWithPermissiveness(aggregatedCalls)
-      const returnData = result[1]
-      missingTokens.forEach((address: string, index: number) => {
-        const [wrappedSymbol, wrappedName, wrappedDecimals] = returnData.slice(index * 3, index * 3 + 3)
-        if (!wrappedSymbol.success || !wrappedName.success || !wrappedDecimals.success) {
-          console.warn(`could not fetch ERC20 data for address ${address}`)
-          return
-        }
-        try {
-          tokenData.push(
-            new Token(
-              chainId,
-              address,
-              erc20Interface.decodeFunctionResult(getDecimalsFunction, wrappedDecimals.data)[0],
-              erc20Interface.decodeFunctionResult(getSymbolFunction, wrappedSymbol.data)[0],
-              erc20Interface.decodeFunctionResult(getNameFunction, wrappedName.data)[0]
-            )
-          )
-        } catch (error) {
-          console.error(`error decoding ERC20 data for address ${address}`)
-        }
-      })
-    }
-    return tokenData
-  }
 
   /**
    * Fetches information about a pair and constructs a pair from the given two tokens.
@@ -242,11 +91,7 @@ export abstract class Fetcher {
       owner: string
     }[]
   > {
-    const multicall = new Contract(
-      PERMISSIVE_MULTICALL_ADDRESS[liquidityTokens[0].chainId],
-      PERMISSIVE_MULTICALL_ABI,
-      provider
-    )
+    const multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider)
     const liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider)
     let calls = []
@@ -303,7 +148,7 @@ export abstract class Fetcher {
       owner: string
     }
   }> {
-    const multicall = new Contract(PERMISSIVE_MULTICALL_ADDRESS[chainId], PERMISSIVE_MULTICALL_ABI, provider)
+    const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)
     const allPairsLength = await factoryContract.allPairsLength()
     let allSwapPairs: {
@@ -343,7 +188,7 @@ export abstract class Fetcher {
     }
 
     // Fetch the pairs that we dont have the fee and owner
-    const swapFeesFetched = await this.fetchSwapFees(tokenPairsToFetch, provider)
+    const swapFeesFetched = tokenPairsToFetch.length === 0 ? [] : await this.fetchSwapFees(tokenPairsToFetch, provider)
     for (let tokenPairsToFetchIndex = 0; tokenPairsToFetchIndex < tokenPairsToFetch.length; tokenPairsToFetchIndex++)
       allSwapPairs[tokenPairsToFetch[tokenPairsToFetchIndex].address] = swapFeesFetched[tokenPairsToFetchIndex]
     return allSwapPairs
@@ -365,75 +210,5 @@ export abstract class Fetcher {
     const feeDenominator = await factoryContract.protocolFeeDenominator()
     const feeReceiver = await factoryContract.feeTo()
     return { feeDenominator, feeReceiver }
-  }
-
-  /**
-   * Fetches the default DXdao token list from the token registry scheme.
-   * @param chainId the chainId of the network to fecth the protocol fee
-   * @param provider the provider to use to fetch the data
-   */
-  public static async fetchDxDaoTokenList(
-    chainId: ChainId,
-    provider = getDefaultProvider(getNetwork(chainId))
-  ): Promise<TokenList> {
-    const tokenRegistryContract = new Contract(TOKEN_REGISTRY_ADDRESS[chainId], TokenRegistryAbi, provider)
-    const tokenAddresses = await tokenRegistryContract.getTokens(DXSWAP_TOKEN_LIST_ID[chainId])
-    const tokens = await this.fetchMultipleTokensData(chainId, tokenAddresses, provider)
-    const tokenList = []
-    for (const token of tokens) {
-      tokenList.push({
-        chainId,
-        address: token.address,
-        name: token.name!,
-        decimals: token.decimals,
-        symbol: token.symbol!,
-        logoURI: await this.fetchTokenLogoUri(token)
-      })
-    }
-    return {
-      name: 'DXswap default token list',
-      tokens: tokenList
-    }
-  }
-
-  private static async fetchTokenLogoUri(token: Token): Promise<string> {
-    const chainId = token.chainId
-    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
-      return '' // token logos not fully supported for testnets
-    }
-    if (Object.keys(TOKEN_LOGO_URI_CACHE[chainId]).length === 0) {
-      await this.populateTokenLogoCache(chainId)
-    }
-    return TOKEN_LOGO_URI_CACHE[chainId][token.address.toLowerCase()]
-  }
-
-  public static async populateTokenLogoCache(chainId: ChainId): Promise<void> {
-    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
-      return
-    }
-    let tokenListURL = ''
-    if (chainId == ChainId.MAINNET) {
-      tokenListURL = 'https://tokens.coingecko.com/uniswap/all.json' // coingecko list used for mainnet
-    } else {
-      tokenListURL = 'https://tokens.honeyswap.org' // honeyswap list used for xdai
-    }
-    const response = await fetch(tokenListURL)
-    if (!response.ok) {
-      console.warn(`could not fetch token list at ${tokenListURL}`)
-      return
-    }
-    const { tokens }: { tokens: TokenInfo[] } = await response.json()
-    TOKEN_LOGO_URI_CACHE[chainId] = tokens.reduce((cache: { [tokenAddress: string]: string }, token) => {
-      cache[token.address.toLowerCase()] = token.logoURI
-      return cache
-    }, {})
-  }
-
-  public static getCachedTokenLogo(token: Token): string {
-    const { chainId } = token
-    if (chainId !== ChainId.MAINNET && chainId !== ChainId.XDAI) {
-      return ''
-    }
-    return TOKEN_LOGO_URI_CACHE[chainId][token.address.toLowerCase()] || ''
   }
 }

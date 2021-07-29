@@ -25,16 +25,16 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
-    [ChainId.ARBITRUM_TESTNET_V3]: new Token(
-      ChainId.ARBITRUM_TESTNET_V3,
-      '0xf8456e5e6A225C2C1D74D8C9a4cB2B1d5dc1153b',
+    [ChainId.ARBITRUM_ONE]: new Token(
+      ChainId.ARBITRUM_ONE,
+      '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
       18,
       'WETH',
       'Wrapped Ether'
     ),
-    [ChainId.SOKOL]: new Token(
-      ChainId.SOKOL,
-      '0xfDc50eF6b67F65Dddc36e56729a9D07BAe1A1f68',
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681',
       18,
       'WETH',
       'Wrapped Ether'
@@ -46,10 +46,6 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on xDai'
     )
-  }
-
-  public static readonly WSPOA: { [key: number]: Token } = {
-    [ChainId.SOKOL]: new Token(ChainId.SOKOL, '0xc655c6D80ac92d75fBF4F40e95280aEb855B1E87', 18, 'WSPOA', 'Wrapped SPOA')
   }
 
   public static readonly WXDAI: { [key: number]: Token } = {
@@ -65,18 +61,38 @@ export class Token extends Currency {
       18,
       'DXD',
       'DXdao from Ethereum'
+    ),
+    [ChainId.ARBITRUM_ONE]: new Token(
+      ChainId.ARBITRUM_ONE,
+      '0xC3Ae0333F0F34aa734D5493276223d95B8F9Cb37',
+      18,
+      'DXD',
+      'DXdao from Ethereum'
+    ),
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0x5d47100B0854525685907D5D773b92c22c0c745e',
+      18,
+      'DXD',
+      'DXdao from Ethereum'
     )
   }
 
   public static readonly SWPR: { [key: number]: Token } = {
-    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x2f638Ec35b429d788bA480210B38e73E58920a09', 18, 'SWPR', 'Swapr')
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0x94d03c7e6B21176810Bb31c11236a64a3D094373',
+      18,
+      'SWPR',
+      'Swapr'
+    )
   }
 
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
-    [ChainId.ARBITRUM_TESTNET_V3]: Token.WETH[ChainId.ARBITRUM_TESTNET_V3],
-    [ChainId.SOKOL]: Token.WSPOA[ChainId.SOKOL],
+    [ChainId.ARBITRUM_ONE]: Token.WETH[ChainId.ARBITRUM_ONE],
+    [ChainId.ARBITRUM_RINKEBY]: Token.WETH[ChainId.ARBITRUM_RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI]
   }
 
@@ -136,7 +152,6 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
 
 // reexport for convenience
 export const WETH = Token.WETH
-export const WSPOA = Token.WSPOA
 export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
 export const SWPR = Token.SWPR
