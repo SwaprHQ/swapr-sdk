@@ -81,7 +81,7 @@ export class Token extends Currency {
   public static readonly SWPR: { [key: number]: Token } = {
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
-      '0xd96fFBfADc1845cA316b850B622877C620C68879',
+      '0x2152E0b8A2ef444ba28Ca729B37f76dF33F292D3',
       18,
       'SWPR',
       'Swapr'
