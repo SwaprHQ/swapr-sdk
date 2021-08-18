@@ -78,6 +78,16 @@ export class Token extends Currency {
     )
   }
 
+  public static readonly SWPR: { [key: number]: Token } = {
+    [ChainId.ARBITRUM_RINKEBY]: new Token(
+      ChainId.ARBITRUM_RINKEBY,
+      '0x6C423f8BEb6713Fd075EA09Fd90a7A736bc80e81',
+      18,
+      'SWPR',
+      'Swapr'
+    )
+  }
+
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
@@ -144,3 +154,4 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
 export const WETH = Token.WETH
 export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
+export const SWPR = Token.SWPR
