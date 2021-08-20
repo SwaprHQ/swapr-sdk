@@ -41,7 +41,7 @@ export class Token extends Currency {
     ),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
-      '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+      '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
       18,
       'WETH',
       'Wrapped Ether on xDai'
@@ -79,6 +79,7 @@ export class Token extends Currency {
   }
 
   public static readonly SWPR: { [key: number]: Token } = {
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd', 18, 'SWPR', 'Swapr'),
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
       '0x6C423f8BEb6713Fd075EA09Fd90a7A736bc80e81',
