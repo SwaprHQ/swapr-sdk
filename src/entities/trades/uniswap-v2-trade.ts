@@ -1,17 +1,28 @@
+import { Interface } from '@ethersproject/abi'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType, ZERO } from '../constants'
-import { sortedInsert } from '../utils'
-import { Currency } from './currency'
-import { CurrencyAmount } from './fractions/currencyAmount'
-import { Fraction } from './fractions/fraction'
-import { Percent } from './fractions/percent'
-import { Price } from './fractions/price'
-import { TokenAmount } from './fractions/tokenAmount'
-import { Pair } from './pair'
-import { RoutablePlatform } from './routable-platform'
-import { Route } from './route'
-import { currencyEquals, Token } from './token'
+import { ChainId, ONE, TradeType, ZERO } from '../../constants'
+import { sortedInsert, validateAndParseAddress } from '../../utils'
+import { Currency } from '../currency'
+import { CurrencyAmount } from '../fractions/currencyAmount'
+import { Fraction } from '../fractions/fraction'
+import { Percent } from '../fractions/percent'
+import { Price } from '../fractions/price'
+import { TokenAmount } from '../fractions/tokenAmount'
+import { Pair } from '../pair'
+import { Route } from '../route'
+import { currencyEquals, Token } from '../token'
+import { Trade } from './interfaces/trade'
+import ROUTER_ABI from '../../abis/router.json'
+import { CallParameters } from './interfaces/call-parameters'
+import { TradeOptions } from './interfaces/trade-options'
+
+function toHex(currencyAmount: CurrencyAmount) {
+  return `0x${currencyAmount.raw.toString(16)}`
+}
+
+const ZERO_HEX = '0x0'
+const UNISWAP_V2_ROUTER_INTERFACE = new Interface(ROUTER_ABI)
 
 /**
  * Returns the percent difference between the mid price and the execution price, i.e. price impact.
@@ -59,7 +70,7 @@ export function inputOutputComparator(a: InputOutput, b: InputOutput): number {
 }
 
 // extension of the input output comparator that also considers other dimensions of the trade in ranking them
-export function tradeComparator(a: Trade, b: Trade) {
+export function tradeComparator(a: UniswapV2Trade, b: UniswapV2Trade) {
   const ioComp = inputOutputComparator(a, b)
   if (ioComp !== 0) {
     return ioComp
@@ -105,65 +116,8 @@ function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
  */
-export class Trade {
-  /**
-   * The route of the trade, i.e. which pairs the trade goes through.
-   */
-  public readonly route: Route
-  /**
-   * The type of the trade, either exact in or exact out.
-   */
-  public readonly tradeType: TradeType
-  /**
-   * The input amount for the trade assuming no slippage.
-   */
-  public readonly inputAmount: CurrencyAmount
-  /**
-   * The output amount for the trade assuming no slippage.
-   */
-  public readonly outputAmount: CurrencyAmount
-  /**
-   * The price expressed in terms of output amount/input amount.
-   */
-  public readonly executionPrice: Price
-  /**
-   * The mid price after the trade executes assuming no slippage.
-   */
-  public readonly nextMidPrice: Price
-  /**
-   * The percent difference between the mid price before the trade and the trade execution price.
-   */
-  public readonly priceImpact: Percent
-  /**
-   * The unique identifier of the chain on which the swap is being performed (used to correctly handle the native currency).
-   */
-  public readonly chainId: ChainId
-  /**
-   * The swap platform this trade will execute on
-   */
-  public readonly platform: RoutablePlatform
-
-  /**
-   * Constructs an exact in trade with the given amount in and route
-   * @param route route of the exact in trade
-   * @param amountIn the amount being passed in
-   */
-  public static exactIn(route: Route, amountIn: CurrencyAmount): Trade {
-    return new Trade(route, amountIn, TradeType.EXACT_INPUT)
-  }
-
-  /**
-   * Constructs an exact out trade with the given amount out and route
-   * @param route route of the exact out trade
-   * @param amountOut the amount returned by the trade
-   */
-  public static exactOut(route: Route, amountOut: CurrencyAmount): Trade {
-    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT)
-  }
-
+export class UniswapV2Trade extends Trade {
   public constructor(route: Route, amount: CurrencyAmount, tradeType: TradeType) {
-    this.chainId = route.chainId
-
     const amounts: TokenAmount[] = new Array(route.path.length)
     const nextPairs: Pair[] = new Array(route.pairs.length)
     if (tradeType === TradeType.EXACT_INPUT) {
@@ -185,30 +139,29 @@ export class Trade {
         nextPairs[i - 1] = nextPair
       }
     }
-
-    this.route = route
-    this.tradeType = tradeType
-    this.inputAmount =
+    const chainId = route.chainId
+    const inputAmount =
       tradeType === TradeType.EXACT_INPUT
         ? amount
         : Currency.isNative(route.input)
-        ? CurrencyAmount.nativeCurrency(amounts[0].raw, this.chainId)
+        ? CurrencyAmount.nativeCurrency(amounts[0].raw, chainId)
         : amounts[0]
-    this.outputAmount =
+    const outputAmount =
       tradeType === TradeType.EXACT_OUTPUT
         ? amount
         : Currency.isNative(route.output)
-        ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, this.chainId)
+        ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, chainId)
         : amounts[amounts.length - 1]
-    this.executionPrice = new Price(
-      this.inputAmount.currency,
-      this.outputAmount.currency,
-      this.inputAmount.raw,
-      this.outputAmount.raw
+    super(
+      route,
+      tradeType,
+      inputAmount,
+      outputAmount,
+      new Price(inputAmount.currency, outputAmount.currency, inputAmount.raw, outputAmount.raw),
+      computePriceImpact(route.midPrice, inputAmount, outputAmount),
+      route.chainId,
+      route.pairs[0].platform
     )
-    this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
-    this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
-    this.platform = this.route.pairs[0].platform
   }
 
   /**
@@ -260,7 +213,7 @@ export class Trade {
    * @param originalAmountIn used in recursion; the original value of the currencyAmountIn parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static bestTradeExactIn(
+  public static async bestTradeExactIn(
     pairs: Pair[],
     currencyAmountIn: CurrencyAmount,
     currencyOut: Currency,
@@ -268,8 +221,8 @@ export class Trade {
     // used in recursion.
     currentPairs: Pair[] = [],
     originalAmountIn: CurrencyAmount = currencyAmountIn,
-    bestTrades: Trade[] = []
-  ): Trade[] {
+    bestTrades: UniswapV2Trade[] = []
+  ): Promise<UniswapV2Trade[]> {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountIn === currencyAmountIn || currentPairs.length > 0, 'INVALID_RECURSION')
@@ -303,7 +256,7 @@ export class Trade {
       if (amountOut.token.equals(tokenOut)) {
         sortedInsert(
           bestTrades,
-          new Trade(
+          new UniswapV2Trade(
             new Route([...currentPairs, pair], originalAmountIn.currency, currencyOut),
             originalAmountIn,
             TradeType.EXACT_INPUT
@@ -315,7 +268,7 @@ export class Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
-        Trade.bestTradeExactIn(
+        UniswapV2Trade.bestTradeExactIn(
           pairsExcludingThisPair,
           amountOut,
           currencyOut,
@@ -348,7 +301,7 @@ export class Trade {
    * @param originalAmountOut used in recursion; the original value of the currencyAmountOut parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static bestTradeExactOut(
+  public static async bestTradeExactOut(
     pairs: Pair[],
     currencyIn: Currency,
     currencyAmountOut: CurrencyAmount,
@@ -356,8 +309,8 @@ export class Trade {
     // used in recursion.
     currentPairs: Pair[] = [],
     originalAmountOut: CurrencyAmount = currencyAmountOut,
-    bestTrades: Trade[] = []
-  ): Trade[] {
+    bestTrades: UniswapV2Trade[] = []
+  ): Promise<UniswapV2Trade[]> {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountOut === currencyAmountOut || currentPairs.length > 0, 'INVALID_RECURSION')
@@ -391,7 +344,7 @@ export class Trade {
       if (amountIn.token.equals(tokenIn)) {
         sortedInsert(
           bestTrades,
-          new Trade(
+          new UniswapV2Trade(
             new Route([pair, ...currentPairs], currencyIn, originalAmountOut.currency),
             originalAmountOut,
             TradeType.EXACT_OUTPUT
@@ -403,7 +356,7 @@ export class Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        Trade.bestTradeExactOut(
+        UniswapV2Trade.bestTradeExactOut(
           pairsExcludingThisPair,
           currencyIn,
           amountIn,
@@ -419,5 +372,76 @@ export class Trade {
     }
 
     return bestTrades
+  }
+
+  public swapCallParameters(options: TradeOptions): CallParameters {
+    const nativeCurrency = Currency.getNative(this.chainId)
+    const etherIn = this.inputAmount.currency === nativeCurrency
+    const etherOut = this.outputAmount.currency === nativeCurrency
+    // the router does not support both ether in and out
+    invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
+    invariant(options.ttl > 0, 'TTL')
+    invariant(!!this.platform.routerAddress[this.chainId], 'ROUTER_ADDRESS_IN_CHAIN')
+
+    const to: string = validateAndParseAddress(options.recipient)
+    const amountIn: string = toHex(this.maximumAmountIn(options.allowedSlippage))
+    const amountOut: string = toHex(this.minimumAmountOut(options.allowedSlippage))
+    const path: string[] = this.route.path.map(token => token.address)
+    const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
+    const useFeeOnTransfer = Boolean(options.feeOnTransfer)
+
+    let methodName: string
+    let args: (string | string[])[]
+    let value: string
+    switch (this.tradeType) {
+      case TradeType.EXACT_INPUT:
+        if (etherIn) {
+          methodName = useFeeOnTransfer
+            ? 'swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[],address,uint256)'
+            : 'swapExactETHForTokens(uint256,address[],address,uint256)'
+          // (uint amountOutMin, address[] calldata path, address to, uint deadline)
+          args = [amountOut, path, to, deadline]
+          value = amountIn
+        } else if (etherOut) {
+          methodName = useFeeOnTransfer
+            ? 'swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)'
+            : 'swapExactTokensForETH(uint256,uint256,address[],address,uint256)'
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          args = [amountIn, amountOut, path, to, deadline]
+          value = ZERO_HEX
+        } else {
+          methodName = useFeeOnTransfer
+            ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)'
+            : 'swapExactTokensForTokens(uint256,uint256,address[],address,uint256)'
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          args = [amountIn, amountOut, path, to, deadline]
+          value = ZERO_HEX
+        }
+        break
+      case TradeType.EXACT_OUTPUT:
+        invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
+        if (etherIn) {
+          methodName = 'swapETHForExactTokens(uint256,address[],address,uint256)'
+          // (uint amountOut, address[] calldata path, address to, uint deadline)
+          args = [amountOut, path, to, deadline]
+          value = amountIn
+        } else if (etherOut) {
+          methodName = 'swapTokensForExactETH(uint256,uint256,address[],address,uint256)'
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          args = [amountOut, amountIn, path, to, deadline]
+          value = ZERO_HEX
+        } else {
+          methodName = 'swapTokensForExactTokens(uint256,uint256,address[],address,uint256)'
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          args = [amountOut, amountIn, path, to, deadline]
+          value = ZERO_HEX
+        }
+        break
+    }
+    return {
+      to: this.platform.routerAddress[this.chainId] as string,
+      data: UNISWAP_V2_ROUTER_INTERFACE.encodeFunctionData(methodName, args),
+      value
+    }
   }
 }
