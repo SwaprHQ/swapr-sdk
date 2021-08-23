@@ -1,6 +1,6 @@
 import { ChainId, Fetcher, JSBI, Token } from '../src'
 import { ZERO_ADDRESS } from '../src/constants'
-import { rinkeby } from 'dxswap-core/.contracts.json'
+import { rinkeby } from '@swapr/core/.contracts.json'
 import { getAddress } from '@ethersproject/address'
 import { TEST_TOKENS } from './commons'
 
