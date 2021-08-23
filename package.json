@@ -1,5 +1,5 @@
 {
-  "name": "dxswap-sdk",
+  "name": "@swapr/sdk",
   "license": "AGPL-3.0-or-later",
   "version": "0.10.3",
   "description": "An SDK for building applications on top of DXswap.",
