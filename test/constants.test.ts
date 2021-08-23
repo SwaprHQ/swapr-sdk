@@ -1,8 +1,8 @@
 import { INIT_CODE_HASH, FACTORY_ADDRESS, ChainId } from '../src/constants'
 
-import { bytecode } from 'dxswap-core/build/DXswapPair.json'
+import { bytecode } from '@swapr/core/build/DXswapPair.json'
 import { keccak256 } from '@ethersproject/solidity'
-import { rinkeby } from 'dxswap-core/.contracts.json'
+import { rinkeby } from '@swapr/core/.contracts.json'
 
 // this _could_ go in constants, except that it would cost every consumer of the sdk the CPU to compute the hash
 // and load the JSON.
