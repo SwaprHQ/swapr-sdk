@@ -9,14 +9,14 @@ import {
   arbitrumOne as coreArbitrumOne,
   arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
   xdai as coreXDai
-} from 'dxswap-core/.contracts.json'
+} from '@swapr/core/.contracts.json'
 import {
   rinkeby as peripheryRinkeby,
   mainnet as peripheryMainnet,
   arbitrumOne as peripheryArbitrumOne,
   arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
   xdai as peripheryXDai
-} from 'dxswap-periphery/.contracts.json'
+} from '@swapr/periphery/.contracts.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string

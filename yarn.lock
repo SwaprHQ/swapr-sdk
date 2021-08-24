@@ -1291,6 +1291,20 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@swapr/core@^0.3.11":
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/@swapr/core/-/core-0.3.11.tgz#908fb6738b6a11d7dd25bfef3d6c5a704bfd3919"
+  integrity sha512-VGEH3rgdJzsBSWqgHp9CQhKgjNR73/3nXmRH+PFQ4yx/DWHE/GaaRevBxBrDt/ZjHV9AAZQKSlmLqb1MGAK6lw==
+  dependencies:
+    typescript "^3.9.5"
+
+"@swapr/periphery@^0.3.15":
+  version "0.3.15"
+  resolved "https://registry.yarnpkg.com/@swapr/periphery/-/periphery-0.3.15.tgz#ad6033449ec5700b073f537a62243d9654ef7367"
+  integrity sha512-KMTlnyK1JQOXW56DzKeUh/iPUt/qAdfzR94NORvtdp+eWVg8NFl4YxXUCzfTNlpAJkpa+sVDvqRZbapAOwvmKA==
+  dependencies:
+    "@swapr/core" "^0.3.11"
+
 "@types/babel__core@^7.1.0":
   version "7.1.9"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.9.tgz#77e59d438522a6fb898fa43dc3455c6e72f3963d"
@@ -2518,24 +2532,6 @@ domexception@^1.0.1:
   integrity sha512-raigMkn7CJNNo6Ihro1fzG7wr3fHuYVytzquZKX5n0yizGsTcYgzdIUwj1X9pK0VvjeihV+XiclP+DjwbsSKug==
   dependencies:
     webidl-conversions "^4.0.2"
-
-"dxswap-core@https://github.com/levelkdev/dxswap-core.git#v0.3.1":
-  version "0.3.0"
-  resolved "https://github.com/levelkdev/dxswap-core.git#ea38ac67256e514eaf3acd0cfc84d7135e59e64e"
-  dependencies:
-    typescript "^3.9.5"
-
-"dxswap-core@https://github.com/levelkdev/dxswap-core.git#v0.3.9":
-  version "0.3.9"
-  resolved "https://github.com/levelkdev/dxswap-core.git#45ce6d68534bf590fa32fcadebd9cb499ad98c12"
-  dependencies:
-    typescript "^3.9.5"
-
-"dxswap-periphery@https://github.com/levelkdev/dxswap-periphery.git#v0.3.11":
-  version "0.3.11"
-  resolved "https://github.com/levelkdev/dxswap-periphery.git#dfe8483d81f10eda4db04424d59f0eaa81b51438"
-  dependencies:
-    dxswap-core "https://github.com/levelkdev/dxswap-core.git#v0.3.1"
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
