@@ -9,7 +9,7 @@ import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
 import { ChainId, BigintIsh, FACTORY_ADDRESS, MULTICALL_ADDRESS, MULTICALL_ABI } from './constants'
 import { Token } from './entities/token'
-import { RoutablePlatform } from './entities/routable-platform'
+import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform/uniswap-v2-routable-platform'
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
@@ -30,7 +30,7 @@ export abstract class Fetcher {
     tokenA: Token,
     tokenB: Token,
     provider = getDefaultProvider(getNetwork(tokenA.chainId)),
-    platform: RoutablePlatform = RoutablePlatform.SWAPR
+    platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
     const address = Pair.getAddress(tokenA, tokenB, platform)
