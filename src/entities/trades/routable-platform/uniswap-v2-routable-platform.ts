@@ -1,4 +1,13 @@
-import { BigintIsh, ChainId, defaultSwapFee, FACTORY_ADDRESS, INIT_CODE_HASH, ROUTER_ADDRESS, _30 } from '../constants'
+import {
+  BigintIsh,
+  ChainId,
+  defaultSwapFee,
+  FACTORY_ADDRESS,
+  INIT_CODE_HASH,
+  ROUTER_ADDRESS,
+  _30
+} from '../../../constants'
+import { RoutablePlatform } from './routable-platform'
 
 const UNISWAP_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
 const SUSHISWAP_FACTORY_ADDRESS: { [chainId: number]: string } = {
@@ -25,49 +34,54 @@ const LEVINSWAP_ROUTER_ADDRESS = '0xb18d4f69627F8320619A696202Ad2C430CeF7C53'
 /**
  * A platform to which Swapr can route through.
  */
-export class RoutablePlatform {
-  public readonly name: string
+export class UniswapV2RoutablePlatform extends RoutablePlatform {
   public readonly factoryAddress: { [supportedChainId in ChainId]?: string }
   public readonly routerAddress: { [supportedChainId in ChainId]?: string }
   public readonly initCodeHash: string
   public readonly defaultSwapFee: BigintIsh
 
-  public static readonly SWAPR = new RoutablePlatform(
+  public static readonly SWAPR = new UniswapV2RoutablePlatform(
+    [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.ARBITRUM_RINKEBY, ChainId.XDAI],
     'Swapr',
     FACTORY_ADDRESS,
     ROUTER_ADDRESS,
     INIT_CODE_HASH,
     defaultSwapFee
   )
-  public static readonly UNISWAP = new RoutablePlatform(
-    'Uniswap',
+  public static readonly UNISWAP = new UniswapV2RoutablePlatform(
+    [ChainId.MAINNET, ChainId.RINKEBY],
+    'Uniswap v2',
     { [ChainId.MAINNET]: UNISWAP_FACTORY_ADDRESS, [ChainId.RINKEBY]: UNISWAP_FACTORY_ADDRESS },
     { [ChainId.MAINNET]: UNISWAP_ROUTER_ADDRESS, [ChainId.RINKEBY]: UNISWAP_ROUTER_ADDRESS },
     '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     _30
   )
-  public static readonly SUSHISWAP = new RoutablePlatform(
+  public static readonly SUSHISWAP = new UniswapV2RoutablePlatform(
+    [ChainId.MAINNET, ChainId.RINKEBY],
     'Sushiswap',
     SUSHISWAP_FACTORY_ADDRESS,
     SUSHISWAP_ROUTER_ADDRESS,
     '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
     _30
   )
-  public static readonly HONEYSWAP = new RoutablePlatform(
+  public static readonly HONEYSWAP = new UniswapV2RoutablePlatform(
+    [ChainId.XDAI],
     'Honeyswap',
     { [ChainId.XDAI]: HONEYSWAP_FACTORY_ADDRESS },
     { [ChainId.XDAI]: HONEYSWAP_ROUTER_ADDRESS },
     '0x3f88503e8580ab941773b59034fb4b2a63e86dbc031b3633a925533ad3ed2b93',
     _30
   )
-  public static readonly BAOSWAP = new RoutablePlatform(
+  public static readonly BAOSWAP = new UniswapV2RoutablePlatform(
+    [ChainId.XDAI],
     'Baoswap',
     { [ChainId.XDAI]: BAOSWAP_FACTORY_ADDRESS },
     { [ChainId.XDAI]: BAOSWAP_ROUTER_ADDRESS },
     '0x0bae3ead48c325ce433426d2e8e6b07dac10835baec21e163760682ea3d3520d',
     _30
   )
-  public static readonly LEVINSWAP = new RoutablePlatform(
+  public static readonly LEVINSWAP = new UniswapV2RoutablePlatform(
+    [ChainId.XDAI],
     'Levinswap',
     { [ChainId.XDAI]: LEVINSWAP_FACTORY_ADDRESS },
     { [ChainId.XDAI]: LEVINSWAP_ROUTER_ADDRESS },
@@ -76,13 +90,14 @@ export class RoutablePlatform {
   )
 
   public constructor(
+    chainIds: ChainId[],
     name: string,
     factoryAddress: { [supportedChainId in ChainId]?: string },
     routerAddress: { [supportedChainId in ChainId]?: string },
     initCodeHash: string,
     defaultSwapFee: BigintIsh
   ) {
-    this.name = name
+    super(chainIds, name)
     this.factoryAddress = factoryAddress
     this.routerAddress = routerAddress
     this.initCodeHash = initCodeHash
