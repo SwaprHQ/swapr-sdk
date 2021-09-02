@@ -82,7 +82,7 @@ export class Token extends Currency {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd', 18, 'SWPR', 'Swapr'),
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
-      '0x6C423f8BEb6713Fd075EA09Fd90a7A736bc80e81',
+      '0x5cc5bb306E1Be68Fbbfa6a34E0f314bC966A7080',
       18,
       'SWPR',
       'Swapr'
