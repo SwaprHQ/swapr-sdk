@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@makerdao/multicall": "^0.11.0",
-    "@swapr/core": "^0.3.13",
-    "@swapr/periphery": "^0.3.17",
+    "@swapr/core": "^0.3.14",
+    "@swapr/periphery": "^0.3.18",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
     "jsbi": "^3.1.1",

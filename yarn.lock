@@ -1291,19 +1291,19 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@swapr/core@^0.3.13":
-  version "0.3.13"
-  resolved "https://registry.yarnpkg.com/@swapr/core/-/core-0.3.13.tgz#b704ea80a7fe23904eb8786e4aabd9749522c209"
-  integrity sha512-/8HmRGCwKwRl2+caM+szF8K2/cJw0nWD5C1FnHrp0bEIalzU5rZ5TnaFmE7dM56AziZpUVfgDbDNDWNK4kNpzw==
+"@swapr/core@^0.3.14":
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/@swapr/core/-/core-0.3.14.tgz#b82c8ba92036a6e417df334f4a35a6c763f38090"
+  integrity sha512-2t/+qzu0lRPRof3KrWyMEZnWSSDn8ePiXk1SfGAYPsVgeE99lbrr6nywNgtrndjfN3e3JUIrCtgKU2p6KcEjng==
   dependencies:
     typescript "^3.9.5"
 
-"@swapr/periphery@^0.3.17":
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/@swapr/periphery/-/periphery-0.3.17.tgz#ff3646d7544361860a7e6d7c5760fa433691b218"
-  integrity sha512-T3lpYH1x3wBiISFVDKwPwGZpKnOcoK156M0+wIaD15wXco36jY6PFduT/ymskH0jZLglxvKzddaeJKTqZgUnbw==
+"@swapr/periphery@^0.3.18":
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/@swapr/periphery/-/periphery-0.3.18.tgz#732bec875bc7e87dabf748cf6191c58ca121ce1f"
+  integrity sha512-waTvaj1OzGDu1YadDCKvH1j1QLnXuSgth0ylkL/70F3DOj9519gT5uygCOMSOdw5zobMrqYpR6qlY9BK430ZSg==
   dependencies:
-    "@swapr/core" "^0.3.13"
+    "@swapr/core" "^0.3.14"
 
 "@types/babel__core@^7.1.0":
   version "7.1.9"
