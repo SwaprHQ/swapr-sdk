@@ -80,6 +80,7 @@ export class Token extends Currency {
 
   public static readonly SWPR: { [key: number]: Token } = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd', 18, 'SWPR', 'Swapr'),
+    [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x1BADC10f2D3A33b7e57b65c12edf37Eb2632a6E2', 18, 'SWPR', 'Swapr'),
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
       '0x5cc5bb306E1Be68Fbbfa6a34E0f314bC966A7080',
