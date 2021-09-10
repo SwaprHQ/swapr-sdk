@@ -1298,10 +1298,17 @@
   dependencies:
     typescript "^3.9.5"
 
-"@swapr/periphery@^0.3.19":
-  version "0.3.19"
-  resolved "https://registry.yarnpkg.com/@swapr/periphery/-/periphery-0.3.19.tgz#06a2da53089604595966e1a1bcf106e44cb1d420"
-  integrity sha512-PWs9raN5kENDeYA/NBduwfqT28KFeMrxcQFjOMq1jY5HkEp/pdH67+9sbud7wZZBpf/90iWfILfY4G6eKXGCgA==
+"@swapr/core@^0.3.18":
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/@swapr/core/-/core-0.3.18.tgz#249a6e1c90c53d6c2beae8c712d429cf8a577906"
+  integrity sha512-AsSyXCIx3OhR399lgQD/bmAgAA2Xa2k2XabH/kG1TeuHfmT2ob+8l5ROit7puO/lD9aFsXO4mxO34oVcoaoXgA==
+  dependencies:
+    typescript "^3.9.5"
+
+"@swapr/periphery@^0.3.20":
+  version "0.3.20"
+  resolved "https://registry.yarnpkg.com/@swapr/periphery/-/periphery-0.3.20.tgz#2dc528a1c29f2911b04d5305d32cb1f1fdaa122b"
+  integrity sha512-h2nH1ZDbk6IGLj6HmZLrg6vcfrWj2uHQXXYsyEXojOwjQ2EXDLw+YrmHhhCHI+qVaQ4rrQ2OclwZWe4oyuMyWg==
   dependencies:
     "@swapr/core" "^0.3.17"
 
