@@ -74,6 +74,11 @@ export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.XDAI]: '0x0000000000000000000000000000000000001234'
 }
 
+// converter only deployed on Arb1
+export const SWPR_CONVERTER_ADDRESS = '0x2b058af96175A847Bf3E5457B3A702F807daDdFd'
+
+export const SWPR_WHITELIST_IPFS_HASH = 'QmcjTAvDJZU339jrc9Ky2pXKR68R1SjnwdyGSQjt1kad9r'
+
 export const INIT_CODE_HASH = '0xd306a548755b9295ee49cc729e13ca4a45e00199bbd890fa146da43a50571776'
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
