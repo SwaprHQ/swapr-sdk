@@ -2,7 +2,7 @@ import { BigintIsh, ChainId } from '../constants'
 import { TokenAmount } from './'
 import invariant from 'tiny-invariant'
 import { Currency, Price, PricedToken, PricedTokenAmount, Token } from '..'
-import { parseUnits } from 'ethers/utils'
+import { utils } from 'ethers'
 import Decimal from 'decimal.js-light'
 
 export class KpiToken extends PricedToken {
@@ -28,8 +28,8 @@ export class KpiToken extends PricedToken {
       new Price(
         token,
         nativeCurrency,
-        parseUnits('1', nativeCurrency.decimals).toString(),
-        parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
+        utils.parseUnits('1', nativeCurrency.decimals).toString(),
+        utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
       ),
       symbol,
       name
