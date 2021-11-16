@@ -6,6 +6,7 @@ import { utils } from 'ethers'
 import Decimal from 'decimal.js-light'
 
 export class KpiToken extends PricedToken {
+  public readonly kpiId: string
   public readonly totalSupply: TokenAmount
   public readonly collateral: PricedTokenAmount
 
@@ -14,6 +15,7 @@ export class KpiToken extends PricedToken {
     address: string,
     totalSupply: BigintIsh,
     collateral: PricedTokenAmount,
+    kpiId: string,
     symbol?: string,
     name?: string
   ) {
@@ -37,5 +39,6 @@ export class KpiToken extends PricedToken {
     invariant(collateral.token.chainId === chainId, 'inconsistent chain id in collateral')
     this.totalSupply = new TokenAmount(this, totalSupply)
     this.collateral = collateral
+    this.kpiId = kpiId
   }
 }
