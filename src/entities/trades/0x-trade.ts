@@ -40,24 +40,16 @@ interface ApiResponse {
   sources: ApiSource[]
 }
 
-const decodePlatformName = (apiName: string): string => {
-  switch (apiName) {
-    case 'Uniswap_V2':
-      return 'Uniswap v2'
-    case 'Liquidity provider':
-      return 'LP'
-    case 'Balancer_V2':
-      return 'Balancer v2'
-    case 'DODO_V2':
-      return 'Dodo v2'
-    case 'Uniswap_V3':
-      return 'Uniswap v3'
-    case 'PancakeSwap_V2': // shouldn't be used since it's on BSC, but added to be extra sure
-      return 'PancakeSwap v2'
-    default:
-      return apiName
-  }
+const CODE_TO_PLATFORM_NAME: { [apiName: string]: string } = {
+  Uniswap_V2: 'Uniswap v2',
+  'Liquidity provider': 'LP',
+  Balancer_V2: 'Balancer v2',
+  DODO_V2: 'Dodo v2',
+  Uniswap_V3: 'Uniswap v3',
+  PancakeSwap_V2: 'PancakeSwap v2' // shouldn't be used since it's on BSC, but added to be extra sure
 }
+
+const decodePlatformName = (apiName: string): string => CODE_TO_PLATFORM_NAME[apiName] || apiName
 
 const platformsFromSources = (sources: ApiSource[]): Platform[] => {
   return sources
