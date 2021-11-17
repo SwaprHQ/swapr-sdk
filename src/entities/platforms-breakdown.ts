@@ -19,14 +19,15 @@ export class Breakdown {
   public readonly midPrice: Price
 
   public constructor(chainId: ChainId, platforms: Platform[], input: Currency, output: Currency, midPrice: Price) {
-    invariant(platforms.length > 0, 'PLATFORMS')
+    invariant(platforms.length > 0, 'Missing routable platform')
     invariant(
       platforms
         .reduce((accumulator, platform) => accumulator.add(platform.percentage), new Percent('0', '100'))
         .toFixed(2) === '100.00',
-      'PERCENT'
+      'Inconsistent breakdown percentage'
     )
-    if (input instanceof Token && output instanceof Token) invariant(input.chainId === output.chainId, 'CHAIN_ID')
+    if (input instanceof Token && output instanceof Token)
+      invariant(input.chainId === output.chainId, 'Input and output tokens must be on the same chain')
 
     this.chainId = chainId
     this.platforms = platforms
