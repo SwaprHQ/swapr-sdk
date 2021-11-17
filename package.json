@@ -1,7 +1,7 @@
 {
   "name": "@swapr/sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "0.10.4",
+  "version": "0.10.11",
   "description": "An SDK for building applications on top of DXswap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -16,15 +16,15 @@
   "module": "dist/sdk.esm.js",
   "scripts": {
     "lint": "tsdx lint src test",
-    "build": "tsdx build",
+    "build": "tsdx build && cp -r ./src/abis ./dist",
     "start": "tsdx watch",
     "test": "tsdx test",
-    "prepare": "tsdx build"
+    "prepare": "yarn build"
   },
   "dependencies": {
     "@makerdao/multicall": "^0.11.0",
-    "@swapr/core": "^0.3.11",
-    "@swapr/periphery": "^0.3.15",
+    "@swapr/core": "^0.3.18",
+    "@swapr/periphery": "^0.3.20",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
     "jsbi": "^3.1.1",
