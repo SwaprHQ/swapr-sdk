@@ -3,42 +3,19 @@ import JSBI from 'jsbi'
 import { parseBigintIsh } from '../utils'
 import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
-import { Pair } from './pair'
 import invariant from 'tiny-invariant'
-import { utils } from 'ethers'
-import { Token } from './token'
+import { MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY, Token } from 'entities'
 
-// this value is used as a floor to calculate apy, in order to avoid infinite results
-export const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
-  [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
-    ChainId.RINKEBY
-  ),
-  [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
-    ChainId.MAINNET
-  ),
-  [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
-    ChainId.XDAI
-  ),
-  [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
-    ChainId.ARBITRUM_ONE
-  ),
-  [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
-    ChainId.ARBITRUM_RINKEBY
-  )
-}
 
-export class LiquidityMiningCampaign {
+
+
+export class SingleSidedLiquidityMiningCampaign {
   public readonly chainId: ChainId
   public readonly address?: string
   public readonly startsAt: BigintIsh
   public readonly endsAt: BigintIsh
   public readonly rewards: PricedTokenAmount[]
-  public readonly targetedPair: Pair
+  public readonly stakeToken: Token
   public readonly staked: PricedTokenAmount
   public readonly duration: BigintIsh
   public readonly locked: boolean
@@ -47,7 +24,7 @@ export class LiquidityMiningCampaign {
   constructor(
     startsAt: BigintIsh,
     endsAt: BigintIsh,
-    targetedPair: Pair,
+    stakeToken: Token,
     rewards: PricedTokenAmount[],
     staked: PricedTokenAmount,
     locked: boolean,
@@ -55,7 +32,6 @@ export class LiquidityMiningCampaign {
     address?: string
   ) {
     invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
-    invariant(staked.token.equals(targetedPair.liquidityToken), 'STAKED_LP_TOKEN')
     for (const reward of rewards) {
       invariant(staked.token.chainId === reward.token.chainId, 'CHAIN_ID')
     }
@@ -63,7 +39,7 @@ export class LiquidityMiningCampaign {
     this.startsAt = startsAt
     this.endsAt = endsAt
     this.rewards = rewards
-    this.targetedPair = targetedPair
+    this.stakeToken = stakeToken
     this.staked = staked
     this.duration = JSBI.subtract(parseBigintIsh(endsAt), parseBigintIsh(startsAt))
     this.locked = locked
