@@ -19,7 +19,7 @@ import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
 import { Token } from './token'
 import { ChainId } from '../constants'
-import { RoutablePlatform } from './routable-platform'
+import { UniswapV2RoutablePlatform } from './trades/routable-platform/uniswap-v2-routable-platform'
 import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
 
 const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
@@ -35,22 +35,22 @@ let PAIR_ADDRESS_CACHE: {
     [chainId: number]: { [token0Address: string]: { [token1Address: string]: string } }
   }
 } = {
-  [RoutablePlatform.SWAPR.name]: {
+  [UniswapV2RoutablePlatform.SWAPR.name]: {
     ...INITIAL_CACHE_STATE
   },
-  [RoutablePlatform.SUSHISWAP.name]: {
+  [UniswapV2RoutablePlatform.SUSHISWAP.name]: {
     ...INITIAL_CACHE_STATE
   },
-  [RoutablePlatform.UNISWAP.name]: {
+  [UniswapV2RoutablePlatform.UNISWAP.name]: {
     ...INITIAL_CACHE_STATE
   },
-  [RoutablePlatform.HONEYSWAP.name]: {
+  [UniswapV2RoutablePlatform.HONEYSWAP.name]: {
     ...INITIAL_CACHE_STATE
   },
-  [RoutablePlatform.BAOSWAP.name]: {
+  [UniswapV2RoutablePlatform.BAOSWAP.name]: {
     ...INITIAL_CACHE_STATE
   },
-  [RoutablePlatform.LEVINSWAP.name]: {
+  [UniswapV2RoutablePlatform.LEVINSWAP.name]: {
     ...INITIAL_CACHE_STATE
   }
 }
@@ -60,7 +60,7 @@ export class Pair {
   private readonly tokenAmounts: [TokenAmount, TokenAmount]
   public readonly swapFee: BigintIsh = defaultSwapFee
   public readonly protocolFeeDenominator: BigintIsh = defaultProtocolFeeDenominator
-  public readonly platform: RoutablePlatform
+  public readonly platform: UniswapV2RoutablePlatform
   public liquidityMiningCampaigns: LiquidityMiningCampaign[]
 
   /**
@@ -75,7 +75,11 @@ export class Pair {
     return this.liquidityToken.address === other.liquidityToken.address
   }
 
-  public static getAddress(tokenA: Token, tokenB: Token, platform: RoutablePlatform = RoutablePlatform.SWAPR): string {
+  public static getAddress(
+    tokenA: Token,
+    tokenB: Token,
+    platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR
+  ): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
     const chainId = tokenA.chainId
     invariant(platform.supportsChain(chainId), 'INVALID_PLATFORM_CHAIN_ID')
@@ -106,7 +110,7 @@ export class Pair {
     tokenAmountB: TokenAmount,
     swapFee?: BigintIsh,
     protocolFeeDenominator?: BigintIsh,
-    platform: RoutablePlatform = RoutablePlatform.SWAPR,
+    platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR,
     liquidityMiningCampaigns: LiquidityMiningCampaign[] = []
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
@@ -114,7 +118,7 @@ export class Pair {
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
 
-    this.platform = platform ? platform : RoutablePlatform.SWAPR
+    this.platform = platform ? platform : UniswapV2RoutablePlatform.SWAPR
     const liquidityTokenAddress = Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform)
     this.liquidityToken = new Token(tokenAmounts[0].token.chainId, liquidityTokenAddress, 18, 'DXS', 'DXswap')
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
