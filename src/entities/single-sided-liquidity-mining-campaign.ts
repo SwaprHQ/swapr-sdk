@@ -4,8 +4,33 @@ import { parseBigintIsh } from '../utils'
 import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
 import invariant from 'tiny-invariant'
-import { MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY, Token } from 'entities'
+import { Token } from './token'
+import { Token as TokenEntity } from 'entities'
+import { utils } from 'ethers'
 
+
+const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
+  [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
+    ChainId.RINKEBY
+  ),
+  [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
+    ChainId.MAINNET
+  ),
+  [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
+    ChainId.XDAI
+  ),
+  [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
+    ChainId.ARBITRUM_ONE
+  ),
+  [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
+    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
+    ChainId.ARBITRUM_RINKEBY
+  )
+}
 
 
 
@@ -24,7 +49,7 @@ export class SingleSidedLiquidityMiningCampaign {
   constructor(
     startsAt: BigintIsh,
     endsAt: BigintIsh,
-    stakeToken: Token,
+    stakeToken: TokenEntity,
     rewards: PricedTokenAmount[],
     staked: PricedTokenAmount,
     locked: boolean,
@@ -77,12 +102,12 @@ export class SingleSidedLiquidityMiningCampaign {
     if (this.remainingDuration.toString() === '0') return new Percent('0', '1')
 
     const remainingRewards = this.remainingRewards
-
+    
     let stakedValueNativeCurrency = this.staked.nativeCurrencyAmount
+
     if (stakedValueNativeCurrency.lessThan(MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY[this.chainId])) {
       stakedValueNativeCurrency = MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY[this.chainId]
     }
-
     const cumulativeRemainingRewardAmountNativeCurrency = remainingRewards.reduce(
       (accumulator, remainingRewardAmount) => {
         return accumulator.add(remainingRewardAmount.nativeCurrencyAmount)
