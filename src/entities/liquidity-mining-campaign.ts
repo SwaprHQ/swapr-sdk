@@ -9,7 +9,7 @@ import { utils } from 'ethers'
 import { Token } from './token'
 
 // this value is used as a floor to calculate apy, in order to avoid infinite results
-export const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
+ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
     utils.parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
     ChainId.RINKEBY
