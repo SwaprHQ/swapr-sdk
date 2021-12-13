@@ -1,9 +1,11 @@
-import { BigintIsh, ChainId } from '../constants'
-import { TokenAmount } from './'
-import invariant from 'tiny-invariant'
-import { Currency, Price, PricedToken, PricedTokenAmount, Token } from '..'
-import { utils } from 'ethers'
 import Decimal from 'decimal.js-light'
+import invariant from 'tiny-invariant'
+import { utils } from 'ethers'
+import { PricedToken } from './priced-token'
+import { Token } from '../entities/token'
+import { BigintIsh, ChainId } from '../constants'
+import { PricedTokenAmount, Price, TokenAmount } from '../entities/fractions'
+import { Currency } from '../entities/currency'
 
 export class KpiToken extends PricedToken {
   public readonly kpiId: string
