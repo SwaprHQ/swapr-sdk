@@ -1,25 +1,11 @@
-import { BigintIsh, ChainId, SECONDS_IN_YEAR } from '../constants'
-import JSBI from 'jsbi'
-import { parseBigintIsh } from '../utils'
-import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
-import { PricedTokenAmount } from './fractions/priced-token-amount'
-import invariant from 'tiny-invariant'
-import { MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY, Token } from 'entities'
+import { PricedTokenAmount, Token, TokenAmount } from "entities"
+import invariant from "tiny-invariant"
 
+import { BigintIsh } from ".."
+import { DistributionCampaignBase } from "./DistributionCampaignBase"
 
-
-
-export class SingleSidedLiquidityMiningCampaign {
-  public readonly chainId: ChainId
-  public readonly address?: string
-  public readonly startsAt: BigintIsh
-  public readonly endsAt: BigintIsh
-  public readonly rewards: PricedTokenAmount[]
+export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase {
   public readonly stakeToken: Token
-  public readonly staked: PricedTokenAmount
-  public readonly duration: BigintIsh
-  public readonly locked: boolean
-  public readonly stakingCap: TokenAmount
 
   constructor(
     startsAt: BigintIsh,
@@ -31,79 +17,17 @@ export class SingleSidedLiquidityMiningCampaign {
     stakingCap: TokenAmount,
     address?: string
   ) {
-    invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
-    for (const reward of rewards) {
-      invariant(staked.token.chainId === reward.token.chainId, 'CHAIN_ID')
-    }
-    this.chainId = staked.token.chainId
-    this.startsAt = startsAt
-    this.endsAt = endsAt
-    this.rewards = rewards
+    invariant(staked.token.equals(stakeToken), 'STAKED_LP_TOKEN')
+    super(
+      startsAt,
+      endsAt,
+      rewards,
+      staked,
+      locked,
+      stakingCap,
+      address 
+    )
+
     this.stakeToken = stakeToken
-    this.staked = staked
-    this.duration = JSBI.subtract(parseBigintIsh(endsAt), parseBigintIsh(startsAt))
-    this.locked = locked
-    this.stakingCap = stakingCap
-    this.address = address
-  }
-
-  public get remainingDuration(): JSBI {
-    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
-    const jsbiStartsAt = parseBigintIsh(this.startsAt)
-    const jsbiEndsAt = parseBigintIsh(this.endsAt)
-    if (JSBI.lessThan(now, jsbiStartsAt)) return JSBI.subtract(jsbiEndsAt, jsbiStartsAt)
-    if (JSBI.greaterThanOrEqual(now, jsbiEndsAt)) return JSBI.BigInt('0')
-    return JSBI.subtract(jsbiEndsAt, now)
-  }
-
-  public get remainingDistributionPercentage(): Percent {
-    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
-    const jsbiStartsAt = parseBigintIsh(this.startsAt)
-    const jsbiEndsAt = parseBigintIsh(this.endsAt)
-    if (JSBI.lessThan(now, jsbiStartsAt)) return new Percent('100', '100')
-    if (JSBI.greaterThanOrEqual(now, jsbiEndsAt)) return new Percent('0', '100')
-    return new Percent(JSBI.subtract(jsbiEndsAt, now), this.duration)
-  }
-
-  public get remainingRewards(): PricedTokenAmount[] {
-    const remainingDistributionPercentage = this.remainingDistributionPercentage
-    return this.rewards.map(reward => {
-      return new PricedTokenAmount(reward.token, remainingDistributionPercentage.multiply(reward.raw).toFixed(0))
-    })
-  }
-
-  public get apy(): Percent {
-    // when the campaign has ended, apy is returned as 0
-    if (this.remainingDuration.toString() === '0') return new Percent('0', '1')
-
-    const remainingRewards = this.remainingRewards
-
-    let stakedValueNativeCurrency = this.staked.nativeCurrencyAmount
-    if (stakedValueNativeCurrency.lessThan(MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY[this.chainId])) {
-      stakedValueNativeCurrency = MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY[this.chainId]
-    }
-
-    const cumulativeRemainingRewardAmountNativeCurrency = remainingRewards.reduce(
-      (accumulator, remainingRewardAmount) => {
-        return accumulator.add(remainingRewardAmount.nativeCurrencyAmount)
-      },
-      CurrencyAmount.nativeCurrency('0', this.chainId)
-    )
-
-    const yieldInPeriod = cumulativeRemainingRewardAmountNativeCurrency.divide(stakedValueNativeCurrency)
-    const annualizationMultiplier = new Fraction(SECONDS_IN_YEAR.toString(), this.remainingDuration.toString())
-    const rawApy = yieldInPeriod.multiply(annualizationMultiplier)
-    return new Percent(rawApy.numerator, rawApy.denominator)
-  }
-
-  public get currentlyActive(): boolean {
-    const now = JSBI.BigInt(Math.floor(Date.now() / 1000))
-    return (
-      JSBI.lessThanOrEqual(parseBigintIsh(this.startsAt), now) && JSBI.greaterThan(parseBigintIsh(this.endsAt), now)
-    )
-  }
-
-  public get ended(): boolean {
-    return JSBI.greaterThan(JSBI.BigInt(Math.floor(Date.now() / 1000)), parseBigintIsh(this.endsAt))
   }
 }
