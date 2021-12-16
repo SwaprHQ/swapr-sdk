@@ -201,7 +201,7 @@ export class UniswapV2Trade extends Trade {
    * @param originalAmountIn used in recursion; the original value of the currencyAmountIn parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static async bestTradeExactIn(
+  public static bestTradeExactIn(
     currencyAmountIn: CurrencyAmount,
     currencyOut: Currency,
     maximumSlippage: Percent,
@@ -211,7 +211,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs: Pair[] = [],
     originalAmountIn: CurrencyAmount = currencyAmountIn,
     bestTrades: UniswapV2Trade[] = []
-  ): Promise<UniswapV2Trade | undefined> {
+  ): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
@@ -293,7 +293,7 @@ export class UniswapV2Trade extends Trade {
    * @param originalAmountOut used in recursion; the original value of the currencyAmountOut parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static async bestTradeExactOut(
+  public static bestTradeExactOut(
     currencyIn: Currency,
     currencyAmountOut: CurrencyAmount,
     maximumSlippage: Percent,
@@ -303,7 +303,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs: Pair[] = [],
     originalAmountOut: CurrencyAmount = currencyAmountOut,
     bestTrades: UniswapV2Trade[] = []
-  ): Promise<UniswapV2Trade | undefined> {
+  ): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
