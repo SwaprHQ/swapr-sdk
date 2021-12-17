@@ -1,24 +1,23 @@
-import { Pair, PricedTokenAmount, TokenAmount } from "entities"
+import { PricedTokenAmount, Token, TokenAmount } from "entities"
 import invariant from "tiny-invariant"
 
 import { BigintIsh } from ".."
 import { DistributionCampaignBase } from "./DistributionCampaignBase"
 
-export class LiquidityMiningCampaign extends DistributionCampaignBase {
-  public readonly targetedPair: Pair
+export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase {
+  public readonly stakeToken: Token
 
   constructor(
     startsAt: BigintIsh,
     endsAt: BigintIsh,
-    targetedPair: Pair,
+    stakeToken: Token,
     rewards: PricedTokenAmount[],
     staked: PricedTokenAmount,
     locked: boolean,
     stakingCap: TokenAmount,
     address?: string
   ) {
-    invariant(staked.token.equals(targetedPair.liquidityToken), 'STAKED_LP_TOKEN')
-   
+    invariant(staked.token.equals(stakeToken), 'STAKED_LP_TOKEN')
     super(
       startsAt,
       endsAt,
@@ -29,6 +28,6 @@ export class LiquidityMiningCampaign extends DistributionCampaignBase {
       address 
     )
 
-    this.targetedPair = targetedPair
+    this.stakeToken = stakeToken
   }
 }
