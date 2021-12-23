@@ -121,8 +121,8 @@ export const COINS_MAINNET = {
  */
 export const COINS_XDAI = {
   wxdai: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
-  usdt: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
-  usdc: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83'
+  usdt: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
+  usdc: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83'
 }
 
 export const XDAI_COIN_IDS = {
