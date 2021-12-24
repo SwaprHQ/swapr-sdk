@@ -1,4 +1,6 @@
 // ABIs
+
+// 3pool ABI which has USDC, USDT and WXDAI
 export const XDAI_CURVE_ROUTER_ABI = JSON.stringify([
   {
     type: 'function',
@@ -40,6 +42,18 @@ export const CURVE_ROUTER_ABI = JSON.stringify([
       { name: '', type: 'uint256[8]' },
       { name: '', type: 'uint256' }
     ]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: '_amount', type: 'uint256' },
+      { name: '_route', type: 'address[6]' },
+      { name: '_indices', type: 'uint256[8]' },
+      { name: '_min_received', type: 'uint256' }
+    ],
+    outputs: []
   }
 ])
 
