@@ -63,7 +63,6 @@ describe('CurveTrade', () => {
 
     const currencyAmountIn = tryParseAmount(parseUnits('1', tokenXWDAI.decimals).toString(), tokenXWDAI)
 
-    console.log(`currencyAmountIn: ${currencyAmountIn?.toExact()}`)
     const trade = await CurveTrade.bestTradeExactIn(
       currencyAmountIn as CurrencyAmount,
       tokenUSDC,
@@ -79,6 +78,28 @@ describe('CurveTrade', () => {
     expect(swapTransaction?.data).toBeDefined()
     expect(swapTransaction?.value).toBeDefined()
     expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
-    console.log(trade?.minimumAmountOut().toExact())
+  })
+
+  test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
+    const tokenXWDAI = new Token(ChainId.XDAI, COINS_XDAI.wxdai, DECIMALS[COINS_XDAI.wxdai], 'WXDAI', 'WXDAI')
+    const tokenUSDC = new Token(ChainId.XDAI, COINS_XDAI.usdc, DECIMALS[COINS_XDAI.usdc], 'USDC', 'USDC')
+
+    const currencyAmountIn = tryParseAmount(parseUnits('1.5', tokenXWDAI.decimals).toString(), tokenXWDAI)
+
+    const trade = await CurveTrade.bestTradeExactIn(
+      currencyAmountIn as CurrencyAmount,
+      tokenUSDC,
+      new Percent('3', '100')
+    )
+
+    expect(trade).toBeDefined()
+    expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
+
+    // test swap transaction
+    const swapTransaction = trade && (await trade.swapTransaction())
+    expect(swapTransaction).toBeDefined()
+    expect(swapTransaction?.data).toBeDefined()
+    expect(swapTransaction?.value).toBeDefined()
+    expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
   })
 })
