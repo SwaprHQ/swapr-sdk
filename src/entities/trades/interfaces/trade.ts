@@ -8,7 +8,7 @@ import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { Route } from '../../route'
 import { TradeOptions } from './trade-options'
 
-type Details = Route | Breakdown
+export type Details = Route | Breakdown | undefined
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -57,5 +57,5 @@ export abstract class Trade {
    */
   public abstract maximumAmountIn(): CurrencyAmount
 
-  public abstract async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction>
+  public abstract swapTransaction(options: TradeOptions): Promise<UnsignedTransaction>
 }
