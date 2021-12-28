@@ -4,7 +4,7 @@ import { formatEther, parseUnits } from '@ethersproject/units'
 import JSBI from 'jsbi'
 
 import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
-import { COINS_MAINNET, COINS_XDAI, DECIMALS } from '../src/entities/trades/curve-trade/constants'
+import { COINS_MAINNET, TOKENS_XDAI, DECIMALS } from '../src/entities/trades/curve-trade/constants'
 import { getCurveContracts } from '../src/entities/trades/curve-trade/contracts'
 
 // try to parse a user entered amount for a given token
@@ -58,8 +58,8 @@ describe('CurveTrade', () => {
   })
 
   test('Should return the best trade from WXDAI to USDC on xDAI', async () => {
-    const tokenXWDAI = new Token(ChainId.XDAI, COINS_XDAI.wxdai, DECIMALS[COINS_XDAI.wxdai], 'WXDAI', 'WXDAI')
-    const tokenUSDC = new Token(ChainId.XDAI, COINS_XDAI.usdc, DECIMALS[COINS_XDAI.usdc], 'USDC', 'USDC')
+    const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
+    const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
     const currencyAmountIn = tryParseAmount(parseUnits('1', tokenXWDAI.decimals).toString(), tokenXWDAI)
 
@@ -81,8 +81,8 @@ describe('CurveTrade', () => {
   })
 
   test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
-    const tokenXWDAI = new Token(ChainId.XDAI, COINS_XDAI.wxdai, DECIMALS[COINS_XDAI.wxdai], 'WXDAI', 'WXDAI')
-    const tokenUSDC = new Token(ChainId.XDAI, COINS_XDAI.usdc, DECIMALS[COINS_XDAI.usdc], 'USDC', 'USDC')
+    const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
+    const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
     const currencyAmountIn = tryParseAmount(parseUnits('1.5', tokenXWDAI.decimals).toString(), tokenXWDAI)
 

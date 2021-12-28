@@ -1,4 +1,21 @@
 import { ChainId } from '../../../constants'
+import { XDAI_CURVE_ROUTER_ABI } from './abi'
+
+export interface CurveToken {
+  isLPToken?: boolean
+  address: string
+  symbol: string
+  name: string
+  decimals: number
+}
+
+export interface CurvePool {
+  name: string
+  swapAddress: string
+  abi: string
+  approveAddress: string
+  tokens: CurveToken[]
+}
 
 /**
  * CurveFi Router address for each Supported ChainId
@@ -119,16 +136,40 @@ export const COINS_MAINNET = {
 /**
  * xDAI Chain coins
  */
-export const COINS_XDAI = {
-  wxdai: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
-  usdt: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
-  usdc: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83'
+export const TOKENS_XDAI: Record<string, CurveToken> = {
+  wxdai: {
+    symbol: 'WXDAI',
+    name: 'WXDAI',
+    address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
+    decimals: 18
+  },
+  usdc: {
+    symbol: 'USDC',
+    name: 'USDC',
+    address: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+    decimals: 6
+  },
+  usdt: {
+    symbol: 'USDT',
+    name: 'USDT',
+    address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
+    decimals: 6
+  }
 }
 
-export const XDAI_COIN_IDS = {
-  [COINS_XDAI.wxdai]: 0,
-  [COINS_XDAI.usdc]: 1,
-  [COINS_XDAI.usdt]: 2
+/**
+ * xDAI pools
+ */
+export const POOLS_XDAI: CurvePool[] = [
+  {
+    name: '3pool',
+    abi: XDAI_CURVE_ROUTER_ABI,
+    swapAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
+    approveAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
+    // Order is crucial
+    tokens: [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
+  }
+]
 }
 
 /**
@@ -141,7 +182,6 @@ export const DECIMALS: { [index: string]: number } = {
   '0x9777d7E2b60bB01759D0E2f8be2095df444cb07E': 6, // pax/yUSDC
   '0x1bE5d71F2dA660BFdee8012dDc58D024448A0A59': 6, // pax/yUSDT
   '0x8E870D67F660D95d5be530380D0eC0bd388289E1': 18, // PAX
-
   '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D': 8, // renBTC
   '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599': 8, // WBTC
   '0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa': 18, // TBTC
@@ -209,10 +249,5 @@ export const DECIMALS: { [index: string]: number } = {
   '0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3': 18, // MIM
 
   '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490': 18, // 3CRV
-  '0xD533a949740bb3306d119CC777fa900bA034cd52': 18, // CRV,
-
-  /// XDAI coins
-  [COINS_XDAI.wxdai]: 18,
-  [COINS_XDAI.usdt]: 6,
-  [COINS_XDAI.usdc]: 6
+  '0xD533a949740bb3306d119CC777fa900bA034cd52': 18 // CRV,
 }

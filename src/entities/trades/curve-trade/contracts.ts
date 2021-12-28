@@ -3,7 +3,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 
 import { ChainId, ZERO_ADDRESS } from '../../../constants'
-import { COINS_MAINNET, COINS_XDAI } from './constants'
+import { COINS_MAINNET, CurveCoinList, TOKENS_XDAI } from './constants'
 // ABIs: trimmed for bundle size
 import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI, XDAI_CURVE_ROUTER_ABI } from './abi'
 
@@ -18,7 +18,7 @@ export const MAINNET_CONTRACTS = {
  */
 export const XDAI_CONTRACTS = {
   addressProvider: ZERO_ADDRESS, // only USDC, USDT and WXDAI can be swapped on xDAI
-  router: '0x7f90122BF0700F9E7e1F688fe926940E8839F353'
+  router: '0x7f90122BF0700F9E7e1F688fe926940E8839F353' // 3pool
 } as const
 
 export type CurveCoreContracts = Record<keyof typeof MAINNET_CONTRACTS, Contract>
@@ -73,9 +73,9 @@ async function getCurveContracts(chainId: ChainId): Promise<CurveCoreContracts> 
  * Returns list of coins avaialble for on Curve for a given chainId
  * @param chainId the target chain ID
  */
-export function getCoinList(chainId: ChainId): Record<string, string> {
+export function getCoinList(chainId: ChainId) {
   if (chainId == ChainId.XDAI) {
-    return COINS_XDAI
+    return TOKENS_XDAI
   }
 
   return COINS_MAINNET
@@ -133,7 +133,7 @@ export async function getBestCurvePoolAndOutput({
   // Map symbols to address
   const currencyInAddress = mapTokenSymbolToAddress(tokenInSymbol, chainId)
   const currencyOutAddress = mapTokenSymbolToAddress(tokenOutSymbol, chainId)
-  const coinList = getCoinList(chainId)
+  const coinList = getCoinList(chainId) as CurveCoinList
 
   if (chainId == ChainId.MAINNET) {
     // Curve V2 pools

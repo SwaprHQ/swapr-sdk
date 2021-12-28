@@ -1,5 +1,7 @@
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
+import { parseUnits } from '@ethersproject/units'
+import { Contract } from '@ethersproject/contracts'
 import invariant from 'tiny-invariant'
 
 import { RoutablePlatform } from '../routable-platform/routable-platform'
@@ -14,10 +16,9 @@ import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
 
 // Curve imports
-import { getCurveContracts, mapTokenSymbolToAddress } from './contracts'
-import { XDAI_COIN_IDS } from './constants'
+import { getCurveContracts, getProvider, mapTokenSymbolToAddress } from './contracts'
+import { POOLS_XDAI } from './constants'
 import { ZERO_ADDRESS } from '../../..'
-import { parseUnits } from '@ethersproject/units'
 
 const ZERO_HEX = '0x0'
 
@@ -177,12 +178,20 @@ export class CurveTrade extends Trade {
       // Map symbols to address
       const currencyInAddress = mapTokenSymbolToAddress(tokenInSymbol, chainId)
       const currencyOutAddress = mapTokenSymbolToAddress(tokenOutSymbol, chainId)
-      // xDAI chain
+
       if (chainId == ChainId.XDAI) {
+        /**
+         * Gnosis Chain / xDAI
+         */
+        /**
+         * Curve's 3pool: WXDAI+USDC+USDT
+         */
+        const curve3Pool = POOLS_XDAI[0]
+        const curve3PoolContract = new Contract(curve3Pool.swapAddress, curve3Pool.abi, getProvider(chainId))
         // Map token address to index
-        const tokenInIndex = XDAI_COIN_IDS[currencyInAddress]
-        const tokenOutIndex = XDAI_COIN_IDS[currencyOutAddress]
-        const expectedAmountOut = (await routerContract.get_dy(
+        const tokenInIndex = curve3Pool.tokens.findIndex(({ symbol }) => symbol == tokenInSymbol)
+        const tokenOutIndex = curve3Pool.tokens.findIndex(({ symbol }) => symbol == tokenOutSymbol)
+        const expectedAmountOut = (await curve3PoolContract.get_dy(
           tokenInIndex.toString(),
           tokenOutIndex.toString(),
           amountInBN.toString()
@@ -204,12 +213,60 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           expectedAmountOut.toString()
         ]
+        const populatedTransaction = await curve3PoolContract.populateTransaction[methodSignatureName](...args, {
+          value
+        })
+        // Assign the CurveTrade
+        bestTrade = new CurveTrade(
+          currencyAmountIn,
+          Currency.isNative(currencyOut)
+            ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
+            : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
+          maximumSlippage,
+          TradeType.EXACT_INPUT,
+          routerContract.address,
+          populatedTransaction.data as string,
+          value
+        )
+      } else if (chainId == ChainId.ARBITRUM_ONE) {
+        /**
+         * Arbitrum WIP
+         */
+      } else if (chainId == ChainId.MAINNET) {
+        /**
+         * Ethereum WIP
+         */
+        const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(
+          currencyInAddress,
+          currencyOutAddress,
+          amountInBN.toString(),
+          {
+            from: ZERO_ADDRESS
+          }
+        )
+        /**
+         * Construct the call data from router method exchange
+         *
+         * exchange(int128 i, int128 j, uint256_dx, uint256 _min_dy)
+         * where:
+         * { name: "_amount", type: "uint256" },
+         * { name: "_route", type: "address[6]" },
+         * { name: "_indices", type: "uint256[8]" },
+         * { name: "_min_received", type: "uint256" }
+         */
+        let methodSignatureName = 'exchange(uint256,address[6],uint256[8],uint256)'
+        const args: (string | string[])[] = [
+          amountInBN.toString(),
+          routes,
+          indices.map((index: string) => index.toString()),
+          expectedAmountOut.toString()
+        ]
+
         const populatedTransaction = await routerContract.populateTransaction[methodSignatureName](...args, {
           value
         })
-
         // Return the CurveTrade
-        return new CurveTrade(
+        bestTrade = new CurveTrade(
           currencyAmountIn,
           Currency.isNative(currencyOut)
             ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
@@ -221,49 +278,6 @@ export class CurveTrade extends Trade {
           value
         )
       }
-
-      // Ethereum Mainnet
-      const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(
-        currencyInAddress,
-        currencyOutAddress,
-        amountInBN.toString(),
-        {
-          from: ZERO_ADDRESS
-        }
-      )
-      /**
-       * Construct the call data from router method exchange
-       *
-       * exchange(int128 i, int128 j, uint256_dx, uint256 _min_dy)
-       * where:
-       * { name: "_amount", type: "uint256" },
-       * { name: "_route", type: "address[6]" },
-       * { name: "_indices", type: "uint256[8]" },
-       * { name: "_min_received", type: "uint256" }
-       */
-      let methodSignatureName = 'exchange(uint256,address[6],uint256[8],uint256)'
-      const args: (string | string[])[] = [
-        amountInBN.toString(),
-        routes,
-        indices.map((index: string) => index.toString()),
-        expectedAmountOut.toString()
-      ]
-
-      const populatedTransaction = await routerContract.populateTransaction[methodSignatureName](...args, {
-        value
-      })
-      // Return the CurveTrade
-      return new CurveTrade(
-        currencyAmountIn,
-        Currency.isNative(currencyOut)
-          ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
-          : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
-        maximumSlippage,
-        TradeType.EXACT_INPUT,
-        routerContract.address,
-        populatedTransaction.data as string,
-        value
-      )
     } catch (error) {
       console.error('could not fetch Curve trade', error)
     }
