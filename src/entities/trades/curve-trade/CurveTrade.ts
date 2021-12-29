@@ -5,7 +5,7 @@ import { Contract } from '@ethersproject/contracts'
 import invariant from 'tiny-invariant'
 
 import { RoutablePlatform } from '../routable-platform/routable-platform'
-import { ChainId, ONE, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType, ZERO_ADDRESS } from '../../../constants'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { TokenAmount } from '../../fractions/tokenAmount'
 import { Fraction } from '../../fractions/fraction'
@@ -18,7 +18,6 @@ import { Currency } from '../../currency'
 // Curve imports
 import { getCurveContracts, getProvider, mapTokenSymbolToAddress } from './contracts'
 import { POOLS_XDAI } from './constants'
-import { ZERO_ADDRESS } from '../../..'
 
 const ZERO_HEX = '0x0'
 
