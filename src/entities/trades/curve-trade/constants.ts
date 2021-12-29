@@ -170,7 +170,6 @@ export const POOLS_XDAI: CurvePool[] = [
     tokens: [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
   }
 ]
-}
 
 /**
  * @todo DRY up
