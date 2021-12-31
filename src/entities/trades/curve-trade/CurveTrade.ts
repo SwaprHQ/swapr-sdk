@@ -222,9 +222,9 @@ export class CurveTrade extends Trade {
           tokens.some(token => token.address.toLowerCase() === tokenIn.address.toLowerCase())
         )
         // For each pool, find the best outcome
-        // const trades = []
-        const bestTrades = await Promise.all(
-          routablePools.map(async pool => {
+        const trades = []
+        for await (const pool of routablePools) {
+          try {
             const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
             // Map token address to index
             const tokenInIndex = pool.tokens.findIndex(({ symbol }) => symbol == tokenInSymbol)
@@ -248,20 +248,23 @@ export class CurveTrade extends Trade {
               value
             })
             // Return the CurveTrade
-            return new CurveTrade(
-              currencyAmountIn,
-              Currency.isNative(currencyOut)
-                ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
-                : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
-              maximumSlippage,
-              TradeType.EXACT_INPUT,
-              poolContract.address,
-              populatedTransaction.data as string,
-              value
+            trades.push(
+              new CurveTrade(
+                currencyAmountIn,
+                Currency.isNative(currencyOut)
+                  ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
+                  : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
+                maximumSlippage,
+                TradeType.EXACT_INPUT,
+                poolContract.address,
+                populatedTransaction.data as string,
+                value
+              )
             )
-          })
-        )
-        bestTrade = bestTrades[0]
+          } catch (e) {}
+        }
+
+        bestTrade = trades.find(trade => trade != undefined)
       }
       // Ethereum WIP
       else if (chainId == ChainId.MAINNET) {

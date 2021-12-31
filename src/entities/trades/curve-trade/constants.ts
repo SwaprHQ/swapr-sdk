@@ -340,3 +340,12 @@ export const DECIMALS: { [index: string]: number } = {
   '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490': 18, // 3CRV
   '0xD533a949740bb3306d119CC777fa900bA034cd52': 18 // CRV,
 }
+
+export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
+  [ChainId.MAINNET]: [],
+  [ChainId.XDAI]: POOLS_XDAI,
+  [ChainId.ARBITRUM_ONE]: POOLS_ARBITRUM_ONE,
+  // Empty
+  [ChainId.RINKEBY]: [],
+  [ChainId.ARBITRUM_RINKEBY]: []
+}
