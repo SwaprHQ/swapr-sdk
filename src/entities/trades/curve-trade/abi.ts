@@ -1,7 +1,7 @@
 // ABIs
 
 // 3pool ABI which has USDC, USDT and WXDAI
-export const XDAI_CURVE_ROUTER_ABI = JSON.stringify([
+export const CURVE_3POOL_ABI = JSON.stringify([
   {
     type: 'function',
     stateMutability: 'nonpayable',
@@ -98,5 +98,63 @@ export const ADDRESS_PROVIDER_ABI = JSON.stringify([
     stateMutability: 'view',
     type: 'function',
     gas: '1308'
+  }
+])
+
+export const CURVE_CRYPTO_SWAP_ABI = JSON.stringify([
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    name: 'exchange_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: '_dx', type: 'uint256' },
+      { name: '_min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '57522'
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    name: 'exchange_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: '_dx', type: 'uint256' },
+      { name: '_min_dy', type: 'uint256' },
+      { name: '_receiver', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '57522'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'get_dy_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: '_dx', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '20256'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'coins',
+    inputs: [{ name: 'arg0', type: 'uint256' }],
+    outputs: [{ name: '', type: 'address' }],
+    gas: '2835'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'underlying_coins',
+    inputs: [{ name: 'arg0', type: 'uint256' }],
+    outputs: [{ name: '', type: 'address' }],
+    gas: '2871'
   }
 ])

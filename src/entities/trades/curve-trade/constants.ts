@@ -1,5 +1,5 @@
 import { ChainId } from '../../../constants'
-import { XDAI_CURVE_ROUTER_ABI } from './abi'
+import { CURVE_3POOL_ABI, CURVE_CRYPTO_SWAP_ABI, CURVE_ROUTER_ABI } from './abi'
 
 export interface CurveToken {
   isLPToken?: boolean
@@ -15,6 +15,7 @@ export interface CurvePool {
   abi: string
   approveAddress: string
   tokens: CurveToken[]
+  isMeta: boolean
 }
 
 /**
@@ -163,11 +164,100 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
 export const POOLS_XDAI: CurvePool[] = [
   {
     name: '3pool',
-    abi: XDAI_CURVE_ROUTER_ABI,
+    abi: CURVE_3POOL_ABI,
     swapAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
     approveAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
+    isMeta: false,
     // Order is crucial
     tokens: [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
+  }
+]
+
+/**
+ * Arbitrum Coins
+ */
+export const TOKENS_ARBITRUM_ONE: { [k: string]: CurveToken } = {
+  usdc: {
+    symbol: 'USDC',
+    name: 'USDC',
+    decimals: 6,
+    address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8'
+  },
+  usdt: {
+    symbol: 'USDT',
+    name: 'USDT',
+    decimals: 6,
+    address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'
+  },
+  wbtc: {
+    symbol: 'wBTC',
+    name: 'wBTC',
+    decimals: 8,
+    address: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f'
+  },
+  renbtc: {
+    symbol: 'renBTC',
+    name: 'renBTC',
+    decimals: 8,
+    address: '0xDBf31dF14B66535aF65AaC99C32e9eA844e14501'
+  },
+  eth: {
+    symbol: 'ETH',
+    name: 'ETH',
+    decimals: 18,
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+  },
+  weth: {
+    symbol: 'WETH',
+    name: 'WETH',
+    decimals: 18,
+    address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+  },
+  eurs: {
+    symbol: 'EURs',
+    name: 'EURs',
+    decimals: 2,
+    address: '0xD22a58f79e9481D1a88e00c343885A588b34b68B'
+  }
+}
+
+export const POOLS_ARBITRUM_ONE: CurvePool[] = [
+  {
+    name: '2pool',
+    swapAddress: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
+    approveAddress: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
+    abi: CURVE_3POOL_ABI,
+    isMeta: false,
+    tokens: [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
+    // underlyingTokens: [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt],
+  },
+  {
+    name: 'tricrypto',
+    abi: CURVE_ROUTER_ABI,
+    isMeta: false,
+    swapAddress: '0x960ea3e3C7FB317332d990873d354E18d7645590',
+    approveAddress: '0x960ea3e3C7FB317332d990873d354E18d7645590',
+    tokens: [TOKENS_ARBITRUM_ONE.usdt, TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.weth]
+  },
+  {
+    name: 'ren',
+    swapAddress: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
+    abi: CURVE_3POOL_ABI,
+    isMeta: false,
+    approveAddress: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
+    tokens: [TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.renbtc]
+  },
+  {
+    name: 'eursusd',
+    swapAddress: '0x25e2e8d104bc1a70492e2be32da7c1f8367f9d2c',
+    approveAddress: '0x25e2e8d104bc1a70492e2be32da7c1f8367f9d2c',
+    abi: CURVE_CRYPTO_SWAP_ABI,
+    isMeta: true,
+    tokens: [
+      TOKENS_ARBITRUM_ONE.eurs, // USDC
+      TOKENS_ARBITRUM_ONE.usdc, // USDC
+      TOKENS_ARBITRUM_ONE.usdt // USDT
+    ]
   }
 ]
 
