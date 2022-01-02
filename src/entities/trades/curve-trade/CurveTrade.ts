@@ -164,20 +164,23 @@ export class CurveTrade extends Trade {
       const value = ZERO_HEX // With Curve, most value exchanged is ERC20
       // Baisc trade information
       const amountInBN = parseUnits(currencyAmountIn.toExact(), currencyAmountIn.currency.decimals)
-      const tokenInSymbol = currencyAmountIn.currency.symbol as string
-      const tokenOutSymbol = currencyOut.symbol as string
       // Get the Router contract to populate the unsigned transaction
       // Get all Curve pools for the chain
       const curvePools = CURVE_POOLS[chainId]
       // Gnosis Chain / xDAI
       if (chainId == ChainId.XDAI) {
         // Curve's 3pool: WXDAI+USDC+USDT
-        const curve3Pool = curvePools[0]
-        const curve3PoolContract = new Contract(curve3Pool.swapAddress, curve3Pool.abi, getProvider(chainId))
+        const pool = curvePools[0]
+        const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
         // Map token address to index
-        const tokenInIndex = curve3Pool.tokens.findIndex(({ symbol }) => symbol == tokenInSymbol)
-        const tokenOutIndex = curve3Pool.tokens.findIndex(({ symbol }) => symbol == tokenOutSymbol)
-        const expectedAmountOut = (await curve3PoolContract.get_dy(
+        const tokenInIndex = pool.tokens.findIndex(
+          ({ address }) => address.toLowerCase() == tokenIn.address.toLowerCase()
+        )
+        const tokenOutIndex = pool.tokens.findIndex(
+          ({ address }) => address.toLowerCase() == tokenOut.address.toLowerCase()
+        )
+        // Estimate output from contract
+        const expectedAmountOut = (await poolContract.get_dy(
           tokenInIndex.toString(),
           tokenOutIndex.toString(),
           amountInBN.toString()
@@ -199,7 +202,7 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           expectedAmountOut.toString()
         ]
-        const populatedTransaction = await curve3PoolContract.populateTransaction[exchangeMethodSignature](...args, {
+        const populatedTransaction = await poolContract.populateTransaction[exchangeMethodSignature](...args, {
           value
         })
         // Assign the CurveTrade
@@ -210,7 +213,7 @@ export class CurveTrade extends Trade {
             : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
           maximumSlippage,
           TradeType.EXACT_INPUT,
-          curve3PoolContract.address,
+          poolContract.address,
           populatedTransaction.data as string,
           value
         )
@@ -218,38 +221,43 @@ export class CurveTrade extends Trade {
       // Arbitrum One
       else if (chainId == ChainId.ARBITRUM_ONE) {
         // Find all pools that the trade can go through
-        const routablePools = curvePools.filter(({ tokens }) =>
-          tokens.some(token => token.address.toLowerCase() === tokenIn.address.toLowerCase())
+        const routablePools = curvePools.filter(
+          ({ tokens }) =>
+            tokens.some(token => token.address.toLowerCase() === tokenIn.address.toLowerCase()) &&
+            tokens.some(token => token.address.toLowerCase() === tokenOut.address.toLowerCase())
         )
         // For each pool, find the best outcome
-        const trades = []
-        for await (const pool of routablePools) {
-          try {
-            const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
-            // Map token address to index
-            const tokenInIndex = pool.tokens.findIndex(({ symbol }) => symbol == tokenInSymbol)
-            const tokenOutIndex = pool.tokens.findIndex(({ symbol }) => symbol == tokenOutSymbol)
-            // Get expected output from the pool
-            const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
-            const expectedAmountOut = (await poolContract[dyMethodSignature](
-              tokenInIndex.toString(),
-              tokenOutIndex.toString(),
-              amountInBN.toString()
-            )) as BigNumber
-            // Construct the unsigned transaction
-            const exchangeMethodSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
-            const args: (string | string[])[] = [
-              tokenInIndex.toString(),
-              tokenOutIndex.toString(),
-              amountInBN.toString(),
-              expectedAmountOut.toString()
-            ]
-            const populatedTransaction = await poolContract.populateTransaction[exchangeMethodSignature](...args, {
-              value
-            })
-            // Return the CurveTrade
-            trades.push(
-              new CurveTrade(
+        const trades = await Promise.all(
+          routablePools.map(async pool => {
+            try {
+              const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
+              // Map token address to index
+              const tokenInIndex = pool.tokens.findIndex(
+                ({ address }) => address.toLowerCase() == tokenIn.address.toLowerCase()
+              )
+              const tokenOutIndex = pool.tokens.findIndex(
+                ({ address }) => address.toLowerCase() == tokenOut.address.toLowerCase()
+              )
+              // Get expected output from the pool
+              const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
+              const expectedAmountOut = (await poolContract[dyMethodSignature](
+                tokenInIndex.toString(),
+                tokenOutIndex.toString(),
+                amountInBN.toString()
+              )) as BigNumber
+              // Construct the unsigned transaction
+              const exchangeMethodSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
+              const args: (string | string[])[] = [
+                tokenInIndex.toString(),
+                tokenOutIndex.toString(),
+                amountInBN.toString(),
+                expectedAmountOut.toString()
+              ]
+              const populatedTransaction = await poolContract.populateTransaction[exchangeMethodSignature](...args, {
+                value
+              })
+              // Return the CurveTrade
+              return new CurveTrade(
                 currencyAmountIn,
                 Currency.isNative(currencyOut)
                   ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
@@ -260,9 +268,12 @@ export class CurveTrade extends Trade {
                 populatedTransaction.data as string,
                 value
               )
-            )
-          } catch (e) {}
-        }
+            } catch (e) {
+              console.log('CurveTrade Error:', e)
+            }
+            return
+          })
+        )
 
         bestTrade = trades.find(trade => trade != undefined)
       }
