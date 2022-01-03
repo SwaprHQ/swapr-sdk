@@ -73,6 +73,7 @@ export class CurveTrade extends Trade {
     output: CurrencyAmount,
     maximumSlippage: Percent,
     tradeType: TradeType,
+    chainId: ChainId,
     to: string,
     callData: string,
     value: string,
@@ -87,9 +88,10 @@ export class CurveTrade extends Trade {
       new Price(input.currency, output.currency, input.raw, output.raw),
       maximumSlippage,
       new Percent('0', '100'),
-      ChainId.MAINNET,
+      chainId,
       RoutablePlatform.CURVE
     )
+
     this.to = to
     this.callData = callData
     this.value = value
@@ -264,6 +266,7 @@ export class CurveTrade extends Trade {
                   : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
                 maximumSlippage,
                 TradeType.EXACT_INPUT,
+                chainId,
                 poolContract.address,
                 populatedTransaction.data as string,
                 value
