@@ -17,7 +17,7 @@ import { Currency } from '../../currency'
 
 // Curve imports
 import { getCurveContracts, getProvider, mapTokenSymbolToAddress } from './contracts'
-import { CURVE_POOLS } from './constants'
+import { CurvePool, CURVE_POOLS } from './constants'
 
 const ZERO_HEX = '0x0'
 
@@ -32,6 +32,15 @@ function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   if (currency instanceof Token) return currency
   if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
   invariant(false, 'CURRENCY')
+}
+
+/**
+ * Returns the token index of a token in a Curve pool
+ * @param pool the Curve pool
+ * @param tokenAddress the token address
+ */
+function getTokenIndex(pool: CurvePool, tokenAddress: string) {
+  return pool.tokens.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
 }
 
 /**
@@ -164,24 +173,19 @@ export class CurveTrade extends Trade {
     let bestTrade
     try {
       const value = ZERO_HEX // With Curve, most value exchanged is ERC20
-      // Baisc trade information
-      const amountInBN = parseUnits(currencyAmountIn.toExact(), currencyAmountIn.currency.decimals)
       // Get the Router contract to populate the unsigned transaction
       // Get all Curve pools for the chain
       const curvePools = CURVE_POOLS[chainId]
       // Gnosis Chain / xDAI
       if (chainId == ChainId.XDAI) {
+        // Baisc trade information
+        const amountInBN = parseUnits(currencyAmountIn.toExact(), currencyAmountIn.currency.decimals)
         // Curve's 3pool: WXDAI+USDC+USDT
         const pool = curvePools[0]
         const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
         // Map token address to index
-        const tokenInIndex = pool.tokens.findIndex(
-          ({ address }) => address.toLowerCase() == tokenIn.address.toLowerCase()
-        )
-        const tokenOutIndex = pool.tokens.findIndex(
-          ({ address }) => address.toLowerCase() == tokenOut.address.toLowerCase()
-        )
-        // Estimate output from contract
+        const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+        const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
         const expectedAmountOut = (await poolContract.get_dy(
           tokenInIndex.toString(),
           tokenOutIndex.toString(),
@@ -215,6 +219,7 @@ export class CurveTrade extends Trade {
             : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
           maximumSlippage,
           TradeType.EXACT_INPUT,
+          chainId,
           poolContract.address,
           populatedTransaction.data as string,
           value
@@ -234,12 +239,8 @@ export class CurveTrade extends Trade {
             try {
               const poolContract = new Contract(pool.swapAddress, pool.abi, getProvider(chainId))
               // Map token address to index
-              const tokenInIndex = pool.tokens.findIndex(
-                ({ address }) => address.toLowerCase() == tokenIn.address.toLowerCase()
-              )
-              const tokenOutIndex = pool.tokens.findIndex(
-                ({ address }) => address.toLowerCase() == tokenOut.address.toLowerCase()
-              )
+              const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+              const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
               // Get expected output from the pool
               const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
               const expectedAmountOut = (await poolContract[dyMethodSignature](
