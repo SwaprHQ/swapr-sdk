@@ -49,22 +49,13 @@ function getTokenIndex(pool: CurvePool, tokenAddress: string) {
  */
 export class CurveTrade extends Trade {
   /**
-   *  Router that will handle the swap logic
-   */
-  private readonly to: string
-
-  /**
-   * The unsigned transaction calldata
-   */
-  private readonly callData: string
-  /**
-   * Amount of ETH/native value to be submitted with the trade
-   */
-  private readonly value: string
-  /**
    * An address the EOA must approve to spend its tokenIn
    */
   public readonly approveAddress: string
+  /**
+   * The Unsigned transaction
+   */
+  public readonly transactionRequest: UnsignedTransaction
 
   /**
    *
@@ -83,9 +74,7 @@ export class CurveTrade extends Trade {
     maximumSlippage: Percent,
     tradeType: TradeType,
     chainId: ChainId,
-    to: string,
-    callData: string,
-    value: string,
+    transactionRequest: UnsignedTransaction,
     approveAddress?: string
   ) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
@@ -100,11 +89,8 @@ export class CurveTrade extends Trade {
       chainId,
       RoutablePlatform.CURVE
     )
-
-    this.to = to
-    this.callData = callData
-    this.value = value
-    this.approveAddress = approveAddress || to
+    this.transactionRequest = transactionRequest
+    this.approveAddress = approveAddress || (transactionRequest.to as string)
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -268,9 +254,7 @@ export class CurveTrade extends Trade {
                 maximumSlippage,
                 TradeType.EXACT_INPUT,
                 chainId,
-                poolContract.address,
-                populatedTransaction.data as string,
-                value
+                populatedTransaction
               )
             } catch (e) {
               console.log('CurveTrade Error:', e)
@@ -292,9 +276,9 @@ export class CurveTrade extends Trade {
 
   public async swapTransaction(): Promise<UnsignedTransaction> {
     return {
-      to: this.to,
-      data: this.callData,
-      value: BigNumber.from(this.value)
+      ...this.transactionRequest,
+      gasLimit: BigNumber.from(this.transactionRequest.gasLimit),
+      value: BigNumber.from(this.transactionRequest.value)
     }
   }
 }
