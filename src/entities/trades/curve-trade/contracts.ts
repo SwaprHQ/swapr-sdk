@@ -3,9 +3,9 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 
 import { ChainId, ZERO_ADDRESS } from '../../../constants'
-import { COINS_MAINNET, CurveCoinList, TOKENS_XDAI } from './constants'
+import { TOKENS_MAINNET, TOKENS_XDAI } from './constants'
 // ABIs: trimmed for bundle size
-import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI, XDAI_CURVE_ROUTER_ABI } from './abi'
+import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI, CURVE_3POOL_ABI } from './abi'
 
 // Constants
 export const MAINNET_CONTRACTS = {
@@ -16,7 +16,7 @@ export const MAINNET_CONTRACTS = {
 /**
  * @todo find the addresses
  */
-export const XDAI_CONTRACTS = {
+export const ARBITRUM_ONEI_CONTRACTS = {
   addressProvider: ZERO_ADDRESS, // only USDC, USDT and WXDAI can be swapped on xDAI
   router: '0x7f90122BF0700F9E7e1F688fe926940E8839F353' // 3pool
 } as const
@@ -29,7 +29,7 @@ export type CurveCoreContracts = Record<keyof typeof MAINNET_CONTRACTS, Contract
  */
 export const ALIASES = {
   [ChainId.MAINNET as ChainId]: MAINNET_CONTRACTS,
-  [ChainId.XDAI as ChainId]: XDAI_CONTRACTS
+  [ChainId.ARBITRUM_ONE as ChainId]: ARBITRUM_ONEI_CONTRACTS
 }
 
 export const ProviderUrlList = {
@@ -51,19 +51,14 @@ export const getProvider = (chainId: ChainId) => {
  * @param ChainId
  * @returns
  */
-export /**
- *
- * @param providerOrSigner
- * @returns
- */
-async function getCurveContracts(chainId: ChainId): Promise<CurveCoreContracts> {
+export async function getCurveContracts(chainId: ChainId): Promise<CurveCoreContracts> {
   const provider = getProvider(chainId)
 
   return {
     addressProvider: new Contract(ALIASES[chainId].addressProvider, ADDRESS_PROVIDER_ABI, provider),
     router: new Contract(
       ALIASES[chainId].router,
-      chainId == ChainId.XDAI ? XDAI_CURVE_ROUTER_ABI : CURVE_ROUTER_ABI,
+      chainId == ChainId.XDAI ? CURVE_3POOL_ABI : CURVE_ROUTER_ABI,
       provider
     )
   }
@@ -78,7 +73,7 @@ export function getCoinList(chainId: ChainId) {
     return TOKENS_XDAI
   }
 
-  return COINS_MAINNET
+  return TOKENS_MAINNET
 }
 
 /**
@@ -87,17 +82,12 @@ export function getCoinList(chainId: ChainId) {
  * @param chainId the chain ID, default is Ethereum; 1
  * @returns
  */
-export function mapTokenSymbolToAddress(tokenAddres: CurveCurrency, chainId: ChainId = ChainId.MAINNET): string {
+export function mapTokenSymbolToAddress(tokenAddres: string, chainId: ChainId = ChainId.MAINNET): string {
   // Default to mainnet
   const coinList = getCoinList(chainId)
   // @ts-ignore
   return coinList[tokenAddres.toLowerCase() as any]
 }
-
-/**
- * A CurveFi currency
- */
-export type CurveCurrency = keyof typeof COINS_MAINNET | string
 
 export interface GetBestPoolAndOutputParams {
   tokenInSymbol: string
@@ -133,11 +123,14 @@ export async function getBestCurvePoolAndOutput({
   // Map symbols to address
   const currencyInAddress = mapTokenSymbolToAddress(tokenInSymbol, chainId)
   const currencyOutAddress = mapTokenSymbolToAddress(tokenOutSymbol, chainId)
-  const coinList = getCoinList(chainId) as CurveCoinList
-
+  const coinList = getCoinList(chainId)
   if (chainId == ChainId.MAINNET) {
     // Curve V2 pools
-    const tricryptoCoins = [coinList.usdt.toLowerCase(), coinList.wbtc.toLowerCase(), coinList.weth.toLowerCase()]
+    const tricryptoCoins = [
+      coinList.usdt.address.toLowerCase(),
+      coinList.wbtc.address.toLowerCase(),
+      coinList.weth.address.toLowerCase()
+    ]
     if (
       tricryptoCoins.includes(currencyInAddress.toLowerCase()) &&
       tricryptoCoins.includes(currencyOutAddress.toLowerCase())
