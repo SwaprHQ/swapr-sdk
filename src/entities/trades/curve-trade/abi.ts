@@ -127,7 +127,7 @@ export const CURVE_CRYPTO_SWAP_ABI = JSON.stringify([
       { name: '_receiver', type: 'address' }
     ],
     outputs: [{ name: '', type: 'uint256' }],
-    gas: '57522'
+    gas: '900000'
   },
   {
     stateMutability: 'view',
@@ -140,21 +140,5 @@ export const CURVE_CRYPTO_SWAP_ABI = JSON.stringify([
     ],
     outputs: [{ name: '', type: 'uint256' }],
     gas: '20256'
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    name: 'coins',
-    inputs: [{ name: 'arg0', type: 'uint256' }],
-    outputs: [{ name: '', type: 'address' }],
-    gas: '2835'
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    name: 'underlying_coins',
-    inputs: [{ name: 'arg0', type: 'uint256' }],
-    outputs: [{ name: '', type: 'address' }],
-    gas: '2871'
   }
 ])
