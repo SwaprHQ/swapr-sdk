@@ -505,6 +505,67 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18,
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     isLPToken: true
+  },
+  sbtccrv: {
+    symbol: 'sbtcCrv',
+    name: 'Curve.fi renBTC/wBTC/sBTC',
+    decimals: 18,
+    address: '0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3',
+    isLPToken: true
+  },
+  linkusd: {
+    name: 'LINKUSD',
+    symbol: 'LINKUSD',
+    decimals: 18,
+    address: '0x0E2EC54fC0B509F445631Bf4b91AB8168230C752'
+  },
+  eth: {
+    symbol: 'ETH',
+    name: 'Ether',
+    decimals: 18,
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+  },
+  ankreth: {
+    name: 'ankreth',
+    symbol: 'ankrETH',
+    decimals: 18,
+    address: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb'
+  },
+  spell: {
+    name: 'Spell',
+    symbol: 'SPELL',
+    decimals: 18,
+    address: '0x090185f2135308bad17527004364ebcc2d37e5f6'
+  },
+  rai: {
+    name: 'rai',
+    symbol: 'RAI',
+    decimals: 18,
+    address: '0x03ab458634910aad20ef5f1c8ee96f1d6ac54919'
+  },
+  cvx: {
+    name: 'Convex',
+    symbol: 'CVX',
+    decimals: 18,
+    address: '0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b'
+  },
+  xaut: {
+    name: 'xaut',
+    symbol: 'XAUt',
+    decimals: 6,
+    address: '0x68749665ff8d2d112fa859aa293f07a622782f38'
+  },
+  t: {
+    name: 'Threshold Network',
+    symbol: 'T',
+    decimals: 18,
+    address: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5'
+  },
+  eurt: {
+    name: 'Tether Euro',
+    symbol: 'EURT',
+    decimals: 6,
+    address: '0xC581b735A1688071A1746c968e0798D642EDE491'
   }
 }
 
