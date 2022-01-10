@@ -57,7 +57,7 @@ export class Token extends Currency {
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
-      '0xb90d6bec20993be5d72a5ab353343f7a0281f158',
+      '0xb90D6bec20993Be5d72A5ab353343f7a0281f158',
       18,
       'DXD',
       'DXdao from Ethereum'

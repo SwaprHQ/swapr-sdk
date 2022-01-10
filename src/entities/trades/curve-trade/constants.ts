@@ -176,7 +176,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   bbtc: {
-    address: '0x9be89d2a4cd102d8fecc6bf9da793be995c22541',
+    address: '0x9BE89D2a4cd102D8Fecc6BF9dA793be995C22541',
     name: 'Binance Wrapped BTC',
     symbol: 'BBTC',
     decimals: 8
@@ -212,7 +212,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   seth: {
-    address: '0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb',
+    address: '0x5e74C9036fb86BD7eCdcb084a0673EFc32eA31cb',
     name: 'Synth sETH',
     symbol: 'sETH',
     decimals: 18
@@ -242,7 +242,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   reth: {
-    address: '0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593',
+    address: '0x9559Aaa82d9649C7A7b220E7c461d2E74c9a3593',
     name: 'StaFi',
     symbol: 'rETH',
     decimals: 18
@@ -290,7 +290,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   cyusdc: {
-    address: '0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c',
+    address: '0x76Eb2FE28b36B3ee97F3Adae0C69606eeDB2A37c',
     name: 'Yearn USD Coin',
     symbol: 'cyUSDC',
     decimals: 8
@@ -314,7 +314,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 8
   },
   cydai: {
-    address: '0x8e595470ed749b85c6f7669de83eae304c2ec68f',
+    address: '0x8e595470Ed749b85C6F7669de83EAe304C2ec68F',
     name: 'Yearn Dai Stablecoin',
     symbol: 'cyDAI',
     decimals: 8
@@ -344,7 +344,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 6
   },
   ust: {
-    address: '0xa47c8bf37f92abed4a126bda807a7b7498661acd',
+    address: '0xa47c8bf37f92aBed4A126BDA807A7b7498661acD',
     name: 'Wrapped UST Token',
     symbol: 'UST',
     decimals: 18
@@ -422,7 +422,7 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   frax: {
-    address: '0x853d955acef822db058eb8505911ed77f175b99e',
+    address: '0x853d955aCEf822Db058eb8505911ED77F175b99e',
     name: 'Frax',
     symbol: 'FRAX',
     decimals: 18
@@ -434,19 +434,19 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     decimals: 18
   },
   asusd: {
-    address: '0x6c5024cd4f8a59110119c56f8933403a539555eb',
+    address: '0x6C5024Cd4F8A59110119C56f8933403A539555EB',
     name: 'Aave interest bearing SUSD',
     symbol: 'aSUSD',
     decimals: 18
   },
   mim: {
-    address: '0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3',
+    address: '0x99D8a9C45b2ecA8864373A26D1459e3Dff1e17F3',
     name: 'Magic Internet Money',
     symbol: 'MIM',
     decimals: 18
   },
   alusd: {
-    address: '0xbc6da0fe9ad5f3b0d58160288917aa56653660e9',
+    address: '0xBC6DA0FE9aD5f3b0d58160288917AA56653660E9',
     name: 'Alchemix USD',
     symbol: 'alUSD',
     decimals: 18
@@ -529,31 +529,31 @@ export const TOKENS_MAINNET: { [k: string]: CurveToken } = {
     name: 'ankreth',
     symbol: 'ankrETH',
     decimals: 18,
-    address: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb'
+    address: '0xE95A203B1a91a908F9B9CE46459d101078c2c3cb'
   },
   spell: {
     name: 'Spell',
     symbol: 'SPELL',
     decimals: 18,
-    address: '0x090185f2135308bad17527004364ebcc2d37e5f6'
+    address: '0x090185f2135308BaD17527004364eBcC2D37e5F6'
   },
   rai: {
-    name: 'rai',
+    name: ' Rai Reflex Index',
     symbol: 'RAI',
     decimals: 18,
-    address: '0x03ab458634910aad20ef5f1c8ee96f1d6ac54919'
+    address: '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919'
   },
   cvx: {
     name: 'Convex',
     symbol: 'CVX',
     decimals: 18,
-    address: '0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b'
+    address: '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
   },
   xaut: {
-    name: 'xaut',
+    name: 'Tether Gold',
     symbol: 'XAUt',
     decimals: 6,
-    address: '0x68749665ff8d2d112fa859aa293f07a622782f38'
+    address: '0x68749665FF8D2d112Fa859AA293F07A622782F38'
   },
   t: {
     name: 'Threshold Network',
