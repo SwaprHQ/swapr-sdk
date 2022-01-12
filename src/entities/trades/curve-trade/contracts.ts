@@ -5,7 +5,7 @@ import { Contract } from '@ethersproject/contracts'
 import { ChainId, ZERO_ADDRESS } from '../../../constants'
 import { TOKENS_MAINNET, TOKENS_XDAI } from './constants'
 // ABIs: trimmed for bundle size
-import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI, CURVE_3POOL_ABI } from './abi'
+import { ADDRESS_PROVIDER_ABI, REGISTRY_EXCHANGE_ABI } from './abi'
 
 // Constants
 export const MAINNET_CONTRACTS = {
@@ -13,26 +13,7 @@ export const MAINNET_CONTRACTS = {
   router: '0xfA9a30350048B2BF66865ee20363067c66f67e58'
 } as const
 
-/**
- * @todo find the addresses
- */
-export const ARBITRUM_ONEI_CONTRACTS = {
-  addressProvider: ZERO_ADDRESS, // only USDC, USDT and WXDAI can be swapped on xDAI
-  router: '0x7f90122BF0700F9E7e1F688fe926940E8839F353' // 3pool
-} as const
-
-export type CurveCoreContracts = Record<keyof typeof MAINNET_CONTRACTS, Contract>
-
-/**
- * CurveFi Router address for each Supported ChainId
- *
- */
-export const ALIASES = {
-  [ChainId.MAINNET as ChainId]: MAINNET_CONTRACTS,
-  [ChainId.ARBITRUM_ONE as ChainId]: ARBITRUM_ONEI_CONTRACTS
-}
-
-export const ProviderUrlList = {
+export const RPC_PROVIDER_LIST = {
   [ChainId.MAINNET as ChainId]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
   [ChainId.XDAI as ChainId]: 'https://rpc.xdaichain.com/',
   [ChainId.ARBITRUM_ONE as ChainId]: 'https://arb1.arbitrum.io/rpc'
@@ -42,26 +23,8 @@ export const ProviderUrlList = {
  *  Construct a new read-only Provider
  */
 export const getProvider = (chainId: ChainId) => {
-  const host = ProviderUrlList[chainId]
+  const host = RPC_PROVIDER_LIST[chainId]
   return new JsonRpcProvider(host)
-}
-
-/**
- *
- * @param ChainId
- * @returns
- */
-export async function getCurveContracts(chainId: ChainId): Promise<CurveCoreContracts> {
-  const provider = getProvider(chainId)
-
-  return {
-    addressProvider: new Contract(ALIASES[chainId].addressProvider, ADDRESS_PROVIDER_ABI, provider),
-    router: new Contract(
-      ALIASES[chainId].router,
-      chainId == ChainId.XDAI ? CURVE_3POOL_ABI : CURVE_ROUTER_ABI,
-      provider
-    )
-  }
 }
 
 /**
@@ -76,22 +39,9 @@ export function getCoinList(chainId: ChainId) {
   return TOKENS_MAINNET
 }
 
-/**
- * Maps a coin symbol to its contract address for a given chain
- * @param tokenAddres the token address
- * @param chainId the chain ID, default is Ethereum; 1
- * @returns
- */
-export function mapTokenSymbolToAddress(tokenAddres: string, chainId: ChainId = ChainId.MAINNET): string {
-  // Default to mainnet
-  const coinList = getCoinList(chainId)
-  // @ts-ignore
-  return coinList[tokenAddres.toLowerCase() as any]
-}
-
 export interface GetBestPoolAndOutputParams {
-  tokenInSymbol: string
-  tokenOutSymbol: string
+  tokenInAddress: string
+  tokenOutAddress: string
   amountIn: BigNumber
   chainId: ChainId
 }
@@ -115,28 +65,25 @@ export interface GetExchangeRoutingInfoResults {
  */
 export async function getBestCurvePoolAndOutput({
   amountIn,
-  tokenInSymbol,
-  tokenOutSymbol,
+  tokenInAddress,
+  tokenOutAddress,
   chainId
 }: GetBestPoolAndOutputParams): Promise<GetBestPoolAndOutputResult> {
-  const { addressProvider: addressProviderContract } = await getCurveContracts(chainId)
-  // Map symbols to address
-  const currencyInAddress = mapTokenSymbolToAddress(tokenInSymbol, chainId)
-  const currencyOutAddress = mapTokenSymbolToAddress(tokenOutSymbol, chainId)
+  const addressProviderContract = new Contract(
+    MAINNET_CONTRACTS.addressProvider,
+    ADDRESS_PROVIDER_ABI,
+    getProvider(chainId)
+  )
   const coinList = getCoinList(chainId)
-  if (chainId == ChainId.MAINNET) {
-    // Curve V2 pools
-    const tricryptoCoins = [
-      coinList.usdt.address.toLowerCase(),
-      coinList.wbtc.address.toLowerCase(),
-      coinList.weth.address.toLowerCase()
-    ]
-    if (
-      tricryptoCoins.includes(currencyInAddress.toLowerCase()) &&
-      tricryptoCoins.includes(currencyOutAddress.toLowerCase())
-    ) {
-      throw new Error("This pair can't be exchanged")
-    }
+
+  // Curve V2 pools
+  const tricryptoCoins = [
+    coinList.usdt.address.toLowerCase(),
+    coinList.wbtc.address.toLowerCase(),
+    coinList.weth.address.toLowerCase()
+  ]
+  if (tricryptoCoins.includes(tokenInAddress.toLowerCase()) && tricryptoCoins.includes(tokenOutAddress.toLowerCase())) {
+    throw new Error("This pair can't be exchanged")
   }
 
   const registryExchangeAddress = await addressProviderContract.get_address(2, {
@@ -144,8 +91,8 @@ export async function getBestCurvePoolAndOutput({
   })
   const registryExchangeContract = new Contract(registryExchangeAddress, REGISTRY_EXCHANGE_ABI, getProvider(chainId))
   const [poolAddress, expectedAmountOut] = await registryExchangeContract.get_best_rate(
-    currencyInAddress,
-    currencyOutAddress,
+    tokenInAddress,
+    tokenOutAddress,
     amountIn.toString()
   )
 
@@ -158,18 +105,15 @@ export async function getBestCurvePoolAndOutput({
 export async function getExchangeRoutingInfo({
   amountIn,
   chainId,
-  tokenInSymbol,
-  tokenOutSymbol
+  tokenInAddress,
+  tokenOutAddress
 }: GetExchangeRoutingInfoParams): Promise<GetExchangeRoutingInfoResults> {
   // Get router
-  const { router: routerContract } = await getCurveContracts(chainId)
-  // Map symbols to address
-  const currencyInAddress = mapTokenSymbolToAddress(tokenInSymbol, chainId)
-  const currencyOutAddress = mapTokenSymbolToAddress(tokenOutSymbol, chainId)
+  const routerContract = new Contract(MAINNET_CONTRACTS.addressProvider, ADDRESS_PROVIDER_ABI, getProvider(chainId))
 
   const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(
-    currencyInAddress,
-    currencyOutAddress,
+    tokenInAddress,
+    tokenOutAddress,
     amountIn.toString(),
     {
       from: ZERO_ADDRESS
