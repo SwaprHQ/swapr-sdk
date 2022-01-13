@@ -29,6 +29,7 @@
     "@swapr/periphery": "^0.3.20",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
+    "ethers-multicall": "^0.2.1",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
