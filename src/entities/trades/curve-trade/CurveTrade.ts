@@ -143,18 +143,30 @@ export class CurveTrade extends Trade {
     return routerContract.canRoute(tokenIn.address, tokenOut.address)
   }
 
+  /**
+   * Computes and returns the best trade from Curve pools
+   * by comparing all the Curve pools on target chain
+   * @param currencyAmountIn the amount of curreny in - sell token
+   * @param currencyOut the currency out - buy token
+   * @param maximumSlippage Maximum slippage
+   * @param provider an optional provider, the router defaults back to default public providers
+   * @returns the best trade if found
+   */
   public static async bestTradeExactIn(
     currencyAmountIn: CurrencyAmount,
     currencyOut: Currency,
     maximumSlippage: Percent,
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
+    // Try to extract the chain ID from the tokens
     const chainId: ChainId | undefined =
       currencyAmountIn instanceof TokenAmount
         ? currencyAmountIn.token.chainId
         : currencyOut instanceof Token
         ? currencyOut.chainId
         : undefined
+
+    // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
     // const amountIn = wrappedAmount(currencyAmountIn, chainId)
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
@@ -176,140 +188,50 @@ export class CurveTrade extends Trade {
       // Get the Router contract to populate the unsigned transaction
       // Get all Curve pools for the chain
       const curvePools = CURVE_POOLS[chainId]
+
+      const nativeCurrency = Currency.getNative(chainId)
+      // Determine if the currency sent is ETH
+      // First using address
+      // then, using symbol
+      const etherIn =
+        tokenIn.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
+          ? true
+          : currencyAmountIn.currency.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
+          ? true
+          : currencyAmountIn.currency === nativeCurrency
+
+      // Baisc trade information
+      const amountInBN = parseUnits(currencyAmountIn.toExact(), tokenIn.decimals)
+
       // Find all pools that the trade can go through
       const routablePools = getRoutablePools(curvePools, tokenIn.address, tokenOut.address)
-      // Gnosis Chain / xDAI
-      if (chainId == ChainId.XDAI) {
-        // Baisc trade information
-        // const amountInBN = parseUnits(currencyAmountIn.toExact(), tokenIn.decimals)
-        // Curve's 3pool: WXDAI+USDC+USDT
-        const pool = curvePools[0]
-        const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
-        const poolContractMulticall = new MulticallContract(pool.swapAddress, pool.abi as any)
-        // Map token address to index
-        const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-        const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-        const [expectedAmountOut] = (await multicallProvider.all([
-          poolContractMulticall.get_dy(
-            tokenInIndex.toString(),
-            tokenOutIndex.toString(),
-            // amountInBN.toString()
-            currencyAmountIn.toExact()
-          )
-        ])) as BigNumber[]
-        /**
-         * Construct the call data from router method exchange
-         *
-         * exchange(int128 i, int128 j, uint256_dx, uint256 _min_dy)
-         * where:
-         * { name: "_amount", type: "uint256" },
-         * { name: "_route", type: "address[6]" },
-         * { name: "_indices", type: "uint256[8]" },
-         * { name: "_min_received", type: "uint256" }
-         */
-        const exchangeMethodSignature = 'exchange(int128,int128,uint256,uint256)'
-        const exchangeMethodParams: (string | string[])[] = [
-          tokenInIndex.toString(),
-          tokenOutIndex.toString(),
-          currencyAmountIn.toExact(),
-          expectedAmountOut.toString()
-        ]
 
-        // Construct the populated transaction
-        const populatedTransaction = await poolContract.populateTransaction[exchangeMethodSignature](
-          ...exchangeMethodParams,
-          {
-            value
-          }
-        )
+      let estimatedAmountOutPerPool: BigNumber[] = []
+      // The current multicall library does not support Arbitrum One
+      if (chainId == ChainId.ARBITRUM_ONE) {
+        // Compile all the output
+        // Using Multicall contract
+        estimatedAmountOutPerPool = await Promise.all(
+          routablePools.map(pool => {
+            // Construct the contract
+            const poolContract = new Contract(pool.swapAddress, pool.abi as any, provider)
 
-        // Assign the CurveTrade
-        bestTrade = new CurveTrade(
-          currencyAmountIn,
-          Currency.isNative(currencyOut)
-            ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
-            : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
-          maximumSlippage,
-          TradeType.EXACT_INPUT,
-          chainId,
-          populatedTransaction,
-          poolContract.address
-        )
-      }
-      // Arbitrum One
-      else if (chainId == ChainId.ARBITRUM_ONE) {
-        const amountInBN = parseUnits(currencyAmountIn.toExact(), tokenIn.decimals)
-        // For each pool, find the best outcome
-        const trades = await Promise.all(
-          routablePools.map(async pool => {
-            try {
-              const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
-              // Map token address to index
-              const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-              const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-              // Get expected output from the pool
-              const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
-              const expectedAmountOut = (await poolContract[dyMethodSignature](
-                tokenInIndex.toString(),
-                tokenOutIndex.toString(),
-                amountInBN.toString()
-              )) as BigNumber
-              // Construct the unsigned transaction
-              const exchangeSignature = pool.isMeta
-                ? 'exchange_underlying(uint256,uint256,uint256,uint256)'
-                : 'exchange(int128,int128,uint256,uint256)'
-              const exchangeParams: (string | string[])[] = [
-                tokenInIndex.toString(),
-                tokenOutIndex.toString(),
-                amountInBN.toString(),
-                expectedAmountOut.toString()
-              ]
-              const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](
-                ...exchangeParams,
-                {
-                  value
-                }
-              )
-              // Return the CurveTrade
-              return new CurveTrade(
-                currencyAmountIn,
-                Currency.isNative(currencyOut)
-                  ? CurrencyAmount.nativeCurrency(expectedAmountOut.toBigInt(), chainId)
-                  : new TokenAmount(tokenOut, expectedAmountOut.toBigInt()),
-                maximumSlippage,
-                TradeType.EXACT_INPUT,
-                chainId,
-                populatedTransaction
-              )
-            } catch (e) {
-              console.log('CurveTrade Error:', e)
-            }
-            return
+            // Map token address to index
+            const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+            const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+
+            // Get expected output from the pool
+            const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
+
+            // Return the call bytes
+            return poolContract[dyMethodSignature](
+              tokenInIndex.toString(),
+              tokenOutIndex.toString(),
+              amountInBN.toString()
+            ) as BigNumber
           })
         )
-
-        bestTrade = trades.find(trade => trade != undefined)
-      }
-      // Ethereum Mainnet
-      else if (chainId == ChainId.MAINNET) {
-        const nativeCurrency = Currency.getNative(chainId)
-        // Determine if the currency sent is ETH
-        // First using address
-        // then, using symbol
-        const etherIn =
-          tokenIn.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
-            ? true
-            : currencyAmountIn.currency.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
-            ? true
-            : currencyAmountIn.currency === nativeCurrency
-
-        // Baisc trade information
-        const amountInBN = parseUnits(currencyAmountIn.toExact(), tokenIn.decimals)
-
-        // Find all pools that the trade can go through
-        const routablePools = getRoutablePools(curvePools, tokenIn.address, tokenOut.address)
-        // console.log({ etherIn, routablePools })
-
+      } else {
         // Compile all the output
         // Using Multicall contract
         const bestPoolOutputCalls = routablePools.map(pool => {
@@ -320,7 +242,7 @@ export class CurveTrade extends Trade {
           // Get expected output from the pool
           const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
 
-          // // Debug
+          // Debug
           // console.log('Fetching estimated output', dyMethodSignature, [
           //   tokenInIndex.toString(),
           //   tokenOutIndex.toString(),
@@ -336,83 +258,85 @@ export class CurveTrade extends Trade {
         })
 
         // Get the estimated output
-        const estimatedAmountOutPerPool = (await multicallProvider.all(bestPoolOutputCalls)) as BigNumber[]
-
-        // Append back the pool list
-        // Using the index
-        const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
-          estimatedAmountOut,
-          pool: curvePools[index]
-        }))
-
-        // Sort the pool by best output
-        const poolWithEstimatedAmountOutSorted = poolWithEstimatedAmountOut.sort((poolA, poolB) =>
-          poolA.estimatedAmountOut.gt(poolB.estimatedAmountOut)
-            ? -1
-            : poolA.estimatedAmountOut.eq(poolB.estimatedAmountOut)
-            ? 0
-            : 1
-        )
-
-        // Select the best (first) pool
-        // among the sorted pools
-        const { pool, estimatedAmountOut } = poolWithEstimatedAmountOutSorted[0]
-
-        // Construct the contrac call
-        const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
-        // Map token address to index
-        const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-        const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
-        // console.log({ etherIn, tokenIn, tokenOut })
-
-        // Construct the unsigned transaction
-        // Default method signature
-        // and params
-        let exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
-
-        let exchangeParams: (string | string[] | boolean | boolean[])[] = [
-          tokenInIndex.toString(),
-          tokenOutIndex.toString(),
-          amountInBN.toString(),
-          estimatedAmountOut.toString()
-        ]
-
-        // If the pool has meta coins
-        if (pool.isMeta) {
-          exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
-        }
-
-        // Pools that allow trading ETH
-        if (pool.allowsTradingETH) {
-          exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
-          console.log(poolContract.populateTransaction)
-          // Native currency ETH
-          if (etherIn) {
-            exchangeParams.push(true)
-          }
-        }
-
-        // Determine if user has sent ETH
-        if (etherIn) {
-          value = currencyAmountIn.toExact()
-        }
-
-        const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
-          value
-        })
-        // Return the CurveTrade
-        bestTrade = new CurveTrade(
-          currencyAmountIn,
-          Currency.isNative(currencyOut)
-            ? CurrencyAmount.nativeCurrency(estimatedAmountOut.toBigInt(), chainId)
-            : new TokenAmount(tokenOut, estimatedAmountOut.toBigInt()),
-          maximumSlippage,
-          TradeType.EXACT_INPUT,
-          chainId,
-          populatedTransaction
-        )
+        estimatedAmountOutPerPool = await multicallProvider.all(bestPoolOutputCalls)
       }
+
+      // Append back the pool list
+      // Using the index
+      const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
+        estimatedAmountOut,
+        pool: curvePools[index]
+      }))
+
+      // Sort the pool by best output
+      const poolWithEstimatedAmountOutSorted = poolWithEstimatedAmountOut.sort((poolA, poolB) =>
+        poolA.estimatedAmountOut.gt(poolB.estimatedAmountOut)
+          ? -1
+          : poolA.estimatedAmountOut.eq(poolB.estimatedAmountOut)
+          ? 0
+          : 1
+      )
+
+      // Select the best (first) pool
+      // among the sorted pools
+      const { pool, estimatedAmountOut } = poolWithEstimatedAmountOutSorted[0]
+
+      // Construct the contrac call
+      const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
+
+      // Map token address to index
+      const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+      const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+
+      // console.log({ etherIn, tokenIn, tokenOut })
+
+      // Construct the unsigned transaction
+      // Default method signature
+      // and params
+      let exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
+
+      let exchangeParams: (string | string[] | boolean | boolean[])[] = [
+        tokenInIndex.toString(),
+        tokenOutIndex.toString(),
+        amountInBN.toString(),
+        estimatedAmountOut.toString()
+      ]
+
+      // If the pool has meta coins
+      if (pool.isMeta) {
+        exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
+      }
+
+      // Pools that allow trading ETH
+      if (pool.allowsTradingETH) {
+        exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
+
+        // Native currency ETH
+        if (etherIn) {
+          exchangeParams.push(true)
+        }
+      }
+
+      // Determine if user has sent ETH
+      if (etherIn) {
+        value = currencyAmountIn.toExact()
+      }
+
+      const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
+        value
+      })
+
+      // Return the CurveTrade
+      bestTrade = new CurveTrade(
+        currencyAmountIn,
+        Currency.isNative(currencyOut)
+          ? CurrencyAmount.nativeCurrency(estimatedAmountOut.toBigInt(), chainId)
+          : new TokenAmount(tokenOut, estimatedAmountOut.toBigInt()),
+        maximumSlippage,
+        TradeType.EXACT_INPUT,
+        chainId,
+        populatedTransaction
+      )
     } catch (error) {
       console.error('could not fetch Curve trade', error)
     }
