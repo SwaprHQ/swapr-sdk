@@ -12,12 +12,18 @@ export class Currency {
   public readonly decimals: number
   public readonly symbol?: string
   public readonly name?: string
+  public readonly address?: string
 
   // fiat currencies used to represent countervalues
   public static readonly USD: Currency = new Currency(18, 'USD', 'US dollar')
 
   // Native currencies for deployment chains
-  public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether')
+  public static readonly ETHER: Currency = new Currency(
+    18,
+    'ETH',
+    'Ether',
+    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+  )
   public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI')
 
   private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
@@ -34,12 +40,13 @@ export class Currency {
    * @param symbol symbol of the currency
    * @param name of the currency
    */
-  protected constructor(decimals: number, symbol?: string, name?: string) {
+  protected constructor(decimals: number, symbol?: string, name?: string, address?: string) {
     validateSolidityTypeInstance(JSBI.BigInt(decimals), SolidityType.uint8)
 
     this.decimals = decimals
     this.symbol = symbol
     this.name = name
+    this.address = address
   }
 
   public static isNative(currency: Currency): boolean {

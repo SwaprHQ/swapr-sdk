@@ -265,7 +265,7 @@ export class CurveTrade extends Trade {
       // Using the index
       const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
         estimatedAmountOut,
-        pool: curvePools[index]
+        pool: routablePools[index]
       }))
 
       // Sort the pool by best output
@@ -291,8 +291,7 @@ export class CurveTrade extends Trade {
       // console.log({ etherIn, tokenIn, tokenOut })
 
       // Construct the unsigned transaction
-      // Default method signature
-      // and params
+      // Default method signature and params
       let exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
 
       let exchangeParams: (string | string[] | boolean | boolean[])[] = [
@@ -319,7 +318,7 @@ export class CurveTrade extends Trade {
 
       // Determine if user has sent ETH
       if (etherIn) {
-        value = currencyAmountIn.toExact()
+        value = amountInBN.toString()
       }
 
       const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {

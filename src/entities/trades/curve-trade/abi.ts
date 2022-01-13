@@ -1,7 +1,9 @@
 // ABIs
 
+import { ContractInterface } from '@ethersproject/contracts'
+
 // 3pool ABI which has USDC, USDT and WXDAI
-export const CURVE_3POOL_ABI = JSON.stringify([
+export const CURVE_3POOL_ABI: ContractInterface = [
   {
     type: 'function',
     stateMutability: 'nonpayable',
@@ -12,7 +14,8 @@ export const CURVE_3POOL_ABI = JSON.stringify([
       { type: 'int128', name: 'j' },
       { type: 'uint256', name: '_dx' },
       { type: 'uint256', name: '_min_dy' }
-    ]
+    ],
+    gas: '5499133'
   },
   {
     type: 'function',
@@ -25,9 +28,9 @@ export const CURVE_3POOL_ABI = JSON.stringify([
       { type: 'uint256', name: '_dx' }
     ]
   }
-])
+]
 
-export const CURVE_ROUTER_ABI = JSON.stringify([
+export const CURVE_ROUTER_ABI: ContractInterface = [
   {
     stateMutability: 'view',
     type: 'function',
@@ -55,9 +58,9 @@ export const CURVE_ROUTER_ABI = JSON.stringify([
     ],
     outputs: []
   }
-])
+]
 
-export const REGISTRY_EXCHANGE_ABI = JSON.stringify([
+export const REGISTRY_EXCHANGE_ABI: ContractInterface = [
   {
     stateMutability: 'view',
     type: 'function',
@@ -88,9 +91,9 @@ export const REGISTRY_EXCHANGE_ABI = JSON.stringify([
     ],
     gas: '395840312'
   }
-])
+]
 
-export const ADDRESS_PROVIDER_ABI = JSON.stringify([
+export const ADDRESS_PROVIDER_ABI: ContractInterface = [
   {
     name: 'get_address',
     outputs: [{ type: 'address', name: '' }],
@@ -99,9 +102,9 @@ export const ADDRESS_PROVIDER_ABI = JSON.stringify([
     type: 'function',
     gas: '1308'
   }
-])
+]
 
-export const CURVE_CRYPTO_SWAP_ABI = JSON.stringify([
+export const CURVE_CRYPTO_SWAP_ABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -141,4 +144,110 @@ export const CURVE_CRYPTO_SWAP_ABI = JSON.stringify([
     outputs: [{ name: '', type: 'uint256' }],
     gas: '20256'
   }
-])
+]
+
+export const CURVE_WETH_ERC20_POOL_ABI: ContractInterface = [
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'get_dy',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' },
+      { name: 'use_eth', type: 'bool' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' },
+      { name: 'use_eth', type: 'bool' },
+      { name: 'receiver', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' },
+      { name: 'receiver', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  }
+]
+
+export const CURVE_ETHXERC20_ABI: ContractInterface = [
+  {
+    name: 'get_dy',
+    outputs: [{ type: 'uint256', name: '' }],
+    inputs: [
+      { type: 'int128', name: 'i' },
+      { type: 'int128', name: 'j' },
+      { type: 'uint256', name: 'dx' }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    gas: '2654541'
+  },
+  {
+    name: 'exchange',
+    outputs: [{ type: 'uint256', name: '' }],
+    inputs: [
+      { type: 'int128', name: 'i' },
+      { type: 'int128', name: 'j' },
+      { type: 'uint256', name: 'dx' },
+      { type: 'uint256', name: 'min_dy' }
+    ],
+    stateMutability: 'payable',
+    type: 'function',
+    gas: '2810134'
+  }
+]

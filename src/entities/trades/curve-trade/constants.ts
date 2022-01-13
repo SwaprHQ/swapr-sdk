@@ -1,5 +1,12 @@
+import { ContractInterface } from '@ethersproject/contracts'
 import { ChainId } from '../../../constants'
-import { CURVE_3POOL_ABI, CURVE_CRYPTO_SWAP_ABI, CURVE_ROUTER_ABI } from './abi'
+import {
+  CURVE_WETH_ERC20_POOL_ABI,
+  CURVE_CRYPTO_SWAP_ABI,
+  CURVE_3POOL_ABI,
+  CURVE_ROUTER_ABI,
+  CURVE_ETHXERC20_ABI
+} from './abi'
 
 export interface CurveToken {
   isLPToken?: boolean
@@ -12,7 +19,7 @@ export interface CurveToken {
 export interface CurvePool {
   name: string
   swapAddress: string
-  abi: string
+  abi: ContractInterface
   approveAddress?: string
   tokens: CurveToken[]
   underlyingTokens?: CurveToken[]
@@ -734,7 +741,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'seth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_ETHXERC20_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.seth],
     swapAddress: '0xc5424b857f758e906013f3555dad202e4bdb4567'
   },
@@ -747,7 +754,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'steth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_ETHXERC20_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.steth],
     swapAddress: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022'
   },
@@ -760,17 +767,16 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'ankreth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_ETHXERC20_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.ankreth],
     swapAddress: '0xA96A65c051bF88B4095Ee1f2451C2A9d43F53Ae2'
   },
   {
     name: 'usdp',
     abi: CURVE_3POOL_ABI,
-    isMeta: true,
+    // isMeta: true,
     tokens: [TOKENS_MAINNET.usdp, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
-
     swapAddress: '0x42d7025938bEc20B69cBae5A77421082407f053A'
   },
   {
@@ -816,13 +822,13 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'reth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_ETHXERC20_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.reth],
     swapAddress: '0xF9440930043eb3997fc70e1339dBb11F341de7A8'
   },
   {
     name: 'alusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.alusd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
@@ -900,7 +906,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'spelleth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_WETH_ERC20_POOL_ABI,
     tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.spell],
     swapAddress: '0x98638FAcf9a3865cd033F36548713183f6996122',
     allowsTradingETH: true
