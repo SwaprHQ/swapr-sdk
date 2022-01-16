@@ -294,11 +294,14 @@ export class CurveTrade extends Trade {
       // Default method signature and params
       let exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
 
+      // Take out 10 to cover fees
+      const dyMinimumReceived = estimatedAmountOut.sub(10)
+
       let exchangeParams: (string | string[] | boolean | boolean[])[] = [
         tokenInIndex.toString(),
         tokenOutIndex.toString(),
         amountInBN.toString(),
-        estimatedAmountOut.toString()
+        dyMinimumReceived.toString()
       ]
 
       // If the pool has meta coins
