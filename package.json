@@ -21,7 +21,10 @@
     "build": "tsdx build && cp -r ./src/abis ./dist",
     "start": "tsdx watch",
     "test": "tsdx test",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "docker:up": "docker-compose up -d --force-recreate --renew-anon-volumes",
+    "docker:restart": "docker-compose restart",
+    "docker:clean": "docker-compose kill && docker-compose -y rm"
   },
   "dependencies": {
     "@makerdao/multicall": "^0.11.0",
