@@ -18,10 +18,11 @@ import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
 
 // Curve imports
-import { CurvePool, CURVE_POOLS } from './constants'
+import { CurvePool, CURVE_POOLS, CurveToken } from './constants'
 import { getProvider, MAINNET_CONTRACTS } from './contracts'
 import { CURVE_ROUTER_ABI } from './abi'
 import { wrappedCurrency } from '../utils'
+import { getExchangeRoutingInfo } from '.'
 
 const ZERO_HEX = '0x0'
 
@@ -140,7 +141,7 @@ export class CurveTrade extends Trade {
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
     const routerContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, getProvider(ChainId.MAINNET))
     // Get the the router an pass arguments
-    return routerContract.canRoute(tokenIn.address, tokenOut.address)
+    return routerContract.can_route(tokenIn.address, tokenOut.address)
   }
 
   /**
@@ -206,6 +207,10 @@ export class CurveTrade extends Trade {
       // Find all pools that the trade can go through
       const routablePools = getRoutablePools(curvePools, tokenIn.address, tokenOut.address)
 
+      if (routablePools.length === 0) {
+        return
+      }
+
       let estimatedAmountOutPerPool: BigNumber[] = []
       // The current multicall library does not support Arbitrum One
       if (chainId == ChainId.ARBITRUM_ONE) {
@@ -221,6 +226,8 @@ export class CurveTrade extends Trade {
             const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
 
             // Get expected output from the pool
+            // Use underylying signature if the pool is a meta pool
+            // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
             const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
 
             // Return the call bytes
@@ -232,9 +239,51 @@ export class CurveTrade extends Trade {
           })
         )
       } else {
-        // Compile all the output
-        // Using Multicall contract
-        const bestPoolOutputCalls = routablePools.map(pool => {
+        // Try using crypto router
+        const curveRouterContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, provider)
+        const exchangeRoutingInfo = await getExchangeRoutingInfo({
+          amountIn: amountInBN,
+          chainId: ChainId.MAINNET,
+          tokenInAddress: tokenIn.address,
+          tokenOutAddress: tokenOut.address
+        })
+
+        console.log({
+          exchangeRoutingInfo
+        })
+
+        // If the swap can be handled by the smart router, use it
+        if (exchangeRoutingInfo) {
+          const params = [
+            amountInBN.toString(),
+            exchangeRoutingInfo.indices.map(index => index.toString()),
+            exchangeRoutingInfo.routes,
+            exchangeRoutingInfo.expectedAmountOut.toString()
+          ]
+
+          console.log(params, curveRouterContract.populateTransaction)
+          const populatedTransaction = await curveRouterContract.populateTransaction[
+            'exchange(uint256,address[6],uint256[8],uint256)'
+          ](...params, {
+            value: 0
+          })
+
+          console.log(populatedTransaction)
+
+          bestTrade = new CurveTrade(
+            currencyAmountIn,
+            Currency.isNative(currencyOut)
+              ? CurrencyAmount.nativeCurrency(exchangeRoutingInfo.expectedAmountOut.toBigInt(), chainId)
+              : new TokenAmount(tokenOut, exchangeRoutingInfo.expectedAmountOut.toBigInt()),
+            maximumSlippage,
+            TradeType.EXACT_INPUT,
+            chainId,
+            populatedTransaction
+          )
+        } else {
+          // Compile all the output
+          // Using Multicall contract
+          const bestPoolOutputCalls = routablePools.map(pool => {
           const poolContractMulticall = new MulticallContract(pool.swapAddress, pool.abi as any)
           // Map token address to index
           const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -258,12 +307,16 @@ export class CurveTrade extends Trade {
         })
 
         // Get the estimated output
-        estimatedAmountOutPerPool = await multicallProvider.all(bestPoolOutputCalls)
-      }
+          estimatedAmountOutPerPool = await multicallProvider.all(bestPoolOutputCalls)
+        }
 
-      // Append back the pool list
-      // Using the index
-      const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
+        if (estimatedAmountOutPerPool.length === 0) {
+          return
+        }
+
+        // Append back the pool list
+        // Using the index
+        const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
         estimatedAmountOut,
         pool: routablePools[index]
       }))
@@ -290,12 +343,19 @@ export class CurveTrade extends Trade {
 
       // console.log({ etherIn, tokenIn, tokenOut })
 
-      // Construct the unsigned transaction
-      // Default method signature and params
-      let exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
+        // Construct the unsigned transaction
+        // Default method signature and params
+        // This is the most optimistic
+        let exchangeSignature = 'exchange'
 
-      // Take out 10 to cover fees
-      const dyMinimumReceived = estimatedAmountOut.sub(10)
+        if (!(exchangeSignature in poolContract.populateTransaction)) {
+          // console.log(`Signature ${exchangeSignature} not found`)
+          // console.log(poolContract.functions)
+          exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
+        }
+
+        // Take out 10 to cover fees
+        const dyMinimumReceived = estimatedAmountOut.sub(10)
 
       let exchangeParams: (string | string[] | boolean | boolean[])[] = [
         tokenInIndex.toString(),
@@ -336,9 +396,10 @@ export class CurveTrade extends Trade {
           : new TokenAmount(tokenOut, estimatedAmountOut.toBigInt()),
         maximumSlippage,
         TradeType.EXACT_INPUT,
-        chainId,
-        populatedTransaction
-      )
+          chainId,
+          populatedTransaction
+        )
+      }
     } catch (error) {
       console.error('could not fetch Curve trade', error)
     }
@@ -349,7 +410,7 @@ export class CurveTrade extends Trade {
     return {
       ...this.transactionRequest,
       gasLimit: this.transactionRequest.gasLimit ? BigNumber.from(this.transactionRequest.gasLimit) : undefined,
-      value: BigNumber.from(this.transactionRequest.value)
+      value: this.transactionRequest.value ? this.transactionRequest.value : BigNumber.from(0)
     }
   }
 }

@@ -5,7 +5,7 @@ import { Contract } from '@ethersproject/contracts'
 import { ChainId, ZERO_ADDRESS } from '../../../constants'
 import { TOKENS_MAINNET, TOKENS_XDAI } from './constants'
 // ABIs: trimmed for bundle size
-import { ADDRESS_PROVIDER_ABI, REGISTRY_EXCHANGE_ABI } from './abi'
+import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI } from './abi'
 
 // Constants
 export const MAINNET_CONTRACTS = {
@@ -104,25 +104,30 @@ export async function getBestCurvePoolAndOutput({
 
 export async function getExchangeRoutingInfo({
   amountIn,
-  chainId,
   tokenInAddress,
   tokenOutAddress
-}: GetExchangeRoutingInfoParams): Promise<GetExchangeRoutingInfoResults> {
+}: GetExchangeRoutingInfoParams): Promise<GetExchangeRoutingInfoResults | undefined> {
   // Get router
-  const routerContract = new Contract(MAINNET_CONTRACTS.addressProvider, ADDRESS_PROVIDER_ABI, getProvider(chainId))
+  const routerContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, getProvider(ChainId.MAINNET))
 
-  const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(
-    tokenInAddress,
-    tokenOutAddress,
-    amountIn.toString(),
-    {
+  try {
+    const params = [tokenInAddress, tokenOutAddress, amountIn.toString()]
+
+    const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(...params, {
       from: ZERO_ADDRESS
-    }
-  )
+    })
 
-  return {
-    expectedAmountOut,
+    return {
+      expectedAmountOut,
     indices,
     routes
+}
+  } catch (e) {
+    console.log(e)
+    // if (e.message !== 'execution reverted') {
+    //   throw e
+    // } else {
+    // }
   }
+  return
 }
