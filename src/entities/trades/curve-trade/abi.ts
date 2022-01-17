@@ -30,7 +30,48 @@ export const CURVE_3POOL_ABI: ContractInterface = [
   }
 ]
 
+// 3pool ABI which has USDC, USDT and WXDAI
+export const CURVE_EURSPOOL_ABI: ContractInterface = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '16729579'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'get_dy',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '4577395'
+  }
+]
+
 export const CURVE_ROUTER_ABI: ContractInterface = [
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: '_amount', type: 'uint256' },
+      { name: '_route', type: 'address[6]' },
+      { name: '_indices', type: 'uint256[8]' },
+      { name: '_min_received', type: 'uint256' }
+    ],
+    outputs: []
+  },
   {
     stateMutability: 'view',
     type: 'function',
@@ -47,16 +88,23 @@ export const CURVE_ROUTER_ABI: ContractInterface = [
     ]
   },
   {
-    stateMutability: 'payable',
+    stateMutability: 'view',
     type: 'function',
-    name: 'exchange',
+    name: 'can_route',
     inputs: [
-      { name: '_amount', type: 'uint256' },
-      { name: '_route', type: 'address[6]' },
-      { name: '_indices', type: 'uint256[8]' },
-      { name: '_min_received', type: 'uint256' }
+      { name: '_initial', type: 'address' },
+      { name: '_target', type: 'address' }
     ],
-    outputs: []
+    outputs: [{ name: '', type: 'bool' }],
+    gas: '26664'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'crypto_coins',
+    inputs: [{ name: 'arg0', type: 'uint256' }],
+    outputs: [{ name: '', type: 'address' }],
+    gas: '2763'
   }
 ]
 
@@ -168,7 +216,8 @@ export const CURVE_WETH_ERC20_POOL_ABI: ContractInterface = [
       { name: 'dx', type: 'uint256' },
       { name: 'min_dy', type: 'uint256' }
     ],
-    outputs: [{ name: '', type: 'uint256' }]
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '16729579'
   },
   {
     stateMutability: 'payable',
@@ -249,5 +298,60 @@ export const CURVE_ETHXERC20_ABI: ContractInterface = [
     stateMutability: 'payable',
     type: 'function',
     gas: '2810134'
+  }
+]
+
+export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '16775598'
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' },
+      { name: 'use_eth', type: 'bool' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '16775598'
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    name: 'exchange_underlying',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' },
+      { name: 'min_dy', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '16775396'
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    name: 'get_dy',
+    inputs: [
+      { name: 'i', type: 'uint256' },
+      { name: 'j', type: 'uint256' },
+      { name: 'dx', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+    gas: '4577515'
   }
 ]
