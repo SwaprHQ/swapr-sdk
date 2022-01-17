@@ -32,7 +32,17 @@ const ZERO_HEX = '0x0'
  * @param tokenAddress the token address
  */
 function getTokenIndex(pool: CurvePool, tokenAddress: string) {
-  return pool.tokens.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+  // Use main tokens
+  let tokenList = pool.tokens
+  // Combine tokens + meta tokens
+  if (pool.isMeta) {
+    // Combine all tokens without 3CRV
+    const tokenWithout3CRV = pool.tokens.filter(token => token.symbol.toLowerCase() !== '3crv')
+
+    tokenList = [...tokenWithout3CRV, ...(pool.metaTokens as CurveToken[])]
+  }
+
+  return tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
 }
 
 /**
@@ -43,10 +53,14 @@ function getTokenIndex(pool: CurvePool, tokenAddress: string) {
  * @returns List of potential pools at which the trade can be done
  */
 function getRoutablePools(pools: CurvePool[], tokenInAddress: string, tokenOutAddress: string) {
-  return pools.filter(({ tokens }) => {
+  return pools.filter(({ tokens, metaTokens }) => {
     const hasTokenIn = tokens.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
     const hasTokenOut = tokens.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
-    return hasTokenIn && hasTokenOut
+
+    const hasMetaTokenIn = metaTokens?.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
+    const hasMetaTokenOut = metaTokens?.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
+
+    return (hasTokenIn && hasTokenOut) || (hasTokenIn && hasMetaTokenOut) || (hasTokenOut && hasMetaTokenIn)
   })
 }
 
