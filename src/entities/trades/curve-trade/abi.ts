@@ -70,7 +70,8 @@ export const CURVE_ROUTER_ABI: ContractInterface = [
       { name: '_indices', type: 'uint256[8]' },
       { name: '_min_received', type: 'uint256' }
     ],
-    outputs: []
+    outputs: [],
+    gas: '4577395'
   },
   {
     stateMutability: 'view',

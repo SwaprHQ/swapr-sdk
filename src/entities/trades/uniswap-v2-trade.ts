@@ -17,6 +17,7 @@ import { TradeOptions } from './interfaces/trade-options'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { Contract } from '@ethersproject/contracts'
 import { UniswapV2RoutablePlatform } from './routable-platform/uniswap-v2-routable-platform'
+import { wrappedAmount, wrappedCurrency } from './utils'
 
 function toHex(currencyAmount: CurrencyAmount) {
   return `0x${currencyAmount.raw.toString(16)}`
@@ -92,19 +93,6 @@ export interface BestTradeOptions {
   maxNumResults?: number
   // the maximum number of hops a trade should contain
   maxHops?: number
-}
-
-function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId): TokenAmount {
-  if (currencyAmount instanceof TokenAmount) return currencyAmount
-  if (Currency.isNative(currencyAmount.currency))
-    return new TokenAmount(Token.getNativeWrapper(chainId), currencyAmount.raw)
-  invariant(false, 'CURRENCY')
-}
-
-function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
-  if (currency instanceof Token) return currency
-  if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
-  invariant(false, 'CURRENCY')
 }
 
 /**

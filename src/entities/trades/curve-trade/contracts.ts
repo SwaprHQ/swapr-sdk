@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { BigNumber } from '@ethersproject/bignumber'
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 
 import { ChainId, ZERO_ADDRESS } from '../../../constants'
@@ -42,7 +42,7 @@ export function getCoinList(chainId: ChainId) {
 export interface GetBestPoolAndOutputParams {
   tokenInAddress: string
   tokenOutAddress: string
-  amountIn: BigNumber
+  amountIn: BigNumberish
   chainId: ChainId
 }
 export type GetExchangeRoutingInfoParams = GetBestPoolAndOutputParams
@@ -113,9 +113,11 @@ export async function getExchangeRoutingInfo({
   try {
     const params = [tokenInAddress, tokenOutAddress, amountIn.toString()]
 
-    const [routes, indices, expectedAmountOut] = await routerContract.get_exchange_routing(...params, {
+    const res = await routerContract.get_exchange_routing(...params, {
       from: ZERO_ADDRESS
     })
+
+    const [routes, indices, expectedAmountOut] = res
 
     return {
       expectedAmountOut,
@@ -123,7 +125,7 @@ export async function getExchangeRoutingInfo({
     routes
 }
   } catch (e) {
-    console.log(e)
+    // console.log(e)
     // if (e.message !== 'execution reverted') {
     //   throw e
     // } else {

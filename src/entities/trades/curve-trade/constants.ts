@@ -5,7 +5,9 @@ import {
   CURVE_CRYPTO_SWAP_ABI,
   CURVE_3POOL_ABI,
   CURVE_ROUTER_ABI,
-  CURVE_ETHXERC20_ABI
+  CURVE_ETHXERC20_ABI,
+  CURVE_EURSPOOL_ABI,
+  CURVE_ETHXERC20_256_ABI
 } from './abi'
 
 export interface CurveToken {
@@ -61,7 +63,6 @@ export const POOLS_XDAI: CurvePool[] = [
     name: '3pool',
     abi: CURVE_3POOL_ABI,
     swapAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
-    approveAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
     isMeta: false,
     // Order is crucial
     tokens: [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
@@ -120,7 +121,6 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
   {
     name: '2pool',
     swapAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
-    approveAddress: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
     abi: CURVE_3POOL_ABI,
     isMeta: false,
     tokens: [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
@@ -131,7 +131,6 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     abi: CURVE_ROUTER_ABI,
     isMeta: false,
     swapAddress: '0x960ea3e3C7FB317332d990873d354E18d7645590',
-    approveAddress: '0x960ea3e3C7FB317332d990873d354E18d7645590',
     tokens: [TOKENS_ARBITRUM_ONE.usdt, TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.weth],
     allowsTradingETH: true
   },
@@ -140,13 +139,11 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     swapAddress: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
     abi: CURVE_3POOL_ABI,
     isMeta: false,
-    approveAddress: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
     tokens: [TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.renbtc]
   },
   {
     name: 'eursusd',
     swapAddress: '0x25e2e8d104bc1a70492e2be32da7c1f8367f9d2c',
-    approveAddress: '0x25e2e8d104bc1a70492e2be32da7c1f8367f9d2c',
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [
@@ -624,12 +621,14 @@ export const POOLS_MAINNET: CurvePool[] = [
     tokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc],
     swapAddress: '0x93054188d876f558f4a66B2EF1d97d16eDf0895B'
   },
+  /*
   {
     name: 'sbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
     swapAddress: '0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714'
   },
+  */
   {
     name: 'hbtc',
     abi: CURVE_3POOL_ABI,
@@ -644,50 +643,50 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'gusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.gusd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956'
   },
   {
     name: 'husd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.husd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604'
   },
   {
     name: 'usdk',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.usdk, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb'
   },
   {
     name: 'usdn',
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.usdn, TOKENS_MAINNET.tricrv],
-    abi: CURVE_3POOL_ABI,
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x0f9cb53Ebe405d49A0bbdBD291A65Ff571bC83e1'
   },
   {
     name: 'linkusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.linkusd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171'
   },
   {
     name: 'musd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.musd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6'
   },
   {
     name: 'rsv',
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.rsv, TOKENS_MAINNET.tricrv],
-    abi: CURVE_3POOL_ABI,
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0xC18cC39da8b11dA8c3541C598eE022258F9744da'
   },
@@ -746,13 +745,6 @@ export const POOLS_MAINNET: CurvePool[] = [
     swapAddress: '0xc5424b857f758e906013f3555dad202e4bdb4567'
   },
   {
-    name: 'aave',
-    abi: CURVE_3POOL_ABI,
-    tokens: [TOKENS_MAINNET.adai, TOKENS_MAINNET.ausdc, TOKENS_MAINNET.ausdt],
-    underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
-    swapAddress: '0xDeBF20617708857ebe4F679508E7b7863a8A8EeE'
-  },
-  {
     name: 'steth',
     abi: CURVE_ETHXERC20_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.steth],
@@ -779,13 +771,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x42d7025938bEc20B69cBae5A77421082407f053A'
   },
-  {
-    name: 'ironbank',
-    abi: CURVE_3POOL_ABI,
-    tokens: [TOKENS_MAINNET.cydai, TOKENS_MAINNET.cyusdc, TOKENS_MAINNET.cyusdt],
-    underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
-    swapAddress: '0x2dded6Da1BF5DBdF597C45fcFaa3194e53EcfeAF'
-  },
+
   {
     name: 'link',
     abi: CURVE_3POOL_ABI,
@@ -794,14 +780,15 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'tusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.tusd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0xecd5e75afb02efa118af914515d6521aabd189f1'
   },
   {
     name: 'frax',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
+    isMeta: true,
     tokens: [TOKENS_MAINNET.frax, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B'
@@ -815,7 +802,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'busdv2',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.busd, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x4807862AA8b2bF68830e4C8dc86D0e9A998e085a'
@@ -835,22 +822,22 @@ export const POOLS_MAINNET: CurvePool[] = [
     swapAddress: '0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c'
   },
   {
-    name: 'tricrypto',
-    abi: CURVE_3POOL_ABI,
-    tokens: [TOKENS_MAINNET.usdt, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.weth],
-    swapAddress: '0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5'
-  },
-  {
     name: 'mim',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.mim, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     swapAddress: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
   },
   {
+    name: 'tricrypto',
+    abi: CURVE_WETH_ERC20_POOL_ABI,
+    tokens: [TOKENS_MAINNET.usdt, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.weth],
+    swapAddress: '0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5'
+  },
+  {
     name: 'tricrypto2',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_WETH_ERC20_POOL_ABI,
     tokens: [TOKENS_MAINNET.usdt, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.weth],
     allowsTradingETH: true,
     swapAddress: '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46'
@@ -871,20 +858,20 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'eursusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_EURSPOOL_ABI,
     tokens: [TOKENS_MAINNET.usdc, TOKENS_MAINNET.eurs],
     swapAddress: '0x98a7F18d4E56Cfe84E3D081B40001B3d5bD3eB8B'
   },
   {
     name: 'crveth',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_ETHXERC20_256_ABI,
     tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.crv],
     swapAddress: '0x8301AE4fc9c624d1D396cbDAa1ed877821D7C511',
     allowsTradingETH: true
   },
   {
     name: 'rai',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.rai, TOKENS_MAINNET.tricrv],
     metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
@@ -892,10 +879,19 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   {
     name: 'cvxeth',
-    abi: CURVE_3POOL_ABI,
-    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.cvx],
+    abi: CURVE_ETHXERC20_ABI,
+    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.cvx],
     swapAddress: '0xB576491F1E6e5E62f1d8F26062Ee822B40B0E0d4'
   },
+  {
+    name: 'spelleth',
+    abi: CURVE_WETH_ERC20_POOL_ABI,
+    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.spell],
+    swapAddress: '0x98638FAcf9a3865cd033F36548713183f6996122',
+    allowsTradingETH: true
+  }
+  /**
+   * Pool is dead
   {
     name: 'xautusd',
     abi: CURVE_3POOL_ABI,
@@ -905,11 +901,11 @@ export const POOLS_MAINNET: CurvePool[] = [
     swapAddress: '0xAdCFcf9894335dC340f6Cd182aFA45999F45Fc44'
   },
   {
-    name: 'spelleth',
-    abi: CURVE_WETH_ERC20_POOL_ABI,
-    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.spell],
-    swapAddress: '0x98638FAcf9a3865cd033F36548713183f6996122',
-    allowsTradingETH: true
+    name: 'ironbank',
+    abi: CURVE_3POOL_ABI,
+    tokens: [TOKENS_MAINNET.cydai, TOKENS_MAINNET.cyusdc, TOKENS_MAINNET.cyusdt],
+    underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    swapAddress: '0x2dded6Da1BF5DBdF597C45fcFaa3194e53EcfeAF'
   },
   {
     abi: CURVE_3POOL_ABI,
@@ -917,7 +913,15 @@ export const POOLS_MAINNET: CurvePool[] = [
     tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.t],
     swapAddress: '0x752eBeb79963cf0732E9c0fec72a49FD1DEfAEAC',
     allowsTradingETH: true
-  }
+  },
+  {
+    name: 'aave',
+    abi: CURVE_3POOL_ABI,
+    tokens: [TOKENS_MAINNET.adai, TOKENS_MAINNET.ausdc, TOKENS_MAINNET.ausdt],
+    underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    swapAddress: '0xDeBF20617708857ebe4F679508E7b7863a8A8EeE'
+  },
+  */
 ]
 
 export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
