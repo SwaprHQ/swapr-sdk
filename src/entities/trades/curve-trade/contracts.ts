@@ -2,8 +2,9 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 
-import { ChainId, ZERO_ADDRESS } from '../../../constants'
-import { TOKENS_MAINNET, TOKENS_XDAI } from './constants'
+import { ZERO_ADDRESS } from '../../../constants'
+import { ChainId } from '../../../constants'
+import { TOKENS_MAINNET } from './constants'
 // ABIs: trimmed for bundle size
 import { ADDRESS_PROVIDER_ABI, CURVE_ROUTER_ABI, REGISTRY_EXCHANGE_ABI } from './abi'
 
@@ -27,18 +28,6 @@ export const getProvider = (chainId: ChainId) => {
   return new JsonRpcProvider(host)
 }
 
-/**
- * Returns list of coins avaialble for on Curve for a given chainId
- * @param chainId the target chain ID
- */
-export function getCoinList(chainId: ChainId) {
-  if (chainId == ChainId.XDAI) {
-    return TOKENS_XDAI
-  }
-
-  return TOKENS_MAINNET
-}
-
 export interface GetBestPoolAndOutputParams {
   tokenInAddress: string
   tokenOutAddress: string
@@ -50,6 +39,7 @@ export type GetExchangeRoutingInfoParams = GetBestPoolAndOutputParams
 export interface GetBestPoolAndOutputResult {
   expectedAmountOut: BigNumber
   poolAddress: string
+  registryExchangeAddress: string
 }
 
 export interface GetExchangeRoutingInfoResults {
@@ -68,20 +58,24 @@ export async function getBestCurvePoolAndOutput({
   tokenInAddress,
   tokenOutAddress,
   chainId
-}: GetBestPoolAndOutputParams): Promise<GetBestPoolAndOutputResult> {
+}: GetBestPoolAndOutputParams): Promise<GetBestPoolAndOutputResult | undefined> {
+  if (chainId !== ChainId.MAINNET) {
+    throw new Error('Best Pool Find is only available on Mainnet')
+  }
+
   const addressProviderContract = new Contract(
     MAINNET_CONTRACTS.addressProvider,
     ADDRESS_PROVIDER_ABI,
     getProvider(chainId)
   )
-  const coinList = getCoinList(chainId)
 
   // Curve V2 pools
   const tricryptoCoins = [
-    coinList.usdt.address.toLowerCase(),
-    coinList.wbtc.address.toLowerCase(),
-    coinList.weth.address.toLowerCase()
+    TOKENS_MAINNET.usdt.address.toLowerCase(),
+    TOKENS_MAINNET.wbtc.address.toLowerCase(),
+    TOKENS_MAINNET.weth.address.toLowerCase()
   ]
+
   if (tricryptoCoins.includes(tokenInAddress.toLowerCase()) && tricryptoCoins.includes(tokenOutAddress.toLowerCase())) {
     throw new Error("This pair can't be exchanged")
   }
@@ -89,6 +83,7 @@ export async function getBestCurvePoolAndOutput({
   const registryExchangeAddress = await addressProviderContract.get_address(2, {
     gasLimit: 100000 // due to Berlin upgrade. See https://github.com/ethers-io/ethers.js/issues/1474
   })
+
   const registryExchangeContract = new Contract(registryExchangeAddress, REGISTRY_EXCHANGE_ABI, getProvider(chainId))
   const [poolAddress, expectedAmountOut] = await registryExchangeContract.get_best_rate(
     tokenInAddress,
@@ -96,9 +91,14 @@ export async function getBestCurvePoolAndOutput({
     amountIn.toString()
   )
 
+  if (poolAddress === ZERO_ADDRESS) {
+    return
+  }
+
   return {
     poolAddress,
-    expectedAmountOut
+    expectedAmountOut,
+    registryExchangeAddress
   }
 }
 
