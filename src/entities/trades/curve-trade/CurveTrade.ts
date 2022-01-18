@@ -1,7 +1,7 @@
 import { Contract as MulticallContract, Provider as MulticallProvider } from 'ethers-multicall'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
-import { parseUnits } from '@ethersproject/units'
+import { formatUnits, parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
@@ -256,7 +256,7 @@ export class CurveTrade extends Trade {
       // For example, an 18 decimal tokens results in 1 * 10^36
       // And an 6 decimal token results in 1 * 10^12
       if (chainId === ChainId.XDAI) {
-        amountInBN = BigNumber.from(currencyAmountIn.toExact())
+        amountInBN = parseUnits(formatUnits(currencyAmountIn.toExact(), tokenIn.decimals), tokenIn.decimals)
       }
 
       console.log([currencyAmountIn.toExact(), amountInBN.toString()])
