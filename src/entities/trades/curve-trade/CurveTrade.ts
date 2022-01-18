@@ -18,8 +18,8 @@ import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
 
 // Curve imports
-import { CurvePool, CURVE_POOLS, CurveToken, TOKENS_MAINNET } from './constants'
-import { getProvider, getExchangeRoutingInfo, MAINNET_CONTRACTS } from './contracts'
+import { CurvePool, CURVE_POOLS, CurveToken, TOKENS_MAINNET, CURVE_TOKENS } from './constants'
+import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, MAINNET_CONTRACTS } from './contracts'
 import { CURVE_ROUTER_ABI } from './abi'
 import { wrappedCurrency } from '../utils'
 
@@ -50,6 +50,12 @@ function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId =
   }
 
   return tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+}
+
+function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
+  const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
+
+  return Object.values(tokenList).find(token => token.address.toLowerCase() === tokenAddress.toLowerCase())
 }
 
 /**
@@ -130,7 +136,7 @@ export class CurveTrade extends Trade {
     transactionRequest: UnsignedTransaction,
     approveAddress?: string
   ) {
-    invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
+    invariant(!currencyEquals(input.currency, output.currency), 'SAME_TOKEN')
     super(
       undefined,
       tradeType,
@@ -196,7 +202,7 @@ export class CurveTrade extends Trade {
    * @param currencyAmountIn the amount of curreny in - sell token
    * @param currencyOut the currency out - buy token
    * @param maximumSlippage Maximum slippage
-   * @param provider an optional provider, the router defaults back to default public providers
+   * @param provider an optional provider, the router defaults public providers
    * @returns the best trade if found
    */
   public static async bestTradeExactIn(
@@ -215,11 +221,17 @@ export class CurveTrade extends Trade {
 
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
-    const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
-    const tokenOut = wrappedCurrency(currencyOut, chainId)
-    invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
+    // const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
+    const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
 
-    console.log(tokenIn)
+    // Get the token's data from Curve
+    const tokenIn = getCurveToken(currencyAmountIn.currency.address as string, chainId)
+    const tokenOut = getCurveToken(currencyOut.address as string, chainId)
+
+    // Validations
+    invariant(tokenIn != undefined, 'NO_TOKEN_IN')
+    invariant(tokenOut != undefined, 'NO_TOKEN_OUT')
+    invariant(tokenIn.address.toLowerCase() != tokenOut.address.toLowerCase(), 'SAME_TOKEN')
 
     // const etherOut = this.outputAmount.currency === nativeCurrency
     // // the router does not support both ether in and out
@@ -259,26 +271,45 @@ export class CurveTrade extends Trade {
         amountInBN = parseUnits(formatUnits(currencyAmountIn.toExact(), tokenIn.decimals), tokenIn.decimals)
       }
 
-      console.log([currencyAmountIn.toExact(), amountInBN.toString()])
-
       // Determine if user has sent ETH
       if (etherIn) {
         value = amountInBN.toString()
       }
 
-      // Find all pools that the trade can go through
-      const routablePools = getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
+      // Check if the two pairs are of different type
+      // When the pair types are different, there is
+      // a potential that Curve Smart Router can handle the trade
+      const isCryptoSwap = tokenIn.type !== tokenOut.type
 
-      // Exit since no pools have been found
-      if (routablePools.length === 0) {
-        console.log('CurveTrade: no pools found for trade pair')
-        return
+      // Find all pools that the trade can go through
+      // Manually find all routable pools
+      let routablePools = getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
+
+      // On mainnet, use the exchange info to get the best pool
+      const bestPoolAndOutputRes =
+        chainId === ChainId.MAINNET
+          ? await getBestCurvePoolAndOutput({
+              amountIn: amountInBN,
+              tokenInAddress: tokenIn.address,
+              tokenOutAddress: tokenOut.address,
+              chainId
+            })
+          : undefined
+
+      // If a pool is found
+      // Ignore the manual off-chain search
+      if (bestPoolAndOutputRes) {
+        routablePools = curvePools.filter(
+          pool => pool.swapAddress.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+        )
       }
 
-      // On Mainnet, try to find a route via Curve's Smart Router
+      console.log({ isCryptoSwap })
 
-      if (chainId === ChainId.MAINNET) {
-        // On mainnet, try using crypto router
+      // Start finding a possible pool
+      // First via Curve's internal best pool finder
+      // On Mainnet, try to find a route via Curve's Smart Router
+      if (isCryptoSwap && chainId === ChainId.MAINNET) {
         let exchangeRoutingInfo
         exchangeRoutingInfo = await getExchangeRoutingInfo({
           amountIn: amountInBN.toString(),
@@ -294,7 +325,7 @@ export class CurveTrade extends Trade {
             exchangeRoutingInfo.routes,
             exchangeRoutingInfo.indices,
             exchangeRoutingInfo.expectedAmountOut
-              .mul(99)
+              .mul(98)
               .div(100)
               .toString()
           ]
@@ -303,7 +334,7 @@ export class CurveTrade extends Trade {
             value
           })
 
-          // Add 30% buffer
+          // Add 30% gas buffer
           const gasLimitWithBuffer = populatedTransaction.gasLimit?.mul(130).div(100)
 
           populatedTransaction.gasLimit = gasLimitWithBuffer
@@ -312,13 +343,19 @@ export class CurveTrade extends Trade {
             currencyAmountIn,
             Currency.isNative(currencyOut)
               ? CurrencyAmount.nativeCurrency(exchangeRoutingInfo.expectedAmountOut.toBigInt(), chainId)
-              : new TokenAmount(tokenOut, exchangeRoutingInfo.expectedAmountOut.toBigInt()),
+              : new TokenAmount(wrappedtokenOut, exchangeRoutingInfo.expectedAmountOut.toBigInt()),
             maximumSlippage,
             TradeType.EXACT_INPUT,
             chainId,
             populatedTransaction
           )
         }
+      }
+
+      // Exit since no pools have been found
+      if (routablePools.length === 0) {
+        console.log('CurveTrade: no pools found for trade pair')
+        return
       }
 
       // The final
@@ -454,7 +491,7 @@ export class CurveTrade extends Trade {
         currencyAmountIn,
         Currency.isNative(currencyOut)
           ? CurrencyAmount.nativeCurrency(estimatedAmountOut.toBigInt(), chainId)
-          : new TokenAmount(tokenOut, estimatedAmountOut.toBigInt()),
+          : new TokenAmount(wrappedtokenOut, estimatedAmountOut.toBigInt()),
         maximumSlippage,
         TradeType.EXACT_INPUT,
         chainId,

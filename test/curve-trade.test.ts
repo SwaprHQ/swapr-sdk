@@ -321,6 +321,75 @@ describe('CurveTrade', () => {
         }
       })
     })
+
+    test('Should trade 1000 USDC to WBTC via smart router', async () => {
+      const tokenIn = new Token(
+        ChainId.MAINNET,
+        TOKENS_MAINNET.usdc.address,
+        TOKENS_MAINNET.usdc.decimals,
+        'USDC',
+        'USDC'
+      )
+      const tokeOut = new Token(
+        ChainId.MAINNET,
+        TOKENS_MAINNET.renbtc.address,
+        TOKENS_MAINNET.renbtc.decimals,
+        TOKENS_MAINNET.renbtc.symbol,
+        TOKENS_MAINNET.renbtc.name
+      )
+
+      const unlockedAccount = '0xF006779eAbE823F8EEd05464A1628383af1f7afb'
+      // Get EVM
+      const mainnetForkProvider = await getGanacheRPCProvider()
+
+      // Unlock
+      await mainnetForkProvider.send('evm_unlockUnknownAccount', [unlockedAccount])
+
+      console.log(`Unlocked ${unlockedAccount} for swap`)
+
+      // Get unlocked account as signer
+      const unlockedAccountSigner = mainnetForkProvider.getSigner(unlockedAccount)
+
+      const currencyAmountIn = new TokenAmount(tokenIn, parseUnits('1000', tokenIn.decimals).toString())
+
+      // Get trade
+      const trade = await CurveTrade.bestTradeExactIn(
+        currencyAmountIn as CurrencyAmount,
+        tokeOut,
+        maxSlippage,
+        mainnetForkProvider
+      )
+
+      expect(trade).toBeDefined()
+      const swapTransaction = trade && (await trade.swapTransaction())
+      expect(swapTransaction).toBeDefined()
+      expect(swapTransaction?.data).toBeDefined()
+      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+
+      let approved = false
+
+      try {
+        // Approve the sell token
+        const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
+
+        console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+
+        await tokenInContract.approve(trade?.approveAddress, MaxInt256)
+
+        console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+
+        approved = true
+      } catch (e) {
+        console.log('[WARNING] Approve failed. Swap stage of test is skipped')
+      }
+
+      if (approved) {
+        console.log(swapTransaction)
+        // Send swap transaction
+        const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any).then(tx => tx.wait())
+        expect(exchangeTx.transactionHash).toBeDefined()
+      }
+    })
   })
 
   describe('Arbitrum One', () => {
