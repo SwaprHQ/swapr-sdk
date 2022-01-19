@@ -1,8 +1,8 @@
 import { parseUnits } from '@ethersproject/units'
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { MaxInt256 } from '@ethersproject/constants'
+// import { MaxInt256 } from '@ethersproject/constants'
+// import { Contract } from '@ethersproject/contracts'
 import { isAddress } from '@ethersproject/address'
-import { Contract } from '@ethersproject/contracts'
 import JSBI from 'jsbi'
 
 import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
@@ -10,10 +10,12 @@ import {
   TOKENS_MAINNET,
   TOKENS_XDAI,
   TOKENS_ARBITRUM_ONE,
-  CURVE_POOLS
+  CURVE_POOLS,
+  POOLS_MAINNET,
+  CurvePool
 } from '../src/entities/trades/curve-trade/constants'
 
-import { ERC20_ABI } from '../test-util/abi'
+// import { ERC20_ABI } from '../test-util/abi'
 import { execAsync } from '../test-util'
 
 export async function getGanacheRPCProvider(timeout = 10000): Promise<JsonRpcProvider> {
@@ -63,6 +65,7 @@ export function tryParseAmount(value?: string, currency?: Currency, chainId?: nu
 }
 
 describe('CurveTrade', () => {
+  // @ts-ignore
   const testIf = (condition: boolean) => (condition ? it : it.skip)
 
   const maxSlippage = new Percent('5', '100')
@@ -73,6 +76,8 @@ describe('CurveTrade', () => {
 
     test('Should return the best trade from WXDAI to USDC', async () => {
       const currencyAmountIn = tryParseAmount(parseUnits('1', tokenXWDAI.decimals).toString(), tokenXWDAI)
+
+      console.log(currencyAmountIn)
 
       const trade = await CurveTrade.bestTradeExactIn(
         currencyAmountIn as CurrencyAmount,
@@ -111,6 +116,7 @@ describe('CurveTrade', () => {
   })
 
   describe('Ethereum', () => {
+    // @ts-ignore
     const testAccountList = [
       {
         // Binance 8
@@ -135,11 +141,7 @@ describe('CurveTrade', () => {
         address: '0x36cc7b13029b5dee4034745fb4f24034f3f2ffc6',
         tokens: [TOKENS_MAINNET.renbtc]
       },
-      {
-        // Random WBTC holder
-        address: '0x72a53cdbbcc1b9efa39c834a540550e23463aacb',
-        tokens: [TOKENS_MAINNET.wbtc]
-      },
+
       {
         // Random FRAX holder
         address: '0x183d0dc5867c01bfb1dbbc41d6a9d3de6e044626',
@@ -213,6 +215,7 @@ describe('CurveTrade', () => {
       await execAsync('npm run docker:down')
     })
 
+    /*
     CURVE_POOLS[1].forEach(async pool => {
       let tokenIn = new Token(
         ChainId.MAINNET,
@@ -321,74 +324,142 @@ describe('CurveTrade', () => {
         }
       })
     })
+    */
 
-    test('Should trade 1000 USDC to WBTC via smart router', async () => {
-      const tokenIn = new Token(
-        ChainId.MAINNET,
-        TOKENS_MAINNET.usdc.address,
-        TOKENS_MAINNET.usdc.decimals,
-        'USDC',
-        'USDC'
-      )
-      const tokeOut = new Token(
-        ChainId.MAINNET,
-        TOKENS_MAINNET.renbtc.address,
-        TOKENS_MAINNET.renbtc.decimals,
-        TOKENS_MAINNET.renbtc.symbol,
-        TOKENS_MAINNET.renbtc.name
-      )
+    interface TestPair {
+      tokenIn: Token
+      tokenOut: Token
+      tokenInAmount: string
+      testAccount: string
+      pool?: CurvePool
+    }
 
-      const unlockedAccount = '0xF006779eAbE823F8EEd05464A1628383af1f7afb'
-      // Get EVM
-      const mainnetForkProvider = await getGanacheRPCProvider()
-
-      // Unlock
-      await mainnetForkProvider.send('evm_unlockUnknownAccount', [unlockedAccount])
-
-      console.log(`Unlocked ${unlockedAccount} for swap`)
-
-      // Get unlocked account as signer
-      const unlockedAccountSigner = mainnetForkProvider.getSigner(unlockedAccount)
-
-      const currencyAmountIn = new TokenAmount(tokenIn, parseUnits('1000', tokenIn.decimals).toString())
-
-      // Get trade
-      const trade = await CurveTrade.bestTradeExactIn(
-        currencyAmountIn as CurrencyAmount,
-        tokeOut,
-        maxSlippage,
-        mainnetForkProvider
-      )
-
-      expect(trade).toBeDefined()
-      const swapTransaction = trade && (await trade.swapTransaction())
-      expect(swapTransaction).toBeDefined()
-      expect(swapTransaction?.data).toBeDefined()
-      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
-
-      let approved = false
-
-      try {
-        // Approve the sell token
-        const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
-
-        console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-
-        await tokenInContract.approve(trade?.approveAddress, MaxInt256)
-
-        console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-
-        approved = true
-      } catch (e) {
-        console.log('[WARNING] Approve failed. Swap stage of test is skipped')
+    // @ts-ignore
+    const testCombos: TestPair[] = [
+      {
+        testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
+        tokenInAmount: '100',
+        tokenIn: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.usdc.address,
+          TOKENS_MAINNET.usdc.decimals,
+          TOKENS_MAINNET.usdc.symbol,
+          TOKENS_MAINNET.usdc.name
+        ),
+        tokenOut: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.dai.address,
+          TOKENS_MAINNET.dai.decimals,
+          TOKENS_MAINNET.dai.symbol,
+          TOKENS_MAINNET.dai.name
+        ),
+        pool: POOLS_MAINNET.find(pool => pool.id === 'susd')
+      },
+      {
+        testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
+        tokenInAmount: '1000',
+        tokenIn: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.usdc.address,
+          TOKENS_MAINNET.usdc.decimals,
+          TOKENS_MAINNET.usdc.symbol,
+          TOKENS_MAINNET.usdc.name
+        ),
+        tokenOut: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.wbtc.address,
+          TOKENS_MAINNET.wbtc.decimals,
+          TOKENS_MAINNET.wbtc.symbol,
+          TOKENS_MAINNET.wbtc.name
+        )
+      },
+      {
+        // Random WBTC holder
+        testAccount: '0x72a53cdbbcc1b9efa39c834a540550e23463aacb',
+        tokenInAmount: '1',
+        tokenIn: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.wbtc.address,
+          TOKENS_MAINNET.wbtc.decimals,
+          TOKENS_MAINNET.wbtc.symbol,
+          TOKENS_MAINNET.wbtc.name
+        ),
+        tokenOut: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.renbtc.address,
+          TOKENS_MAINNET.renbtc.decimals,
+          TOKENS_MAINNET.renbtc.symbol,
+          TOKENS_MAINNET.renbtc.name
+        )
+      },
+      {
+        testAccount: '0x28c6c06298d514db089934071355e5743bf21d60',
+        tokenInAmount: '1',
+        tokenIn: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.eth.address,
+          TOKENS_MAINNET.eth.decimals,
+          TOKENS_MAINNET.eth.symbol,
+          TOKENS_MAINNET.eth.name
+        ),
+        tokenOut: new Token(
+          ChainId.MAINNET,
+          TOKENS_MAINNET.steth.address,
+          TOKENS_MAINNET.steth.decimals,
+          TOKENS_MAINNET.steth.symbol,
+          TOKENS_MAINNET.steth.name
+        )
       }
+    ]
 
-      if (approved) {
-        console.log(swapTransaction)
-        // Send swap transaction
-        const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any).then(tx => tx.wait())
-        expect(exchangeTx.transactionHash).toBeDefined()
-      }
+    testCombos.forEach(({ testAccount, tokenIn, tokenOut, tokenInAmount }) => {
+      const currencyAmountIn = new TokenAmount(tokenIn, parseUnits(tokenInAmount, tokenIn.decimals).toString())
+      const testName = `Should swap ${tokenInAmount} ${tokenIn.symbol} to ${tokenOut.symbol}`
+
+      test(testName, async () => {
+        // Get EVM
+        const mainnetForkProvider = await getGanacheRPCProvider()
+        // Unlock
+        await mainnetForkProvider.send('evm_unlockUnknownAccount', [testAccount])
+
+        // console.log(`Unlocked ${testAccount} for swap`)
+
+        // Get unlocked account as signer
+        // const unlockedAccountSigner = mainnetForkProvider.getSigner(testAccount)
+
+        // Get trade
+        const trade = await CurveTrade.bestTradeExactIn(
+          currencyAmountIn as CurrencyAmount,
+          tokenOut,
+          maxSlippage,
+          mainnetForkProvider
+        )
+
+        expect(trade).toBeDefined()
+        const swapTransaction = trade && (await trade.swapTransaction())
+        expect(swapTransaction).toBeDefined()
+        expect(swapTransaction?.data).toBeDefined()
+        expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+
+        /*
+        let approved = false
+        try {
+          // Approve the sell token
+          const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
+          console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+          await tokenInContract.approve(trade?.approveAddress, MaxInt256).then((tx: any) => tx.wait())
+          console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+          approved = true
+        } catch (e) {
+          console.log('[WARNING] Approve failed. Swap stage of test is skipped')
+        }
+        if (approved) {
+          const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any)
+          console.log(exchangeTx)
+          expect(exchangeTx).toBeDefined()
+        }
+        */
+      })
     })
   })
 

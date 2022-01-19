@@ -1,4 +1,4 @@
-import { Contract as MulticallContract, Provider as MulticallProvider } from 'ethers-multicall'
+import { Provider as MulticallProvider } from 'ethers-multicall'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
 import { formatUnits, parseUnits } from '@ethersproject/units'
@@ -296,6 +296,8 @@ export class CurveTrade extends Trade {
             })
           : undefined
 
+      console.log({ bestPoolAndOutputRes })
+
       // If a pool is found
       // Ignore the manual off-chain search
       if (bestPoolAndOutputRes) {
@@ -304,14 +306,11 @@ export class CurveTrade extends Trade {
         )
       }
 
-      console.log({ isCryptoSwap })
-
       // Start finding a possible pool
       // First via Curve's internal best pool finder
       // On Mainnet, try to find a route via Curve's Smart Router
       if (isCryptoSwap && chainId === ChainId.MAINNET) {
-        let exchangeRoutingInfo
-        exchangeRoutingInfo = await getExchangeRoutingInfo({
+        const exchangeRoutingInfo = await getExchangeRoutingInfo({
           amountIn: amountInBN.toString(),
           chainId: ChainId.MAINNET,
           tokenInAddress: tokenIn.address,
@@ -329,7 +328,11 @@ export class CurveTrade extends Trade {
               .div(100)
               .toString()
           ]
+
           const curveRouterContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, provider)
+
+          console.log(`Found a rout via Smart Router at ${curveRouterContract.address}`, params)
+
           const populatedTransaction = await curveRouterContract.populateTransaction.exchange(...params, {
             value
           })
@@ -359,37 +362,11 @@ export class CurveTrade extends Trade {
       }
 
       // The final
-      let estimatedAmountOutPerPool: BigNumber[] = []
-      // The current multicall library does not support Arbitrum One
-      if (chainId == ChainId.ARBITRUM_ONE) {
-        // Compile all the output
-        estimatedAmountOutPerPool = await Promise.all(
-          routablePools.map(async pool => {
-            // Construct the contract
-            const poolContract = new Contract(pool.swapAddress, pool.abi as any, provider)
-
-            // Map token address to index
-            const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-            const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
-            // Get expected output from the pool
-            // Use underylying signature if the pool is a meta pool
-            // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
-            const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
-
-            // Return the call bytes
-            return poolContract[dyMethodSignature](
-              tokenInIndex.toString(),
-              tokenOutIndex.toString(),
-              amountInBN.toString()
-            ) as BigNumber
-          })
-        )
-      } else {
-        // Compile all the output
-        // Using Multicall contract
-        const bestPoolOutputCalls = routablePools.map(pool => {
-          const poolContractMulticall = new MulticallContract(pool.swapAddress, pool.abi as any)
+      // Compile all the output
+      // Using Multicall contract
+      const estimatedAmountOutPerPool = await Promise.all(
+        routablePools.map(async pool => {
+          const poolContract = new Contract(pool.swapAddress, pool.abi as any, provider)
           // Map token address to index
           const tokenInIndex = getTokenIndex(pool, tokenIn.address)
           const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
@@ -405,13 +382,18 @@ export class CurveTrade extends Trade {
           // Debug
           console.log('Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
 
-          // Return the call bytes
-          return poolContractMulticall[dyMethodSignature](...dyMethodParams)
+          try {
+            // Return the call bytes
+            return poolContract[dyMethodSignature](...dyMethodParams) as BigNumber
+          } catch (e) {
+            console.log(e)
+            return BigNumber.from(0)
+          }
         })
+      )
 
-        // Get the estimated output
-        estimatedAmountOutPerPool = await multicallProvider.all(bestPoolOutputCalls)
-      }
+      // Get the estimated output
+      // estimatedAmountOutPerPool = await multicallProvider.all(bestPoolOutputCalls)
 
       if (estimatedAmountOutPerPool.length === 0) {
         return
@@ -480,7 +462,7 @@ export class CurveTrade extends Trade {
         }
       }
 
-      console.log(exchangeSignature, exchangeParams)
+      console.log(`Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
 
       const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
         value
