@@ -1,8 +1,8 @@
-import { PricedTokenAmount, Token, TokenAmount } from "entities"
-import invariant from "tiny-invariant"
+import { PricedTokenAmount, Token, TokenAmount } from 'entities'
+import invariant from 'tiny-invariant'
 
-import { BigintIsh } from ".."
-import { DistributionCampaignBase } from "./DistributionCampaignBase"
+import { BigintIsh } from '../constants'
+import { DistributionCampaignBase } from './DistributionCampaignBase'
 
 export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase {
   public readonly stakeToken: Token
@@ -18,15 +18,15 @@ export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase
     address?: string
   ) {
     invariant(staked.token.equals(stakeToken), 'STAKED_LP_TOKEN')
-    super(
+    super({
       startsAt,
       endsAt,
       rewards,
       staked,
       locked,
       stakingCap,
-      address 
-    )
+      address
+    })
 
     this.stakeToken = stakeToken
   }

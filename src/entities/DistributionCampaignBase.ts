@@ -7,7 +7,6 @@ import invariant from 'tiny-invariant'
 import { Token } from './token'
 import { utils } from 'ethers'
 
-
 const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
     utils.parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
@@ -31,7 +30,15 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
   )
 }
 
-
+interface DistributionCampaignBaseConstructoParams {
+  startsAt: BigintIsh
+  endsAt: BigintIsh
+  rewards: PricedTokenAmount[]
+  staked: PricedTokenAmount
+  locked: boolean
+  stakingCap: TokenAmount
+  address?: string
+}
 
 export class DistributionCampaignBase {
   public readonly chainId: ChainId
@@ -44,15 +51,15 @@ export class DistributionCampaignBase {
   public readonly locked: boolean
   public readonly stakingCap: TokenAmount
 
-  constructor(
-    startsAt: BigintIsh,
-    endsAt: BigintIsh,
-    rewards: PricedTokenAmount[],
-    staked: PricedTokenAmount,
-    locked: boolean,
-    stakingCap: TokenAmount,
-    address?: string
-  ) {
+  constructor({
+    startsAt,
+    endsAt,
+    rewards,
+    staked,
+    locked,
+    stakingCap,
+    address
+  }: DistributionCampaignBaseConstructoParams) {
     invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
     for (const reward of rewards) {
       invariant(staked.token.chainId === reward.token.chainId, 'CHAIN_ID')
@@ -94,12 +101,11 @@ export class DistributionCampaignBase {
   }
 
   public get apy(): Percent {
-
     // when the campaign has ended, apy is returned as 0
     if (this.remainingDuration.toString() === '0') return new Percent('0', '1')
 
     const remainingRewards = this.remainingRewards
-    
+
     let stakedValueNativeCurrency = this.staked.nativeCurrencyAmount
 
     if (stakedValueNativeCurrency.lessThan(MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY[this.chainId])) {
