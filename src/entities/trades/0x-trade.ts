@@ -79,6 +79,17 @@ function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   invariant(false, 'CURRENCY')
 }
 
+export interface ZeroXTradeConstructorParams {
+  breakdown: Breakdown
+  input: CurrencyAmount
+  output: CurrencyAmount
+  maximumSlippage: Percent
+  tradeType: TradeType
+  to: string
+  callData: string
+  value: string
+}
+
 /**
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
@@ -88,29 +99,34 @@ export class ZeroXTrade extends Trade {
   private readonly callData: string
   private readonly value: string
 
-  public constructor(
-    breakdown: Breakdown,
-    input: CurrencyAmount,
-    output: CurrencyAmount,
-    maximumSlippage: Percent,
-    tradeType: TradeType,
-    to: string,
-    callData: string,
-    value: string
-  ) {
+  public constructor({
+    breakdown,
+    input,
+    output,
+    maximumSlippage,
+    tradeType,
+    to,
+    callData,
+    value
+  }: ZeroXTradeConstructorParams) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
     const chainId = breakdown.chainId
-    super(
-      breakdown,
-      tradeType,
-      input,
-      output,
-      new Price(input.currency, output.currency, input.raw, output.raw),
+    super({
+      details: breakdown,
+      type: tradeType,
+      inputAmount: input,
+      outputAmount: output,
+      executionPrice: new Price({
+        baseCurrency: input.currency,
+        quoteCurrency: output.currency,
+        denominator: input.raw,
+        numerator: output.raw
+      }),
       maximumSlippage,
-      new Percent('0', '100'),
+      priceImpact: new Percent('0', '100'),
       chainId,
-      RoutablePlatform.ZEROX
-    )
+      platform: RoutablePlatform.ZEROX
+    })
     this.to = to
     this.callData = callData
     this.value = value
@@ -178,20 +194,25 @@ export class ZeroXTrade extends Trade {
         platformsFromSources(json.sources),
         tokenIn,
         tokenOut,
-        new Price(tokenIn, tokenOut, amountIn.raw, json.buyAmount)
+        new Price({
+          baseCurrency: tokenIn,
+          quoteCurrency: tokenOut,
+          denominator: amountIn.raw,
+          numerator: json.buyAmount
+        })
       )
-      bestTrade = new ZeroXTrade(
+      bestTrade = new ZeroXTrade({
         breakdown,
-        currencyAmountIn,
-        Currency.isNative(currencyOut)
+        input: currencyAmountIn,
+        output: Currency.isNative(currencyOut)
           ? CurrencyAmount.nativeCurrency(json.buyAmount, chainId)
           : new TokenAmount(tokenOut, json.buyAmount),
         maximumSlippage,
-        TradeType.EXACT_INPUT,
-        json.to,
-        json.data,
-        json.value
-      )
+        tradeType: TradeType.EXACT_INPUT,
+        to: json.to,
+        callData: json.data,
+        value: json.value
+      })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
     }
@@ -233,20 +254,25 @@ export class ZeroXTrade extends Trade {
         platformsFromSources(json.sources),
         tokenIn,
         tokenOut,
-        new Price(tokenOut, tokenIn, amountOut.raw, json.buyAmount)
+        new Price({
+          baseCurrency: tokenOut,
+          quoteCurrency: tokenIn,
+          denominator: amountOut.raw,
+          numerator: json.buyAmount
+        })
       )
-      bestTrade = new ZeroXTrade(
+      bestTrade = new ZeroXTrade({
         breakdown,
-        Currency.isNative(currencyIn)
+        input: Currency.isNative(currencyIn)
           ? CurrencyAmount.nativeCurrency(json.buyAmount, chainId)
           : new TokenAmount(tokenIn, json.buyAmount),
-        currencyAmountOut,
+        output: currencyAmountOut,
         maximumSlippage,
-        TradeType.EXACT_OUTPUT,
-        json.to,
-        json.data,
-        json.value
-      )
+        tradeType: TradeType.EXACT_OUTPUT,
+        to: json.to,
+        callData: json.data,
+        value: json.value
+      })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
     }
