@@ -30,7 +30,7 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
   )
 }
 
-interface DistributionCampaignBaseConstructoParams {
+export interface DistributionCampaignBaseConstructoParams {
   startsAt: BigintIsh
   endsAt: BigintIsh
   rewards: PricedTokenAmount[]

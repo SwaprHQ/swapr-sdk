@@ -10,7 +10,7 @@ import { TradeOptions } from './trade-options'
 
 type Details = Route | Breakdown
 
-interface TradeConstructorParams {
+export interface TradeConstructorParams {
   details: Details
   type: TradeType
   inputAmount: CurrencyAmount
