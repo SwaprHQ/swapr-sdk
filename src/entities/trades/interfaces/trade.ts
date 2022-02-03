@@ -20,6 +20,7 @@ export interface TradeConstructorParams {
   priceImpact: Percent
   chainId: ChainId
   platform: RoutablePlatform
+  fee?: Percent
 }
 
 /**
@@ -37,6 +38,11 @@ export abstract class Trade {
   public readonly chainId: ChainId
   public readonly platform: RoutablePlatform
 
+  /**
+   * The protocol fee
+   */
+  public readonly fee: Percent
+
   protected constructor({
     details,
     type,
@@ -46,7 +52,8 @@ export abstract class Trade {
     maximumSlippage,
     priceImpact,
     chainId,
-    platform
+    platform,
+    fee = new Percent('0')
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
@@ -57,6 +64,7 @@ export abstract class Trade {
     this.priceImpact = priceImpact
     this.chainId = chainId
     this.platform = platform
+    this.fee = fee
   }
 
   /**
