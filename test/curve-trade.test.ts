@@ -68,22 +68,23 @@ describe('CurveTrade', () => {
   // @ts-ignore
   const testIf = (condition: boolean) => (condition ? it : it.skip)
 
-  const maxSlippage = new Percent('5', '100')
+  const maximumSlippage = new Percent('3', '100')
 
   describe('Gnosis Chain', () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
     test('Should return the best trade from WXDAI to USDC', async () => {
-      const currencyAmountIn = tryParseAmount(parseUnits('1', tokenXWDAI.decimals).toString(), tokenXWDAI)
+      const currencyAmountIn = tryParseAmount(
+        parseUnits('1', tokenXWDAI.decimals).toString(),
+        tokenXWDAI
+      ) as CurrencyAmount
 
-      console.log(currencyAmountIn)
-
-      const trade = await CurveTrade.bestTradeExactIn(
-        currencyAmountIn as CurrencyAmount,
-        tokenUSDC,
-        new Percent('3', '100')
-      )
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: tokenUSDC,
+        maximumSlippage
+      })
 
       expect(trade).toBeDefined()
       expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
@@ -96,13 +97,16 @@ describe('CurveTrade', () => {
     })
 
     test('Should return the best trade from USDC to WXDAI', async () => {
-      const currencyAmountIn = tryParseAmount(parseUnits('1', tokenUSDC.decimals).toString(), tokenUSDC)
+      const currencyAmountIn = tryParseAmount(
+        parseUnits('1', tokenUSDC.decimals).toString(),
+        tokenUSDC
+      ) as CurrencyAmount
 
-      const trade = await CurveTrade.bestTradeExactIn(
-        currencyAmountIn as CurrencyAmount,
-        tokenXWDAI,
-        new Percent('3', '100')
-      )
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: tokenXWDAI,
+        maximumSlippage
+      })
 
       expect(trade).toBeDefined()
       expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
@@ -413,7 +417,10 @@ describe('CurveTrade', () => {
     ]
 
     testCombos.forEach(({ testAccount, tokenIn, tokenOut, tokenInAmount }) => {
-      const currencyAmountIn = new TokenAmount(tokenIn, parseUnits(tokenInAmount, tokenIn.decimals).toString())
+      const currencyAmountIn = new TokenAmount(
+        tokenIn,
+        parseUnits(tokenInAmount, tokenIn.decimals).toString()
+      ) as CurrencyAmount
       const testName = `Should swap ${tokenInAmount} ${tokenIn.symbol} to ${tokenOut.symbol}`
 
       test(testName, async () => {
@@ -429,9 +436,11 @@ describe('CurveTrade', () => {
 
         // Get trade
         const trade = await CurveTrade.bestTradeExactIn(
-          currencyAmountIn as CurrencyAmount,
-          tokenOut,
-          maxSlippage,
+          {
+            currencyAmountIn,
+            currencyOut: tokenOut,
+            maximumSlippage
+          },
           mainnetForkProvider
         )
 
@@ -488,13 +497,16 @@ describe('CurveTrade', () => {
     )
 
     test('Should return the best trade from USDC to USDT via 2pool', async () => {
-      const currencyAmountIn = tryParseAmount(parseUnits('1', tokenUSDC.decimals).toString(), tokenUSDC)
+      const currencyAmountIn = tryParseAmount(
+        parseUnits('1', tokenUSDC.decimals).toString(),
+        tokenUSDC
+      ) as CurrencyAmount
 
-      const trade = await CurveTrade.bestTradeExactIn(
-        currencyAmountIn as CurrencyAmount,
-        tokenUSDT,
-        new Percent('3', '100')
-      )
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: tokenUSDT,
+        maximumSlippage
+      })
 
       const curve2Pool = CURVE_POOLS[ChainId.ARBITRUM_ONE].find(({ name }) => name.toLowerCase() == '2pool')
 
@@ -509,12 +521,15 @@ describe('CurveTrade', () => {
     })
 
     test('Should return the best trade from USDC to EURs via eurusd', async () => {
-      const currencyAmountIn = tryParseAmount(parseUnits('1', tokenUSDC.decimals).toString(), tokenUSDC)
-      const trade = await CurveTrade.bestTradeExactIn(
-        currencyAmountIn as CurrencyAmount,
-        tokenEURs,
-        new Percent('3', '100')
-      )
+      const currencyAmountIn = tryParseAmount(
+        parseUnits('1', tokenUSDC.decimals).toString(),
+        tokenUSDC
+      ) as CurrencyAmount
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: tokenEURs,
+        maximumSlippage
+      })
       expect(trade).toBeDefined()
       expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
       // test swap transaction
@@ -528,12 +543,15 @@ describe('CurveTrade', () => {
   test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
-    const currencyAmountIn = tryParseAmount(parseUnits('1.5', tokenXWDAI.decimals).toString(), tokenXWDAI)
-    const trade = await CurveTrade.bestTradeExactIn(
-      currencyAmountIn as CurrencyAmount,
-      tokenUSDC,
-      new Percent('3', '100')
-    )
+    const currencyAmountIn = tryParseAmount(
+      parseUnits('1.5', tokenXWDAI.decimals).toString(),
+      tokenXWDAI
+    ) as CurrencyAmount
+    const trade = await CurveTrade.bestTradeExactIn({
+      currencyAmountIn,
+      currencyOut: tokenUSDC,
+      maximumSlippage
+    })
     expect(trade).toBeDefined()
     expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
     // test swap transaction

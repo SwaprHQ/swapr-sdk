@@ -25,7 +25,7 @@ function toHex(currencyAmount: CurrencyAmount) {
 
 const ZERO_HEX = '0x0'
 
-export interface BestTradeExactInParams {
+export interface UniswapV2TradeBestTradeExactInParams {
   currencyAmountIn: CurrencyAmount
   currencyOut: Currency
   maximumSlippage: Percent
@@ -37,7 +37,7 @@ export interface BestTradeExactInParams {
   bestTrades: UniswapV2Trade[]
 }
 
-export interface BestTradeExactOutParams {
+export interface UniswapV2TradeBestTradeExactOutParams {
   currencyIn: Currency
   currencyAmountOut: CurrencyAmount
   maximumSlippage: Percent
@@ -228,7 +228,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs = [],
     originalAmountIn = currencyAmountIn,
     bestTrades = []
-  }: BestTradeExactInParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeBestTradeExactInParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
@@ -320,7 +320,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs = [],
     originalAmountOut = currencyAmountOut,
     bestTrades = []
-  }: BestTradeExactOutParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeBestTradeExactOutParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')

@@ -2,8 +2,20 @@
 
 import { ContractInterface } from '@ethersproject/contracts'
 
+const CURVE_SHARED_POOL_ABI = [
+  {
+    name: 'fee',
+    outputs: [{ type: 'uint256', name: '' }],
+    inputs: [],
+    stateMutability: 'view',
+    type: 'function',
+    gas: '2201'
+  }
+]
+
 // 3pool ABI which has USDC, USDT and WXDAI
 export const CURVE_3POOL_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     type: 'function',
     stateMutability: 'nonpayable',
@@ -32,6 +44,7 @@ export const CURVE_3POOL_ABI: ContractInterface = [
 
 // 3pool ABI which has USDC, USDT and WXDAI
 export const CURVE_EURSPOOL_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -60,6 +73,7 @@ export const CURVE_EURSPOOL_ABI: ContractInterface = [
 ]
 
 export const CURVE_ROUTER_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'payable',
     type: 'function',
@@ -110,6 +124,7 @@ export const CURVE_ROUTER_ABI: ContractInterface = [
 ]
 
 export const REGISTRY_EXCHANGE_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'view',
     type: 'function',
@@ -154,6 +169,7 @@ export const ADDRESS_PROVIDER_ABI: ContractInterface = [
 ]
 
 export const CURVE_CRYPTO_SWAP_ABI = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -196,6 +212,7 @@ export const CURVE_CRYPTO_SWAP_ABI = [
 ]
 
 export const CURVE_WETH_ERC20_POOL_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'view',
     type: 'function',
@@ -275,6 +292,7 @@ export const CURVE_WETH_ERC20_POOL_ABI: ContractInterface = [
 ]
 
 export const CURVE_ETHXERC20_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     name: 'get_dy',
     outputs: [{ type: 'uint256', name: '' }],
@@ -303,6 +321,7 @@ export const CURVE_ETHXERC20_ABI: ContractInterface = [
 ]
 
 export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
+  ...CURVE_SHARED_POOL_ABI,
   {
     stateMutability: 'payable',
     type: 'function',

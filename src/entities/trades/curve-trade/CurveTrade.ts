@@ -18,88 +18,29 @@ import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
 
 // Curve imports
-import { CurvePool, CURVE_POOLS, CurveToken, TOKENS_MAINNET, CURVE_TOKENS } from './constants'
 import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, MAINNET_CONTRACTS } from './contracts'
-import { CURVE_ROUTER_ABI } from './abi'
+import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
+import { CURVE_POOLS, CurveToken } from './constants'
 import { wrappedCurrency } from '../utils'
+import { CURVE_ROUTER_ABI } from './abi'
 
 const ZERO_HEX = '0x0'
 
-/**
- * Returns the token index of a token in a Curve pool
- * @param pool the Curve pool
- * @param tokenAddress the token address
- */
-function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
-  // Use main tokens
-  let tokenList = pool.tokens
-  // Combine tokens + meta tokens
-  if (pool.isMeta && pool.metaTokens) {
-    // Combine all tokens without 3CRV
-    const tokenWithout3CRV = pool.tokens.filter(token => token.symbol.toLowerCase() !== '3crv')
-
-    tokenList = [...tokenWithout3CRV, ...(pool.metaTokens as CurveToken[])]
-  }
-
-  if (
-    pool.allowsTradingETH === true &&
-    chainId === ChainId.MAINNET &&
-    tokenAddress.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-  ) {
-    tokenAddress = TOKENS_MAINNET.weth.address
-  }
-
-  return tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+export interface CurveTradeConstructorParams {
+  inputAmount: CurrencyAmount
+  outputAmount: CurrencyAmount
+  maximumSlippage: Percent
+  tradeType: TradeType
+  chainId: ChainId
+  transactionRequest: UnsignedTransaction
+  approveAddress?: string
+  fee?: Percent
 }
 
-function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
-  const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
-
-  return Object.values(tokenList).find(token => token.address.toLowerCase() === tokenAddress.toLowerCase())
-}
-
-/**
- *
- * @param pools The list of Curve pools
- * @param tokenInAddress Token in address
- * @param tokenOutAddress Token out address
- * @returns List of potential pools at which the trade can be done
- */
-function getRoutablePools(pools: CurvePool[], tokenIn: CurveToken, tokenOut: CurveToken, chainId: ChainId) {
-  return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
-    let tokenInAddress = tokenIn.address
-    let tokenOutAddress = tokenOut.address
-
-    // For mainnet, account for ETH/WETH
-    if (chainId === ChainId.MAINNET) {
-      const isTokenInEther = tokenIn.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-      const isTokenOutEther = tokenOut.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-
-      tokenInAddress = allowsTradingETH === true && isTokenInEther ? TOKENS_MAINNET.weth.address : tokenIn.address
-      tokenOutAddress = allowsTradingETH === true && isTokenOutEther ? TOKENS_MAINNET.weth.address : tokenOut.address
-    }
-
-    // main tokens
-    const hasTokenIn = tokens.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
-    const hasTokenOut = tokens.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
-
-    // Meta tokens in MetaPools [ERC20, [...3PoolTokens]]
-    const hasMetaTokenIn = metaTokens?.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
-    const hasMetaTokenOut = metaTokens?.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
-
-    // Underlying tokens, similar to meta tokens
-    const hasUnderlyingTokenIn = underlyingTokens?.some(
-      token => token.address.toLowerCase() === tokenInAddress.toLowerCase()
-    )
-    const hasUnderlyingTokenOut = underlyingTokens?.some(
-      token => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
-    )
-
-    return (
-      (hasTokenIn || hasUnderlyingTokenIn || hasMetaTokenIn) &&
-      (hasTokenOut || hasUnderlyingTokenOut || hasMetaTokenOut)
-    )
-  })
+export interface CurveTradeBestTradeExactInParams {
+  currencyAmountIn: CurrencyAmount
+  currencyOut: Currency
+  maximumSlippage: Percent
 }
 
 /**
@@ -127,27 +68,34 @@ export class CurveTrade extends Trade {
    * @param value ETH value
    * @param approveAddress Approve address, defaults to `to`
    */
-  public constructor(
-    input: CurrencyAmount,
-    output: CurrencyAmount,
-    maximumSlippage: Percent,
-    tradeType: TradeType,
-    chainId: ChainId,
-    transactionRequest: UnsignedTransaction,
-    approveAddress?: string
-  ) {
-    invariant(!currencyEquals(input.currency, output.currency), 'SAME_TOKEN')
-    super(
-      undefined,
-      tradeType,
-      input,
-      output,
-      new Price(input.currency, output.currency, input.raw, output.raw),
+  public constructor({
+    inputAmount,
+    outputAmount,
+    maximumSlippage,
+    tradeType,
+    chainId,
+    transactionRequest,
+    approveAddress,
+    fee
+  }: CurveTradeConstructorParams) {
+    invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
+    super({
+      details: undefined,
+      type: tradeType,
+      inputAmount,
+      outputAmount,
+      executionPrice: new Price({
+        baseCurrency: inputAmount.currency,
+        quoteCurrency: outputAmount.currency,
+        denominator: inputAmount.raw,
+        numerator: outputAmount.raw
+      }),
       maximumSlippage,
-      new Percent('0', '100'),
+      priceImpact: new Percent('0', '100'),
       chainId,
-      RoutablePlatform.CURVE
-    )
+      platform: RoutablePlatform.CURVE,
+      fee
+    })
     this.transactionRequest = transactionRequest
     this.approveAddress = approveAddress || (transactionRequest.to as string)
   }
@@ -206,9 +154,7 @@ export class CurveTrade extends Trade {
    * @returns the best trade if found
    */
   public static async bestTradeExactIn(
-    currencyAmountIn: CurrencyAmount,
-    currencyOut: Currency,
-    maximumSlippage: Percent,
+    { currencyAmountIn, currencyOut, maximumSlippage }: CurveTradeBestTradeExactInParams,
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
@@ -296,7 +242,9 @@ export class CurveTrade extends Trade {
             })
           : undefined
 
-      console.log({ bestPoolAndOutputRes })
+      // Majority of Curve pools
+      // have 4bps fee of which 50% goes to Curve
+      let fee = new Percent('4', '10000')
 
       // If a pool is found
       // Ignore the manual off-chain search
@@ -342,16 +290,17 @@ export class CurveTrade extends Trade {
 
           populatedTransaction.gasLimit = gasLimitWithBuffer
 
-          return new CurveTrade(
-            currencyAmountIn,
-            Currency.isNative(currencyOut)
+          return new CurveTrade({
+            inputAmount: currencyAmountIn,
+            outputAmount: Currency.isNative(currencyOut)
               ? CurrencyAmount.nativeCurrency(exchangeRoutingInfo.expectedAmountOut.toBigInt(), chainId)
               : new TokenAmount(wrappedtokenOut, exchangeRoutingInfo.expectedAmountOut.toBigInt()),
             maximumSlippage,
-            TradeType.EXACT_INPUT,
+            tradeType: TradeType.EXACT_INPUT,
             chainId,
-            populatedTransaction
-          )
+            transactionRequest: populatedTransaction,
+            fee
+          })
         }
       }
 
@@ -370,6 +319,11 @@ export class CurveTrade extends Trade {
           // Map token address to index
           const tokenInIndex = getTokenIndex(pool, tokenIn.address)
           const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+
+          // Skip pool that return -1
+          if (tokenInIndex < 0 || tokenOutIndex < 0) {
+            return BigNumber.from(0)
+          }
 
           // Get expected output from the pool
           // Use underylying signature if the pool is a meta pool
@@ -422,6 +376,13 @@ export class CurveTrade extends Trade {
       // Construct the contrac call
       const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
 
+      // Try to fetch the fee from the contract the newest
+      // If the call fails, the fee defaults back to 4bps
+      try {
+        const feeFromContract = (await poolContract.fee()) as BigNumber
+        fee = new Percent(feeFromContract.toString(), '10000000000')
+      } catch (e) {}
+
       // Map token address to index
       const tokenInIndex = getTokenIndex(pool, tokenIn.address)
       const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
@@ -469,22 +430,27 @@ export class CurveTrade extends Trade {
       })
 
       // Return the CurveTrade
-      bestTrade = new CurveTrade(
-        currencyAmountIn,
-        Currency.isNative(currencyOut)
+      bestTrade = new CurveTrade({
+        inputAmount: currencyAmountIn,
+        outputAmount: Currency.isNative(currencyOut)
           ? CurrencyAmount.nativeCurrency(estimatedAmountOut.toBigInt(), chainId)
           : new TokenAmount(wrappedtokenOut, estimatedAmountOut.toBigInt()),
         maximumSlippage,
-        TradeType.EXACT_INPUT,
+        tradeType: TradeType.EXACT_INPUT,
         chainId,
-        populatedTransaction
-      )
+        transactionRequest: populatedTransaction,
+        fee
+      })
     } catch (error) {
       console.error('could not fetch Curve trade', error)
     }
     return bestTrade
   }
 
+  /**
+   * Returns unsigned transaction for the trade
+   * @returns the unsigned transaction
+   */
   public async swapTransaction(): Promise<UnsignedTransaction> {
     return {
       ...this.transactionRequest,
