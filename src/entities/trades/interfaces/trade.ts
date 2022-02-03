@@ -10,6 +10,18 @@ import { TradeOptions } from './trade-options'
 
 export type Details = Route | Breakdown | undefined
 
+export interface TradeConstructorParams {
+  details: Details
+  type: TradeType
+  inputAmount: CurrencyAmount
+  outputAmount: CurrencyAmount
+  executionPrice: Price
+  maximumSlippage: Percent
+  priceImpact: Percent
+  chainId: ChainId
+  platform: RoutablePlatform
+}
+
 /**
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
@@ -25,17 +37,17 @@ export abstract class Trade {
   public readonly chainId: ChainId
   public readonly platform: RoutablePlatform
 
-  protected constructor(
-    details: Details,
-    type: TradeType,
-    inputAmount: CurrencyAmount,
-    outputAmount: CurrencyAmount,
-    executionPrice: Price,
-    maximumSlippage: Percent,
-    priceImpact: Percent,
-    chainId: ChainId,
-    platform: RoutablePlatform
-  ) {
+  protected constructor({
+    details,
+    type,
+    inputAmount,
+    outputAmount,
+    executionPrice,
+    maximumSlippage,
+    priceImpact,
+    chainId,
+    platform
+  }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
     this.inputAmount = inputAmount

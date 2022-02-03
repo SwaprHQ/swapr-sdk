@@ -25,6 +25,30 @@ function toHex(currencyAmount: CurrencyAmount) {
 
 const ZERO_HEX = '0x0'
 
+export interface BestTradeExactInParams {
+  currencyAmountIn: CurrencyAmount
+  currencyOut: Currency
+  maximumSlippage: Percent
+  pairs: Pair[]
+  maxHops: BestTradeOptions
+  // used in recursion.
+  currentPairs: Pair[]
+  originalAmountIn: CurrencyAmount
+  bestTrades: UniswapV2Trade[]
+}
+
+export interface BestTradeExactOutParams {
+  currencyIn: Currency
+  currencyAmountOut: CurrencyAmount
+  maximumSlippage: Percent
+  pairs?: Pair[]
+  maxHops: BestTradeOptions
+  // used in recursion.
+  currentPairs: Pair[]
+  originalAmountOut: CurrencyAmount
+  bestTrades: UniswapV2Trade[]
+}
+
 /**
  * Returns the percent difference between the mid price and the execution price, i.e. price impact.
  * @param midPrice mid price before the trade
@@ -136,17 +160,22 @@ export class UniswapV2Trade extends Trade {
         : Currency.isNative(route.output)
         ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, chainId)
         : amounts[amounts.length - 1]
-    super(
-      route,
-      tradeType,
+    super({
+      details: route,
+      type: tradeType,
       inputAmount,
       outputAmount,
-      new Price(inputAmount.currency, outputAmount.currency, inputAmount.raw, outputAmount.raw),
+      executionPrice: new Price({
+        baseCurrency: inputAmount.currency,
+        quoteCurrency: outputAmount.currency,
+        denominator: inputAmount.raw,
+        numerator: outputAmount.raw
+      }),
       maximumSlippage,
-      computePriceImpact(route.midPrice, inputAmount, outputAmount),
-      route.chainId,
-      route.pairs[0].platform
-    )
+      priceImpact: computePriceImpact(route.midPrice, inputAmount, outputAmount),
+      chainId: route.chainId,
+      platform: route.pairs[0].platform
+    })
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -189,17 +218,17 @@ export class UniswapV2Trade extends Trade {
    * @param originalAmountIn used in recursion; the original value of the currencyAmountIn parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static bestTradeExactIn(
-    currencyAmountIn: CurrencyAmount,
-    currencyOut: Currency,
-    maximumSlippage: Percent,
-    pairs: Pair[],
-    { maxNumResults = 3, maxHops = 3 }: BestTradeOptions = {},
+  public static bestTradeExactIn({
+    currencyAmountIn,
+    currencyOut,
+    maximumSlippage,
+    pairs,
+    maxHops: { maxNumResults = 3, maxHops = 3 } = {},
     // used in recursion.
-    currentPairs: Pair[] = [],
-    originalAmountIn: CurrencyAmount = currencyAmountIn,
-    bestTrades: UniswapV2Trade[] = []
-  ): UniswapV2Trade | undefined {
+    currentPairs = [],
+    originalAmountIn = currencyAmountIn,
+    bestTrades = []
+  }: BestTradeExactInParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
@@ -247,19 +276,19 @@ export class UniswapV2Trade extends Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
-        UniswapV2Trade.bestTradeExactIn(
-          amountOut,
+        UniswapV2Trade.bestTradeExactIn({
+          currencyAmountIn: amountOut,
           currencyOut,
           maximumSlippage,
-          pairsExcludingThisPair,
-          {
+          pairs: pairsExcludingThisPair,
+          maxHops: {
             maxNumResults,
             maxHops: maxHops - 1
           },
-          [...currentPairs, pair],
+          currentPairs: [...currentPairs, pair],
           originalAmountIn,
           bestTrades
-        )
+        })
       }
     }
 
@@ -281,17 +310,17 @@ export class UniswapV2Trade extends Trade {
    * @param originalAmountOut used in recursion; the original value of the currencyAmountOut parameter
    * @param bestTrades used in recursion; the current list of best trades
    */
-  public static bestTradeExactOut(
-    currencyIn: Currency,
-    currencyAmountOut: CurrencyAmount,
-    maximumSlippage: Percent,
-    pairs?: Pair[],
-    { maxNumResults = 3, maxHops = 3 }: BestTradeOptions = {},
+  public static bestTradeExactOut({
+    currencyIn,
+    currencyAmountOut,
+    maximumSlippage,
+    pairs,
+    maxHops: { maxNumResults = 3, maxHops = 3 } = {},
     // used in recursion.
-    currentPairs: Pair[] = [],
-    originalAmountOut: CurrencyAmount = currencyAmountOut,
-    bestTrades: UniswapV2Trade[] = []
-  ): UniswapV2Trade | undefined {
+    currentPairs = [],
+    originalAmountOut = currencyAmountOut,
+    bestTrades = []
+  }: BestTradeExactOutParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
@@ -339,19 +368,19 @@ export class UniswapV2Trade extends Trade {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        UniswapV2Trade.bestTradeExactOut(
+        UniswapV2Trade.bestTradeExactOut({
           currencyIn,
-          amountIn,
+          currencyAmountOut: amountIn,
           maximumSlippage,
-          pairsExcludingThisPair,
-          {
+          pairs: pairsExcludingThisPair,
+          maxHops: {
             maxNumResults,
             maxHops: maxHops - 1
           },
-          [pair, ...currentPairs],
+          currentPairs: [pair, ...currentPairs],
           originalAmountOut,
           bestTrades
-        )
+        })
       }
     }
 
