@@ -24,28 +24,26 @@ function toHex(currencyAmount: CurrencyAmount) {
 
 const ZERO_HEX = '0x0'
 
-export interface BestTradeExactInParams {
-  currencyAmountIn: CurrencyAmount
-  currencyOut: Currency
+export interface UniswapV2TradeBestTradeExactParams {
+  maxHops?: BestTradeOptions
   maximumSlippage: Percent
-  pairs: Pair[]
-  maxHops: BestTradeOptions
   // used in recursion.
-  currentPairs: Pair[]
-  originalAmountIn: CurrencyAmount
-  bestTrades: UniswapV2Trade[]
+  currentPairs?: Pair[]
+  bestTrades?: UniswapV2Trade[]
 }
 
-export interface BestTradeExactOutParams {
+export interface UniswapV2TradeBestTradeExactInParams extends UniswapV2TradeBestTradeExactParams {
+  currencyAmountIn: CurrencyAmount
+  currencyOut: Currency
+  pairs: Pair[]
+  originalAmountIn?: CurrencyAmount
+}
+
+export interface UniswapV2TradeBestTradeExactOutParams extends UniswapV2TradeBestTradeExactParams {
   currencyIn: Currency
   currencyAmountOut: CurrencyAmount
-  maximumSlippage: Percent
-  pairs?: Pair[]
-  maxHops: BestTradeOptions
-  // used in recursion.
-  currentPairs: Pair[]
-  originalAmountOut: CurrencyAmount
-  bestTrades: UniswapV2Trade[]
+  pairs: Pair[]
+  originalAmountOut?: CurrencyAmount
 }
 
 /**
