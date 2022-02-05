@@ -1,7 +1,7 @@
 import { Provider as MulticallProvider } from 'ethers-multicall'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
-import { formatUnits, parseUnits } from '@ethersproject/units'
+import { parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
@@ -42,6 +42,13 @@ export interface CurveTradeBestTradeExactInParams {
   currencyOut: Currency
   maximumSlippage: Percent
 }
+
+/**
+ * Prints debug data to console. Requires setting `__SWAPR_CURVE_DEBUG__` to `true`
+ * @param data
+ * @returns
+ */
+const debug = (...data: any[]) => (window as any).__SWAPR_CURVE_DEBUG__ === true && console.debug(data)
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -171,7 +178,7 @@ export class CurveTrade extends Trade {
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
 
     // Get the token's data from Curve
-    const tokenIn = getCurveToken(currencyAmountIn.currency.address as string, chainId)
+    const tokenIn = getCurveToken(currencyAmountIn.currency?.address as string, chainId)
     const tokenOut = getCurveToken(currencyOut.address as string, chainId)
 
     // Validations
@@ -207,15 +214,7 @@ export class CurveTrade extends Trade {
           : currencyAmountIn.currency === nativeCurrency
 
       // Baisc trade information
-      let amountInBN = parseUnits(currencyAmountIn.toExact(), tokenIn.decimals)
-
-      // This is a bug with tokens on xDAI
-      // currencyAmountIn.toExact() produces the double amount of digits
-      // For example, an 18 decimal tokens results in 1 * 10^36
-      // And an 6 decimal token results in 1 * 10^12
-      if (chainId === ChainId.XDAI) {
-        amountInBN = parseUnits(formatUnits(currencyAmountIn.toExact(), tokenIn.decimals), tokenIn.decimals)
-      }
+      let amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
       // Determine if user has sent ETH
       if (etherIn) {
@@ -279,7 +278,7 @@ export class CurveTrade extends Trade {
 
           const curveRouterContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, provider)
 
-          console.log(`Found a rout via Smart Router at ${curveRouterContract.address}`, params)
+          debug(`Found a rout via Smart Router at ${curveRouterContract.address}`, params)
 
           const populatedTransaction = await curveRouterContract.populateTransaction.exchange(...params, {
             value
@@ -334,7 +333,7 @@ export class CurveTrade extends Trade {
           const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), amountInBN.toString()]
 
           // Debug
-          console.log('Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
+          debug('Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
 
           try {
             // Return the call bytes
@@ -393,8 +392,8 @@ export class CurveTrade extends Trade {
       let exchangeSignature = 'exchange'
 
       if (!(exchangeSignature in poolContract.populateTransaction)) {
-        // console.log(`Signature ${exchangeSignature} not found`)
-        // console.log(poolContract.functions)
+        // debug(`Signature ${exchangeSignature} not found`)
+        // debug(poolContract.functions)
         exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
       }
 
@@ -423,7 +422,7 @@ export class CurveTrade extends Trade {
         }
       }
 
-      console.log(`Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
+      debug(`Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
 
       const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
         value

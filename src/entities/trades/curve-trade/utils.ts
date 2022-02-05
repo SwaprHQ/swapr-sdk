@@ -39,7 +39,7 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
 export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
 
-  return Object.values(tokenList).find(token => token.address.toLowerCase() === tokenAddress.toLowerCase())
+  return Object.values(tokenList).find(token => token.address.toLowerCase() === tokenAddress?.toLowerCase())
 }
 
 /**
