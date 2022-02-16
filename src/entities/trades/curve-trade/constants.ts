@@ -10,7 +10,6 @@ import {
   CURVE_ETHXERC20_256_ABI
 } from './abi'
 
-// Assets
 enum TokenType {
   USD = 'usd',
   EUR = 'eur',

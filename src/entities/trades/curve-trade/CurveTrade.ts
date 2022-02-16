@@ -60,14 +60,14 @@ export class CurveTrade extends Trade {
 
   /**
    *
-   * @param input Input token
-   * @param output Output token
-   * @param maximumSlippage Maximum slippage indicated by the user
-   * @param tradeType Trade type
-   * @param to Address to to which transaction is send
-   * @param callData Unsigned transaction signature
-   * @param value ETH value
-   * @param approveAddress Approve address, defaults to `to`
+   * @param {Object} obj Curve trade options.
+   * @param {CurrencyAmount} obj.inputAmount - Input token
+   * @param {CurrencyAmount} obj.outputAmount - Output token
+   * @param {Percent} obj.maximumSlippage - Maximum slippage indicated by the user
+   * @param {TradeType} obj.tradeType - Trade type
+   * @param {string} obj.transactionRequest - Address to to which transaction is send
+   * @param {Percent} obj.fee - Trade fee
+   * @param {string} obj.approveAddress - Approve address, defaults to `to`
    */
   public constructor({
     inputAmount,
@@ -130,8 +130,8 @@ export class CurveTrade extends Trade {
 
   /**
    * Checks if two tokens can be routed between on Curve Finance pools
-   * @param tokenIn
-   * @param tokenOut
+   * @param {string} tokenIn
+   * @param {string} tokenOut
    * @returns a `boolean` whether the tokens can be exchanged on Curve Finance pools
    */
   public static async canRoute(tokenIn: Token, tokenOut: Token): Promise<boolean> {
@@ -148,10 +148,11 @@ export class CurveTrade extends Trade {
   /**
    * Computes and returns the best trade from Curve pools
    * by comparing all the Curve pools on target chain
-   * @param currencyAmountIn the amount of curreny in - sell token
-   * @param currencyOut the currency out - buy token
-   * @param maximumSlippage Maximum slippage
-   * @param provider an optional provider, the router defaults public providers
+   * @param {object} obj options
+   * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
+   * @param {Currency} obj.currencyOut the currency out - buy token
+   * @param {Percent} obj.maximumSlippage Maximum slippage
+   * @param {Provider} provider an optional provider, the router defaults public providers
    * @returns the best trade if found
    */
   public static async bestTradeExactIn(

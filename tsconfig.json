@@ -18,6 +18,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": false,
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {

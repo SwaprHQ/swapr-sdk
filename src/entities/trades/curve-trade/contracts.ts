@@ -49,9 +49,9 @@ export interface GetExchangeRoutingInfoResults {
 }
 
 /**
- * Returns the best pool to route a trade through
- * @param param
- * @returns
+ * Returns the best pool to route a trade through using Curve Registry Exchange contract.
+ * The contract is only available on Mainnet.
+ * @returns the best pool to route the trade through and expected receive amount
  */
 export async function getBestCurvePoolAndOutput({
   amountIn,
@@ -102,6 +102,11 @@ export async function getBestCurvePoolAndOutput({
   }
 }
 
+/**
+ * Returns routing information from the Curve Smart Router. The router is only available on Mainnet.
+ * The contract calls reverts if there no route is found
+ * @returns the routing information
+ */
 export async function getExchangeRoutingInfo({
   amountIn,
   tokenInAddress,
@@ -113,23 +118,22 @@ export async function getExchangeRoutingInfo({
   try {
     const params = [tokenInAddress, tokenOutAddress, amountIn.toString()]
 
-    const res = await routerContract.get_exchange_routing(...params, {
+    const exchangeRoutingRes = await routerContract.get_exchange_routing(...params, {
       from: ZERO_ADDRESS
     })
 
-    const [routes, indices, expectedAmountOut] = res
+    const [routes, indices, expectedAmountOut] = exchangeRoutingRes
 
     return {
       expectedAmountOut,
-    indices,
-    routes
-}
-  } catch (e) {
-    // console.log(e)
-    // if (e.message !== 'execution reverted') {
-    //   throw e
-    // } else {
-    // }
+      indices,
+      routes
+    }
+  } catch (error) {
+    // Throw any non-EVM errors
+    if (!error.message.includes('execution reverted')) {
+      throw error
+    }
   }
   return
 }
