@@ -17,3 +17,11 @@ export function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
   invariant(false, 'CURRENCY')
 }
+
+export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency) {
+  return currencyAmount instanceof TokenAmount
+    ? currencyAmount.token.chainId
+    : currency instanceof Token
+    ? currency.chainId
+    : undefined
+}
