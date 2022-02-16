@@ -16,6 +16,7 @@ import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
 import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
+import { debug } from '../../../utils'
 
 // Curve imports
 import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, MAINNET_CONTRACTS } from './contracts'
@@ -42,13 +43,6 @@ export interface CurveTradeBestTradeExactInParams {
   currencyOut: Currency
   maximumSlippage: Percent
 }
-
-/**
- * Prints debug data to console. Requires setting `__SWAPR_CURVE_DEBUG__` to `true`
- * @param data
- * @returns
- */
-const debug = (...data: any[]) => (window as any).__SWAPR_CURVE_DEBUG__ === true && console.debug(data)
 
 /**
  * Represents a trade executed against a list of pairs.

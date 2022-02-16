@@ -80,3 +80,10 @@ export function sortedInsert<T>(items: T[], add: T, maxSize: number, comparator:
     return isFull ? items.pop()! : null
   }
 }
+
+/**
+ * Prints debug data to console. Requires setting `window.__SWAPR_SDK_DEBUG__` to `true`
+ * @param data
+ * @returns void
+ */
+export const debug = (...data: any[]) => (window as any).__SWAPR_SDK_DEBUG__ === true && console.debug(data)
