@@ -17,7 +17,7 @@ import { TradeOptions } from './interfaces/trade-options'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { Contract } from '@ethersproject/contracts'
 import { UniswapV2RoutablePlatform } from './routable-platform/uniswap-v2-routable-platform'
-import { wrappedAmount, wrappedCurrency } from './utils'
+import { tryGetChainId, wrappedAmount, wrappedCurrency } from './utils'
 
 function toHex(currencyAmount: CurrencyAmount) {
   return `0x${currencyAmount.raw.toString(16)}`
@@ -231,12 +231,7 @@ export class UniswapV2Trade extends Trade {
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountIn === currencyAmountIn || currentPairs.length > 0, 'INVALID_RECURSION')
-    const chainId: ChainId | undefined =
-      currencyAmountIn instanceof TokenAmount
-        ? currencyAmountIn.token.chainId
-        : currencyOut instanceof Token
-        ? currencyOut.chainId
-        : undefined
+    const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
@@ -323,12 +318,7 @@ export class UniswapV2Trade extends Trade {
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountOut === currencyAmountOut || currentPairs.length > 0, 'INVALID_RECURSION')
-    const chainId: ChainId | undefined =
-      currencyAmountOut instanceof TokenAmount
-        ? currencyAmountOut.token.chainId
-        : currencyIn instanceof Token
-        ? currencyIn.chainId
-        : undefined
+    const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountOut = wrappedAmount(currencyAmountOut, chainId)

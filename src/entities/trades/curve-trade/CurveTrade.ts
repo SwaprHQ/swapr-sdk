@@ -22,7 +22,7 @@ import { debug } from '../../../utils'
 import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, MAINNET_CONTRACTS } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { CURVE_POOLS, CurveToken } from './constants'
-import { wrappedCurrency } from '../utils'
+import { tryGetChainId, wrappedCurrency } from '../utils'
 import { CURVE_ROUTER_ABI } from './abi'
 
 const ZERO_HEX = '0x0'
@@ -160,13 +160,7 @@ export class CurveTrade extends Trade {
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
-    const chainId: ChainId | undefined =
-      currencyAmountIn instanceof TokenAmount
-        ? currencyAmountIn.token.chainId
-        : currencyOut instanceof Token
-        ? currencyOut.chainId
-        : undefined
-
+    const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
     // const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)

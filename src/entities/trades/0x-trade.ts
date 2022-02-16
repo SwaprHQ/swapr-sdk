@@ -15,6 +15,7 @@ import { RoutablePlatform } from './routable-platform/routable-platform'
 import fetch from 'node-fetch'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Decimal } from 'decimal.js-light'
+import { tryGetChainId } from './utils'
 
 interface ApiSource {
   name: string
@@ -163,12 +164,7 @@ export class ZeroXTrade extends Trade {
     currencyOut: Currency,
     maximumSlippage: Percent
   ): Promise<ZeroXTrade | undefined> {
-    const chainId: ChainId | undefined =
-      currencyAmountIn instanceof TokenAmount
-        ? currencyAmountIn.token.chainId
-        : currencyOut instanceof Token
-        ? currencyOut.chainId
-        : undefined
+    const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     invariant(chainId !== undefined && chainId === ChainId.MAINNET, 'CHAIN_ID') // 0x is only supported in mainnet for now
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
@@ -224,12 +220,7 @@ export class ZeroXTrade extends Trade {
     currencyAmountOut: CurrencyAmount,
     maximumSlippage: Percent
   ): Promise<ZeroXTrade | undefined> {
-    const chainId: ChainId | undefined =
-      currencyAmountOut instanceof TokenAmount
-        ? currencyAmountOut.token.chainId
-        : currencyIn instanceof Token
-        ? currencyIn.chainId
-        : undefined
+    const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     invariant(chainId !== undefined && chainId === ChainId.MAINNET, 'CHAIN_ID') // 0x is only supported in mainnet for now
     const tokenIn = wrappedCurrency(currencyIn, chainId)
     const amountOut = wrappedAmount(currencyAmountOut, chainId)
