@@ -29,12 +29,12 @@ export class KpiToken extends PricedToken {
       chainId,
       address,
       18,
-      new Price(
-        token,
-        nativeCurrency,
-        utils.parseUnits('1', nativeCurrency.decimals).toString(),
-        utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
-      ),
+      new Price({
+        baseCurrency: token,
+        quoteCurrency: nativeCurrency,
+        denominator: utils.parseUnits('1', nativeCurrency.decimals).toString(),
+        numerator: utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
+      }),
       symbol,
       name
     ) // decimals are always 18 for kpi tokens

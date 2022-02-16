@@ -139,14 +139,24 @@ export class Pair {
    * Returns the current mid price of the pair in terms of token0, i.e. the ratio of reserve1 to reserve0
    */
   public get token0Price(): Price {
-    return new Price(this.token0, this.token1, this.tokenAmounts[0].raw, this.tokenAmounts[1].raw)
+    return new Price({
+      baseCurrency: this.token0,
+      quoteCurrency: this.token1,
+      denominator: this.tokenAmounts[0].raw,
+      numerator: this.tokenAmounts[1].raw
+    })
   }
 
   /**
    * Returns the current mid price of the pair in terms of token1, i.e. the ratio of reserve0 to reserve1
    */
   public get token1Price(): Price {
-    return new Price(this.token1, this.token0, this.tokenAmounts[1].raw, this.tokenAmounts[0].raw)
+    return new Price({
+      baseCurrency: this.token1,
+      quoteCurrency: this.token0,
+      denominator: this.tokenAmounts[1].raw,
+      numerator: this.tokenAmounts[0].raw
+    })
   }
 
   /**

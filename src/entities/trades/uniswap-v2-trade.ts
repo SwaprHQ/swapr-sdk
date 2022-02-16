@@ -17,6 +17,7 @@ import { TradeOptions } from './interfaces/trade-options'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { Contract } from '@ethersproject/contracts'
 import { UniswapV2RoutablePlatform } from './routable-platform/uniswap-v2-routable-platform'
+import { wrappedAmount, wrappedCurrency } from './utils'
 
 function toHex(currencyAmount: CurrencyAmount) {
   return `0x${currencyAmount.raw.toString(16)}`
@@ -114,19 +115,6 @@ export interface BestTradeOptions {
   maxNumResults?: number
   // the maximum number of hops a trade should contain
   maxHops?: number
-}
-
-function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId): TokenAmount {
-  if (currencyAmount instanceof TokenAmount) return currencyAmount
-  if (Currency.isNative(currencyAmount.currency))
-    return new TokenAmount(Token.getNativeWrapper(chainId), currencyAmount.raw)
-  invariant(false, 'CURRENCY')
-}
-
-function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
-  if (currency instanceof Token) return currency
-  if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
-  invariant(false, 'CURRENCY')
 }
 
 /**
@@ -238,7 +226,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs = [],
     originalAmountIn = currencyAmountIn,
     bestTrades = []
-  }: BestTradeExactInParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeBestTradeExactInParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
@@ -330,7 +318,7 @@ export class UniswapV2Trade extends Trade {
     currentPairs = [],
     originalAmountOut = currencyAmountOut,
     bestTrades = []
-  }: BestTradeExactOutParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeBestTradeExactOutParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
