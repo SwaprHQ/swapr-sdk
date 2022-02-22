@@ -44,6 +44,12 @@ export interface CurveTradeBestTradeExactInParams {
   maximumSlippage: Percent
 }
 
+export interface CurveTradeBestTradeExactOutParams {
+  currencyIn: Currency
+  currencyAmountOut: CurrencyAmount
+  maximumSlippage: Percent
+}
+
 /**
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
@@ -433,6 +439,43 @@ export class CurveTrade extends Trade {
       console.error('could not fetch Curve trade', error)
     }
     return bestTrade
+  }
+
+  /**
+   *
+   * @returns
+   */
+
+  /**
+   * Computes and returns the best trade from Curve pools using output as target.
+   * Avoid usig this method. It uses some optimistic math estimate right input.
+   * @param {object} obj options
+   * @param {CurrencyAmount} obj.currencyAmountOut the amount of curreny in - buy token
+   * @param {Currency} obj.currencyIn the currency in - sell token
+   * @param {Percent} obj.maximumSlippage Maximum slippage
+   * @param {Provider} provider an optional provider, the router defaults public providers
+   * @returns the best trade if found
+   */
+  public static async bestTradeExactOut(
+    { currencyAmountOut, currencyIn, maximumSlippage }: CurveTradeBestTradeExactOutParams,
+    provider?: Provider
+  ): Promise<CurveTrade | undefined> {
+    // Swap
+    let amountOutBN = parseUnits(currencyAmountOut.denominator.toString(), currencyIn.decimals)
+    // Add 0.04% to input amount
+    let estimatedAmountIn = amountOutBN.mul(1004).div(1000)
+    const currencyAmountIn = new TokenAmount(currencyIn as Token, estimatedAmountIn.toBigInt())
+
+    const trade = await CurveTrade.bestTradeExactIn(
+      {
+        currencyAmountIn,
+        currencyOut: currencyAmountOut.currency,
+        maximumSlippage
+      },
+      provider
+    )
+
+    return trade
   }
 
   /**
