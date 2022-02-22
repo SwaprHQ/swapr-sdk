@@ -5,7 +5,17 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { isAddress } from '@ethersproject/address'
 import JSBI from 'jsbi'
 
-import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
+import {
+  ChainId,
+  Currency,
+  CurrencyAmount,
+  CurveTrade,
+  Percent,
+  RoutablePlatform,
+  Token,
+  TokenAmount,
+  _1000
+} from '../src'
 import {
   TOKENS_MAINNET,
   TOKENS_XDAI,
@@ -116,6 +126,19 @@ describe('CurveTrade', () => {
       expect(swapTransaction).toBeDefined()
       expect(swapTransaction?.data).toBeDefined()
       expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+    })
+
+    test('Should estimate input from output', async () => {
+      const currencyAmountOut = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
+
+      const trade = await CurveTrade.bestTradeExactOut({
+        currencyAmountOut,
+        maximumSlippage,
+        currencyIn: tokenXWDAI
+      })
+      expect(trade).toBeDefined()
+
+      console.log(trade?.outputAmount.toSignificant())
     })
   })
 
