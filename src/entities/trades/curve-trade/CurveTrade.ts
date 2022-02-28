@@ -1,7 +1,7 @@
 import { Provider as MulticallProvider } from 'ethers-multicall'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
-import { parseUnits } from '@ethersproject/units'
+import { formatUnits, parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
@@ -334,14 +334,16 @@ export class CurveTrade extends Trade {
         const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
 
         // Construct the params
-        const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), amountInBN.toString()]
+        const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
         // Debug
         debug('Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
 
         try {
+          const dyOutput = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
+          console.log(dyOutput.toString())
           // Return the call bytes
-          return poolContract[dyMethodSignature](...dyMethodParams) as BigNumber
+          return dyOutput
         } catch (e) {
           console.log(e)
           return BigNumber.from(0)
@@ -359,6 +361,10 @@ export class CurveTrade extends Trade {
       estimatedAmountOut,
       pool: routablePools[index]
     }))
+
+    console.log({
+      poolWithEstimatedAmountOut
+    })
 
     // Sort the pool by best output
     const poolWithEstimatedAmountOutSorted = poolWithEstimatedAmountOut.sort((poolA, poolB) =>
@@ -512,22 +518,61 @@ export class CurveTrade extends Trade {
     { currencyAmountOut, currencyIn, maximumSlippage }: CurveTradeBestTradeExactOutParams,
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
-    // Swap
-    let amountOutBN = parseUnits(currencyAmountOut.denominator.toString(), currencyIn.decimals)
-    // Add 0.04% to input amount
-    let estimatedAmountIn = amountOutBN.mul(1004).div(1000)
-    const currencyAmountIn = new TokenAmount(currencyIn as Token, estimatedAmountIn.toBigInt())
+    // Try to extract the chain ID from the tokens
+    const chainId = tryGetChainId(currencyAmountOut, currencyIn)
+    // Require the chain ID
+    invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
-    const trade = await CurveTrade.bestTradeExactIn(
-      {
+    try {
+      // Swap
+      let amountOutBN = parseUnits(currencyAmountOut.toFixed(0), currencyAmountOut.currency.decimals)
+      // Add 0.04% to input amount
+      let estimatedAmountIn = amountOutBN.mul(1004).div(1000)
+      console.log({
+        qRaw: currencyAmountOut.raw.toString(),
+        qToFixed: currencyAmountOut.toFixed(0),
+        q0: formatUnits(estimatedAmountIn, currencyAmountOut.currency.decimals),
+        q1: formatUnits(amountOutBN, currencyAmountOut.currency.decimals)
+      })
+      // Swap
+      const currencyAmountIn = new TokenAmount(currencyIn as Token, estimatedAmountIn.toString())
+      const currencyOut = currencyAmountOut.currency
+
+      console.log({
+        currencyAmountOut,
+        currencyIn,
         currencyAmountIn,
-        currencyOut: currencyAmountOut.currency,
-        maximumSlippage
-      },
-      provider
-    )
+        currencyOut
+      })
 
-    return trade
+      const quote = await CurveTrade.getQuote(
+        {
+          currencyAmountIn,
+          currencyOut,
+          maximumSlippage
+        },
+        provider
+      )
+
+      if (quote) {
+        const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to } = quote
+        // Return the CurveTrade
+        return new CurveTrade({
+          fee,
+          maximumSlippage,
+          tradeType: TradeType.EXACT_INPUT,
+          chainId,
+          transactionRequest: populatedTransaction,
+          inputAmount: currencyAmountIn,
+          outputAmount: estimatedAmountOut,
+          approveAddress: to
+        })
+      }
+    } catch (error) {
+      console.error('could not fetch Curve trade', error)
+    }
+
+    return
   }
 
   /**

@@ -128,17 +128,26 @@ describe('CurveTrade', () => {
       expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
     })
 
-    test('Should estimate input from output', async () => {
+    test('Should estimate input from output #1', async () => {
       const currencyAmountOut = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
-
       const trade = await CurveTrade.bestTradeExactOut({
         currencyAmountOut,
         maximumSlippage,
         currencyIn: tokenXWDAI
       })
       expect(trade).toBeDefined()
-
-      console.log(trade?.outputAmount.toSignificant())
+      console.log(trade?.minimumAmountOut().toFixed(5))
+    })
+    test('Should estimate input from output #2', async () => {
+      console.log(tokenXWDAI.decimals)
+      const currencyAmountOut = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
+      const trade = await CurveTrade.bestTradeExactOut({
+        currencyAmountOut,
+        maximumSlippage,
+        currencyIn: tokenUSDC
+      })
+      expect(trade).toBeDefined()
+      console.log(trade?.minimumAmountOut().toFixed(5))
     })
   })
 
