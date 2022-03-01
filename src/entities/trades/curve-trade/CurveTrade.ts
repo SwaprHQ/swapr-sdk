@@ -1,7 +1,7 @@
 import { Provider as MulticallProvider } from 'ethers-multicall'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
-import { formatUnits, parseUnits } from '@ethersproject/units'
+import { parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
@@ -24,6 +24,7 @@ import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { CURVE_POOLS, CurveToken } from './constants'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { CURVE_ROUTER_ABI } from './abi'
+import Decimal from 'decimal.js-light'
 
 const ZERO_HEX = '0x0'
 
@@ -50,6 +51,8 @@ export interface CurveTradeQuote {
   populatedTransaction: UnsignedTransaction
   currencyAmountIn: CurrencyAmount
   estimatedAmountOut: CurrencyAmount
+  exchangeRate: number
+  exchangeRateWithoutFee: number
   currencyOut: Currency
   maximumSlippage: Percent
 }
@@ -168,10 +171,14 @@ export class CurveTrade extends Trade {
   }
 
   /**
-   *
-   * @param param0
-   * @param provider
-   * @returns
+   * Given an a sell token and a buy token, and amount of sell token, returns a
+   * quote from Curve's pools with best pool, and unsigned transactions data
+   * @param {object} obj options
+   * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
+   * @param {Currency} obj.currencyOut the currency in - buy token
+   * @param {Percent} obj.maximumSlippage Maximum slippage
+   * @param {Provider} provider an optional provider, the router defaults public providers
+   * @returns the best trade if found
    */
   public static async getQuote(
     { currencyAmountIn, currencyOut, maximumSlippage }: CurveTradeGetQuoteParams,
@@ -248,7 +255,12 @@ export class CurveTrade extends Trade {
 
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
+    const FEE_DECIMAL = 0.0004
     let fee = new Percent('4', '10000')
+
+    // Exchange fee
+    let exchangeRateWithoutFee = 1
+    let exchangeRate = 1 - FEE_DECIMAL
 
     // If a pool is found
     // Ignore the manual off-chain search
@@ -283,7 +295,7 @@ export class CurveTrade extends Trade {
 
         const curveRouterContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, provider)
 
-        debug(`Found a rout via Smart Router at ${curveRouterContract.address}`, params)
+        debug(`Curve::GetQuote | Found a rout via Smart Router at ${curveRouterContract.address}`, params)
 
         const populatedTransaction = await curveRouterContract.populateTransaction.exchange(...params, {
           value
@@ -301,7 +313,9 @@ export class CurveTrade extends Trade {
           currencyOut,
           maximumSlippage,
           populatedTransaction,
-          to: curveRouterContract.address
+          to: curveRouterContract.address,
+          exchangeRateWithoutFee,
+          exchangeRate
         }
       }
     }
@@ -337,11 +351,10 @@ export class CurveTrade extends Trade {
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
         // Debug
-        debug('Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
+        debug('Curve::GetQuote | Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
 
         try {
           const dyOutput = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
-          console.log(dyOutput.toString())
           // Return the call bytes
           return dyOutput
         } catch (e) {
@@ -361,10 +374,6 @@ export class CurveTrade extends Trade {
       estimatedAmountOut,
       pool: routablePools[index]
     }))
-
-    console.log({
-      poolWithEstimatedAmountOut
-    })
 
     // Sort the pool by best output
     const poolWithEstimatedAmountOutSorted = poolWithEstimatedAmountOut.sort((poolA, poolB) =>
@@ -429,7 +438,7 @@ export class CurveTrade extends Trade {
       }
     }
 
-    debug(`Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
+    debug(`Curve::GetQuote | Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
 
     const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
       value
@@ -445,7 +454,9 @@ export class CurveTrade extends Trade {
         : new TokenAmount(wrappedtokenOut, estimatedAmountOut.toBigInt()),
       maximumSlippage,
       fee,
-      to: poolContract.address
+      to: poolContract.address,
+      exchangeRateWithoutFee,
+      exchangeRate
     }
   }
 
@@ -524,26 +535,25 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
-      // Swap
-      let amountOutBN = parseUnits(currencyAmountOut.toFixed(0), currencyAmountOut.currency.decimals)
-      // Add 0.04% to input amount
-      let estimatedAmountIn = amountOutBN.mul(1004).div(1000)
-      console.log({
-        qRaw: currencyAmountOut.raw.toString(),
-        qToFixed: currencyAmountOut.toFixed(0),
-        q0: formatUnits(estimatedAmountIn, currencyAmountOut.currency.decimals),
-        q1: formatUnits(amountOutBN, currencyAmountOut.currency.decimals)
-      })
-      // Swap
-      const currencyAmountIn = new TokenAmount(currencyIn as Token, estimatedAmountIn.toString())
-      const currencyOut = currencyAmountOut.currency
+      // Get quote for original amounts in
+      const baseQuote = (await CurveTrade.getQuote(
+        {
+          currencyAmountIn: currencyAmountOut,
+          currencyOut: currencyIn,
+          maximumSlippage
+        },
+        provider
+      )) as CurveTradeQuote
 
-      console.log({
-        currencyAmountOut,
-        currencyIn,
-        currencyAmountIn,
-        currencyOut
-      })
+      const currencyOut = currencyAmountOut.currency
+      const rawInputToOutputExchangeRate = new Decimal(baseQuote.exchangeRate).pow(-currencyOut.decimals)
+      const outputToInputExchangeRate = new Decimal(rawInputToOutputExchangeRate).pow(-1)
+      const amountOut = new Decimal(currencyAmountOut.toFixed(currencyOut.decimals))
+      const estimatedAmountIn = amountOut.times(outputToInputExchangeRate).dividedBy('0.9996')
+      const currencyAmountIn = new TokenAmount(
+        currencyIn as Token,
+        parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
+      )
 
       const quote = await CurveTrade.getQuote(
         {
