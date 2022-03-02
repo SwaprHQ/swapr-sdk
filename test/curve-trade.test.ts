@@ -3,9 +3,8 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 // import { MaxInt256 } from '@ethersproject/constants'
 // import { Contract } from '@ethersproject/contracts'
 import { isAddress } from '@ethersproject/address'
-import JSBI from 'jsbi'
 
-import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
+import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount, _1000 } from '../src'
 import {
   TOKENS_MAINNET,
   TOKENS_XDAI,
@@ -43,27 +42,6 @@ export async function getGanacheRPCProvider(timeout = 10000): Promise<JsonRpcPro
   return provider
 }
 
-// try to parse a user entered amount for a given token
-export function tryParseAmount(value?: string, currency?: Currency, chainId?: number): CurrencyAmount | undefined {
-  if (!value || !currency) {
-    return undefined
-  }
-
-  try {
-    const typedValueParsed = parseUnits(value, currency.decimals).toString()
-    if (typedValueParsed !== '0') {
-      if (currency instanceof Token) return new TokenAmount(currency, JSBI.BigInt(typedValueParsed))
-      else if (chainId) return CurrencyAmount.nativeCurrency(JSBI.BigInt(typedValueParsed), chainId)
-      else return undefined
-    }
-  } catch (error) {
-    // should fail if the user specifies too many decimal places of precision (or maybe exceed max uint?)
-    console.debug(`Failed to parse input amount: "${value}"`, error)
-  }
-  // necessary for all paths to return a value
-  return undefined
-}
-
 describe('CurveTrade', () => {
   // @ts-ignore
   const testIf = (condition: boolean) => (condition ? it : it.skip)
@@ -75,10 +53,7 @@ describe('CurveTrade', () => {
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
     test('Should return the best trade from WXDAI to USDC', async () => {
-      const currencyAmountIn = tryParseAmount(
-        parseUnits('1', tokenXWDAI.decimals).toString(),
-        tokenXWDAI
-      ) as CurrencyAmount
+      const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
 
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
@@ -97,10 +72,7 @@ describe('CurveTrade', () => {
     })
 
     test('Should return the best trade from USDC to WXDAI', async () => {
-      const currencyAmountIn = tryParseAmount(
-        parseUnits('1', tokenUSDC.decimals).toString(),
-        tokenUSDC
-      ) as CurrencyAmount
+      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
 
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
@@ -116,6 +88,25 @@ describe('CurveTrade', () => {
       expect(swapTransaction).toBeDefined()
       expect(swapTransaction?.data).toBeDefined()
       expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+    })
+
+    test('Should estimate WXDAI input amount to get 100 USDC', async () => {
+      const currencyAmountOut = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
+      const trade = await CurveTrade.bestTradeExactOut({
+        currencyAmountOut,
+        maximumSlippage,
+        currencyIn: tokenXWDAI
+      })
+      expect(trade).toBeDefined()
+    })
+    test('Should estimate USDC input amount to get 100 WXDAI', async () => {
+      const currencyAmountOut = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
+      const trade = await CurveTrade.bestTradeExactOut({
+        currencyAmountOut,
+        maximumSlippage,
+        currencyIn: tokenUSDC
+      })
+      expect(trade).toBeDefined()
     })
   })
 
@@ -386,10 +377,7 @@ describe('CurveTrade', () => {
     )
 
     test('Should return the best trade from USDC to USDT via 2pool', async () => {
-      const currencyAmountIn = tryParseAmount(
-        parseUnits('1', tokenUSDC.decimals).toString(),
-        tokenUSDC
-      ) as CurrencyAmount
+      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
 
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
@@ -410,10 +398,8 @@ describe('CurveTrade', () => {
     })
 
     test('Should return the best trade from USDC to EURs via eurusd', async () => {
-      const currencyAmountIn = tryParseAmount(
-        parseUnits('1', tokenUSDC.decimals).toString(),
-        tokenUSDC
-      ) as CurrencyAmount
+      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
+
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
         currencyOut: tokenEURs,
@@ -432,10 +418,7 @@ describe('CurveTrade', () => {
   test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
-    const currencyAmountIn = tryParseAmount(
-      parseUnits('1.5', tokenXWDAI.decimals).toString(),
-      tokenXWDAI
-    ) as CurrencyAmount
+    const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('1.5', tokenXWDAI.decimals).toString())
     const trade = await CurveTrade.bestTradeExactIn({
       currencyAmountIn,
       currencyOut: tokenUSDC,
