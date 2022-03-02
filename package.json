@@ -27,11 +27,15 @@
     "docker:clean": "docker-compose kill && docker-compose -y rm"
   },
   "dependencies": {
+    "@ethersproject/bignumber": "^5.5.0",
+    "@gnosis.pm/gp-v2-contracts": "^1.1.2",
     "@makerdao/multicall": "^0.11.0",
     "@swapr/core": "^0.3.18",
     "@swapr/periphery": "^0.3.20",
     "big.js": "^5.2.2",
+    "dayjs": "^1.10.8",
     "decimal.js-light": "^2.5.0",
+    "ethers": "^5.5.4",
     "ethers-multicall": "^0.2.1",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",

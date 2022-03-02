@@ -1179,6 +1179,31 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
+"@ethersproject/providers@5.5.3":
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.5.3.tgz#56c2b070542ac44eb5de2ed3cf6784acd60a3130"
+  integrity sha512-ZHXxXXXWHuwCQKrgdpIkbzMNJMvs+9YWemanwp1fA7XZEv7QlilseysPvQe0D7Q7DlkJX/w/bGA1MdgK2TbGvA==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.5.0"
+    "@ethersproject/abstract-signer" "^5.5.0"
+    "@ethersproject/address" "^5.5.0"
+    "@ethersproject/basex" "^5.5.0"
+    "@ethersproject/bignumber" "^5.5.0"
+    "@ethersproject/bytes" "^5.5.0"
+    "@ethersproject/constants" "^5.5.0"
+    "@ethersproject/hash" "^5.5.0"
+    "@ethersproject/logger" "^5.5.0"
+    "@ethersproject/networks" "^5.5.0"
+    "@ethersproject/properties" "^5.5.0"
+    "@ethersproject/random" "^5.5.0"
+    "@ethersproject/rlp" "^5.5.0"
+    "@ethersproject/sha2" "^5.5.0"
+    "@ethersproject/strings" "^5.5.0"
+    "@ethersproject/transactions" "^5.5.0"
+    "@ethersproject/web" "^5.5.0"
+    bech32 "1.1.4"
+    ws "7.4.6"
+
 "@ethersproject/providers@^5.4.2":
   version "5.4.2"
   resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.4.2.tgz#73df9767869a31bd88d9e27e78cff96364b8fbed"
@@ -1411,6 +1436,11 @@
     "@ethersproject/logger" "^5.5.0"
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
+
+"@gnosis.pm/gp-v2-contracts@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/gp-v2-contracts/-/gp-v2-contracts-1.1.2.tgz#0453bb097377dc63cf46ee195f7e521d429f7e22"
+  integrity sha512-BvZMNS+fwITb+qs+trs2fyvYksa6MPjjLze9AOXPnvcKVYFEGwG6cfsecBswEMo+xevLIQNDyF7HZRhN7ply8w==
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
@@ -2757,6 +2787,11 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
+dayjs@^1.10.8:
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.10.8.tgz#267df4bc6276fcb33c04a6735287e3f429abec41"
+  integrity sha512-wbNwDfBHHur9UOzNUjeKUOJ0fCb0a52Wx0xInmQ7Y8FstyajiV1NmK1e00cxsr9YrE9r7yAChE0VvpuY5Rnlow==
+
 debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -3265,6 +3300,42 @@ ethers@^5.0.0:
     "@ethersproject/pbkdf2" "5.5.0"
     "@ethersproject/properties" "5.5.0"
     "@ethersproject/providers" "5.5.2"
+    "@ethersproject/random" "5.5.1"
+    "@ethersproject/rlp" "5.5.0"
+    "@ethersproject/sha2" "5.5.0"
+    "@ethersproject/signing-key" "5.5.0"
+    "@ethersproject/solidity" "5.5.0"
+    "@ethersproject/strings" "5.5.0"
+    "@ethersproject/transactions" "5.5.0"
+    "@ethersproject/units" "5.5.0"
+    "@ethersproject/wallet" "5.5.0"
+    "@ethersproject/web" "5.5.1"
+    "@ethersproject/wordlists" "5.5.0"
+
+ethers@^5.5.4:
+  version "5.5.4"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.5.4.tgz#e1155b73376a2f5da448e4a33351b57a885f4352"
+  integrity sha512-N9IAXsF8iKhgHIC6pquzRgPBJEzc9auw3JoRkaKe+y4Wl/LFBtDDunNe7YmdomontECAcC5APaAgWZBiu1kirw==
+  dependencies:
+    "@ethersproject/abi" "5.5.0"
+    "@ethersproject/abstract-provider" "5.5.1"
+    "@ethersproject/abstract-signer" "5.5.0"
+    "@ethersproject/address" "5.5.0"
+    "@ethersproject/base64" "5.5.0"
+    "@ethersproject/basex" "5.5.0"
+    "@ethersproject/bignumber" "5.5.0"
+    "@ethersproject/bytes" "5.5.0"
+    "@ethersproject/constants" "5.5.0"
+    "@ethersproject/contracts" "5.5.0"
+    "@ethersproject/hash" "5.5.0"
+    "@ethersproject/hdnode" "5.5.0"
+    "@ethersproject/json-wallets" "5.5.0"
+    "@ethersproject/keccak256" "5.5.0"
+    "@ethersproject/logger" "5.5.0"
+    "@ethersproject/networks" "5.5.2"
+    "@ethersproject/pbkdf2" "5.5.0"
+    "@ethersproject/properties" "5.5.0"
+    "@ethersproject/providers" "5.5.3"
     "@ethersproject/random" "5.5.1"
     "@ethersproject/rlp" "5.5.0"
     "@ethersproject/sha2" "5.5.0"

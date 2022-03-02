@@ -6,6 +6,7 @@ import { ChainId } from '../../../constants'
 export class RoutablePlatform {
   public static readonly ZEROX = new RoutablePlatform([ChainId.MAINNET], '0x')
   public static readonly CURVE = new RoutablePlatform([ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.XDAI], 'Curve')
+  public static readonly COWFI = new RoutablePlatform([ChainId.MAINNET, ChainId.XDAI, ChainId.RINKEBY], 'Cow')
 
   public readonly chainIds: ChainId[]
   public readonly name: string
