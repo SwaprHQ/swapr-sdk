@@ -570,7 +570,7 @@ export class CurveTrade extends Trade {
         return new CurveTrade({
           fee,
           maximumSlippage,
-          tradeType: TradeType.EXACT_INPUT,
+          tradeType: TradeType.EXACT_OUTPUT,
           chainId,
           transactionRequest: populatedTransaction,
           inputAmount: currencyAmountIn,
