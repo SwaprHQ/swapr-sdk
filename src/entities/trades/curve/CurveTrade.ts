@@ -20,13 +20,7 @@ import { Currency } from '../../currency'
 import { debug } from '../../../utils'
 
 // Curve imports
-import {
-  getProvider,
-  getExchangeRoutingInfo,
-  getBestCurvePoolAndOutput,
-  MAINNET_CONTRACTS,
-  getRouter
-} from './contracts'
+import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { CURVE_POOLS, CurveToken } from './constants'
 import { tryGetChainId, wrappedCurrency } from '../utils'
@@ -37,7 +31,6 @@ import {
   CurveTradeBestTradeExactOutParams,
   CurveTradeBestTradeExactInParams
 } from './types'
-import { CURVE_ROUTER_ABI } from './abi'
 
 /**
  * Represents a trade executed against a list of pairs.
