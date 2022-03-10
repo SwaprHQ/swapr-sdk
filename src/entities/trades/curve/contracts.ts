@@ -103,6 +103,13 @@ export async function getBestCurvePoolAndOutput({
 }
 
 /**
+ * Returns Curve's Smart Router contract instance
+ */
+export function getRouter() {
+  return new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, getProvider(ChainId.MAINNET))
+}
+
+/**
  * Returns routing information from the Curve Smart Router. The router is only available on Mainnet.
  * The contract calls reverts if there no route is found
  * @returns the routing information
@@ -112,8 +119,7 @@ export async function getExchangeRoutingInfo({
   tokenInAddress,
   tokenOutAddress
 }: GetExchangeRoutingInfoParams): Promise<GetExchangeRoutingInfoResults | undefined> {
-  // Get router
-  const routerContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, getProvider(ChainId.MAINNET))
+  const routerContract = getRouter()
 
   try {
     const params = [tokenInAddress, tokenOutAddress, amountIn.toString()]
