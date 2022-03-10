@@ -1,14 +1,6 @@
-import { BigNumber } from '@ethersproject/bignumber'
-import { utils } from 'ethers'
-import { ChainId } from '../../../constants'
 import { CurvePool, CurveToken, CURVE_TOKENS, TOKENS_MAINNET } from './constants'
+import { ChainId } from '../../../constants'
 
-export const toBN = (n: BigNumber, decimals = 18): BigNumber => {
-  // @ts-ignore
-  return BigNumber.from(utils.formatUnits(n, decimals)).mul(decimals)
-}
-
-export const toLowerCase = (str: string) => str.toLocaleLowerCase()
 /**
  * Returns the token index of a token in a Curve pool
  * @param pool the Curve pool

@@ -4,6 +4,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
+import Decimal from 'decimal.js-light'
 import invariant from 'tiny-invariant'
 
 import { RoutablePlatform } from '../routable-platform/routable-platform'
@@ -19,55 +20,24 @@ import { Currency } from '../../currency'
 import { debug } from '../../../utils'
 
 // Curve imports
-import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, MAINNET_CONTRACTS } from './contracts'
+import {
+  getProvider,
+  getExchangeRoutingInfo,
+  getBestCurvePoolAndOutput,
+  MAINNET_CONTRACTS,
+  getRouter
+} from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { CURVE_POOLS, CurveToken } from './constants'
 import { tryGetChainId, wrappedCurrency } from '../utils'
+import {
+  CurveTradeConstructorParams,
+  CurveTradeGetQuoteParams,
+  CurveTradeQuote,
+  CurveTradeBestTradeExactOutParams,
+  CurveTradeBestTradeExactInParams
+} from './types'
 import { CURVE_ROUTER_ABI } from './abi'
-import Decimal from 'decimal.js-light'
-
-const ZERO_HEX = '0x0'
-
-export interface CurveTradeConstructorParams {
-  inputAmount: CurrencyAmount
-  outputAmount: CurrencyAmount
-  maximumSlippage: Percent
-  tradeType: TradeType
-  chainId: ChainId
-  transactionRequest: UnsignedTransaction
-  approveAddress?: string
-  fee?: Percent
-}
-
-export interface CurveTradeGetQuoteParams {
-  currencyAmountIn: CurrencyAmount
-  currencyOut: Currency
-  maximumSlippage: Percent
-}
-
-export interface CurveTradeQuote {
-  fee: Percent
-  to: string
-  populatedTransaction: UnsignedTransaction
-  currencyAmountIn: CurrencyAmount
-  estimatedAmountOut: CurrencyAmount
-  exchangeRate: number
-  exchangeRateWithoutFee: number
-  currencyOut: Currency
-  maximumSlippage: Percent
-}
-
-export interface CurveTradeBestTradeExactInParams {
-  currencyAmountIn: CurrencyAmount
-  currencyOut: Currency
-  maximumSlippage: Percent
-}
-
-export interface CurveTradeBestTradeExactOutParams {
-  currencyIn: Currency
-  currencyAmountOut: CurrencyAmount
-  maximumSlippage: Percent
-}
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -154,20 +124,14 @@ export class CurveTrade extends Trade {
   }
 
   /**
-   * Checks if two tokens can be routed between on Curve Finance pools
+   * Checks if two tokens can be routed between on Curve Finance pools.
+   * This method returns accurate results only on Ethereum since the Curve Router is available there.
    * @param {string} tokenIn
    * @param {string} tokenOut
    * @returns a `boolean` whether the tokens can be exchanged on Curve Finance pools
    */
   public static async canRoute(tokenIn: Token, tokenOut: Token): Promise<boolean> {
-    // Validations
-    const chainId: ChainId | undefined =
-      tokenIn instanceof Token ? tokenIn.chainId : tokenOut instanceof Token ? tokenOut.chainId : undefined
-    invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
-    invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
-    const routerContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, getProvider(ChainId.MAINNET))
-    // Get the the router an pass arguments
-    return routerContract.can_route(tokenIn.address, tokenOut.address)
+    return getRouter().can_route(tokenIn.address, tokenOut.address)
   }
 
   /**
@@ -209,7 +173,7 @@ export class CurveTrade extends Trade {
     const multicallProvider = new MulticallProvider(provider as any)
     await multicallProvider.init()
 
-    let value = ZERO_HEX // With Curve, most value exchanged is ERC20
+    let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
     // Get all Curve pools for the chain
     const curvePools = CURVE_POOLS[chainId]
@@ -293,7 +257,7 @@ export class CurveTrade extends Trade {
             .toString()
         ]
 
-        const curveRouterContract = new Contract(MAINNET_CONTRACTS.router, CURVE_ROUTER_ABI, provider)
+        const curveRouterContract = getRouter()
 
         debug(`Curve::GetQuote | Found a rout via Smart Router at ${curveRouterContract.address}`, params)
 
@@ -444,7 +408,6 @@ export class CurveTrade extends Trade {
       value
     })
 
-    // Return the CurveTrade
     return {
       currencyAmountIn,
       populatedTransaction,
@@ -509,11 +472,6 @@ export class CurveTrade extends Trade {
 
     return
   }
-
-  /**
-   *
-   * @returns
-   */
 
   /**
    * Computes and returns the best trade from Curve pools using output as target.
