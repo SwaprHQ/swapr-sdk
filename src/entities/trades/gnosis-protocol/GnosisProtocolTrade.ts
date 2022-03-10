@@ -98,7 +98,7 @@ export class GnosisProtocolTrade extends Trade {
       maximumSlippage,
       chainId,
       priceImpact: new Percent('0'),
-      platform: RoutablePlatform.COWFI,
+      platform: RoutablePlatform.GNOSIS_PROTOCOL,
       fee
     })
     this.order = order
@@ -162,7 +162,7 @@ export class GnosisProtocolTrade extends Trade {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     // Require the chain ID
-    invariant(chainId !== undefined && RoutablePlatform.COWFI.supportsChain(chainId), 'CHAIN_ID')
+    invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const tokenOut = wrappedCurrency(currencyOut, chainId)
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
@@ -228,7 +228,7 @@ export class GnosisProtocolTrade extends Trade {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     // Require the chain ID
-    invariant(chainId !== undefined && RoutablePlatform.COWFI.supportsChain(chainId), 'CHAIN_ID')
+    invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyAmountOut.currency, chainId)
     const tokenOut = wrappedCurrency(currencyIn, chainId)
     const amountOutBN = parseUnits(currencyAmountOut.toSignificant(), tokenIn.decimals)
