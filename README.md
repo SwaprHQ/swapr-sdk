@@ -30,16 +30,18 @@ Run tests
 yarn test
 ```
 
-## Trades
+## Eco Router Trades
 
-Currently supported DEXs are
+Swapr uses multiple trades to find best protocol and route for traders. Currently supported DEXs are
 
-- Swapr
-- Uniswap v2
-- SushiSwap
-- Honeyswap
-- Levinswap
-- Baoswap
-- Curve
+| Protocol   | Ethereum | Arbitrum One | Gnosis Chain |
+| ---------- | -------- | ------------ | ------------ |
+| Swapr      | ✅       | ✅           | ✅           |
+| Uniswap v2 | ✅       | ✅           | ✅           |
+| SushiSwap  | ✅       | ✅           | ✅           |
+| Honeyswap  |          |              | ✅           |
+| Levinswap  |          |              | ✅           |
+| Baoswap    |          |              | ✅           |
+| Curve      | WIP      | ✅           | ✅           |
 
-The `Trade` class is extendable. New DEXs can be added to the SDK by inheriting the `Trade` and adding required methods.
+The `Trade` class is extendable. New DEXs can be added to the SDK by extending the `Trade` and adding required methods.

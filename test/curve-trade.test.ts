@@ -12,7 +12,7 @@ import {
   CURVE_POOLS,
   POOLS_MAINNET,
   CurvePool
-} from '../src/entities/trades/curve-trade/constants'
+} from '../src/entities/trades/curve/constants'
 
 // import { ERC20_ABI } from '../test-util/abi'
 import { execAsync } from '../test-util'
