@@ -1,7 +1,7 @@
 {
   "name": "@swapr/sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "0.11.1",
+  "version": "1.0.0-beta.5",
   "description": "An SDK for building applications on top of DXswap.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -21,7 +21,10 @@
     "build": "tsdx build && cp -r ./src/abis ./dist",
     "start": "tsdx watch",
     "test": "tsdx test",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "docker:up": "docker-compose up -d",
+    "docker:restart": "docker-compose restart",
+    "docker:clean": "docker-compose kill && docker-compose -y rm"
   },
   "dependencies": {
     "@makerdao/multicall": "^0.11.0",
@@ -29,6 +32,7 @@
     "@swapr/periphery": "^0.3.20",
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
+    "ethers-multicall": "^0.2.1",
     "jsbi": "^3.1.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
@@ -45,10 +49,11 @@
   "devDependencies": {
     "@ethersproject/abi": "^5.4.0",
     "@ethersproject/address": "^5.4.0",
-    "@ethersproject/contracts": "^5.4.0",
+    "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/networks": "^5.4.1",
     "@ethersproject/providers": "^5.4.2",
     "@ethersproject/solidity": "^5.4.0",
+    "@ethersproject/units": "^5.5.0",
     "@types/big.js": "^4.0.5",
     "@types/jest": "^24.0.25",
     "@types/node-fetch": "^2.5.8",

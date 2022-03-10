@@ -1,6 +1,8 @@
-# DXswap SDK
+# Swapr SDK
 
-## Running tests
+## Getting Started
+
+### Running tests
 
 To run the tests, follow these steps. You must have at least node v10 and [yarn](https://yarnpkg.com/) installed.
 
@@ -28,22 +30,18 @@ Run tests
 yarn test
 ```
 
-You should see output like the following:
+## Eco Router Trades
 
-```sh
-yarn run v1.22.4
-$ tsdx test
- PASS  test/constants.test.ts (6.67s)
- PASS  test/pair.test.ts (6.805s)
- PASS  test/fraction.test.ts (6.874s)
- PASS  test/miscellaneous.test.ts (6.944s)
- PASS  test/entities.test.ts (7.108s)
- PASS  test/trade.test.ts (7.223s)
+Swapr uses multiple trades to find best protocol and route for traders. Currently supported DEXs are
 
-Test Suites: 1 skipped, 6 passed, 6 of 7 total
-Tests:       3 skipped, 82 passed, 85 total
-Snapshots:   0 total
-Time:        8.319s
-Ran all test suites.
-✨  Done in 6.61s.
-```
+| Protocol   | Ethereum | Arbitrum One | Gnosis Chain |
+| ---------- | -------- | ------------ | ------------ |
+| Swapr      | ✅       | ✅           | ✅           |
+| Uniswap v2 | ✅       | ✅           | ✅           |
+| SushiSwap  | ✅       | ✅           | ✅           |
+| Honeyswap  |          |              | ✅           |
+| Levinswap  |          |              | ✅           |
+| Baoswap    |          |              | ✅           |
+| Curve      | WIP      | ✅           | ✅           |
+
+The `Trade` class is extendable. New DEXs can be added to the SDK by extending the `Trade` and adding required methods.

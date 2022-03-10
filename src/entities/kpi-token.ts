@@ -1,9 +1,11 @@
-import { BigintIsh, ChainId } from '../constants'
-import { TokenAmount } from './'
-import invariant from 'tiny-invariant'
-import { Currency, Price, PricedToken, PricedTokenAmount, Token } from '..'
-import { utils } from 'ethers'
 import Decimal from 'decimal.js-light'
+import invariant from 'tiny-invariant'
+import { utils } from 'ethers'
+import { PricedToken } from './priced-token'
+import { Token } from '../entities/token'
+import { BigintIsh, ChainId } from '../constants'
+import { PricedTokenAmount, Price, TokenAmount } from '../entities/fractions'
+import { Currency } from '../entities/currency'
 
 export class KpiToken extends PricedToken {
   public readonly kpiId: string
@@ -27,12 +29,12 @@ export class KpiToken extends PricedToken {
       chainId,
       address,
       18,
-      new Price(
-        token,
-        nativeCurrency,
-        utils.parseUnits('1', nativeCurrency.decimals).toString(),
-        utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
-      ),
+      new Price({
+        baseCurrency: token,
+        quoteCurrency: nativeCurrency,
+        denominator: utils.parseUnits('1', nativeCurrency.decimals).toString(),
+        numerator: utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
+      }),
       symbol,
       name
     ) // decimals are always 18 for kpi tokens

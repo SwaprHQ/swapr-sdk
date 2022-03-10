@@ -10,6 +10,13 @@ import { Route } from '../route'
 import { Fraction } from './fraction'
 import { CurrencyAmount } from './currencyAmount'
 
+export interface PriceConstructorParams {
+  baseCurrency: Currency
+  quoteCurrency: Currency
+  denominator: BigintIsh
+  numerator: BigintIsh
+}
+
 export class Price extends Fraction {
   public readonly baseCurrency: Currency // input i.e. denominator
   public readonly quoteCurrency: Currency // output i.e. numerator
@@ -20,15 +27,25 @@ export class Price extends Fraction {
     for (const [i, pair] of route.pairs.entries()) {
       prices.push(
         route.path[i].equals(pair.token0)
-          ? new Price(pair.reserve0.currency, pair.reserve1.currency, pair.reserve0.raw, pair.reserve1.raw)
-          : new Price(pair.reserve1.currency, pair.reserve0.currency, pair.reserve1.raw, pair.reserve0.raw)
+          ? new Price({
+              baseCurrency: pair.reserve0.currency,
+              quoteCurrency: pair.reserve1.currency,
+              denominator: pair.reserve0.raw,
+              numerator: pair.reserve1.raw
+            })
+          : new Price({
+              baseCurrency: pair.reserve1.currency,
+              quoteCurrency: pair.reserve0.currency,
+              denominator: pair.reserve1.raw,
+              numerator: pair.reserve0.raw
+            })
       )
     }
     return prices.slice(1).reduce((accumulator, currentValue) => accumulator.multiply(currentValue), prices[0])
   }
 
   // denominator and numerator _must_ be raw, i.e. in the native representation
-  public constructor(baseCurrency: Currency, quoteCurrency: Currency, denominator: BigintIsh, numerator: BigintIsh) {
+  public constructor({ baseCurrency, quoteCurrency, denominator, numerator }: PriceConstructorParams) {
     super(numerator, denominator)
 
     this.baseCurrency = baseCurrency
@@ -48,13 +65,23 @@ export class Price extends Fraction {
   }
 
   public invert(): Price {
-    return new Price(this.quoteCurrency, this.baseCurrency, this.numerator, this.denominator)
+    return new Price({
+      baseCurrency: this.quoteCurrency,
+      quoteCurrency: this.baseCurrency,
+      denominator: this.numerator,
+      numerator: this.denominator
+    })
   }
 
   public multiply(other: Price): Price {
     invariant(currencyEquals(this.quoteCurrency, other.baseCurrency), 'TOKEN')
     const fraction = super.multiply(other)
-    return new Price(this.baseCurrency, other.quoteCurrency, fraction.denominator, fraction.numerator)
+    return new Price({
+      baseCurrency: this.baseCurrency,
+      quoteCurrency: other.quoteCurrency,
+      denominator: fraction.denominator,
+      numerator: fraction.numerator
+    })
   }
 
   // performs floor division on overflow
