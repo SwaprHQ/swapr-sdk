@@ -22,33 +22,13 @@ import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
 
 import { ORDER_APP_DATA, CHAIN_ID_TO_NETWORK, ORDER_PLACEHOLDER_ADDRESS } from './constants'
-
-export interface GnosisProtocolTradeConstructorParams {
-  inputAmount: CurrencyAmount
-  outputAmount: CurrencyAmount
-  maximumSlippage: Percent
-  tradeType: TradeType
-  chainId: ChainId
-  order: Order
-  fee?: Percent
-}
-
-export interface GnosisProtocolTradeBestTradeExactInParams {
-  currencyAmountIn: CurrencyAmount
-  currencyOut: Currency
-  maximumSlippage: Percent
-  receiver?: string
-}
-
-export interface GnosisProtocolTradeBestTradeExactOutParams {
-  currencyAmountOut: CurrencyAmount
-  currencyIn: Currency
-  maximumSlippage: Percent
-  receiver?: string
-}
-
-type SwapOrderParams = Required<Pick<Order, 'receiver'>>
-
+import {
+  GnosisProtocolTradeBestTradeExactInParams,
+  GnosisProtocolTradeBestTradeExactOutParams,
+  GnosisProtocolTradeConstructorParams,
+  GnosisProtocolTradeSwapOrderParams,
+  GnosisProtocolTradeOrderStatus
+} from './types'
 export class GnosisProtocolTrade extends Trade {
   /**
    * CowFi order details. The payload is signed and sent to CowFi API
@@ -279,7 +259,7 @@ export class GnosisProtocolTrade extends Trade {
    * @param options
    * @returns
    */
-  public swapOrder({ receiver }: SwapOrderParams): Order {
+  public swapOrder({ receiver }: GnosisProtocolTradeSwapOrderParams): Order {
     return {
       ...this.order,
       receiver
