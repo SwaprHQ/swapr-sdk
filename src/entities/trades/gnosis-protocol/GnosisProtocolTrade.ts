@@ -27,7 +27,7 @@ import {
   GnosisProtocolTradeBestTradeExactOutParams,
   GnosisProtocolTradeConstructorParams,
   GnosisProtocolTradeSwapOrderParams,
-  GnosisProtocolTradeOrderStatus
+  GnosisProtocolTradeOrderMetadata
 } from './types'
 export class GnosisProtocolTrade extends Trade {
   /**
@@ -120,6 +120,24 @@ export class GnosisProtocolTrade extends Trade {
    */
   public static getApi(chainId = ChainId.MAINNET) {
     return new GnosisProtcolApi(CHAIN_ID_TO_NETWORK[chainId as keyof typeof CHAIN_ID_TO_NETWORK], Environment.Prod)
+  }
+
+  /**
+   * Fetches the order metadata from the API
+   * @param orderId The order ID
+   * @param chainId The chainId, defaults to Mainnet (1)
+   */
+  public static async getOrderMetadata(
+    orderId: string,
+    chainId: ChainId = ChainId.MAINNET
+  ): Promise<GnosisProtocolTradeOrderMetadata> {
+    const response = await fetch(`${GnosisProtocolTrade.getApi(chainId).baseUrl}/api/v1/orders/${orderId}`)
+
+    if (!response.ok) {
+      throw new Error('GnosisProtocolTrade: Failed to fetch order metadata')
+    }
+
+    return response.json()
   }
 
   /**
@@ -316,6 +334,13 @@ export class GnosisProtocolTrade extends Trade {
     })
 
     return this.orderId
+  }
+
+  /**
+   * Fetches the order status from the API
+   */
+  public getOrderMetadata(): Promise<GnosisProtocolTradeOrderMetadata> {
+    return GnosisProtocolTrade.getOrderMetadata(this.orderId as string, this.chainId)
   }
 
   public swapTransaction(): Promise<UnsignedTransaction> {
