@@ -1,12 +1,12 @@
-import { UnsignedTransaction } from '@ethersproject/transactions'
-import { Breakdown } from '../../platforms-breakdown'
-import { ChainId, TradeType } from '../../../constants'
-import { CurrencyAmount } from '../../fractions/currencyAmount'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
+import type { Breakdown } from '../../platforms-breakdown'
+import type { ChainId, TradeType } from '../../../constants'
+import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Percent } from '../../fractions/percent'
-import { Price } from '../../fractions/price'
-import { RoutablePlatform } from '../routable-platform/routable-platform'
-import { Route } from '../../route'
-import { TradeOptions } from './trade-options'
+import type { Price } from '../../fractions/price'
+import type { RoutablePlatform } from '../routable-platform/routable-platform'
+import type { Route } from '../../route'
+import type { TradeOptions } from './trade-options'
 
 export type Details = Route | Breakdown | undefined
 
@@ -53,7 +53,7 @@ export abstract class Trade {
     priceImpact,
     chainId,
     platform,
-    fee = new Percent('0')
+    fee = new Percent('0'),
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type

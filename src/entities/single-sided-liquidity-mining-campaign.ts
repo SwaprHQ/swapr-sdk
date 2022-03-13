@@ -1,4 +1,4 @@
-import { PricedTokenAmount, Token, TokenAmount } from 'entities'
+import { PricedTokenAmount, Token, TokenAmount } from '../entities'
 import invariant from 'tiny-invariant'
 
 import { BigintIsh } from '../constants'
@@ -25,7 +25,7 @@ export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase
       staked,
       locked,
       stakingCap,
-      address
+      address,
     })
 
     this.stakeToken = stakeToken

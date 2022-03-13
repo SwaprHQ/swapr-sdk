@@ -1,5 +1,5 @@
 import { Provider as MulticallProvider } from 'ethers-multicall'
-import { UnsignedTransaction } from '@ethersproject/transactions'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
@@ -29,7 +29,7 @@ import {
   CurveTradeGetQuoteParams,
   CurveTradeQuote,
   CurveTradeBestTradeExactOutParams,
-  CurveTradeBestTradeExactInParams
+  CurveTradeBestTradeExactInParams,
 } from './types'
 
 /**
@@ -65,7 +65,7 @@ export class CurveTrade extends Trade {
     chainId,
     transactionRequest,
     approveAddress,
-    fee
+    fee,
   }: CurveTradeConstructorParams) {
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
     super({
@@ -77,13 +77,13 @@ export class CurveTrade extends Trade {
         baseCurrency: inputAmount.currency,
         quoteCurrency: outputAmount.currency,
         denominator: inputAmount.raw,
-        numerator: outputAmount.raw
+        numerator: outputAmount.raw,
       }),
       maximumSlippage,
       priceImpact: new Percent('0', '100'),
       chainId,
       platform: RoutablePlatform.CURVE,
-      fee
+      fee,
     })
     this.transactionRequest = transactionRequest
     this.approveAddress = approveAddress || (transactionRequest.to as string)
@@ -108,8 +108,9 @@ export class CurveTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -206,7 +207,7 @@ export class CurveTrade extends Trade {
             amountIn: amountInBN,
             tokenInAddress: tokenIn.address,
             tokenOutAddress: tokenOut.address,
-            chainId
+            chainId,
           })
         : undefined
 
@@ -223,7 +224,7 @@ export class CurveTrade extends Trade {
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
       routablePools = curvePools.filter(
-        pool => pool.swapAddress.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+        (pool) => pool.swapAddress.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
     }
 
@@ -235,7 +236,7 @@ export class CurveTrade extends Trade {
         amountIn: amountInBN.toString(),
         chainId: ChainId.MAINNET,
         tokenInAddress: tokenIn.address,
-        tokenOutAddress: tokenOut.address
+        tokenOutAddress: tokenOut.address,
       })
 
       // If the swap can be handled by the smart router, use it
@@ -244,10 +245,7 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           exchangeRoutingInfo.routes,
           exchangeRoutingInfo.indices,
-          exchangeRoutingInfo.expectedAmountOut
-            .mul(98)
-            .div(100)
-            .toString()
+          exchangeRoutingInfo.expectedAmountOut.mul(98).div(100).toString(),
         ]
 
         const curveRouterContract = getRouter()
@@ -255,7 +253,7 @@ export class CurveTrade extends Trade {
         debug(`Curve::GetQuote | Found a rout via Smart Router at ${curveRouterContract.address}`, params)
 
         const populatedTransaction = await curveRouterContract.populateTransaction.exchange(...params, {
-          value
+          value,
         })
 
         // Add 30% gas buffer
@@ -272,7 +270,7 @@ export class CurveTrade extends Trade {
           populatedTransaction,
           to: curveRouterContract.address,
           exchangeRateWithoutFee,
-          exchangeRate
+          exchangeRate,
         }
       }
     }
@@ -288,7 +286,7 @@ export class CurveTrade extends Trade {
     // Compile all the output
     // Using Multicall contract
     const estimatedAmountOutPerPool = await Promise.all(
-      routablePools.map(async pool => {
+      routablePools.map(async (pool) => {
         const poolContract = new Contract(pool.swapAddress, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -329,7 +327,7 @@ export class CurveTrade extends Trade {
     // Using the index
     const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
       estimatedAmountOut,
-      pool: routablePools[index]
+      pool: routablePools[index],
     }))
 
     // Sort the pool by best output
@@ -377,7 +375,7 @@ export class CurveTrade extends Trade {
       tokenInIndex.toString(),
       tokenOutIndex.toString(),
       amountInBN.toString(),
-      dyMinimumReceived.toString()
+      dyMinimumReceived.toString(),
     ]
 
     // If the pool has meta coins
@@ -398,7 +396,7 @@ export class CurveTrade extends Trade {
     debug(`Curve::GetQuote | Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
 
     const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
-      value
+      value,
     })
 
     return {
@@ -412,7 +410,7 @@ export class CurveTrade extends Trade {
       fee,
       to: poolContract.address,
       exchangeRateWithoutFee,
-      exchangeRate
+      exchangeRate,
     }
   }
 
@@ -440,7 +438,7 @@ export class CurveTrade extends Trade {
         {
           currencyAmountIn,
           currencyOut,
-          maximumSlippage
+          maximumSlippage,
         },
         provider
       )
@@ -456,7 +454,7 @@ export class CurveTrade extends Trade {
           transactionRequest: populatedTransaction,
           inputAmount: currencyAmountIn,
           outputAmount: estimatedAmountOut,
-          approveAddress: to
+          approveAddress: to,
         })
       }
     } catch (error) {
@@ -491,7 +489,7 @@ export class CurveTrade extends Trade {
         {
           currencyAmountIn: currencyAmountOut,
           currencyOut: currencyIn,
-          maximumSlippage
+          maximumSlippage,
         },
         provider
       )) as CurveTradeQuote
@@ -510,7 +508,7 @@ export class CurveTrade extends Trade {
         {
           currencyAmountIn,
           currencyOut,
-          maximumSlippage
+          maximumSlippage,
         },
         provider
       )
@@ -526,7 +524,7 @@ export class CurveTrade extends Trade {
           transactionRequest: populatedTransaction,
           inputAmount: currencyAmountIn,
           outputAmount: estimatedAmountOut,
-          approveAddress: to
+          approveAddress: to,
         })
       }
     } catch (error) {
@@ -544,7 +542,7 @@ export class CurveTrade extends Trade {
     return {
       ...this.transactionRequest,
       gasLimit: this.transactionRequest.gasLimit ? BigNumber.from(this.transactionRequest.gasLimit) : undefined,
-      value: this.transactionRequest.value ? this.transactionRequest.value : BigNumber.from(0)
+      value: this.transactionRequest.value ? this.transactionRequest.value : BigNumber.from(0),
     }
   }
 }
