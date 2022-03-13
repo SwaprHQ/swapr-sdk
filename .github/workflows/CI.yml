@@ -1,43 +1,31 @@
 name: CI
-env:
-  CI: true
 
 on:
-  pull_request:
-    branches:
-      - v2
   push:
     branches:
-      - v2
+      - develop
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  test:
+  CI:
+    name: Lint, Build, and Test
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
-        node: ['10.x', '12.x']
-        os: [ubuntu-latest, macOS-latest]
-
-    runs-on: ${{ matrix.os }}
+        node_version: [16]
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
-
-      - run: npm install -g yarn
-
-      - id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v1
-        with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ matrix.os }}-yarn-
-
-      - run: yarn
-
-      - run: yarn lint
-      - run: yarn build
-      - run: yarn test
+          node-version: '16'
+      - name: Install
+        run: yarn install
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
+      - name: Build
+        run: yarn run build
