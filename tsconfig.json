@@ -1,12 +1,12 @@
 {
-  "include": ["src", "test"],
   "compilerOptions": {
-    "target": "es2018",
-    "module": "esnext",
+    "target": "ES2015",
+    "module": "commonjs",
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -18,12 +18,15 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": false,
     "moduleResolution": "node",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {
       "*": ["src/*", "node_modules/*"]
     },
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"]
 }
