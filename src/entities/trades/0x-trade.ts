@@ -9,7 +9,7 @@ import { Price } from '../fractions/price'
 import { TokenAmount } from '../fractions/tokenAmount'
 import { currencyEquals, Token } from '../token'
 import { Trade } from './interfaces/trade'
-import { UnsignedTransaction } from '@ethersproject/transactions'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { Breakdown, Platform } from '../platforms-breakdown'
 import { RoutablePlatform } from './routable-platform/routable-platform'
 import fetch from 'node-fetch'
@@ -47,23 +47,23 @@ const CODE_TO_PLATFORM_NAME: { [apiName: string]: string } = {
   Balancer_V2: 'Balancer v2',
   DODO_V2: 'Dodo v2',
   Uniswap_V3: 'Uniswap v3',
-  PancakeSwap_V2: 'PancakeSwap v2' // shouldn't be used since it's on BSC, but added to be extra sure
+  PancakeSwap_V2: 'PancakeSwap v2', // shouldn't be used since it's on BSC, but added to be extra sure
 }
 
 const decodePlatformName = (apiName: string): string => CODE_TO_PLATFORM_NAME[apiName] || apiName
 
 const platformsFromSources = (sources: ApiSource[]): Platform[] => {
   return sources
-    .map(source => {
+    .map((source) => {
       const proportion = new Decimal(source.proportion)
       const denominator = new Decimal('10').pow(proportion.decimalPlaces())
       const numerator = proportion.times(denominator)
       return {
         name: decodePlatformName(source.name),
-        percentage: new Percent(numerator.toString(), denominator.toString())
+        percentage: new Percent(numerator.toString(), denominator.toString()),
       }
     })
-    .filter(platform => platform.percentage.greaterThan('0'))
+    .filter((platform) => platform.percentage.greaterThan('0'))
     .sort((a, b) => (a.percentage.greaterThan(b.percentage) ? -1 : a.percentage.equalTo(b.percentage) ? 0 : 1))
 }
 
@@ -108,7 +108,7 @@ export class ZeroXTrade extends Trade {
     tradeType,
     to,
     callData,
-    value
+    value,
   }: ZeroXTradeConstructorParams) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
     const chainId = breakdown.chainId
@@ -121,12 +121,12 @@ export class ZeroXTrade extends Trade {
         baseCurrency: input.currency,
         quoteCurrency: output.currency,
         denominator: input.raw,
-        numerator: output.raw
+        numerator: output.raw,
       }),
       maximumSlippage,
       priceImpact: new Percent('0', '100'),
       chainId,
-      platform: RoutablePlatform.ZEROX
+      platform: RoutablePlatform.ZEROX,
     })
     this.to = to
     this.callData = callData
@@ -151,8 +151,9 @@ export class ZeroXTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -194,7 +195,7 @@ export class ZeroXTrade extends Trade {
           baseCurrency: tokenIn,
           quoteCurrency: tokenOut,
           denominator: amountIn.raw,
-          numerator: json.buyAmount
+          numerator: json.buyAmount,
         })
       )
       bestTrade = new ZeroXTrade({
@@ -207,7 +208,7 @@ export class ZeroXTrade extends Trade {
         tradeType: TradeType.EXACT_INPUT,
         to: json.to,
         callData: json.data,
-        value: json.value
+        value: json.value,
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
@@ -249,7 +250,7 @@ export class ZeroXTrade extends Trade {
           baseCurrency: tokenOut,
           quoteCurrency: tokenIn,
           denominator: amountOut.raw,
-          numerator: json.buyAmount
+          numerator: json.buyAmount,
         })
       )
       bestTrade = new ZeroXTrade({
@@ -262,7 +263,7 @@ export class ZeroXTrade extends Trade {
         tradeType: TradeType.EXACT_OUTPUT,
         to: json.to,
         callData: json.data,
-        value: json.value
+        value: json.value,
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
@@ -275,7 +276,7 @@ export class ZeroXTrade extends Trade {
     return {
       to: this.to,
       data: this.callData,
-      value: BigNumber.from(this.value)
+      value: BigNumber.from(this.value),
     }
   }
 }

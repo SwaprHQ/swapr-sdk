@@ -1,4 +1,4 @@
-import { Pair, PricedTokenAmount, TokenAmount } from 'entities'
+import { Pair, PricedTokenAmount, TokenAmount } from '../entities'
 import invariant from 'tiny-invariant'
 import { BigintIsh } from '../constants'
 
@@ -26,7 +26,7 @@ export class LiquidityMiningCampaign extends DistributionCampaignBase {
     staked,
     locked,
     stakingCap,
-    address
+    address,
   }: LiquidityMiningCampaignConstructorParams) {
     invariant(staked.token.equals(targetedPair.liquidityToken), 'STAKED_LP_TOKEN')
 
@@ -37,7 +37,7 @@ export class LiquidityMiningCampaign extends DistributionCampaignBase {
       staked,
       locked,
       stakingCap,
-      address
+      address,
     })
 
     this.targetedPair = targetedPair
