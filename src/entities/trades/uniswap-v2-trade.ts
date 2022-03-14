@@ -245,7 +245,7 @@ export class UniswapV2Trade extends Trade {
 
       let amountOut: TokenAmount
       try {
-        ;[amountOut] = pair.getOutputAmount(amountIn)
+        amountOut = pair.getOutputAmount(amountIn)[0]
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -332,7 +332,7 @@ export class UniswapV2Trade extends Trade {
 
       let amountIn: TokenAmount
       try {
-        ;[amountIn] = pair.getInputAmount(amountOut)
+        amountIn = pair.getInputAmount(amountOut)[0]
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
