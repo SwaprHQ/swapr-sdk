@@ -1,7 +1,7 @@
-import { Api as GnosisProtcolApi, Environment } from '@gnosis.pm/gp-v2-contracts/lib/esm/api'
+import { Api as GnosisProtcolApi, Environment } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/api'
 import { GPv2VaultRelayer as GPv2VaultRelayerList } from '@gnosis.pm/gp-v2-contracts/networks.json'
-import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
-import { SigningScheme } from '@gnosis.pm/gp-v2-contracts/lib/esm/sign'
+import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
+import { SigningScheme } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { Signer } from '@ethersproject/abstract-signer'
 import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
@@ -27,7 +27,7 @@ import {
   GnosisProtocolTradeBestTradeExactOutParams,
   GnosisProtocolTradeConstructorParams,
   GnosisProtocolTradeSwapOrderParams,
-  GnosisProtocolTradeOrderMetadata
+  GnosisProtocolTradeOrderMetadata,
 } from './types'
 export class GnosisProtocolTrade extends Trade {
   /**
@@ -60,7 +60,7 @@ export class GnosisProtocolTrade extends Trade {
     outputAmount,
     tradeType,
     order,
-    fee
+    fee,
   }: GnosisProtocolTradeConstructorParams) {
     console.log(inputAmount.currency, outputAmount.currency)
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
@@ -73,16 +73,16 @@ export class GnosisProtocolTrade extends Trade {
         baseCurrency: inputAmount.currency,
         quoteCurrency: outputAmount.currency,
         denominator: inputAmount.raw,
-        numerator: outputAmount.raw
+        numerator: outputAmount.raw,
       }),
       maximumSlippage,
       chainId,
       priceImpact: new Percent('0'),
       platform: RoutablePlatform.GNOSIS_PROTOCOL,
-      fee
+      fee,
     })
     this.order = order
-    this.approveAddress = GPv2VaultRelayerList[(chainId as unknown) as keyof typeof GPv2VaultRelayerList].address
+    this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -104,8 +104,9 @@ export class GnosisProtocolTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -155,7 +156,7 @@ export class GnosisProtocolTrade extends Trade {
     currencyAmountIn,
     currencyOut,
     maximumSlippage,
-    receiver = ORDER_PLACEHOLDER_ADDRESS
+    receiver = ORDER_PLACEHOLDER_ADDRESS,
   }: GnosisProtocolTradeBestTradeExactInParams): Promise<GnosisProtocolTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
@@ -178,10 +179,8 @@ export class GnosisProtocolTrade extends Trade {
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
         receiver,
         appData: ORDER_APP_DATA,
-        validTo: dayjs()
-          .add(1, 'h')
-          .unix(), // Order expires in 1 hour
-        partiallyFillable: false
+        validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
+        partiallyFillable: false,
       })
 
       // calculate the fee from the trade
@@ -199,7 +198,7 @@ export class GnosisProtocolTrade extends Trade {
           ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
           : new TokenAmount(tokenOut, quote.buyAmount.toString()),
         fee,
-        order: quote
+        order: quote,
       })
     } catch (error) {
       console.error('could not fetch Cow trade', error)
@@ -221,7 +220,7 @@ export class GnosisProtocolTrade extends Trade {
     currencyAmountOut,
     currencyIn,
     maximumSlippage,
-    receiver = ORDER_PLACEHOLDER_ADDRESS
+    receiver = ORDER_PLACEHOLDER_ADDRESS,
   }: GnosisProtocolTradeBestTradeExactOutParams): Promise<GnosisProtocolTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
@@ -243,10 +242,8 @@ export class GnosisProtocolTrade extends Trade {
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
         receiver,
         appData: ORDER_APP_DATA,
-        validTo: dayjs()
-          .add(1, 'h')
-          .unix(), // Order expires in 1 hour
-        partiallyFillable: false
+        validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
+        partiallyFillable: false,
       })
 
       // calculate the fee from the trade
@@ -264,7 +261,7 @@ export class GnosisProtocolTrade extends Trade {
           ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
           : new TokenAmount(tokenOut, quote.buyAmount.toString()),
         fee,
-        order: quote
+        order: quote,
       })
     } catch (error) {
       console.error('could not fetch Cow trade', error)
@@ -280,7 +277,7 @@ export class GnosisProtocolTrade extends Trade {
   public swapOrder({ receiver }: GnosisProtocolTradeSwapOrderParams): Order {
     return {
       ...this.order,
-      receiver
+      receiver,
     }
   }
 
@@ -322,15 +319,15 @@ export class GnosisProtocolTrade extends Trade {
     }
 
     console.log({
-      orderSignatureInfo: this.orderSignatureInfo
+      orderSignatureInfo: this.orderSignatureInfo,
     })
 
     this.orderId = await GnosisProtocolTrade.getApi(this.chainId).placeOrder({
       order: this.order,
       signature: {
         data: this.orderSignatureInfo.signature as any,
-        scheme: this.orderSignatureInfo.signingScheme
-      }
+        scheme: this.orderSignatureInfo.signingScheme,
+      },
     })
 
     return this.orderId

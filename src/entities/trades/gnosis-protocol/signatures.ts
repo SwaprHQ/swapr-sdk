@@ -1,12 +1,12 @@
-import { TypedDataV3Signer, IntChainIdTypedDataV4Signer } from '@gnosis.pm/gp-v2-contracts/lib/esm/signers'
-import { Order, OrderCancellation as OrderCancellationGp } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
+import { TypedDataV3Signer, IntChainIdTypedDataV4Signer } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/signers'
+import { Order, OrderCancellation as OrderCancellationGp } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
 import {
   Signature,
   SigningScheme,
   EcdsaSignature,
   signOrder as signOrderGp,
-  signOrderCancellation as signOrderCancellationGp
-} from '@gnosis.pm/gp-v2-contracts/lib/esm/sign'
+  signOrderCancellation as signOrderCancellationGp,
+} from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
 import { Signer } from '@ethersproject/abstract-signer'
 import { ChainId } from '../../../constants'
 import { getDomain } from './utils'
@@ -63,7 +63,7 @@ const mapSigningSchema: Map<SigningScheme, SchemaInfo> = new Map([
   [SigningScheme.EIP712, { libraryValue: 0, apiValue: 'eip712' }],
   [SigningScheme.ETHSIGN, { libraryValue: 1, apiValue: 'ethsign' }],
   [SigningScheme.EIP1271, { libraryValue: 2, apiValue: 'eip1271' }],
-  [SigningScheme.PRESIGN, { libraryValue: 3, apiValue: 'presign' }]
+  [SigningScheme.PRESIGN, { libraryValue: 3, apiValue: 'presign' }],
 ])
 
 function _getSigningSchemeInfo(ecdaSigningScheme: SigningScheme): SchemaInfo {
@@ -88,7 +88,7 @@ async function _signOrder(params: SignOrderParams): Promise<Signature> {
     order,
     signer,
     signingScheme,
-    signingSchemeLibValue: getSigningSchemeLibValue(signingScheme)
+    signingSchemeLibValue: getSigningSchemeLibValue(signingScheme),
   })
 
   return signOrderGp(domain, order, signer as any, getSigningSchemeLibValue(signingScheme))
@@ -102,7 +102,7 @@ async function _signOrderCancellation(params: SingOrderCancellationParams): Prom
   console.log('[utils:signature] signOrderCancellation', {
     domain,
     orderId,
-    signer
+    signer,
   })
 
   return signOrderCancellationGp(domain, orderId, signer as any, getSigningSchemeLibValue(signingScheme))

@@ -1,9 +1,9 @@
-import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
-import { CurrencyAmount } from '../../fractions/currencyAmount'
-import { ChainId, TradeType } from '../../../constants'
-import { Percent } from '../../fractions/percent'
-import { SigningSchemeValue } from './signatures'
-import { Currency } from '../../currency'
+import type { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
+import type { CurrencyAmount } from '../../fractions/currencyAmount'
+import type { ChainId, TradeType } from '../../../constants'
+import type { Percent } from '../../fractions/percent'
+import type { SigningSchemeValue } from './signatures'
+import type { Currency } from '../../currency'
 
 export enum GnosisProtocolTradeOrderStatus {
   UNKNOWN = 'unknown',
@@ -11,7 +11,7 @@ export enum GnosisProtocolTradeOrderStatus {
   PRESIGNATURE_PENDING = 'presignaturePending',
   FULFILLED = 'fulfilled',
   EXPIRED = 'expired',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface GnosisProtocolTradeConstructorParams {
@@ -47,7 +47,7 @@ export enum GnosisProtocolTradeOrderOrderStatus {
   PRESIGNATURE_PENDING = 'presignaturePending',
   FULFILLED = 'fulfilled',
   EXPIRED = 'expired',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export type GnosisProtocolTradeApiOrderOrderStatus =
