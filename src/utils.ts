@@ -86,4 +86,12 @@ export function sortedInsert<T>(items: T[], add: T, maxSize: number, comparator:
  * @param data
  * @returns void
  */
-export const debug = (...data: any[]) => (window as any).__SWAPR_SDK_DEBUG__ === true && console.debug(data)
+export function debug(...data: any[]) {
+  const isBrowser = typeof window !== 'undefined'
+
+  const shouldDebug = isBrowser
+    ? (window as any).__SWAPR_SDK_DEBUG__ === true
+    : process.env.__SWAPR_SDK_DEBUG__ != undefined
+
+  shouldDebug && console.debug(data)
+}

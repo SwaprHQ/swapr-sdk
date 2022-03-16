@@ -31,13 +31,13 @@ export class Price extends Fraction {
               baseCurrency: pair.reserve0.currency,
               quoteCurrency: pair.reserve1.currency,
               denominator: pair.reserve0.raw,
-              numerator: pair.reserve1.raw
+              numerator: pair.reserve1.raw,
             })
           : new Price({
               baseCurrency: pair.reserve1.currency,
               quoteCurrency: pair.reserve0.currency,
               denominator: pair.reserve1.raw,
-              numerator: pair.reserve0.raw
+              numerator: pair.reserve0.raw,
             })
       )
     }
@@ -69,7 +69,7 @@ export class Price extends Fraction {
       baseCurrency: this.quoteCurrency,
       quoteCurrency: this.baseCurrency,
       denominator: this.numerator,
-      numerator: this.denominator
+      numerator: this.denominator,
     })
   }
 
@@ -80,7 +80,7 @@ export class Price extends Fraction {
       baseCurrency: this.baseCurrency,
       quoteCurrency: other.quoteCurrency,
       denominator: fraction.denominator,
-      numerator: fraction.numerator
+      numerator: fraction.numerator,
     })
   }
 
@@ -93,11 +93,11 @@ export class Price extends Fraction {
     return CurrencyAmount.nativeCurrency(super.multiply(currencyAmount.raw).quotient, ChainId.MAINNET)
   }
 
-  public toSignificant(significantDigits: number = 6, format?: object, rounding?: Rounding): string {
+  public toSignificant(significantDigits = 6, format?: object, rounding?: Rounding): string {
     return this.adjusted.toSignificant(significantDigits, format, rounding)
   }
 
-  public toFixed(decimalPlaces: number = 4, format?: object, rounding?: Rounding): string {
+  public toFixed(decimalPlaces = 4, format?: object, rounding?: Rounding): string {
     return this.adjusted.toFixed(decimalPlaces, format, rounding)
   }
 }

@@ -1,4 +1,3 @@
-import { Provider as MulticallProvider } from 'ethers-multicall'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
@@ -163,10 +162,6 @@ export class CurveTrade extends Trade {
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     provider = provider || getProvider(chainId)
 
-    // Use multicall provider
-    const multicallProvider = new MulticallProvider(provider as any)
-    await multicallProvider.init()
-
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
     // Get all Curve pools for the chain
@@ -184,7 +179,7 @@ export class CurveTrade extends Trade {
         : currencyAmountIn.currency === nativeCurrency
 
     // Baisc trade information
-    let amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
+    const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
     // Determine if user has sent ETH
     if (etherIn) {
@@ -217,8 +212,8 @@ export class CurveTrade extends Trade {
     let fee = new Percent('4', '10000')
 
     // Exchange fee
-    let exchangeRateWithoutFee = 1
-    let exchangeRate = 1 - FEE_DECIMAL
+    const exchangeRateWithoutFee = 1
+    const exchangeRate = 1 - FEE_DECIMAL
 
     // If a pool is found
     // Ignore the manual off-chain search
@@ -351,7 +346,9 @@ export class CurveTrade extends Trade {
     try {
       const feeFromContract = (await poolContract.fee()) as BigNumber
       fee = new Percent(feeFromContract.toString(), '10000000000')
-    } catch (e) {}
+    } catch (e) {
+      debug(e)
+    }
 
     // Map token address to index
     const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -371,7 +368,7 @@ export class CurveTrade extends Trade {
     // Reduce by 1% to cover fees
     const dyMinimumReceived = estimatedAmountOut.mul(99).div(100)
 
-    let exchangeParams: (string | string[] | boolean | boolean[])[] = [
+    const exchangeParams: (string | string[] | boolean | boolean[])[] = [
       tokenInIndex.toString(),
       tokenOutIndex.toString(),
       amountInBN.toString(),

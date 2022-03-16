@@ -10,10 +10,9 @@ import {
   MINIMUM_LIQUIDITY,
   ZERO,
   ONE,
-  _30,
   _10000,
   defaultSwapFee,
-  defaultProtocolFeeDenominator
+  defaultProtocolFeeDenominator,
 } from '../constants'
 import { sqrt, parseBigintIsh } from '../utils'
 import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
@@ -27,7 +26,7 @@ const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.RINKEBY]: {},
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
-  [ChainId.XDAI]: {}
+  [ChainId.XDAI]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {
@@ -36,23 +35,23 @@ let PAIR_ADDRESS_CACHE: {
   }
 } = {
   [UniswapV2RoutablePlatform.SWAPR.name]: {
-    ...INITIAL_CACHE_STATE
+    ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.SUSHISWAP.name]: {
-    ...INITIAL_CACHE_STATE
+    ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.UNISWAP.name]: {
-    ...INITIAL_CACHE_STATE
+    ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.HONEYSWAP.name]: {
-    ...INITIAL_CACHE_STATE
+    ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.BAOSWAP.name]: {
-    ...INITIAL_CACHE_STATE
+    ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.LEVINSWAP.name]: {
-    ...INITIAL_CACHE_STATE
-  }
+    ...INITIAL_CACHE_STATE,
+  },
 }
 
 export class Pair {
@@ -96,10 +95,10 @@ export class Pair {
                 platform.factoryAddress[chainId] as string,
                 keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
                 platform.initCodeHash
-              )
-            }
-          }
-        }
+              ),
+            },
+          },
+        },
       }
     }
     return PAIR_ADDRESS_CACHE[platform.name][chainId][tokens[0].address][tokens[1].address]
@@ -143,7 +142,7 @@ export class Pair {
       baseCurrency: this.token0,
       quoteCurrency: this.token1,
       denominator: this.tokenAmounts[0].raw,
-      numerator: this.tokenAmounts[1].raw
+      numerator: this.tokenAmounts[1].raw,
     })
   }
 
@@ -155,7 +154,7 @@ export class Pair {
       baseCurrency: this.token1,
       quoteCurrency: this.token0,
       denominator: this.tokenAmounts[1].raw,
-      numerator: this.tokenAmounts[0].raw
+      numerator: this.tokenAmounts[0].raw,
     })
   }
 
@@ -220,7 +219,7 @@ export class Pair {
         outputReserve.subtract(outputAmount),
         this.swapFee,
         this.protocolFeeDenominator
-      )
+      ),
     ]
   }
 
@@ -252,7 +251,7 @@ export class Pair {
         outputReserve.subtract(outputAmount),
         this.swapFee,
         this.protocolFeeDenominator
-      )
+      ),
     ]
   }
 
@@ -285,7 +284,7 @@ export class Pair {
     token: Token,
     totalSupply: TokenAmount,
     liquidity: TokenAmount,
-    feeOn: boolean = false,
+    feeOn = false,
     kLast?: BigintIsh
   ): TokenAmount {
     invariant(this.involvesToken(token), 'TOKEN')
