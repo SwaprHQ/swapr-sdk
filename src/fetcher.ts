@@ -18,7 +18,9 @@ export abstract class Fetcher {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() {
+    // do nothing.
+  }
 
   /**
    * Fetches information about a pair and constructs a pair from the given two tokens.
@@ -73,7 +75,7 @@ export abstract class Fetcher {
   }> {
     return {
       fee: JSBI.BigInt(await new Contract(liquidityToken.address, IDXswapPair.abi, provider).swapFee()),
-      owner: await new Contract(FACTORY_ADDRESS[liquidityToken.chainId], IDXswapFactory.abi, provider).feeToSetter()
+      owner: await new Contract(FACTORY_ADDRESS[liquidityToken.chainId], IDXswapFactory.abi, provider).feeToSetter(),
     }
   }
 
@@ -94,25 +96,25 @@ export abstract class Fetcher {
     const multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider)
     const liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider)
-    let calls = []
+    const calls = []
     calls.push({
       address: factoryContract.address,
-      callData: factoryContract.interface.encodeFunctionData(factoryContract.interface.getFunction('feeToSetter()'))
+      callData: factoryContract.interface.encodeFunctionData(factoryContract.interface.getFunction('feeToSetter()')),
     })
     for (let tokenPairsIndex = 0; tokenPairsIndex < liquidityTokens.length; tokenPairsIndex++) {
       calls.push({
         address: liquidityTokens[tokenPairsIndex].address,
         callData: liquidityTokenContract.interface.encodeFunctionData(
           liquidityTokenContract.interface.getFunction('swapFee()')
-        )
+        ),
       })
     }
-    const result = await multicall.aggregate(calls.map(call => [call.address, call.callData]))
+    const result = await multicall.aggregate(calls.map((call) => [call.address, call.callData]))
     const owner = factoryContract.interface.decodeFunctionResult(
       factoryContract.interface.getFunction('feeToSetter()'),
       result.returnData[0]
     )[0]
-    let fees = []
+    const fees = []
     for (let resultIndex = 1; resultIndex < result.returnData.length; resultIndex++) {
       fees.push({
         fee: JSBI.BigInt(
@@ -121,7 +123,7 @@ export abstract class Fetcher {
             result.returnData[resultIndex]
           )[0]
         ),
-        owner
+        owner,
       })
     }
     return fees
@@ -151,7 +153,7 @@ export abstract class Fetcher {
     const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)
     const allPairsLength = await factoryContract.allPairsLength()
-    let allSwapPairs: {
+    const allSwapPairs: {
       [key: string]: {
         fee: BigintIsh
         owner: string
@@ -159,26 +161,26 @@ export abstract class Fetcher {
     } = {}
 
     // Get first token pairs from cache
-    let tokenPairsCache = Object.keys(swapFeesCache)
-    let tokenPairsToFetch: Token[] = []
+    const tokenPairsCache = Object.keys(swapFeesCache)
+    const tokenPairsToFetch: Token[] = []
     for (let tokenPaisCacheIndex = 0; tokenPaisCacheIndex < tokenPairsCache.length; tokenPaisCacheIndex++) {
       allSwapPairs[tokenPairsCache[tokenPaisCacheIndex]] = {
         fee: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].fee,
-        owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner
+        owner: swapFeesCache[tokenPairsCache[tokenPaisCacheIndex]].owner,
       }
     }
 
     // Get rest of the token pairs that are not cached
-    let calls = []
+    const calls = []
     for (let pairIndex = tokenPairsCache.length; pairIndex < allPairsLength; pairIndex++)
       calls.push({
         address: factoryContract.address,
         callData: factoryContract.interface.encodeFunctionData(
           factoryContract.interface.getFunction('allPairs(uint)'),
           [pairIndex]
-        )
+        ),
       })
-    const result = await multicall.aggregate(calls.map(call => [call.address, call.callData]))
+    const result = await multicall.aggregate(calls.map((call) => [call.address, call.callData]))
     for (let resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
       const tokenPairAddress = factoryContract.interface.decodeFunctionResult(
         factoryContract.interface.getFunction('allPairs(uint256)'),

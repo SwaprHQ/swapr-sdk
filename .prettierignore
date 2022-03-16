@@ -1,0 +1,9 @@
+# generated stuff
+build
+dist
+.git
+.github
+src/**/*.d.ts
+src/abis
+
+tsconfig.json

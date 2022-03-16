@@ -1,8 +1,8 @@
-import { UnsignedTransaction } from '@ethersproject/transactions'
-import { CurrencyAmount } from '../../fractions/currencyAmount'
-import { ChainId, TradeType } from '../../../constants'
-import { Percent } from '../../fractions/percent'
-import { Currency } from '../../currency'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
+import type { CurrencyAmount } from '../../fractions/currencyAmount'
+import type { ChainId, TradeType } from '../../../constants'
+import type { Percent } from '../../fractions/percent'
+import type { Currency } from '../../currency'
 
 export interface CurveTradeConstructorParams {
   inputAmount: CurrencyAmount

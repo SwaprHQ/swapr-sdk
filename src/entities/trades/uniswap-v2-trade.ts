@@ -14,7 +14,7 @@ import { currencyEquals } from '../token'
 import { Trade } from './interfaces/trade'
 import ROUTER_ABI from '../../abis/router.json'
 import { TradeOptions } from './interfaces/trade-options'
-import { UnsignedTransaction } from '@ethersproject/transactions'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { Contract } from '@ethersproject/contracts'
 import { UniswapV2RoutablePlatform } from './routable-platform/uniswap-v2-routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from './utils'
@@ -167,12 +167,12 @@ export class UniswapV2Trade extends Trade {
         baseCurrency: inputAmount.currency,
         quoteCurrency: outputAmount.currency,
         denominator: inputAmount.raw,
-        numerator: outputAmount.raw
+        numerator: outputAmount.raw,
       }),
       maximumSlippage,
       priceImpact: computePriceImpact(route.midPrice, inputAmount, outputAmount),
       chainId: route.chainId,
-      platform: route.pairs[0].platform
+      platform: route.pairs[0].platform,
     })
   }
 
@@ -194,8 +194,9 @@ export class UniswapV2Trade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -225,7 +226,7 @@ export class UniswapV2Trade extends Trade {
     // used in recursion.
     currentPairs = [],
     originalAmountIn = currencyAmountIn,
-    bestTrades = []
+    bestTrades = [],
   }: UniswapV2TradeBestTradeExactInParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
@@ -244,7 +245,7 @@ export class UniswapV2Trade extends Trade {
 
       let amountOut: TokenAmount
       try {
-        ;[amountOut] = pair.getOutputAmount(amountIn)
+        amountOut = pair.getOutputAmount(amountIn)[0]
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -276,11 +277,11 @@ export class UniswapV2Trade extends Trade {
           pairs: pairsExcludingThisPair,
           maxHops: {
             maxNumResults,
-            maxHops: maxHops - 1
+            maxHops: maxHops - 1,
           },
           currentPairs: [...currentPairs, pair],
           originalAmountIn,
-          bestTrades
+          bestTrades,
         })
       }
     }
@@ -312,7 +313,7 @@ export class UniswapV2Trade extends Trade {
     // used in recursion.
     currentPairs = [],
     originalAmountOut = currencyAmountOut,
-    bestTrades = []
+    bestTrades = [],
   }: UniswapV2TradeBestTradeExactOutParams): UniswapV2Trade | undefined {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
@@ -331,7 +332,7 @@ export class UniswapV2Trade extends Trade {
 
       let amountIn: TokenAmount
       try {
-        ;[amountIn] = pair.getInputAmount(amountOut)
+        amountIn = pair.getInputAmount(amountOut)[0]
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
@@ -363,11 +364,11 @@ export class UniswapV2Trade extends Trade {
           pairs: pairsExcludingThisPair,
           maxHops: {
             maxNumResults,
-            maxHops: maxHops - 1
+            maxHops: maxHops - 1,
           },
           currentPairs: [pair, ...currentPairs],
           originalAmountOut,
-          bestTrades
+          bestTrades,
         })
       }
     }
@@ -388,7 +389,7 @@ export class UniswapV2Trade extends Trade {
     const to: string = validateAndParseAddress(options.recipient)
     const amountIn: string = toHex(this.maximumAmountIn())
     const amountOut: string = toHex(this.minimumAmountOut())
-    const path: string[] = this.route.path.map(token => token.address)
+    const path: string[] = this.route.path.map((token) => token.address)
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
 
     let methodName: string

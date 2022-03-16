@@ -69,12 +69,12 @@ describe('fees', () => {
       const fees = await Fetcher.fetchAllSwapFees(ChainId.RINKEBY, {
         [WETH_WEENUS_RINKEBY.liquidityToken.address]: {
           fee: JSBI.BigInt(10),
-          owner: ZERO_ADDRESS
+          owner: ZERO_ADDRESS,
         },
         [WETH_XEENUS_RINKEBY.liquidityToken.address]: {
           fee: JSBI.BigInt(15),
-          owner: ZERO_ADDRESS
-        }
+          owner: ZERO_ADDRESS,
+        },
       })
       expect(fees[WETH_WEENUS_RINKEBY.liquidityToken.address].fee).toEqual(JSBI.BigInt(10))
       expect(fees[WETH_XEENUS_RINKEBY.liquidityToken.address].fee).toEqual(JSBI.BigInt(15))
@@ -85,7 +85,6 @@ describe('fees', () => {
   describe('fetchProtocolFee', () => {
     it('Get protocol fee on rinkeby', async () => {
       const protocolFee = await Fetcher.fetchProtocolFee(ChainId.RINKEBY)
-      expect(protocolFee.feeDenominator).toEqual(5)
       expect(protocolFee.feeReceiver).toEqual(getAddress(rinkeby.feeReceiver))
     })
   })
