@@ -61,7 +61,6 @@ export class GnosisProtocolTrade extends Trade {
     order,
     fee,
   }: GnosisProtocolTradeConstructorParams) {
-    console.log(inputAmount.currency, outputAmount.currency)
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
     super({
       details: undefined,
@@ -261,7 +260,7 @@ export class GnosisProtocolTrade extends Trade {
         order: quote,
       })
     } catch (error) {
-      console.error('could not fetch Cow trade', error)
+      console.error('could not fetch COW trade', error)
       return
     }
   }
