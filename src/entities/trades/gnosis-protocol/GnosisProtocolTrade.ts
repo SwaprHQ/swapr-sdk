@@ -2,7 +2,6 @@ import { Api as GnosisProtcolApi, Environment } from '@gnosis.pm/gp-v2-contracts
 import { GPv2VaultRelayer as GPv2VaultRelayerList } from '@gnosis.pm/gp-v2-contracts/networks.json'
 import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
 import { SigningScheme } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
-import { UnsignedTransaction } from '@ethersproject/transactions'
 import { Signer } from '@ethersproject/abstract-signer'
 import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
 import { parseUnits } from '@ethersproject/units'
@@ -114,7 +113,7 @@ export class GnosisProtocolTrade extends Trade {
   }
 
   /**
-   * Returns the Gnosis Protocol API, with access to low level methods a quote from the API
+   * Returns the Gnosis Protocol API, with access to low level methods.
    * @param quote Quote query params
    * @param chainId The chainId, defaults to Mainnet (1)
    * @returns
@@ -142,8 +141,7 @@ export class GnosisProtocolTrade extends Trade {
   }
 
   /**
-   * Computes and returns the best trade from Curve pools
-   * by comparing all the Curve pools on target chain
+   * Computes and returns the best trade from Gnosis Protocol API
    * @param {object} obj options
    * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
    * @param {Currency} obj.currencyOut the currency out - buy token
@@ -207,8 +205,7 @@ export class GnosisProtocolTrade extends Trade {
   }
 
   /**
-   * Computes and returns the best trade from Curve pools
-   * by comparing all the Curve pools on target chain
+   * Computes and returns the best trade from Gnosis Protocol API
    * @param {object} obj options
    * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
    * @param {Currency} obj.currencyOut the currency out - buy token
@@ -293,7 +290,7 @@ export class GnosisProtocolTrade extends Trade {
     }
 
     // assign signature info and return instance
-    this.orderSignatureInfo = await signOrderGP({ ...this.order, receiver }, this.chainId, signer as any)
+    this.orderSignatureInfo = await signOrderGP({ ...this.order, receiver }, this.chainId, signer)
     return this
   }
 
@@ -338,9 +335,5 @@ export class GnosisProtocolTrade extends Trade {
    */
   public getOrderMetadata(): Promise<GnosisProtocolTradeOrderMetadata> {
     return GnosisProtocolTrade.getOrderMetadata(this.orderId as string, this.chainId)
-  }
-
-  public swapTransaction(): Promise<UnsignedTransaction> {
-    return {} as any
   }
 }

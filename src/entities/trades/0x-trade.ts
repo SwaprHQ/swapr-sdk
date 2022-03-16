@@ -8,7 +8,7 @@ import { Percent } from '../fractions/percent'
 import { Price } from '../fractions/price'
 import { TokenAmount } from '../fractions/tokenAmount'
 import { currencyEquals, Token } from '../token'
-import { Trade } from './interfaces/trade'
+import { TradeWithSwapTransaction } from './interfaces/trade'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { Breakdown, Platform } from '../platforms-breakdown'
 import { RoutablePlatform } from './routable-platform/routable-platform'
@@ -95,7 +95,7 @@ export interface ZeroXTradeConstructorParams {
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
  */
-export class ZeroXTrade extends Trade {
+export class ZeroXTrade extends TradeWithSwapTransaction {
   private readonly to: string
   private readonly callData: string
   private readonly value: string
