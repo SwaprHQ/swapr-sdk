@@ -1,4 +1,3 @@
-import { Provider as MulticallProvider } from 'ethers-multicall'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
@@ -162,10 +161,6 @@ export class CurveTrade extends Trade {
     // // the router does not support both ether in and out
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     provider = provider || getProvider(chainId)
-
-    // Use multicall provider
-    const multicallProvider = new MulticallProvider(provider as any)
-    await multicallProvider.init()
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
