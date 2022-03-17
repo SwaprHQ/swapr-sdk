@@ -181,7 +181,7 @@ export class GnosisProtocolTrade extends Trade {
     try {
       const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
         kind: OrderKind.SELL,
-        sellAmountAfterFee: amountInBN.toString(),
+        sellAmountBeforeFee: amountInBN.toString(),
         sellToken: tokenIn.address,
         buyToken: tokenOut.address,
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
