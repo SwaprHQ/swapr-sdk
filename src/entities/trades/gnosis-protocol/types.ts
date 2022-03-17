@@ -22,6 +22,7 @@ export interface GnosisProtocolTradeConstructorParams {
   chainId: ChainId
   order: Order
   fee?: Percent
+  feeAmount: CurrencyAmount
 }
 
 export interface GnosisProtocolTradeBestTradeExactInParams {

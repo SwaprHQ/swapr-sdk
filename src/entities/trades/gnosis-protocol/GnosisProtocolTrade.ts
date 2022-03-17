@@ -7,7 +7,6 @@ import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellatio
 import { parseUnits } from '@ethersproject/units'
 import invariant from 'tiny-invariant'
 import dayjs from 'dayjs'
-import JSBI from 'jsbi'
 import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { ChainId, ONE, TradeType } from '../../../constants'
@@ -28,6 +27,10 @@ import {
   GnosisProtocolTradeSwapOrderParams,
   GnosisProtocolTradeOrderMetadata,
 } from './types'
+
+/**
+ * Gnosis Protcol Trade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
+ */
 export class GnosisProtocolTrade extends Trade {
   /**
    * CowFi order details. The payload is signed and sent to CowFi API
@@ -52,6 +55,11 @@ export class GnosisProtocolTrade extends Trade {
    */
   public orderId?: string
 
+  /**
+   * The trade fee amount. Fees are paid in sell token
+   */
+  public readonly feeAmount: CurrencyAmount
+
   constructor({
     chainId,
     inputAmount,
@@ -60,6 +68,7 @@ export class GnosisProtocolTrade extends Trade {
     tradeType,
     order,
     fee,
+    feeAmount,
   }: GnosisProtocolTradeConstructorParams) {
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
     super({
@@ -81,6 +90,8 @@ export class GnosisProtocolTrade extends Trade {
     })
     this.order = order
     this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
+    // The fee token and amount are sell token
+    this.feeAmount = feeAmount
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -170,7 +181,7 @@ export class GnosisProtocolTrade extends Trade {
     try {
       const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
         kind: OrderKind.SELL,
-        sellAmountBeforeFee: amountInBN.toString(),
+        sellAmountAfterFee: amountInBN.toString(),
         sellToken: tokenIn.address,
         buyToken: tokenOut.address,
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
@@ -180,11 +191,12 @@ export class GnosisProtocolTrade extends Trade {
         partiallyFillable: false,
       })
 
-      // calculate the fee from the trade
-      const fee = new Percent(
-        JSBI.divide(JSBI.BigInt(quote.sellAmount.toString()), JSBI.BigInt(quote.feeAmount.toString())),
-        JSBI.BigInt('1000000000000000000')
-      )
+      // Calculate the fee in terms of percentages
+      const feeAmountBN = parseUnits(quote.feeAmount.toString(), tokenIn.decimals)
+        .div(quote.sellAmount.toString())
+        .mul(100)
+      const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
+      const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
 
       return new GnosisProtocolTrade({
         chainId,
@@ -196,6 +208,7 @@ export class GnosisProtocolTrade extends Trade {
           : new TokenAmount(tokenOut, quote.buyAmount.toString()),
         fee,
         order: quote,
+        feeAmount: new TokenAmount(tokenIn, quote.feeAmount.toString()),
       })
     } catch (error) {
       console.error('could not fetch Cow trade', error)
@@ -222,9 +235,9 @@ export class GnosisProtocolTrade extends Trade {
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
-    const tokenIn = wrappedCurrency(currencyAmountOut.currency, chainId)
-    const tokenOut = wrappedCurrency(currencyIn, chainId)
-    const amountOutBN = parseUnits(currencyAmountOut.toSignificant(), tokenIn.decimals)
+    const tokenIn = wrappedCurrency(currencyIn, chainId)
+    const tokenOut = wrappedCurrency(currencyAmountOut.currency, chainId)
+    const amountOutBN = parseUnits(currencyAmountOut.toSignificant(), tokenOut.decimals)
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 
     // the router does not support both ether in and out
@@ -242,21 +255,29 @@ export class GnosisProtocolTrade extends Trade {
         partiallyFillable: false,
       })
 
-      // calculate the fee from the trade
-      const fee = new Percent(
-        JSBI.divide(JSBI.BigInt(quote.sellAmount.toString()), JSBI.BigInt(quote.feeAmount.toString())),
-        JSBI.BigInt('1000000000000000000')
-      )
+      // Calculate the fee in terms of percentages
+      const feeAmountBN = parseUnits(quote.feeAmount.toString(), tokenIn.decimals)
+        .div(quote.sellAmount.toString())
+        .mul(100)
+      const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
+      const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
+
+      const inputAmount = Currency.isNative(tokenIn)
+        ? CurrencyAmount.nativeCurrency(quote.sellAmount.toString(), chainId)
+        : new TokenAmount(tokenIn, quote.sellAmount.toString())
+
+      const outputAmount = Currency.isNative(currencyIn)
+        ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
+        : new TokenAmount(tokenOut, quote.buyAmount.toString())
 
       return new GnosisProtocolTrade({
         chainId,
         maximumSlippage,
         tradeType: TradeType.EXACT_OUTPUT,
-        inputAmount: currencyAmountOut,
-        outputAmount: Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
-          : new TokenAmount(tokenOut, quote.buyAmount.toString()),
+        inputAmount,
+        outputAmount,
         fee,
+        feeAmount: new TokenAmount(tokenIn, quote.feeAmount.toString()),
         order: quote,
       })
     } catch (error) {
