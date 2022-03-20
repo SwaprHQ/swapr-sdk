@@ -1,5 +1,6 @@
-import { CurvePool, CurveToken, CURVE_TOKENS, TOKENS_MAINNET } from './constants'
+import { CurvePool } from './pools'
 import { ChainId } from '../../../constants'
+import { CURVE_TOKENS, TOKENS_MAINNET, CurveToken } from './tokens'
 
 /**
  * Returns the token index of a token in a Curve pool
@@ -12,26 +13,39 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   // Combine tokens + meta tokens
   if (pool.isMeta && pool.metaTokens) {
     // Combine all tokens without 3CRV
-    const tokenWithout3CRV = pool.tokens.filter(token => token.symbol.toLowerCase() !== '3crv')
+    const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
 
     tokenList = [...tokenWithout3CRV, ...(pool.metaTokens as CurveToken[])]
   }
 
-  if (
-    pool.allowsTradingETH === true &&
-    chainId === ChainId.MAINNET &&
-    tokenAddress.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-  ) {
-    tokenAddress = TOKENS_MAINNET.weth.address
+  // if (
+  //   pool.allowsTradingETH === true &&
+  //   chainId === ChainId.MAINNET &&
+  //   tokenAddress.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
+  // ) {
+  //   // tokenAddress = TOKENS_MAINNET.weth.address
+  // }
+  // console.log(`Searching for token (addres: ${tokenAddress}) in `, tokenList)
+
+  const tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+
+  // Search for WETH if the token is ETH
+  if (tokenIndex < 0) {
+    //
+    const poolHasWETH = tokenList.find(
+      ({ address }) => CURVE_TOKENS[chainId].weth.address.toLowerCase() === address.toLowerCase()
+    )
+
+    return poolHasWETH ? 0 : -1
   }
 
-  return tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+  return tokenIndex
 }
 
 export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
 
-  return Object.values(tokenList).find(token => token.address.toLowerCase() === tokenAddress?.toLowerCase())
+  return Object.values(tokenList).find((token) => token.address.toLowerCase() === tokenAddress?.toLowerCase())
 }
 
 /**
@@ -56,19 +70,19 @@ export function getRoutablePools(pools: CurvePool[], tokenIn: CurveToken, tokenO
     }
 
     // main tokens
-    const hasTokenIn = tokens.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
-    const hasTokenOut = tokens.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
+    const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
+    const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
 
     // Meta tokens in MetaPools [ERC20, [...3PoolTokens]]
-    const hasMetaTokenIn = metaTokens?.some(token => token.address.toLowerCase() === tokenInAddress.toLowerCase())
-    const hasMetaTokenOut = metaTokens?.some(token => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
+    const hasMetaTokenIn = metaTokens?.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
+    const hasMetaTokenOut = metaTokens?.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
 
     // Underlying tokens, similar to meta tokens
     const hasUnderlyingTokenIn = underlyingTokens?.some(
-      token => token.address.toLowerCase() === tokenInAddress.toLowerCase()
+      (token) => token.address.toLowerCase() === tokenInAddress.toLowerCase()
     )
     const hasUnderlyingTokenOut = underlyingTokens?.some(
-      token => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
+      (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
     )
 
     return (
