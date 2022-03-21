@@ -309,14 +309,23 @@ export class CurveTrade extends Trade {
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
         // Debug
-        debug('Curve::GetQuote | Fetching estimated output', pool.address, dyMethodSignature, dyMethodParams)
+        debug('Curve::GetQuote | Fetching estimated output', {
+          address: pool.address,
+          dyMethodSignature,
+          dyMethodParams,
+        })
 
         try {
           const dyOutput = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
           // Return the call bytes
           return dyOutput
-        } catch (e) {
-          console.log(e)
+        } catch (error) {
+          console.log(`CurveTrade error: failed to fetch estimated out from `, {
+            address: pool.address,
+            dyMethodSignature,
+            dyMethodParams,
+            error,
+          })
           return BigNumber.from(0)
         }
       })
@@ -378,9 +387,9 @@ export class CurveTrade extends Trade {
     // Exit to avoid issues
     if (pool.isMeta) {
       exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
-      if (!(exchangeSignature in poolContract.interface)) {
+      if (!(exchangeSignature in poolContract.functions)) {
         // Exit the search
-        console.log('CurveTrade: could not find a signature')
+        console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
         return
       }
     }
@@ -405,16 +414,18 @@ export class CurveTrade extends Trade {
         !poolContract.interface.getFunction(exchangeSignature).payable
       ) {
         // Exit the search
-        console.log(`CurveTrade: could not find a signature ${exchangeSignature}`)
+        console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
         return
       }
       // Native currency ETH parameter: eth_in
       exchangeParams.push(isNativeAssetIn)
     }
 
-    debug(`Curve::GetQuote | Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
-
-    console.log(poolContract.populateTransaction, exchangeSignature)
+    debug(`Curve::GetQuote | Final pool`, {
+      address: poolContract.address,
+      exchangeSignature,
+      exchangeParams,
+    })
 
     const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
       value,
