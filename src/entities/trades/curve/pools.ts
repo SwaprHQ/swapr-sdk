@@ -136,14 +136,13 @@ export const POOLS_MAINNET: CurvePool[] = [
     tokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc],
     address: '0x93054188d876f558f4a66B2EF1d97d16eDf0895B',
   },
-  /*
   {
+    id: 'sbtc',
     name: 'sbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
-    address:'0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714'
+    address: '0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714',
   },
-  */
   {
     id: 'hbtc',
     name: 'Houbi BTC',
@@ -445,7 +444,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     address: '0xA96A65c051bF88B4095Ee1f2451C2A9d43F53Ae2',
   },
   /**
-   * Pool is dead
+   * @todo debug these
   {
     id: 'xautusd',
     name: 'xautusd',

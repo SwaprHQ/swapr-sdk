@@ -1,46 +1,13 @@
-import { parseUnits } from '@ethersproject/units'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { parseEther, parseUnits } from '@ethersproject/units'
 // import { MaxInt256 } from '@ethersproject/constants'
 // import { Contract } from '@ethersproject/contracts'
-import { isAddress } from '@ethersproject/address'
 
-import { ChainId, /* CurrencyAmount, */ CurveTrade, Percent, RoutablePlatform, Token, TokenAmount, _1000 } from '../src'
-import {
-  // TOKENS_MAINNET,
-  TOKENS_XDAI,
-  TOKENS_ARBITRUM_ONE,
-  CURVE_POOLS,
-  // POOLS_MAINNET,
-  // CurvePool,
-} from '../src/entities/trades/curve/constants'
-
+import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
+import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
+import { CURVE_POOLS, CurvePool, POOLS_MAINNET } from '../src/entities/trades/curve/pools'
 // import { ERC20_ABI } from '../test-util/abi'
-// import { execAsync } from '../test-util'
-
-export async function getGanacheRPCProvider(timeout = 10000): Promise<JsonRpcProvider> {
-  let retryCt = 0
-  let provider: JsonRpcProvider
-
-  while (retryCt * 100 < timeout) {
-    try {
-      provider = new JsonRpcProvider()
-      const isReady = await provider.ready
-      const blockNumber = await provider.getBlockNumber()
-
-      if (isReady) {
-        console.log(`Provider ready @ block #${blockNumber}`)
-        break
-      }
-    } catch (e) {
-      console.log(e)
-    }
-
-    retryCt++
-  }
-
-  // @ts-ignore
-  return provider
-}
+import { execAsync, getGanacheRPCProvider } from '../jest'
+import invariant from 'tiny-invariant'
 
 describe('CurveTrade', () => {
   const maximumSlippage = new Percent('3', '100')
@@ -49,42 +16,31 @@ describe('CurveTrade', () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
+    test.todo('Should be able to accept native xDAI')
     test('Should return the best trade from WXDAI to USDC', async () => {
       const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
-
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
         currencyOut: tokenUSDC,
         maximumSlippage,
       })
-
-      expect(trade).toBeDefined()
-      expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
-
-      // test swap transaction
-      const swapTransaction = trade && (await trade.swapTransaction())
-      expect(swapTransaction).toBeDefined()
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction?.data).toBeDefined()
-      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+      expect(swapTransaction?.to).toBeAddress()
     })
 
     test('Should return the best trade from USDC to WXDAI', async () => {
       const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
-
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
         currencyOut: tokenXWDAI,
         maximumSlippage,
       })
-
-      expect(trade).toBeDefined()
-      expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
-
-      // test swap transaction
-      const swapTransaction = trade && (await trade.swapTransaction())
-      expect(swapTransaction).toBeDefined()
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction?.data).toBeDefined()
-      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+      expect(swapTransaction?.to).toBeAddress()
     })
 
     test('Should estimate WXDAI input amount to get 100 USDC', async () => {
@@ -94,7 +50,10 @@ describe('CurveTrade', () => {
         maximumSlippage,
         currencyIn: tokenXWDAI,
       })
-      expect(trade).toBeDefined()
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction?.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
     })
     test('Should estimate USDC input amount to get 100 WXDAI', async () => {
       const currencyAmountOut = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
@@ -103,7 +62,10 @@ describe('CurveTrade', () => {
         maximumSlippage,
         currencyIn: tokenUSDC,
       })
-      expect(trade).toBeDefined()
+      invariant(trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction?.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
     })
   })
 
@@ -131,7 +93,7 @@ describe('CurveTrade', () => {
       TOKENS_ARBITRUM_ONE.usdt.name
     )
 
-    test('Should return the best trade from USDC to USDT via 2pool', async () => {
+    test('Should find a route from 1 USDC to USDT via 2pool', async () => {
       const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
 
       const trade = await CurveTrade.bestTradeExactIn({
@@ -139,34 +101,26 @@ describe('CurveTrade', () => {
         currencyOut: tokenUSDT,
         maximumSlippage,
       })
-
       const curve2Pool = CURVE_POOLS[ChainId.ARBITRUM_ONE].find(({ name }) => name.toLowerCase() == '2pool')
-
-      expect(trade).toBeDefined()
-      expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
-      // test swap transaction
-      const swapTransaction = trade && (await trade.swapTransaction())
-      expect(swapTransaction).toBeDefined()
-      expect(swapTransaction?.data).toBeDefined()
-      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
-      expect(swapTransaction?.to).toBe(curve2Pool?.swapAddress)
+      invariant(!!trade)
+      expect(trade.platform.name).toEqual(RoutablePlatform.CURVE.name)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to?.toLowerCase()).toBe(curve2Pool?.address.toLowerCase())
     })
 
-    test('Should return the best trade from USDC to EURs via eurusd', async () => {
-      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
-
+    test('Should find a route from 10 USDC to EURs via eurusd pool', async () => {
+      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('10', tokenUSDC.decimals).toString())
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
         currencyOut: tokenEURs,
         maximumSlippage,
       })
-      expect(trade).toBeDefined()
-      expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
-      // test swap transaction
-      const swapTransaction = trade && (await trade.swapTransaction())
-      expect(swapTransaction).toBeDefined()
-      expect(swapTransaction?.data).toBeDefined()
-      expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+      invariant(!!trade)
+      expect(trade.platform.name).toEqual(RoutablePlatform.CURVE.name)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
     })
   })
 
@@ -179,17 +133,14 @@ describe('CurveTrade', () => {
       currencyOut: tokenUSDC,
       maximumSlippage,
     })
-    expect(trade).toBeDefined()
+    invariant(!!trade)
     expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
-    // test swap transaction
-    const swapTransaction = trade && (await trade.swapTransaction())
-    expect(swapTransaction).toBeDefined()
+    const swapTransaction = await trade.swapTransaction()
     expect(swapTransaction?.data).toBeDefined()
-    expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+    expect(swapTransaction?.to).toBeAddress()
   })
 
-  /*
-  describe.skip('Ethereum', () => {
+  describe('Ethereum', () => {
     // @ts-ignore
     const testAccountList = [
       {
@@ -277,12 +228,215 @@ describe('CurveTrade', () => {
       },
     ]
 
+    // Enable debugging
+    process.env.__SWAPR_SDK_DEBUG__ = 'true'
+
+    const CURVE_ROUTER_ADDRESS = '0xfA9a30350048B2BF66865ee20363067c66f67e58'
+
+    const tokenStETH = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.steth.address,
+      TOKENS_MAINNET.steth.decimals,
+      TOKENS_MAINNET.steth.symbol,
+      TOKENS_MAINNET.steth.name
+    )
+
+    const tokenWETH = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.weth.address,
+      TOKENS_MAINNET.weth.decimals,
+      TOKENS_MAINNET.weth.symbol,
+      TOKENS_MAINNET.weth.name
+    )
+    const tokenETH = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.eth.address,
+      TOKENS_MAINNET.eth.decimals,
+      TOKENS_MAINNET.eth.symbol,
+      TOKENS_MAINNET.eth.name
+    )
+    const tokenCRV = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.crv.address,
+      TOKENS_MAINNET.crv.decimals,
+      TOKENS_MAINNET.crv.symbol,
+      TOKENS_MAINNET.crv.name
+    )
+
+    const tokenUSDC = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.usdc.address,
+      TOKENS_MAINNET.usdc.decimals,
+      TOKENS_MAINNET.usdc.symbol,
+      TOKENS_MAINNET.usdc.name
+    )
+
+    const tokenRenBTC = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.renbtc.address,
+      TOKENS_MAINNET.renbtc.decimals,
+      TOKENS_MAINNET.renbtc.symbol,
+      TOKENS_MAINNET.renbtc.name
+    )
+
+    const tokenWBTC = new Token(
+      ChainId.MAINNET,
+      TOKENS_MAINNET.wbtc.address,
+      TOKENS_MAINNET.wbtc.decimals,
+      TOKENS_MAINNET.wbtc.symbol,
+      TOKENS_MAINNET.wbtc.name
+    )
+
+    // Common token amounts
+    const currencyAmountETH1 = new TokenAmount(
+      tokenETH,
+      parseUnits('1', tokenETH.decimals).toString()
+    ) as CurrencyAmount
+    const currencyAmountStETH1 = new TokenAmount(
+      tokenStETH,
+      parseUnits('1', tokenStETH.decimals).toString()
+    ) as CurrencyAmount
+    const currencyAmountUSDC1000 = new TokenAmount(
+      tokenUSDC,
+      parseUnits('1000', tokenUSDC.decimals).toString()
+    ) as CurrencyAmount
+    const currencyAmountRenBTC1 = new TokenAmount(
+      tokenRenBTC,
+      parseUnits('1', tokenRenBTC.decimals).toString()
+    ) as CurrencyAmount
+
     beforeAll(async () => {
       await execAsync('npm run docker:up')
     })
 
     afterAll(async () => {
       await execAsync('npm run docker:clean')
+    })
+
+    test.skip('Should find a route from 1 stETH to WETH', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountStETH1,
+          currencyOut: tokenWETH,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction.value).toEqual(parseEther('1').toString())
+    })
+
+    test('Should find a route from 1 stETH to ETH', async () => {
+      const currencyAmountIn = new TokenAmount(
+        tokenStETH,
+        parseUnits('1', tokenStETH.decimals).toString()
+      ) as CurrencyAmount
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn,
+          currencyOut: tokenETH,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+    })
+    test('Should find a route from 1 ETH to stETH', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountETH1,
+          currencyOut: tokenStETH,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual(
+        parseUnits('1', currencyAmountETH1.currency.decimals).toString()
+      )
+    })
+
+    test('Should find a route from 1 ETH to CRV via CRVETH pool', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountETH1,
+          currencyOut: tokenCRV,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction.value).toEqual(parseUnits('1'))
+    })
+
+    test('Should find a route from 1000 USDC to stETH via Curve Smart Router', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountUSDC1000,
+          currencyOut: tokenStETH,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+      expect(swapTransaction?.to?.toLowerCase()).toEqual(CURVE_ROUTER_ADDRESS.toLowerCase())
+    })
+    test.skip('Should find a route from 1000 USDC to WETH via Curve Smart Router', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountUSDC1000,
+          currencyOut: tokenWETH,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+      expect(swapTransaction?.to?.toLowerCase()).toEqual(CURVE_ROUTER_ADDRESS.toLowerCase())
+    })
+
+    test('Should find a route from 1 renBTC to WBTC via renBTC pool', async () => {
+      const provider = await getGanacheRPCProvider()
+      const trade = await CurveTrade.bestTradeExactIn(
+        {
+          currencyAmountIn: currencyAmountRenBTC1,
+          currencyOut: tokenWBTC,
+          maximumSlippage,
+        },
+        provider
+      )
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+
+      expect(swapTransaction?.value?.toString()).toEqual('0')
     })
 
     interface TestPair {
@@ -293,7 +447,6 @@ describe('CurveTrade', () => {
       pool?: CurvePool
     }
 
-    // @ts-ignore
     const testCombos: TestPair[] = [
       {
         testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
@@ -351,24 +504,6 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.renbtc.name
         ),
       },
-      {
-        testAccount: '0x28c6c06298d514db089934071355e5743bf21d60',
-        tokenInAmount: '1',
-        tokenIn: new Token(
-          ChainId.MAINNET,
-          TOKENS_MAINNET.eth.address,
-          TOKENS_MAINNET.eth.decimals,
-          TOKENS_MAINNET.eth.symbol,
-          TOKENS_MAINNET.eth.name
-        ),
-        tokenOut: new Token(
-          ChainId.MAINNET,
-          TOKENS_MAINNET.steth.address,
-          TOKENS_MAINNET.steth.decimals,
-          TOKENS_MAINNET.steth.symbol,
-          TOKENS_MAINNET.steth.name
-        ),
-      },
     ]
 
     testCombos.forEach(({ testAccount, tokenIn, tokenOut, tokenInAmount }) => {
@@ -376,7 +511,7 @@ describe('CurveTrade', () => {
         tokenIn,
         parseUnits(tokenInAmount, tokenIn.decimals).toString()
       ) as CurrencyAmount
-      const testName = `Should swap ${tokenInAmount} ${tokenIn.symbol} to ${tokenOut.symbol}`
+      const testName = `Should find a route from ${tokenInAmount} ${tokenIn.symbol} to ${tokenOut.symbol}`
 
       test(testName, async () => {
         // Get EVM
@@ -399,11 +534,10 @@ describe('CurveTrade', () => {
           mainnetForkProvider
         )
 
-        expect(trade).toBeDefined()
-        const swapTransaction = trade && (await trade.swapTransaction())
-        expect(swapTransaction).toBeDefined()
+        invariant(!!trade)
+        const swapTransaction = await trade.swapTransaction()
         expect(swapTransaction?.data).toBeDefined()
-        expect(isAddress(swapTransaction?.to as string)).toBeTruthy()
+        expect(swapTransaction?.to).toBeAddress()
 
         // let approved = false
         // try {
@@ -421,9 +555,7 @@ describe('CurveTrade', () => {
         //   console.log(exchangeTx)
         //   expect(exchangeTx).toBeDefined()
         // }
-
       })
     })
   })
-  */
 })
