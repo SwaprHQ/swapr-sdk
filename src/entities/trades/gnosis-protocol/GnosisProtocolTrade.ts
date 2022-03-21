@@ -315,15 +315,36 @@ export class GnosisProtocolTrade extends Trade {
   }
 
   /**
-   *
-   * @returns
+   * Cancels the current instance order, if submitted
    */
   public async cancelOrder(signer: Signer) {
     if (!this.orderId) {
       throw new Error('GnosisProtocolTrade: Missing order ID')
     }
 
-    return signOrderCancellationGP(this.orderId, this.chainId, signer)
+    return GnosisProtocolTrade.cancelOrder(this.orderId, this.chainId, signer)
+  }
+
+  /**
+   * Cancels the current instance order, if submitted
+   * @param orderId The order ID from GPv2
+   * @param chainId The chain Id on which the order exists
+   * @param signer A Signer with ability to sign the payload
+   * @returns the signing results
+   */
+  public static async cancelOrder(orderId: string, chainId: ChainId, signer: Signer) {
+    const orderCancellationSignature = await signOrderCancellationGP(orderId, chainId, signer)
+
+    const response = await fetch(`${GnosisProtocolTrade.getApi(chainId).baseUrl}/api/v1/orders/${orderId}`, {
+      method: 'delete',
+      body: JSON.stringify(orderCancellationSignature),
+    })
+
+    if (response.ok && response.status === 200) {
+      return true
+    }
+
+    throw new Error(`GnosisProtocolTrade: Failed to cancel order. API Status code: ${response.status}`)
   }
 
   /**
