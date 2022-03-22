@@ -24,8 +24,8 @@ export interface TradeConstructorParams {
 }
 
 /**
- * Represents a trade executed against a list of pairs.
- * Does not account for slippage, i.e. trades that front run this trade and move the price.
+ * Represents a base Trade class.
+ * Extend this class to create more trades to the Eco Router
  */
 export abstract class Trade {
   public readonly details: Details
@@ -76,6 +76,12 @@ export abstract class Trade {
    * Get the maximum amount in that can be spent via this trade for the given slippage tolerance
    */
   public abstract maximumAmountIn(): CurrencyAmount
+}
 
+/**
+ * Represents a trade executed against a list of pairs.
+ * Does not account for slippage, i.e. trades that front run this trade and move the price.
+ */
+export abstract class TradeWithSwapTransaction extends Trade {
   public abstract swapTransaction(options: TradeOptions): Promise<UnsignedTransaction>
 }
