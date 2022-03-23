@@ -4,10 +4,13 @@ import { parseEther, parseUnits } from '@ethersproject/units'
 
 import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
 import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
-import { CURVE_POOLS, CurvePool, POOLS_MAINNET } from '../src/entities/trades/curve/pools'
+import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
 // import { ERC20_ABI } from '../test-util/abi'
-import { execAsync, getGanacheRPCProvider } from '../jest'
+import { ERC20_ABI, execAsync, getGanacheRPCProvider } from '../jest'
 import invariant from 'tiny-invariant'
+import { Contract } from '@ethersproject/contracts'
+import { MaxUint256 } from 'ethers/constants'
+import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
 
 describe('CurveTrade', () => {
   const maximumSlippage = new Percent('3', '100')
@@ -141,6 +144,9 @@ describe('CurveTrade', () => {
   })
 
   describe('Ethereum', () => {
+    //
+    const testEVMTX = true
+
     // @ts-ignore
     const testAccountList = [
       {
@@ -439,12 +445,18 @@ describe('CurveTrade', () => {
       expect(swapTransaction?.value?.toString()).toEqual('0')
     })
 
+    test('Should fetch token list from the pool', async () => {
+      const results = await getPoolTokenList('0x52EA46506B9CC5Ef470C5bf89f17Dc28bB35D85C', ChainId.MAINNET)
+      expect(Array.isArray(results.allTokens)).toBeTruthy()
+      expect(Array.isArray(results.mainTokens)).toBeTruthy()
+      expect(Array.isArray(results.underlyingTokens)).toBeTruthy()
+    })
+
     interface TestPair {
       tokenIn: Token
       tokenOut: Token
       tokenInAmount: string
       testAccount: string
-      pool?: CurvePool
     }
 
     const testCombos: TestPair[] = [
@@ -465,7 +477,6 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.dai.symbol,
           TOKENS_MAINNET.dai.name
         ),
-        pool: POOLS_MAINNET.find((pool) => pool.id === 'susd'),
       },
       {
         testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
@@ -522,7 +533,7 @@ describe('CurveTrade', () => {
         // console.log(`Unlocked ${testAccount} for swap`)
 
         // Get unlocked account as signer
-        // const unlockedAccountSigner = mainnetForkProvider.getSigner(testAccount)
+        const unlockedAccountSigner = mainnetForkProvider.getSigner(testAccount)
 
         // Get trade
         const trade = await CurveTrade.bestTradeExactIn(
@@ -536,25 +547,29 @@ describe('CurveTrade', () => {
 
         invariant(!!trade)
         const swapTransaction = await trade.swapTransaction()
+
         expect(swapTransaction?.data).toBeDefined()
         expect(swapTransaction?.to).toBeAddress()
 
-        // let approved = false
-        // try {
-        //   // Approve the sell token
-        //   const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
-        //   console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-        //   await tokenInContract.approve(trade?.approveAddress, MaxInt256).then((tx: any) => tx.wait())
-        //   console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-        //   approved = true
-        // } catch (e) {
-        //   console.log('[WARNING] Approve failed. Swap stage of test is skipped')
-        // }
-        // if (approved) {
-        //   const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any)
-        //   console.log(exchangeTx)
-        //   expect(exchangeTx).toBeDefined()
-        // }
+        let approved = false
+
+        if (!testEVMTX) return
+
+        try {
+          // Approve the sell token
+          const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
+          console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+          await tokenInContract.approve(trade?.approveAddress, MaxUint256).then((tx: any) => tx.wait())
+          console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+          approved = true
+        } catch (e) {
+          console.log('[WARNING] Approve failed. Swap stage of test is skipped')
+        }
+        if (approved) {
+          const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any)
+          console.log(exchangeTx)
+          expect(exchangeTx).toBeDefined()
+        }
       })
     })
   })

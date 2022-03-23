@@ -4,4 +4,4 @@ services:
     image: trufflesuite/ganache-cli
     ports:
       - '8545:8545'
-    command: --networkId 1 --chainId 1 --fork ${FORK_RPC_URL} --gasLimit 20751683
+    command: --networkId 1 --chainId 1 --fork ${EVM_RPC_URL} --gasLimit 20751683
