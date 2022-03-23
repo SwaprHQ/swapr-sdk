@@ -19,7 +19,7 @@ export function execAsync(command: string) {
 }
 
 /**
- *
+ * Returns the RPC provider from ganache once it is available. 
  */
 export async function getGanacheRPCProvider(timeout = 10000): Promise<JsonRpcProvider> {
   let retryCt = 0

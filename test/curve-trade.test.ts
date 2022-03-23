@@ -605,14 +605,6 @@ describe('CurveTrade', () => {
             .sendTransaction(swapTransaction as any)
             .then((tx) => tx.wait())
             .catch(console.log)
-
-          console.log(exchangeTx)
-          // const logs = await unlockedAccountSigner.provider.getTransaction(exchangeTx.transactionHash)
-          // console.log(logs)
-
-          await new Promise((resolve) => setTimeout(resolve, 50000))
-
-          // expect(exchangeTx).toBeDefined()
         }
       })
     })
