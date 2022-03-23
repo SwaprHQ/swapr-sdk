@@ -13,6 +13,20 @@ export const poolMethods = {
       outputs: [{ type: 'uint256', name: '' }],
       inputs: [],
     },
+    coins: {
+      stateMutability: 'view',
+      type: 'function',
+      name: 'coins',
+      outputs: [{ type: 'address', name: '' }],
+      inputs: [{ type: 'int128', name: '_coin' }],
+    },
+    underlying_coins: {
+      stateMutability: 'view',
+      type: 'function',
+      name: 'underlying_coins',
+      outputs: [{ type: 'address', name: '' }],
+      inputs: [{ type: 'int128', name: '_coin' }],
+    },
     'get_dy(uint256,uint256,uint256)': {
       stateMutability: 'view',
       type: 'function',
@@ -92,6 +106,19 @@ export const poolMethods = {
       ],
       outputs: [{ type: 'uint256', name: '' }],
       gas: '57522',
+    },
+    'exchange_underlying(int128,int128,uint256,uint256)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange_underlying',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'uint256', name: 'dx' },
+        { type: 'uint256', name: 'min_dy' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+      gas: '6125699',
     },
   },
   payable: {

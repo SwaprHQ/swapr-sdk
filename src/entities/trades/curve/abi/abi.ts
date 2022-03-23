@@ -8,6 +8,15 @@ export const CURVE_3POOL_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
   poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange_underlying(uint256,uint256,uint256,uint256,address)'],
+]
+
+// 3pool ABI which has USDC, USDT and WXDAI
+export const CURVE_3POOL_UNDERLYING_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256)'],
 ]
 
 // 3pool ABI which has USDC, USDT and WXDAI

@@ -1,5 +1,5 @@
 import type { ContractInterface } from '@ethersproject/contracts'
-import { ChainId } from '../../../constants'
+import { ChainId } from '../../../../constants'
 import {
   CURVE_WETH_ERC20_POOL_ABI,
   CURVE_CRYPTO_SWAP_ABI,
@@ -7,9 +7,10 @@ import {
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
   CURVE_ETHXERC20_256_ABI,
-} from './abi'
-import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from './tokens'
-import { CurveToken } from './tokens/types'
+  CURVE_3POOL_UNDERLYING_ABI,
+} from '../abi'
+import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../tokens'
+import { CurveToken } from '../tokens/types'
 
 export interface CurvePool {
   id: string
@@ -93,7 +94,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'usdt',
     name: 'USDT',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_3POOL_UNDERLYING_ABI,
     tokens: [TOKENS_MAINNET.cdai, TOKENS_MAINNET.cusdc, TOKENS_MAINNET.usdt],
     underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
     address: '0x52EA46506B9CC5Ef470C5bf89f17Dc28bB35D85C',
