@@ -11,7 +11,7 @@ import { TokenAmount } from '../fractions/tokenAmount'
 import { Pair } from '../pair'
 import { Route } from '../route'
 import { currencyEquals } from '../token'
-import { Trade } from './interfaces/trade'
+import { TradeWithSwapTransaction } from './interfaces/trade'
 import ROUTER_ABI from '../../abis/router.json'
 import { TradeOptions } from './interfaces/trade-options'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
@@ -121,7 +121,7 @@ export interface BestTradeOptions {
  * Represents a trade executed against a list of pairs.
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
  */
-export class UniswapV2Trade extends Trade {
+export class UniswapV2Trade extends TradeWithSwapTransaction {
   public constructor(route: Route, amount: CurrencyAmount, maximumSlippage: Percent, tradeType: TradeType) {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     const amounts: TokenAmount[] = new Array(route.path.length)
