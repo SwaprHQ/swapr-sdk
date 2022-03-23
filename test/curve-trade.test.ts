@@ -1,12 +1,16 @@
 import { parseEther, parseUnits } from '@ethersproject/units'
 import { MaxUint256 } from '@ethersproject/constants'
+import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 import invariant from 'tiny-invariant'
 
+// Jest
+import { addEVMAccount, ERC20_ABI, execAsync, getGanacheRPCProvider, unlockEVMAccount } from '../jest'
+
+// Tets targets
 import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
 import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
 import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
-import { ERC20_ABI, execAsync, getGanacheRPCProvider } from '../jest'
 import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
 
 describe('CurveTrade', () => {
@@ -16,7 +20,18 @@ describe('CurveTrade', () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
-    test.todo('Should be able to accept native xDAI')
+    test('Should be able to accept native xDAI', async () => {
+      const currencyAmountIn = TokenAmount.nativeCurrency(parseUnits('100', 18).toBigInt(), ChainId.XDAI)
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: tokenUSDC,
+        maximumSlippage,
+      })
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction?.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+    })
     test('Should return the best trade from WXDAI to USDC', async () => {
       const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
       const trade = await CurveTrade.bestTradeExactIn({
@@ -457,6 +472,7 @@ describe('CurveTrade', () => {
     }
 
     const testCombos: TestPair[] = [
+      /* not avaialble at Curve.fi
       {
         testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
         tokenInAmount: '100',
@@ -475,9 +491,10 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.dai.name
         ),
       },
+      */
       {
         testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
-        tokenInAmount: '1000',
+        tokenInAmount: '100',
         tokenIn: new Token(
           ChainId.MAINNET,
           TOKENS_MAINNET.usdc.address,
@@ -515,22 +532,27 @@ describe('CurveTrade', () => {
     ]
 
     testCombos.forEach(({ testAccount, tokenIn, tokenOut, tokenInAmount }) => {
-      const currencyAmountIn = new TokenAmount(
-        tokenIn,
-        parseUnits(tokenInAmount, tokenIn.decimals).toString()
-      ) as CurrencyAmount
+      const tokenInAmountBN = parseUnits(tokenInAmount, tokenIn.decimals)
+      const currencyAmountIn = new TokenAmount(tokenIn, tokenInAmountBN.toString()) as CurrencyAmount
       const testName = `Should find a route from ${tokenInAmount} ${tokenIn.symbol} to ${tokenOut.symbol}`
 
       test(testName, async () => {
         // Get EVM
         const mainnetForkProvider = await getGanacheRPCProvider()
-        // Unlock
-        await mainnetForkProvider.send('evm_unlockUnknownAccount', [testAccount])
+        // Unlock wallet
+        await addEVMAccount(mainnetForkProvider, testAccount)
+        await unlockEVMAccount(mainnetForkProvider, testAccount)
 
-        // console.log(`Unlocked ${testAccount} for swap`)
+        await mainnetForkProvider.send('evm_setAccountBalance', [testAccount, parseEther('2').toHexString()])
+
+        console.log(await mainnetForkProvider.listAccounts())
+
+        console.log(await mainnetForkProvider.getBalance('0xf006779eabe823f8eed05464a1628383af1f7afb'))
 
         // Get unlocked account as signer
         const unlockedAccountSigner = mainnetForkProvider.getSigner(testAccount)
+
+        console.log(await unlockedAccountSigner.getBalance())
 
         // Get trade
         const trade = await CurveTrade.bestTradeExactIn(
@@ -555,17 +577,42 @@ describe('CurveTrade', () => {
         try {
           // Approve the sell token
           const tokenInContract = new Contract(tokenIn.address, ERC20_ABI, unlockedAccountSigner)
-          console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-          await tokenInContract.approve(trade?.approveAddress, MaxUint256).then((tx: any) => tx.wait())
-          console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
-          approved = true
+
+          // Check unlocked account balance before moving to swapping
+          const testAccountTokenInBalance = (await tokenInContract.balanceOf(testAccount)) as BigNumber
+          const testAccountTokenInAllowance = (await tokenInContract.allowance(
+            trade?.approveAddress,
+            testAccount
+          )) as BigNumber
+
+          console.log(
+            `User balance at ${
+              tokenIn.symbol
+            } = ${testAccountTokenInBalance.toString()}, allowance = ${testAccountTokenInAllowance.toString()}`
+          )
+
+          if (testAccountTokenInBalance.gte(tokenInAmountBN)) {
+            console.log(`Approving ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+            await tokenInContract.approve(trade?.approveAddress, MaxUint256).then((tx: any) => tx.wait())
+            console.log(`Approved ${tokenIn.symbol} (${tokenIn.address}) for swap on ${trade?.approveAddress}`)
+            approved = true
+          }
         } catch (e) {
           console.log('[WARNING] Approve failed. Swap stage of test is skipped')
         }
         if (approved) {
-          const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any)
+          const exchangeTx = await unlockedAccountSigner
+            .sendTransaction(swapTransaction as any)
+            .then((tx) => tx.wait())
+            .catch(console.log)
+
           console.log(exchangeTx)
-          expect(exchangeTx).toBeDefined()
+          // const logs = await unlockedAccountSigner.provider.getTransaction(exchangeTx.transactionHash)
+          // console.log(logs)
+
+          await new Promise((resolve) => setTimeout(resolve, 50000))
+
+          // expect(exchangeTx).toBeDefined()
         }
       })
     })

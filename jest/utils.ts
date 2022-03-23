@@ -45,6 +45,20 @@ export async function getGanacheRPCProvider(timeout = 10000): Promise<JsonRpcPro
   return provider as JsonRpcProvider
 }
 
+/**
+ * Unlocks a EVM wallet in Ganache
+ */
+export async function addEVMAccount(provider: JsonRpcProvider, account: string): Promise<any> {
+  return provider.send('evm_addAccount', [account, ''])
+}
+
+/**
+ * Unlocks a EVM wallet in Ganache
+ */
+export function unlockEVMAccount(provider: JsonRpcProvider, account: string): Promise<any> {
+  return provider.send('personal_unlockAccount', [account, '', 0])
+}
+
 expect.extend({
   toBeAddress(received) {
     const pass = isAddress(received)
