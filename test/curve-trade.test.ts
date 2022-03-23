@@ -1,16 +1,13 @@
 import { parseEther, parseUnits } from '@ethersproject/units'
-// import { MaxInt256 } from '@ethersproject/constants'
-// import { Contract } from '@ethersproject/contracts'
+import { MaxUint256 } from '@ethersproject/constants'
+import { Contract } from '@ethersproject/contracts'
+import invariant from 'tiny-invariant'
 
 import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
 import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
-import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
-// import { ERC20_ABI } from '../test-util/abi'
-import { ERC20_ABI, execAsync, getGanacheRPCProvider } from '../jest'
-import invariant from 'tiny-invariant'
-import { Contract } from '@ethersproject/contracts'
-import { MaxUint256 } from 'ethers/constants'
 import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
+import { ERC20_ABI, execAsync, getGanacheRPCProvider } from '../jest'
+import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
 
 describe('CurveTrade', () => {
   const maximumSlippage = new Percent('3', '100')
