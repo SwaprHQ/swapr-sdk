@@ -8,35 +8,29 @@ import { CURVE_TOKENS, TOKENS_MAINNET, CurveToken } from './tokens'
  * @param tokenAddress the token address
  */
 export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
+  // Combine all tokens without 3CRV
+  const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
   // Use main tokens
   let tokenList = pool.tokens
-  // Combine tokens + meta tokens
-  if (pool.isMeta && pool.metaTokens) {
-    // Combine all tokens without 3CRV
-    const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
-
+  // Append underlying tokens
+  if (pool.underlyingTokens) {
+    tokenList = [...tokenWithout3CRV, ...(pool.underlyingTokens as CurveToken[])]
+  }
+  // Append meta tokens
+  else if (pool.isMeta && pool.metaTokens) {
     tokenList = [...tokenWithout3CRV, ...(pool.metaTokens as CurveToken[])]
   }
+  // Search for WETH in the pool
+  const poolHasWETH = tokenList.find(
+    ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
+  )
 
-  // if (
-  //   pool.allowsTradingETH === true &&
-  //   chainId === ChainId.MAINNET &&
-  //   tokenAddress.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-  // ) {
-  //   // tokenAddress = TOKENS_MAINNET.weth.address
-  // }
-  // console.log(`Searching for token (addres: ${tokenAddress}) in `, tokenList)
+  // Search for the main/underlying token
+  let tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
 
-  const tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
-
-  // Search for WETH if the token is ETH
-  if (tokenIndex < 0) {
-    //
-    const poolHasWETH = tokenList.find(
-      ({ address }) => CURVE_TOKENS[chainId].weth.address.toLowerCase() === address.toLowerCase()
-    )
-
-    return poolHasWETH ? 0 : -1
+  // ETH is always at 0 all pools
+  if (tokenIndex < 0 && poolHasWETH) {
+    tokenIndex = 0
   }
 
   return tokenIndex

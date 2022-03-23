@@ -19,9 +19,10 @@ import { Currency } from '../../currency'
 import { debug } from '../../../utils'
 
 // Curve imports
-import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
+import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { tryGetChainId, wrappedCurrency } from '../utils'
+import { getProvider } from './contracts/utils'
 import type { CurveToken } from './tokens/types'
 import { CURVE_POOLS } from './pools'
 import {
@@ -225,10 +226,14 @@ export class CurveTrade extends Trade {
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
+      debug(`Curve::GetQuote | Found best pool from Curve`, bestPoolAndOutputRes)
       routablePools = curvePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
+      debug(`Curve::GetQuote | Routable pools`, routablePools)
     }
+
+    debug(routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder
@@ -290,6 +295,7 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const estimatedAmountOutPerPool = await Promise.all(
       routablePools.map(async (pool) => {
+        console.log(pool)
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -309,6 +315,12 @@ export class CurveTrade extends Trade {
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
         // Debug
+        console.log({
+          address: pool.address,
+          dyMethodSignature,
+          dyMethodParams,
+        })
+
         debug('Curve::GetQuote | Fetching estimated output', {
           address: pool.address,
           dyMethodSignature,
@@ -383,13 +395,18 @@ export class CurveTrade extends Trade {
 
     // console.log('poolContract.interface', poolContract.interface.getFunction(exchangeSignature))
 
+    console.log(poolContract.functions)
     // If the pool has meta coins
     // Exit to avoid issues
-    if (pool.isMeta) {
+    if (pool.isMeta || pool?.underlyingTokens) {
+      // Try uint256
       exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
       if (!(exchangeSignature in poolContract.functions)) {
-        // Exit the search
-        console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+        exchangeSignature = 'exchange_underlying(int128,int128,uint256,uint256)'
+        if (!(exchangeSignature in poolContract.functions)) {
+          // Exit the search
+          console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+        }
         return
       }
     }

@@ -1,4 +1,3 @@
-import { JsonRpcProvider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
 import { ZERO_ADDRESS } from '../../../../constants'
 import { ChainId } from '../../../../constants'
@@ -16,26 +15,13 @@ import {
   GetExchangeRoutingInfoParams,
   GetExchangeRoutingInfoResults,
 } from './types'
+import { getProvider } from './utils'
 
 // Constants
 export const MAINNET_CONTRACTS = {
   addressProvider: '0x0000000022d53366457f9d5e68ec105046fc4383',
   router: '0xfA9a30350048B2BF66865ee20363067c66f67e58',
 } as const
-
-export const RPC_PROVIDER_LIST = {
-  [ChainId.MAINNET as ChainId]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
-  [ChainId.XDAI as ChainId]: 'https://rpc.xdaichain.com/',
-  [ChainId.ARBITRUM_ONE as ChainId]: 'https://arb1.arbitrum.io/rpc',
-}
-
-/**
- *  Construct a new read-only Provider
- */
-export const getProvider = (chainId: ChainId) => {
-  const host = RPC_PROVIDER_LIST[chainId]
-  return new JsonRpcProvider(host)
-}
 
 /**
  * Returns the best pool to route a trade through using Curve Registry Exchange contract.
