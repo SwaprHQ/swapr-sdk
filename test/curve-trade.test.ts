@@ -601,10 +601,8 @@ describe('CurveTrade', () => {
           console.log('[WARNING] Approve failed. Swap stage of test is skipped')
         }
         if (approved) {
-          const exchangeTx = await unlockedAccountSigner
-            .sendTransaction(swapTransaction as any)
-            .then((tx) => tx.wait())
-            .catch(console.log)
+          const exchangeTx = await unlockedAccountSigner.sendTransaction(swapTransaction as any).then((tx) => tx.wait())
+          expect(exchangeTx.status).toBe(1)
         }
       })
     })
