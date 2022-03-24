@@ -20,7 +20,7 @@ describe('CurveTrade', () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
-    test('Should be able to accept native xDAI', async () => {
+    test.skip('Should be able to accept native xDAI', async () => {
       const currencyAmountIn = TokenAmount.nativeCurrency(parseUnits('100', 18).toBigInt(), ChainId.XDAI)
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
