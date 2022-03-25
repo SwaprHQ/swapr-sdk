@@ -156,95 +156,7 @@ describe('CurveTrade', () => {
   })
 
   describe('Ethereum', () => {
-    //
     const testEVMTX = true
-
-    // @ts-ignore
-    const testAccountList = [
-      {
-        // Binance 8
-        address: '0xf977814e90da44bfa03b6295a0616a897441acec',
-        tokens: [TOKENS_MAINNET.usdc, TOKENS_MAINNET.dai, TOKENS_MAINNET.crv],
-      },
-      {
-        // Binance 14
-        address: '0x28c6c06298d514db089934071355e5743bf21d60',
-        tokens: [
-          TOKENS_MAINNET.usdc,
-          TOKENS_MAINNET.busd,
-          TOKENS_MAINNET.crv,
-          TOKENS_MAINNET.cvx,
-          TOKENS_MAINNET.eth,
-          TOKENS_MAINNET.tusd,
-          TOKENS_MAINNET.link,
-        ],
-      },
-      {
-        // Random RenBTC
-        address: '0x36cc7b13029b5dee4034745fb4f24034f3f2ffc6',
-        tokens: [TOKENS_MAINNET.renbtc],
-      },
-
-      {
-        // Random FRAX holder
-        address: '0x183d0dc5867c01bfb1dbbc41d6a9d3de6e044626',
-        tokens: [TOKENS_MAINNET.frax],
-      },
-      {
-        // FTX
-        address: '0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2',
-        tokens: [TOKENS_MAINNET.xaut, TOKENS_MAINNET.husd, TOKENS_MAINNET.pax],
-      },
-      {
-        address: '0x8301AE4fc9c624d1D396cbDAa1ed877821D7C511',
-        tokens: [TOKENS_MAINNET.eth],
-      },
-      {
-        // Houbi
-        address: '0x46705dfff24256421a05d056c29e81bdc09723b8',
-        tokens: [TOKENS_MAINNET.hbtc],
-      },
-      {
-        // Random RAI holder
-        address: '0x618788357d0ebd8a37e763adab3bc575d54c2c7d',
-        tokens: [TOKENS_MAINNET.rai],
-      },
-      {
-        // Gemini 4
-        address: '0x5f65f7b609678448494de4c87521cdf6cef1e932',
-        tokens: [TOKENS_MAINNET.gusd],
-      },
-      {
-        // Hotbit 3
-        address: '0x562680a4dc50ed2f14d75bf31f494cfe0b8d10a1',
-        tokens: [TOKENS_MAINNET.dusd],
-      },
-      {
-        // Random
-        address: '0xa046a8660e66d178ee07ec97c585eeb6aa18c26c',
-        tokens: [TOKENS_MAINNET.mim],
-      },
-      {
-        // Random
-        address: '0x7d812b62dc15e6f4073eba8a2ba8db19c4e40704',
-        tokens: [TOKENS_MAINNET.usdt],
-      },
-      {
-        // Random
-        address: '0xab4ce310054a11328685ece1043211b68ba5d082',
-        tokens: [TOKENS_MAINNET.cdai],
-      },
-      {
-        // Coinbase 4
-        address: '0x503828976d22510aad0201ac7ec88293211d23da',
-        tokens: [TOKENS_MAINNET.musd],
-      },
-      {
-        // Random EOA with 9k WETH
-        address: '0x57757e3d981446d585af0d9ae4d7df6d64647806',
-        tokens: [TOKENS_MAINNET.weth],
-      },
-    ]
 
     // Enable debugging
     process.env.__SWAPR_SDK_DEBUG__ = 'true'
@@ -266,6 +178,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.weth.symbol,
       TOKENS_MAINNET.weth.name
     )
+
     const tokenETH = new Token(
       ChainId.MAINNET,
       TOKENS_MAINNET.eth.address,
@@ -273,6 +186,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.eth.symbol,
       TOKENS_MAINNET.eth.name
     )
+
     const tokenCRV = new Token(
       ChainId.MAINNET,
       TOKENS_MAINNET.crv.address,

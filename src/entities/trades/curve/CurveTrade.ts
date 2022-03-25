@@ -176,6 +176,7 @@ export class CurveTrade extends Trade {
     const curvePools = CURVE_POOLS[chainId]
 
     const nativeCurrency = Currency.getNative(chainId)
+
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
@@ -189,7 +190,6 @@ export class CurveTrade extends Trade {
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
-    // Determine if user has sent ETH
     if (isNativeAssetIn) {
       value = amountInBN.toString()
     }
@@ -286,7 +286,7 @@ export class CurveTrade extends Trade {
     // Continue using pool-by-pool cases
     // Exit since no pools have been found
     if (routablePools.length === 0) {
-      console.log('CurveTrade: no pools found for trade pair')
+      console.error('CurveTrade: no pools found for trade pair')
       return
     }
 
@@ -295,7 +295,6 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const estimatedAmountOutPerPool = await Promise.all(
       routablePools.map(async (pool) => {
-        console.log(pool)
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -314,13 +313,6 @@ export class CurveTrade extends Trade {
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
-        // Debug
-        console.log({
-          address: pool.address,
-          dyMethodSignature,
-          dyMethodParams,
-        })
-
         debug('Curve::GetQuote | Fetching estimated output', {
           address: pool.address,
           dyMethodSignature,
@@ -332,7 +324,7 @@ export class CurveTrade extends Trade {
           // Return the call bytes
           return dyOutput
         } catch (error) {
-          console.log(`CurveTrade error: failed to fetch estimated out from `, {
+          console.error(`CurveTrade error: failed to fetch estimated out from `, {
             address: pool.address,
             dyMethodSignature,
             dyMethodParams,
@@ -379,8 +371,6 @@ export class CurveTrade extends Trade {
       debug(e)
     }
 
-    console.log({ tokens: pool.tokens, tokenIn })
-
     // Map token address to index
     const tokenInIndex = getTokenIndex(pool, tokenIn.address, chainId)
     const tokenOutIndex = getTokenIndex(pool, tokenOut.address, chainId)
@@ -393,9 +383,6 @@ export class CurveTrade extends Trade {
         return signature.startsWith('exchange(')
       }) || 'exchange'
 
-    // console.log('poolContract.interface', poolContract.interface.getFunction(exchangeSignature))
-
-    console.log(poolContract.functions)
     // If the pool has meta coins
     // Exit to avoid issues
     if (pool.isMeta || pool?.underlyingTokens) {
@@ -405,7 +392,7 @@ export class CurveTrade extends Trade {
         exchangeSignature = 'exchange_underlying(int128,int128,uint256,uint256)'
         if (!(exchangeSignature in poolContract.functions)) {
           // Exit the search
-          console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+          console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
         }
         return
       }
@@ -421,8 +408,8 @@ export class CurveTrade extends Trade {
       dyMinimumReceived.toString(),
     ]
 
-    // Some pools allows trading ETH pools that allow trading ETH
-    // When the function is payable,
+    // Some pools allow trading ETH
+    // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
@@ -431,7 +418,7 @@ export class CurveTrade extends Trade {
         !poolContract.interface.getFunction(exchangeSignature).payable
       ) {
         // Exit the search
-        console.log(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+        console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
         return
       }
       // Native currency ETH parameter: eth_in
