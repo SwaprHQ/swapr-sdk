@@ -1,7 +1,7 @@
 version: '3'
 services:
  ganache:
-    image: trufflesuite/ganache-cli
+    image: trufflesuite/ganache:latest
     ports:
       - '8545:8545'
-    command: --networkId 1 --chainId 1 --fork ${FORK_RPC_URL} --gasLimit 20751683
+    command: --networkId 1 --chain.chainId 1 --fork.url ${EVM_RPC_URL} --gasLimit 20751683

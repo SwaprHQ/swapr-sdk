@@ -93,5 +93,5 @@ export function debug(...data: any[]) {
     ? (window as any).__SWAPR_SDK_DEBUG__ === true
     : process.env.__SWAPR_SDK_DEBUG__ != undefined
 
-  shouldDebug && console.debug(data)
+  shouldDebug && console.debug(...data)
 }

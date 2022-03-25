@@ -28,4 +28,6 @@ jobs:
       - name: Build
         run: yarn run build
       - name: Test
+        env:
+          EVM_RPC_URL: ${{ secrets.EVM_RPC_URL }}
         run: yarn test

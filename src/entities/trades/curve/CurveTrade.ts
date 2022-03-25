@@ -19,10 +19,12 @@ import { Currency } from '../../currency'
 import { debug } from '../../../utils'
 
 // Curve imports
-import { getProvider, getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
+import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
-import { CURVE_POOLS, CurveToken } from './constants'
 import { tryGetChainId, wrappedCurrency } from '../utils'
+import { getProvider } from './contracts/utils'
+import type { CurveToken } from './tokens/types'
+import { CURVE_POOLS } from './pools'
 import {
   CurveTradeConstructorParams,
   CurveTradeGetQuoteParams,
@@ -44,6 +46,10 @@ export class CurveTrade extends Trade {
    * The Unsigned transaction
    */
   public readonly transactionRequest: UnsignedTransaction
+  /**
+   * The contract instance through which the trade go through
+   */
+  public readonly contract: Contract
 
   /**
    *
@@ -65,6 +71,7 @@ export class CurveTrade extends Trade {
     transactionRequest,
     approveAddress,
     fee,
+    contract,
   }: CurveTradeConstructorParams) {
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
     super({
@@ -86,6 +93,7 @@ export class CurveTrade extends Trade {
     })
     this.transactionRequest = transactionRequest
     this.approveAddress = approveAddress || (transactionRequest.to as string)
+    this.contract = contract
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -168,10 +176,11 @@ export class CurveTrade extends Trade {
     const curvePools = CURVE_POOLS[chainId]
 
     const nativeCurrency = Currency.getNative(chainId)
+
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
-    const etherIn =
+    const isNativeAssetIn =
       tokenIn.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
         ? true
         : currencyAmountIn.currency.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
@@ -181,8 +190,7 @@ export class CurveTrade extends Trade {
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
-    // Determine if user has sent ETH
-    if (etherIn) {
+    if (isNativeAssetIn) {
       value = amountInBN.toString()
     }
 
@@ -218,10 +226,14 @@ export class CurveTrade extends Trade {
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
+      debug(`Curve::GetQuote | Found best pool from Curve`, bestPoolAndOutputRes)
       routablePools = curvePools.filter(
-        (pool) => pool.swapAddress.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
+      debug(`Curve::GetQuote | Routable pools`, routablePools)
     }
+
+    debug(routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder
@@ -266,6 +278,7 @@ export class CurveTrade extends Trade {
           to: curveRouterContract.address,
           exchangeRateWithoutFee,
           exchangeRate,
+          contract: curveRouterContract,
         }
       }
     }
@@ -273,7 +286,7 @@ export class CurveTrade extends Trade {
     // Continue using pool-by-pool cases
     // Exit since no pools have been found
     if (routablePools.length === 0) {
-      console.log('CurveTrade: no pools found for trade pair')
+      console.error('CurveTrade: no pools found for trade pair')
       return
     }
 
@@ -282,7 +295,7 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const estimatedAmountOutPerPool = await Promise.all(
       routablePools.map(async (pool) => {
-        const poolContract = new Contract(pool.swapAddress, pool.abi as any, provider)
+        const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
@@ -300,15 +313,23 @@ export class CurveTrade extends Trade {
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
-        // Debug
-        debug('Curve::GetQuote | Fetching estimated output', pool.swapAddress, dyMethodSignature, dyMethodParams)
+        debug('Curve::GetQuote | Fetching estimated output', {
+          address: pool.address,
+          dyMethodSignature,
+          dyMethodParams,
+        })
 
         try {
           const dyOutput = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
           // Return the call bytes
           return dyOutput
-        } catch (e) {
-          console.log(e)
+        } catch (error) {
+          console.error(`CurveTrade error: failed to fetch estimated out from `, {
+            address: pool.address,
+            dyMethodSignature,
+            dyMethodParams,
+            error,
+          })
           return BigNumber.from(0)
         }
       })
@@ -339,7 +360,7 @@ export class CurveTrade extends Trade {
     const { pool, estimatedAmountOut } = poolWithEstimatedAmountOutSorted[0]
 
     // Construct the contrac call
-    const poolContract = new Contract(pool.swapAddress, pool.abi, provider)
+    const poolContract = new Contract(pool.address, pool.abi, provider)
 
     // Try to fetch the fee from the contract the newest
     // If the call fails, the fee defaults back to 4bps
@@ -351,22 +372,34 @@ export class CurveTrade extends Trade {
     }
 
     // Map token address to index
-    const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-    const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+    const tokenInIndex = getTokenIndex(pool, tokenIn.address, chainId)
+    const tokenOutIndex = getTokenIndex(pool, tokenOut.address, chainId)
 
     // Construct the unsigned transaction
     // Default method signature and params
     // This is the most optimistic
-    let exchangeSignature = 'exchange'
+    let exchangeSignature =
+      Object.keys(poolContract.functions).find((signature) => {
+        return signature.startsWith('exchange(')
+      }) || 'exchange'
 
-    if (!(exchangeSignature in poolContract.populateTransaction)) {
-      // debug(`Signature ${exchangeSignature} not found`)
-      // debug(poolContract.functions)
-      exchangeSignature = 'exchange(int128,int128,uint256,uint256)'
+    // If the pool has meta coins
+    // Exit to avoid issues
+    if (pool.isMeta || pool?.underlyingTokens) {
+      // Try uint256
+      exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
+      if (!(exchangeSignature in poolContract.functions)) {
+        exchangeSignature = 'exchange_underlying(int128,int128,uint256,uint256)'
+        if (!(exchangeSignature in poolContract.functions)) {
+          // Exit the search
+          console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+        }
+        return
+      }
     }
 
-    // Reduce by 1% to cover fees
-    const dyMinimumReceived = estimatedAmountOut.mul(99).div(100)
+    // Reduce by 0.1% to cover fees
+    const dyMinimumReceived = estimatedAmountOut.mul(9999).div(10000)
 
     const exchangeParams: (string | string[] | boolean | boolean[])[] = [
       tokenInIndex.toString(),
@@ -375,22 +408,28 @@ export class CurveTrade extends Trade {
       dyMinimumReceived.toString(),
     ]
 
-    // If the pool has meta coins
-    if (pool.isMeta) {
-      exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
-    }
-
-    // Pools that allow trading ETH
+    // Some pools allow trading ETH
+    // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
-      // Native currency ETH
-      if (etherIn) {
-        exchangeParams.push(true)
+      if (
+        !(exchangeSignature in poolContract.functions) ||
+        !poolContract.interface.getFunction(exchangeSignature).payable
+      ) {
+        // Exit the search
+        console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+        return
       }
+      // Native currency ETH parameter: eth_in
+      exchangeParams.push(isNativeAssetIn)
     }
 
-    debug(`Curve::GetQuote | Final pool is ${poolContract.address} ${exchangeSignature}`, exchangeParams)
+    debug(`Curve::GetQuote | Final pool`, {
+      address: poolContract.address,
+      exchangeSignature,
+      exchangeParams,
+    })
 
     const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
       value,
@@ -408,6 +447,7 @@ export class CurveTrade extends Trade {
       to: poolContract.address,
       exchangeRateWithoutFee,
       exchangeRate,
+      contract: poolContract,
     }
   }
 
@@ -441,7 +481,7 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
-        const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to } = quote
+        const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
           fee,
@@ -452,6 +492,7 @@ export class CurveTrade extends Trade {
           inputAmount: currencyAmountIn,
           outputAmount: estimatedAmountOut,
           approveAddress: to,
+          contract,
         })
       }
     } catch (error) {
@@ -511,7 +552,7 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
-        const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to } = quote
+        const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
           fee,
@@ -522,6 +563,7 @@ export class CurveTrade extends Trade {
           inputAmount: currencyAmountIn,
           outputAmount: estimatedAmountOut,
           approveAddress: to,
+          contract,
         })
       }
     } catch (error) {

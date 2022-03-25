@@ -1,4 +1,5 @@
 import type { UnsignedTransaction } from '@ethersproject/transactions'
+import type { Contract } from '@ethersproject/contracts'
 import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import type { ChainId, TradeType } from '../../../constants'
 import type { Percent } from '../../fractions/percent'
@@ -13,6 +14,7 @@ export interface CurveTradeConstructorParams {
   transactionRequest: UnsignedTransaction
   approveAddress?: string
   fee?: Percent
+  contract: Contract
 }
 
 export interface CurveTradeGetQuoteParams {
@@ -31,6 +33,7 @@ export interface CurveTradeQuote {
   exchangeRateWithoutFee: number
   currencyOut: Currency
   maximumSlippage: Percent
+  contract: Contract
 }
 
 export interface CurveTradeBestTradeExactInParams {
