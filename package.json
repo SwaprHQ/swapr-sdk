@@ -24,7 +24,8 @@
     "docker:up": "docker-compose up -d",
     "docker:restart": "docker-compose restart",
     "docker:clean": "docker-compose kill",
-    "install-peers": "install-peers"
+    "install-peers": "install-peers",
+    "prepare": "install-peers"
   },
   "dependencies": {
     "@ethersproject/abi": "^5.6.0",
