@@ -2,7 +2,7 @@ import { ChainId } from '../../../../constants'
 import { CurveToken, TokenType } from './types'
 
 /**
- * xDAI Chain coins
+ * Gnosis Chain
  */
 export const TOKENS_XDAI: Record<string, CurveToken> = {
   wxdai: {
@@ -29,7 +29,7 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
 }
 
 /**
- * Arbitrum Coins
+ * Arbitrum
  */
 export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
   usdc: {
@@ -83,6 +83,9 @@ export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
   },
 } as const
 
+/**
+ * Ethereum
+ */
 export const TOKENS_MAINNET: Record<string, CurveToken> = {
   crv: {
     address: '0xD533a949740bb3306d119CC777fa900bA034cd52',
@@ -574,10 +577,6 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     type: TokenType.OTHER,
   },
 }
-
-// type StyleSet<T extends string> = {
-//   [k in T]: CurveToken
-// }
 
 type CurveTokenList = {
   [chainId in ChainId]: Record<string, CurveToken>
