@@ -24,7 +24,7 @@ import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from './contracts/utils'
 import type { CurveToken } from './tokens/types'
-import { CURVE_POOLS } from './pools'
+import { CurvePool, CURVE_POOLS } from './pools'
 import {
   CurveTradeConstructorParams,
   CurveTradeGetQuoteParams,
@@ -32,6 +32,13 @@ import {
   CurveTradeBestTradeExactOutParams,
   CurveTradeBestTradeExactInParams,
 } from './types'
+
+interface QuoteFromPool {
+  estimatedAmountOut: BigNumber
+  poolContract: Contract
+  pool: CurvePool
+  error?: Error
+}
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -293,7 +300,7 @@ export class CurveTrade extends Trade {
     // The final step
     // Compile all the output
     // Using Multicall contract
-    const estimatedAmountOutPerPool = await Promise.all(
+    const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
@@ -302,7 +309,7 @@ export class CurveTrade extends Trade {
 
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
-          return BigNumber.from(0)
+          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
         }
 
         // Get expected output from the pool
@@ -320,9 +327,13 @@ export class CurveTrade extends Trade {
         })
 
         try {
-          const dyOutput = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
+          const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
           // Return the call bytes
-          return dyOutput
+          return {
+            pool,
+            estimatedAmountOut,
+            poolContract,
+          }
         } catch (error) {
           console.error(`CurveTrade error: failed to fetch estimated out from `, {
             address: pool.address,
@@ -330,37 +341,38 @@ export class CurveTrade extends Trade {
             dyMethodParams,
             error,
           })
-          return BigNumber.from(0)
+          return {
+            pool,
+            estimatedAmountOut: BigNumber.from(0),
+            poolContract,
+            error,
+          }
         }
       })
     )
 
-    if (estimatedAmountOutPerPool.length === 0) {
-      throw new Error('CurveTrade: not pools found')
-    }
-
-    // Append back the pool list
-    // Using the index
-    const poolWithEstimatedAmountOut = estimatedAmountOutPerPool.map((estimatedAmountOut, index) => ({
-      estimatedAmountOut,
-      pool: routablePools[index],
-    }))
+    console.log({ quoteFromPoolList })
 
     // Sort the pool by best output
-    const poolWithEstimatedAmountOutSorted = poolWithEstimatedAmountOut.sort((poolA, poolB) =>
-      poolA.estimatedAmountOut.gt(poolB.estimatedAmountOut)
-        ? -1
-        : poolA.estimatedAmountOut.eq(poolB.estimatedAmountOut)
-        ? 0
-        : 1
-    )
+    const estimatedAmountOutPerPoolSorted = quoteFromPoolList
+      .filter((pool) => {
+        return pool.estimatedAmountOut.gt(0) && pool.error == undefined
+      })
+      .sort((poolA, poolB) =>
+        poolA.estimatedAmountOut.gt(poolB.estimatedAmountOut)
+          ? -1
+          : poolA.estimatedAmountOut.eq(poolB.estimatedAmountOut)
+          ? 0
+          : 1
+      )
+
+    if (estimatedAmountOutPerPoolSorted.length === 0) {
+      throw new Error('CurveTrade: zero pools returned an quote')
+    }
 
     // Select the best (first) pool
     // among the sorted pools
-    const { pool, estimatedAmountOut } = poolWithEstimatedAmountOutSorted[0]
-
-    // Construct the contrac call
-    const poolContract = new Contract(pool.address, pool.abi, provider)
+    const { pool, estimatedAmountOut, poolContract } = estimatedAmountOutPerPoolSorted[0]
 
     // Try to fetch the fee from the contract the newest
     // If the call fails, the fee defaults back to 4bps
