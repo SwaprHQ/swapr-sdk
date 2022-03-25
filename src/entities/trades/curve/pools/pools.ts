@@ -9,6 +9,7 @@ import {
   CURVE_ETHXERC20_256_ABI,
   CURVE_3POOL_UNDERLYING_ABI,
 } from '../abi'
+import { poolMethods } from '../abi/common'
 import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../tokens'
 import { CurveToken } from '../tokens/types'
 
@@ -432,7 +433,13 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'steth',
     name: 'steth',
-    abi: CURVE_ETHXERC20_256_ABI,
+    abi: [
+      poolMethods['view']['fee'],
+      poolMethods['payable']['exchange(uint256,uint256,uint256,uint256)'],
+      poolMethods['payable']['exchange(uint256,uint256,uint256,uint256,bool)'],
+      poolMethods['payable']['exchange_underlying(uint256,uint256,uint256,uint256)'],
+      poolMethods['view']['get_dy(int128,int128,uint256)'],
+    ],
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.steth],
     address: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022',
     allowsTradingETH: true,
