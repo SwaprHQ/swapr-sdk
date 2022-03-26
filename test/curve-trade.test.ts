@@ -296,6 +296,7 @@ describe('CurveTrade', () => {
       const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
+      console.log(trade.minimumAmountOut().toExact())
       expect(swapTransaction?.value?.toString()).toEqual(
         parseUnits('1', currencyAmountETH1.currency.decimals).toString()
       )
