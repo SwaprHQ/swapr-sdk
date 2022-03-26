@@ -34,14 +34,15 @@ yarn test
 
 Swapr uses multiple trades to find best protocol and route for traders. Currently supported DEXs are
 
-| Protocol   | Ethereum | Arbitrum One | Gnosis Chain |
-| ---------- | -------- | ------------ | ------------ |
-| Swapr      | ✅       | ✅           | ✅           |
-| Uniswap v2 | ✅       | ✅           | ✅           |
-| SushiSwap  | ✅       | ✅           | ✅           |
-| Honeyswap  |          |              | ✅           |
-| Levinswap  |          |              | ✅           |
-| Baoswap    |          |              | ✅           |
-| Curve      | WIP      | ✅           | ✅           |
+| Protocol     | Ethereum | Arbitrum One | Gnosis Chain |
+| ------------ | -------- | ------------ | ------------ |
+| Swapr        | ✅       | ✅           | ✅           |
+| Uniswap v2   | ✅       | ✅           | ✅           |
+| SushiSwap    | ✅       | ✅           | ✅           |
+| Honeyswap    |          |              | ✅           |
+| Levinswap    |          |              | ✅           |
+| Baoswap      |          |              | ✅           |
+| Curve        | WIP      | ✅           | ✅           |
+| CoW Protocol | ✅       |              | ✅           |
 
 The `Trade` class is extendable. New DEXs can be added to the SDK by extending the `Trade` and adding required methods.
