@@ -1,121 +1,32 @@
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
-import { ONE, TradeType, ZERO } from '../../constants'
-import { sortedInsert, validateAndParseAddress } from '../../utils'
-import { Currency } from '../currency'
-import { CurrencyAmount } from '../fractions/currencyAmount'
-import { Fraction } from '../fractions/fraction'
-import { Percent } from '../fractions/percent'
-import { Price } from '../fractions/price'
-import { TokenAmount } from '../fractions/tokenAmount'
-import { Pair } from '../pair'
-import { Route } from '../route'
-import { currencyEquals } from '../token'
-import { TradeWithSwapTransaction } from './interfaces/trade'
-import ROUTER_ABI from '../../abis/router.json'
-import { TradeOptions } from './interfaces/trade-options'
-import type { UnsignedTransaction } from '@ethersproject/transactions'
+import { ONE, TradeType, ZERO } from '../../../constants'
+import { sortedInsert, validateAndParseAddress } from '../../../utils'
+import { Currency } from '../../currency'
+import { CurrencyAmount } from '../../fractions/currencyAmount'
+import { Fraction } from '../../fractions/fraction'
+import { Percent } from '../../fractions/percent'
+import { Price } from '../../fractions/price'
+import { TokenAmount } from '../../fractions/tokenAmount'
+import { Pair } from '../../pair'
+import { Route } from '../../route'
+import { currencyEquals, Token } from '../../token'
+import { TradeWithSwapTransaction } from '../interfaces/trade'
+import ROUTER_ABI from '../../../abis/router.json'
+import { TradeOptions } from '../interfaces/trade-options'
 import { Contract } from '@ethersproject/contracts'
-import { UniswapV2RoutablePlatform } from './routable-platform/uniswap-v2-routable-platform'
-import { tryGetChainId, wrappedAmount, wrappedCurrency } from './utils'
+import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
+import { wrappedAmount, wrappedCurrency } from '../utils'
 
-function toHex(currencyAmount: CurrencyAmount) {
-  return `0x${currencyAmount.raw.toString(16)}`
-}
-
-const ZERO_HEX = '0x0'
-
-export interface UniswapV2TradeBestTradeExactParams {
-  maxHops?: BestTradeOptions
-  maximumSlippage: Percent
-  // used in recursion.
-  currentPairs?: Pair[]
-  bestTrades?: UniswapV2Trade[]
-}
-
-export interface UniswapV2TradeBestTradeExactInParams extends UniswapV2TradeBestTradeExactParams {
-  currencyAmountIn: CurrencyAmount
-  currencyOut: Currency
-  pairs: Pair[]
-  originalAmountIn?: CurrencyAmount
-}
-
-export interface UniswapV2TradeBestTradeExactOutParams extends UniswapV2TradeBestTradeExactParams {
-  currencyIn: Currency
-  currencyAmountOut: CurrencyAmount
-  pairs: Pair[]
-  originalAmountOut?: CurrencyAmount
-}
-
-/**
- * Returns the percent difference between the mid price and the execution price, i.e. price impact.
- * @param midPrice mid price before the trade
- * @param inputAmount the input amount of the trade
- * @param outputAmount the output amount of the trade
- */
-function computePriceImpact(midPrice: Price, inputAmount: CurrencyAmount, outputAmount: CurrencyAmount): Percent {
-  const exactQuote = midPrice.raw.multiply(inputAmount.raw)
-  // calculate slippage := (exactQuote - outputAmount) / exactQuote
-  const slippage = exactQuote.subtract(outputAmount.raw).divide(exactQuote)
-  return new Percent(slippage.numerator, slippage.denominator)
-}
-
-// minimal interface so the input output comparator may be shared across types
-interface InputOutput {
-  readonly inputAmount: CurrencyAmount
-  readonly outputAmount: CurrencyAmount
-}
-
-// comparator function that allows sorting trades by their output amounts, in decreasing order, and then input amounts
-// in increasing order. i.e. the best trades have the most outputs for the least inputs and are sorted first
-export function inputOutputComparator(a: InputOutput, b: InputOutput): number {
-  // must have same input and output token for comparison
-  invariant(currencyEquals(a.inputAmount.currency, b.inputAmount.currency), 'INPUT_CURRENCY')
-  invariant(currencyEquals(a.outputAmount.currency, b.outputAmount.currency), 'OUTPUT_CURRENCY')
-  if (a.outputAmount.equalTo(b.outputAmount)) {
-    if (a.inputAmount.equalTo(b.inputAmount)) {
-      return 0
-    }
-    // trade A requires less input than trade B, so A should come first
-    if (a.inputAmount.lessThan(b.inputAmount)) {
-      return -1
-    } else {
-      return 1
-    }
-  } else {
-    // tradeA has less output than trade B, so should come second
-    if (a.outputAmount.lessThan(b.outputAmount)) {
-      return 1
-    } else {
-      return -1
-    }
-  }
-}
-
-// extension of the input output comparator that also considers other dimensions of the trade in ranking them
-export function tradeComparator(a: UniswapV2Trade, b: UniswapV2Trade) {
-  const ioComp = inputOutputComparator(a, b)
-  if (ioComp !== 0) {
-    return ioComp
-  }
-
-  // consider lowest slippage next, since these are less likely to fail
-  if (a.priceImpact.lessThan(b.priceImpact)) {
-    return -1
-  } else if (a.priceImpact.greaterThan(b.priceImpact)) {
-    return 1
-  }
-
-  // finally consider the number of hops since each hop costs gas
-  return a.route.path.length - b.route.path.length
-}
-
-export interface BestTradeOptions {
-  // how many results to return
-  maxNumResults?: number
-  // the maximum number of hops a trade should contain
-  maxHops?: number
-}
+import {
+  UniswapV2TradeBestTradeExactInParams,
+  UniswapV2TradeBestTradeExactOutParams,
+  UniswapV2TradeComputeTradesExactInParams,
+  UniswapV2TradeComputeTradesExactOutParams,
+} from './types'
+import { computePriceImpact, inputOutputComparator, toHex, ZERO_HEX } from './utilts'
+import { getAllCommonPairs } from './contracts'
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -194,9 +105,8 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .multiply(this.inputAmount.raw).quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
+        .quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -204,20 +114,90 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
   }
 
   /**
+   * Computes the best trade for the given input and output amounts.
+   * @param {UniswapV2TradeBestTradeExactInParams} params the pairs to consider in finding the best trade
+   */
+  public static async bestTradeExactIn({
+    currencyAmountIn,
+    currencyOut,
+    maximumSlippage,
+    maxHops: { maxNumResults = 3, maxHops = 3 } = {},
+    platform,
+  }: UniswapV2TradeBestTradeExactInParams): Promise<UniswapV2Trade | undefined> {
+    let bestTrade: UniswapV2Trade | undefined
+    try {
+      // Fetch the commons pairs between A and B
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs(
+        currencyAmountIn.currency,
+        currencyOut,
+        platform
+      )
+      // Compare and sort all routes from A to B
+      const tradeRoutes = UniswapV2Trade.computeTradeExactIn({
+        currencyAmountIn,
+        currencyOut,
+        maximumSlippage,
+        pairs: commonPairsBetweenCurrenyInAndOut,
+        maxHops: { maxNumResults, maxHops },
+      })
+
+      bestTrade = tradeRoutes.at(0)
+    } catch (error) {
+      // tslint:disable-next-line:no-console
+    }
+
+    return bestTrade
+  }
+
+  /**
+   * similar to the `bestTradeExactIn` method, but instead targets a fixed output amount
+   * given a list of pairs, and a fixed amount out, returns the top `maxNumResults` trades that go from an input token
+   * to an output token amount, making at most `maxHops` hops
+   * note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
+   * the amount in among multiple routes.
+   * @param {UniswapV2TradeBestTradeExactOutParams} params the parameters to use
+   */
+  public static async bestTradeExactOut({
+    currencyIn,
+    currencyAmountOut,
+    maximumSlippage,
+    maxHops: { maxNumResults = 3, maxHops = 3 } = {},
+    platform,
+  }: UniswapV2TradeBestTradeExactOutParams): Promise<UniswapV2Trade | undefined> {
+    let bestTrade: UniswapV2Trade | undefined
+    try {
+      // Fetch the commons pairs between A and B
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs(
+        currencyIn,
+        currencyAmountOut.currency,
+        platform
+      )
+      // Compare and sort all routes from A to B
+      const tradeRoutes = UniswapV2Trade.computeTradeExactOut({
+        currencyAmountOut,
+        currencyIn,
+        maximumSlippage,
+        pairs: commonPairsBetweenCurrenyInAndOut,
+        maxHops: { maxNumResults, maxHops },
+      })
+      // Return the best route
+      bestTrade = tradeRoutes.at(0)
+    } catch (error) {
+      // tslint:disable-next-line:no-console
+    }
+
+    return bestTrade
+  }
+
+  /**
    * Given a list of pairs, and a fixed amount in, returns the top `maxNumResults` trades that go from an input token
    * amount to an output token, making at most `maxHops` hops.
    * Note this does not consider aggregation, as routes are linear. It's possible a better route exists by splitting
    * the amount in among multiple routes.
-   * @param pairs the pairs to consider in finding the best trade
-   * @param currencyAmountIn exact amount of input currency to spend
-   * @param currencyOut the desired currency out
-   * @param maxNumResults maximum number of results to return
-   * @param maxHops maximum number of hops a returned trade can make, e.g. 1 hop goes through a single pair
-   * @param currentPairs used in recursion; the current list of pairs
-   * @param originalAmountIn used in recursion; the original value of the currencyAmountIn parameter
-   * @param bestTrades used in recursion; the current list of best trades
+   * @param {UniswapV2TradeComputeTradesExactInParams} param0
+   * @returns list of trades that go from an input token amount to an output token, making at most `maxHops` hops
    */
-  public static bestTradeExactIn({
+  public static computeTradeExactIn({
     currencyAmountIn,
     currencyOut,
     maximumSlippage,
@@ -227,16 +207,20 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     currentPairs = [],
     originalAmountIn = currencyAmountIn,
     bestTrades = [],
-  }: UniswapV2TradeBestTradeExactInParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeComputeTradesExactInParams): UniswapV2Trade[] {
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountIn === currencyAmountIn || currentPairs.length > 0, 'INVALID_RECURSION')
-    const chainId = tryGetChainId(currencyAmountIn, currencyOut)
+
+    // Validate chain ID
+    const chainId = (currencyAmountIn.currency as Token).chainId ?? (currencyOut as Token).chainId
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
     const tokenOut = wrappedCurrency(currencyOut, chainId)
+
+    // Find connecting pairs from token in to token out
     for (let i = 0; i < pairs.length; i++) {
       const pair = pairs[i]
       // pair irrelevant
@@ -264,13 +248,13 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
             TradeType.EXACT_INPUT
           ),
           maxNumResults,
-          tradeComparator
+          UniswapV2Trade.tradeComparator
         )
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
-        UniswapV2Trade.bestTradeExactIn({
+        UniswapV2Trade.computeTradeExactIn({
           currencyAmountIn: amountOut,
           currencyOut,
           maximumSlippage,
@@ -286,7 +270,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
       }
     }
 
-    return bestTrades[0]
+    return bestTrades
   }
 
   /**
@@ -295,18 +279,12 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
    * to an output token amount, making at most `maxHops` hops
    * note this does not consider aggregation, as routes are linear. it's possible a better route exists by splitting
    * the amount in among multiple routes.
-   * @param pairs the pairs to consider in finding the best trade
-   * @param currencyIn the currency to spend
-   * @param currencyAmountOut the exact amount of currency out
-   * @param maxNumResults maximum number of results to return
-   * @param maxHops maximum number of hops a returned trade can make, e.g. 1 hop goes through a single pair
-   * @param currentPairs used in recursion; the current list of pairs
-   * @param originalAmountOut used in recursion; the original value of the currencyAmountOut parameter
-   * @param bestTrades used in recursion; the current list of best trades
+   * @param {UniswapV2TradeBestTradeExactOutParams} params the parameters to use
+   * @returns list of trades that go from an input token to an output token amount, making at most `maxHops` hops
    */
-  public static bestTradeExactOut({
-    currencyIn,
+  public static computeTradeExactOut({
     currencyAmountOut,
+    currencyIn,
     maximumSlippage,
     pairs,
     maxHops: { maxNumResults = 3, maxHops = 3 } = {},
@@ -314,16 +292,21 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     currentPairs = [],
     originalAmountOut = currencyAmountOut,
     bestTrades = [],
-  }: UniswapV2TradeBestTradeExactOutParams): UniswapV2Trade | undefined {
+  }: UniswapV2TradeComputeTradesExactOutParams): UniswapV2Trade[] {
+    // Validate params
     invariant(maximumSlippage.greaterThan('0'), 'MAXIMUM_SLIPPAGE')
     invariant(pairs && pairs.length > 0, 'PAIRS')
     invariant(maxHops > 0, 'MAX_HOPS')
     invariant(originalAmountOut === currencyAmountOut || currentPairs.length > 0, 'INVALID_RECURSION')
-    const chainId = tryGetChainId(currencyAmountOut, currencyIn)
+
+    // Validate chain ID
+    const chainId = (currencyAmountOut.currency as Token).chainId ?? (currencyIn as Token).chainId
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountOut = wrappedAmount(currencyAmountOut, chainId)
     const tokenIn = wrappedCurrency(currencyIn, chainId)
+
+    // Find connecting pairs from token in to token out
     for (let i = 0; i < pairs.length; i++) {
       const pair = pairs[i]
       // pair irrelevant
@@ -351,13 +334,13 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
             TradeType.EXACT_OUTPUT
           ),
           maxNumResults,
-          tradeComparator
+          UniswapV2Trade.tradeComparator
         )
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        UniswapV2Trade.bestTradeExactOut({
+        UniswapV2Trade.computeTradeExactOut({
           currencyIn,
           currencyAmountOut: amountIn,
           maximumSlippage,
@@ -373,7 +356,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
       }
     }
 
-    return bestTrades[0]
+    return bestTrades
   }
 
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
@@ -439,5 +422,23 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
 
   public get route() {
     return this.details as Route
+  }
+
+  // extension of the input output comparator that also considers other dimensions of the trade in ranking them
+  static tradeComparator(a: UniswapV2Trade, b: UniswapV2Trade) {
+    const ioComp = inputOutputComparator(a, b)
+    if (ioComp !== 0) {
+      return ioComp
+    }
+
+    // consider lowest slippage next, since these are less likely to fail
+    if (a.priceImpact.lessThan(b.priceImpact)) {
+      return -1
+    } else if (a.priceImpact.greaterThan(b.priceImpact)) {
+      return 1
+    }
+
+    // finally consider the number of hops since each hop costs gas
+    return a.route.path.length - b.route.path.length
   }
 }
