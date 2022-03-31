@@ -88,7 +88,7 @@ describe('UniswapV2Trade', () => {
   describe('#bestTradeExactIn', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.bestTradeExactIn({
+        UniswapV2Trade.computeTradeExactIn({
           pairs: [],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -98,7 +98,7 @@ describe('UniswapV2Trade', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.bestTradeExactIn({
+        UniswapV2Trade.computeTradeExactIn({
           pairs: [pair_0_2],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -108,104 +108,101 @@ describe('UniswapV2Trade', () => {
       ).toThrow('MAX_HOPS')
     })
 
-    it.skip('provides best route', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+    it('provides best route', () => {
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
         currencyOut: token2,
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
-      expect(result?.route.path).toEqual([token0, token2])
-      expect(result?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(100)))
-      expect(result?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(99)))
-      expect(result?.route.path).toEqual([token0, token1, token2])
-      expect(result?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(100)))
-      expect(result?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(69)))
+      expect(result[0]?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
+      expect(result[0]?.route.path).toEqual([token0, token2])
+      expect(result[0]?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(100)))
+      expect(result[0]?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(99)))
+
+      expect(result[1]?.route.path).toEqual([token0, token1, token2])
+      expect(result[1]?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(100)))
+      expect(result[1]?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(69)))
     })
 
     it('doesnt throw for zero liquidity pairs', () => {
       expect(
-        UniswapV2Trade.bestTradeExactIn({
+        UniswapV2Trade.computeTradeExactIn({
           pairs: [empty_pair_0_1],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token1,
           maximumSlippage,
         })
-      ).toBeUndefined()
+      ).toHaveLength(0)
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
         maxHops: { maxHops: 1 },
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
-      expect(result?.route.path).toEqual([token0, token2])
+      expect(result[0]?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
+      expect(result[0]?.route.path).toEqual([token0, token2])
     })
 
     it('insufficient input for one pair', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(1)),
         currencyOut: token2,
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
-      expect(result?.route.path).toEqual([token0, token2])
-      expect(result?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(1)))
+      expect(result[0]?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
+      expect(result[0]?.route.path).toEqual([token0, token2])
+      expect(result[0]?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(1)))
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
         maxHops: { maxNumResults: 1 },
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1)
+      expect(result[0]?.route.pairs).toHaveLength(1)
     })
 
-    it.skip('no path', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+    it('no path', () => {
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
         maximumSlippage,
       })
-      expect(result).toBeUndefined()
+      expect(result).toHaveLength(0)
     })
 
-    it.skip('works for ETHER currency input', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+    it('works for ETHER currency input', () => {
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: CurrencyAmount.nativeCurrency(JSBI.BigInt(100), ChainId.MAINNET),
         currencyOut: token3,
         maximumSlippage,
       })
-      expect(result?.inputAmount.currency).toEqual(ETHER)
-      expect(result?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token1, token3])
-      expect(result?.outputAmount.currency).toEqual(token3)
-      expect(result?.inputAmount.currency).toEqual(ETHER)
-      expect(result?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token3])
-      expect(result?.outputAmount.currency).toEqual(token3)
+      expect(result[0]?.inputAmount.currency).toEqual(ETHER)
+      expect(result[0]?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token1, token3])
+      expect(result[0]?.outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
-      const result = UniswapV2Trade.bestTradeExactIn({
+      const result = UniswapV2Trade.computeTradeExactIn({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: new TokenAmount(token3, JSBI.BigInt(100)),
         currencyOut: ETHER,
         maximumSlippage,
       })
-      expect(result?.inputAmount.currency).toEqual(token3)
-      expect(result?.route.path).toEqual([token3, token0, Token.WETH[ChainId.MAINNET]])
-      expect(result?.outputAmount.currency).toEqual(ETHER)
-      expect(result?.inputAmount.currency).toEqual(token3)
-      expect(result?.outputAmount.currency).toEqual(ETHER)
+      expect(result[0]?.inputAmount.currency).toEqual(token3)
+      expect(result[0]?.route.path).toEqual([token3, token0, Token.WETH[ChainId.MAINNET]])
+      expect(result[0]?.inputAmount.currency).toEqual(token3)
+      expect(result[0]?.outputAmount.currency).toEqual(ETHER)
     })
   })
 
@@ -331,7 +328,7 @@ describe('UniswapV2Trade', () => {
   describe('#bestTradeExactOut', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.bestTradeExactOut({
+        UniswapV2Trade.computeTradeExactOut({
           pairs: [],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -341,7 +338,7 @@ describe('UniswapV2Trade', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.bestTradeExactOut({
+        UniswapV2Trade.computeTradeExactOut({
           pairs: [pair_0_2],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -351,55 +348,55 @@ describe('UniswapV2Trade', () => {
       ).toThrow('MAX_HOPS')
     })
 
-    it.skip('provides best route', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+    it('provides best route', () => {
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
-      expect(result?.route.path).toEqual([token0, token2])
-      expect(result?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(101)))
-      expect(result?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(100)))
-      expect(result?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(156)))
-      expect(result?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(100)))
+      expect(result[0]?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
+      expect(result[0]?.route.path).toEqual([token0, token2])
+      expect(result[0]?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(101)))
+      expect(result[0]?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(100)))
+      expect(result[1]?.inputAmount).toEqual(new TokenAmount(token0, JSBI.BigInt(156)))
+      expect(result[1]?.outputAmount).toEqual(new TokenAmount(token2, JSBI.BigInt(100)))
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
         maxHops: { maxHops: 1 },
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
-      expect(result?.route.path).toEqual([token0, token2])
+      expect(result[0]?.route.pairs).toHaveLength(1) // 0 -> 2 at 10:11
+      expect(result[0]?.route.path).toEqual([token0, token2])
     })
 
-    it.skip('insufficient liquidity', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+    it('insufficient liquidity', () => {
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1200)),
         maximumSlippage,
       })
-      expect(result?.route.path).toHaveLength(0)
+      expect(result).toHaveLength(0)
     })
 
-    it.skip('insufficient liquidity in one pair but not the other', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+    it('insufficient liquidity in one pair but not the other', () => {
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1050)),
         maximumSlippage,
       })
-      expect(result?.route.pairs).toHaveLength(1)
+      expect(result[0]?.route.pairs).toHaveLength(1)
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -407,45 +404,48 @@ describe('UniswapV2Trade', () => {
         maximumSlippage,
       })
 
-      expect(result?.route.pairs).toHaveLength(1)
+      expect(result[0]?.route.pairs).toHaveLength(1)
     })
 
     it('no path', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
         maximumSlippage,
       })
-      expect(result).toBeUndefined()
+      expect(result).toHaveLength(0)
     })
 
-    it.skip('works for ETHER currency input', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+    it('works for ETHER currency input', () => {
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyIn: ETHER,
         currencyAmountOut: new TokenAmount(token3, JSBI.BigInt(100)),
         maximumSlippage,
       })
-      expect(result?.inputAmount.currency).toEqual(ETHER)
-      expect(result?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token1, token3])
-      expect(result?.outputAmount.currency).toEqual(token3)
-      expect(result?.inputAmount.currency).toEqual(ETHER)
-      expect(result?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token3])
-      expect(result?.outputAmount.currency).toEqual(token3)
+      expect(result[0]?.inputAmount.currency).toEqual(ETHER)
+      expect(result[0]?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token1, token3])
+      expect(result[0]?.outputAmount.currency).toEqual(token3)
+      // least efficient path
+      expect(result[1]?.inputAmount.currency).toEqual(ETHER)
+      expect(result[1]?.route.path).toEqual([Token.WETH[ChainId.MAINNET], token0, token3])
+      expect(result[1]?.outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
-      const result = UniswapV2Trade.bestTradeExactOut({
+      const result = UniswapV2Trade.computeTradeExactOut({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyIn: token3,
         currencyAmountOut: CurrencyAmount.nativeCurrency(JSBI.BigInt(100), ChainId.MAINNET),
         maximumSlippage,
       })
-      expect(result?.inputAmount.currency).toEqual(token3)
-      expect(result?.route.path).toEqual([token3, token0, Token.WETH[ChainId.MAINNET]])
-      expect(result?.outputAmount.currency).toEqual(ETHER)
-      expect(result?.inputAmount.currency).toEqual(token3)
-      expect(result?.outputAmount.currency).toEqual(ETHER)
+      expect(result[0]?.inputAmount.currency).toEqual(token3)
+      expect(result[0]?.route.path).toEqual([token3, token0, Token.WETH[ChainId.MAINNET]])
+      expect(result[0]?.outputAmount.currency).toEqual(ETHER)
+      // least efficient path
+      expect(result[1]?.inputAmount.currency).toEqual(token3)
+      expect(result[1]?.outputAmount.currency).toEqual(ETHER)
+      expect(result[1]?.route.path).toEqual([token3, token1, token0, Token.WETH[ChainId.MAINNET]])
     })
   })
 })
