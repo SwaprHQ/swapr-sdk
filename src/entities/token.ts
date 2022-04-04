@@ -52,6 +52,10 @@ export class Token extends Currency {
     [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI')
   }
 
+  public static readonly WMATIC: {[key: number]: Token} = {
+    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', 18, 'WMATIC', 'Wrapped Matic')
+  }
+
   public static readonly DXD: { [key: number]: Token } = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'),
@@ -103,7 +107,8 @@ export class Token extends Currency {
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.ARBITRUM_ONE]: Token.WETH[ChainId.ARBITRUM_ONE],
     [ChainId.ARBITRUM_RINKEBY]: Token.WETH[ChainId.ARBITRUM_RINKEBY],
-    [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI]
+    [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
+    [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON]
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {

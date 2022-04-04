@@ -27,7 +27,8 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
   [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
     utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
     ChainId.ARBITRUM_RINKEBY
-  )
+  ),
+  [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(utils.parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(), ChainId.POLYGON)
 }
 
 export interface DistributionCampaignBaseConstructoParams {

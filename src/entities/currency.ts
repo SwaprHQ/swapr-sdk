@@ -25,13 +25,15 @@ export class Currency {
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
   )
   public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI')
+  public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic')
 
   private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
     [ChainId.ARBITRUM_ONE]: Currency.ETHER,
     [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
-    [ChainId.XDAI]: Currency.XDAI
+    [ChainId.XDAI]: Currency.XDAI,
+    [ChainId.POLYGON]: Currency.MATIC
   }
 
   /**
@@ -62,3 +64,4 @@ export const USD = Currency.USD
 
 export const ETHER = Currency.ETHER
 export const XDAI = Currency.XDAI
+export const MATIC = Currency.MATIC

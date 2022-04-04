@@ -25,6 +25,7 @@ export enum ChainId {
   MAINNET = 1,
   RINKEBY = 4,
   XDAI = 100,
+  POLYGON = 137,
   ARBITRUM_ONE = 42161,
   ARBITRUM_RINKEBY = 421611
 }
@@ -47,7 +48,8 @@ export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: coreRinkeby.factory,
   [ChainId.ARBITRUM_ONE]: coreArbitrumOne.factory,
   [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
-  [ChainId.XDAI]: coreXDai.factory
+  [ChainId.XDAI]: coreXDai.factory,
+  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
 }
 
 export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -55,7 +57,8 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: peripheryMainnet.router,
   [ChainId.XDAI]: peripheryXDai.router,
   [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
-  [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router
+  [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router,
+  [ChainId.POLYGON] : '0x0000000000000000000000000000000000001234'
 }
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
@@ -63,7 +66,8 @@ export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } =
   [ChainId.RINKEBY]: '0x0f9E49d473B813abe33F1BAB11fa9E16eE850EBa',
   [ChainId.XDAI]: '0xa039793Af0bb060c597362E8155a0327d9b8BEE8',
   [ChainId.ARBITRUM_ONE]: '0xecA7F78d59D16812948849663b26FE10E320f80C',
-  [ChainId.ARBITRUM_RINKEBY]: '0x41e657cAdE74f45b7E2F0F4a5AeE0239f2fB4E1F'
+  [ChainId.ARBITRUM_RINKEBY]: '0x41e657cAdE74f45b7E2F0F4a5AeE0239f2fB4E1F',
+  [ChainId.POLYGON] : '0x0000000000000000000000000000000000001234'
 }
 
 export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -71,7 +75,8 @@ export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: '0x6D525E4115d339aD4e336bCF4C85A1Fb8f4a594C',
   [ChainId.ARBITRUM_RINKEBY]: '0x99583f330814E04de96C0288FBF82B5E35A009dc',
   [ChainId.ARBITRUM_ONE]: '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd',
-  [ChainId.XDAI]: '0x0000000000000000000000000000000000001234'
+  [ChainId.XDAI]: '0x0000000000000000000000000000000000001234',
+  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
 }
 
 // converter only deployed on Arb1
@@ -80,7 +85,8 @@ export const SWPR_CONVERTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: '0x0000000000000000000000000000000000001234',
   [ChainId.ARBITRUM_RINKEBY]: '0x0000000000000000000000000000000000001234',
   [ChainId.ARBITRUM_ONE]: '0x2b058af96175A847Bf3E5457B3A702F807daDdFd',
-  [ChainId.XDAI]: '0x0000000000000000000000000000000000001234'
+  [ChainId.XDAI]: '0x0000000000000000000000000000000000001234',
+  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
 }
 
 export const SWPR_WHITELIST_IPFS_HASH = 'QmcjTAvDJZU339jrc9Ky2pXKR68R1SjnwdyGSQjt1kad9r'
@@ -121,7 +127,8 @@ const MULTICALL_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
   [ChainId.ARBITRUM_ONE]: '0xF718F2bd590E5621e53f7b89398e52f7Acced8ca',
   [ChainId.XDAI]: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
-  [ChainId.ARBITRUM_RINKEBY]: '0xf1f8AAc64036cdd399886b1C157B7e3b361093F3'
+  [ChainId.ARBITRUM_RINKEBY]: '0xf1f8AAc64036cdd399886b1C157B7e3b361093F3',
+  [ChainId.POLYGON]: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
 }
 
 export {

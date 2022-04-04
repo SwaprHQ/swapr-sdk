@@ -507,4 +507,5 @@ export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
   // Empty
   [ChainId.RINKEBY]: [],
   [ChainId.ARBITRUM_RINKEBY]: [],
+  [ChainId.POLYGON]: []
 }
