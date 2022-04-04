@@ -15,7 +15,7 @@ import {
   GetExchangeRoutingInfoParams,
   GetExchangeRoutingInfoResults,
 } from './types'
-import { getProvider } from './utils'
+import { getProvider } from '../../utils'
 
 // Constants
 export const MAINNET_CONTRACTS = {

@@ -1,4 +1,6 @@
+import { JsonRpcProvider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
+
 import { CurrencyAmount } from '../fractions/currencyAmount'
 import { TokenAmount } from '../fractions/tokenAmount'
 import { ChainId } from '../../constants'
@@ -24,4 +26,25 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
     : currency instanceof Token
     ? currency.chainId
     : undefined
+}
+
+/**
+ *
+ */
+export const RPC_PROVIDER_LIST = {
+  [ChainId.MAINNET as ChainId]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.XDAI as ChainId]: 'https://rpc.xdaichain.com/',
+  [ChainId.RINKEBY as ChainId]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.ARBITRUM_ONE as ChainId]: 'https://arb1.arbitrum.io/rpc',
+  [ChainId.ARBITRUM_RINKEBY as ChainId]: 'https://rinkeby.arbitrum.io/rpc',
+}
+
+/**
+ * Returns a RPC provider for the given chainId.
+ * @param chainId The chainId
+ * @returns The RPC provider
+ */
+export function getProvider(chainId: ChainId) {
+  const host = RPC_PROVIDER_LIST[chainId]
+  return new JsonRpcProvider(host)
 }
