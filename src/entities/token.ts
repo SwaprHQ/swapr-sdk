@@ -45,7 +45,8 @@ export class Token extends Currency {
       18,
       'WETH',
       'Wrapped Ether on xDai'
-    )
+    ),
+    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619', 18, 'WETH', 'Wrapped Ether on Polygon')
   }
 
   public static readonly WXDAI: { [key: number]: Token } = {
