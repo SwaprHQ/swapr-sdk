@@ -53,6 +53,9 @@ let PAIR_ADDRESS_CACHE: {
   [UniswapV2RoutablePlatform.LEVINSWAP.name]: {
     ...INITIAL_CACHE_STATE,
   },
+  [UniswapV2RoutablePlatform.QUICKSWAP.name]: {
+    ...INITIAL_CACHE_STATE,
+  },
 }
 
 export class Pair {
