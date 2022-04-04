@@ -43,10 +43,10 @@ describe('Dynamic-Fees', () => {
 
   const empty_pair_0_1 = new Pair(new TokenAmount(token0, JSBI.BigInt(0)), new TokenAmount(token1, JSBI.BigInt(0)))
 
-  describe('#computeTradeExactIn', () => {
+  describe('#computeTradesExactIn', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -56,7 +56,7 @@ describe('Dynamic-Fees', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [pair_0_2],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -67,7 +67,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('provides best route', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
         currencyOut: token2,
@@ -81,7 +81,7 @@ describe('Dynamic-Fees', () => {
 
     it('doesnt throw for zero liquidity pairs', () => {
       expect(
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [empty_pair_0_1],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token1,
@@ -91,7 +91,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -103,7 +103,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('insufficient input for one pair', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(1)),
         currencyOut: token2,
@@ -115,7 +115,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -126,7 +126,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('no path', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -136,10 +136,10 @@ describe('Dynamic-Fees', () => {
     })
   })
 
-  describe('#computeTradeExactOut', () => {
+  describe('#computeTradesExactOut', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactOut({
+        UniswapV2Trade.computeTradesExactOut({
           pairs: [],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -149,7 +149,7 @@ describe('Dynamic-Fees', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactOut({
+        UniswapV2Trade.computeTradesExactOut({
           pairs: [pair_0_2],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -160,7 +160,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('provides best route', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -173,7 +173,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -185,7 +185,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('insufficient liquidity', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1200)),
@@ -195,7 +195,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('insufficient liquidity in one pair but not the other', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1050)),
@@ -205,7 +205,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -217,7 +217,7 @@ describe('Dynamic-Fees', () => {
     })
 
     it('no path', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),

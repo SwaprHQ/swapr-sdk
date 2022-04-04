@@ -133,7 +133,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
         platform
       )
       // Compare and sort all routes from A to B
-      const tradeRoutes = UniswapV2Trade.computeTradeExactIn({
+      const tradeRoutes = UniswapV2Trade.computeTradesExactIn({
         currencyAmountIn,
         currencyOut,
         maximumSlippage,
@@ -173,7 +173,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
         platform
       )
       // Compare and sort all routes from A to B
-      const tradeRoutes = UniswapV2Trade.computeTradeExactOut({
+      const tradeRoutes = UniswapV2Trade.computeTradesExactOut({
         currencyAmountOut,
         currencyIn,
         maximumSlippage,
@@ -197,7 +197,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
    * @param {UniswapV2TradeComputeTradesExactInParams} param0
    * @returns list of trades that go from an input token amount to an output token, making at most `maxHops` hops
    */
-  public static computeTradeExactIn({
+  public static computeTradesExactIn({
     currencyAmountIn,
     currencyOut,
     maximumSlippage,
@@ -254,7 +254,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           currencyAmountIn: amountOut,
           currencyOut,
           maximumSlippage,
@@ -282,7 +282,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
    * @param {UniswapV2TradeBestTradeExactOutParams} params the parameters to use
    * @returns list of trades that go from an input token to an output token amount, making at most `maxHops` hops
    */
-  public static computeTradeExactOut({
+  public static computeTradesExactOut({
     currencyAmountOut,
     currencyIn,
     maximumSlippage,
@@ -340,7 +340,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
         // otherwise, consider all the other paths that arrive at this token as long as we have not exceeded maxHops
-        UniswapV2Trade.computeTradeExactOut({
+        UniswapV2Trade.computeTradesExactOut({
           currencyIn,
           currencyAmountOut: amountIn,
           maximumSlippage,

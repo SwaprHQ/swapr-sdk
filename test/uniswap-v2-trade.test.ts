@@ -88,7 +88,7 @@ describe('UniswapV2Trade', () => {
   describe('#bestTradeExactIn', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -98,7 +98,7 @@ describe('UniswapV2Trade', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [pair_0_2],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token2,
@@ -109,7 +109,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('provides best route', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
         currencyOut: token2,
@@ -127,7 +127,7 @@ describe('UniswapV2Trade', () => {
 
     it('doesnt throw for zero liquidity pairs', () => {
       expect(
-        UniswapV2Trade.computeTradeExactIn({
+        UniswapV2Trade.computeTradesExactIn({
           pairs: [empty_pair_0_1],
           currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(100)),
           currencyOut: token1,
@@ -137,7 +137,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -149,7 +149,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('insufficient input for one pair', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(1)),
         currencyOut: token2,
@@ -161,7 +161,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -172,7 +172,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('no path', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: new TokenAmount(token0, JSBI.BigInt(10)),
         currencyOut: token2,
@@ -182,7 +182,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('works for ETHER currency input', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: CurrencyAmount.nativeCurrency(JSBI.BigInt(100), ChainId.MAINNET),
         currencyOut: token3,
@@ -193,7 +193,7 @@ describe('UniswapV2Trade', () => {
       expect(result[0]?.outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
-      const result = UniswapV2Trade.computeTradeExactIn({
+      const result = UniswapV2Trade.computeTradesExactIn({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyAmountIn: new TokenAmount(token3, JSBI.BigInt(100)),
         currencyOut: ETHER,
@@ -328,7 +328,7 @@ describe('UniswapV2Trade', () => {
   describe('#bestTradeExactOut', () => {
     it('throws with empty pairs', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactOut({
+        UniswapV2Trade.computeTradesExactOut({
           pairs: [],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -338,7 +338,7 @@ describe('UniswapV2Trade', () => {
     })
     it('throws with max hops of 0', () => {
       expect(() =>
-        UniswapV2Trade.computeTradeExactOut({
+        UniswapV2Trade.computeTradesExactOut({
           pairs: [pair_0_2],
           currencyIn: token0,
           currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -349,7 +349,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('provides best route', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(100)),
@@ -364,7 +364,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('respects maxHops', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -376,7 +376,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('insufficient liquidity', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1200)),
@@ -386,7 +386,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('insufficient liquidity in one pair but not the other', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(1050)),
@@ -396,7 +396,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('respects n', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_2, pair_1_2],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -408,7 +408,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('no path', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_0_1, pair_0_3, pair_1_3],
         currencyIn: token0,
         currencyAmountOut: new TokenAmount(token2, JSBI.BigInt(10)),
@@ -418,7 +418,7 @@ describe('UniswapV2Trade', () => {
     })
 
     it('works for ETHER currency input', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyIn: ETHER,
         currencyAmountOut: new TokenAmount(token3, JSBI.BigInt(100)),
@@ -433,7 +433,7 @@ describe('UniswapV2Trade', () => {
       expect(result[1]?.outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
-      const result = UniswapV2Trade.computeTradeExactOut({
+      const result = UniswapV2Trade.computeTradesExactOut({
         pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         currencyIn: token3,
         currencyAmountOut: CurrencyAmount.nativeCurrency(JSBI.BigInt(100), ChainId.MAINNET),
