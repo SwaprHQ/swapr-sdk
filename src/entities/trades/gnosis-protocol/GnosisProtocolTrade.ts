@@ -89,7 +89,7 @@ export class GnosisProtocolTrade extends Trade {
       fee,
     })
     this.order = order
-    this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
+    this.approveAddress = GPv2VaultRelayerList[(chainId as unknown) as keyof typeof GPv2VaultRelayerList].address
     // The fee token and amount are sell token
     this.feeAmount = feeAmount
   }
@@ -113,9 +113,8 @@ export class GnosisProtocolTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .multiply(this.inputAmount.raw).quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
+        .quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
@@ -157,8 +156,7 @@ export class GnosisProtocolTrade extends Trade {
    * @param {Currency} obj.currencyOut the currency out - buy token
    * @param {Percent} obj.maximumSlippage Maximum slippage
    * @param {Percent} obj.receiver The receiver
-   * @param {Provider} provider an optional provider, the router defaults public providers
-   * @returns the best trade if found
+   * @returns A GPv2 trade if found, otherwise undefined
    */
   public static async bestTradeExactIn({
     currencyAmountIn,
@@ -222,8 +220,7 @@ export class GnosisProtocolTrade extends Trade {
    * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
    * @param {Currency} obj.currencyOut the currency out - buy token
    * @param {Percent} obj.maximumSlippage Maximum slippage
-   * @param {Provider} provider an optional provider, the router defaults public providers
-   * @returns the best trade if found
+   * @returns A GPv2 trade if found, otherwise undefined
    */
   public static async bestTradeExactOut({
     currencyAmountOut,

@@ -1,4 +1,4 @@
-export * from './uniswap-v2-trade'
+export * from './uniswap-v2'
 export * from './0x-trade'
 export * from './interfaces/trade-options'
 export * from './interfaces/trade'

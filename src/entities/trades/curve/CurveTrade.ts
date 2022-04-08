@@ -22,7 +22,7 @@ import { debug } from '../../../utils'
 import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { tryGetChainId, wrappedCurrency } from '../utils'
-import { getProvider } from './contracts/utils'
+import { getProvider } from '../utils'
 import type { CurveToken } from './tokens/types'
 import { CurvePool, CURVE_POOLS } from './pools'
 import {
@@ -122,9 +122,8 @@ export class CurveTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .multiply(this.inputAmount.raw).quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
+        .quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
