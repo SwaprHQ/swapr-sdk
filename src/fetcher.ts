@@ -7,7 +7,7 @@ import { Pair } from './entities/pair'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import invariant from 'tiny-invariant'
-import { ChainId, BigintIsh, FACTORY_ADDRESS, MULTICALL_ADDRESS, MULTICALL_ABI } from './constants'
+import { ChainId, BigintIsh, FACTORY_ADDRESS, MULTICALL2_ADDRESS, MULTICALL2_ABI } from './constants'
 import { Token } from './entities/token'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform/uniswap-v2-routable-platform'
 
@@ -93,7 +93,7 @@ export abstract class Fetcher {
       owner: string
     }[]
   > {
-    const multicall = new Contract(MULTICALL_ADDRESS[liquidityTokens[0].chainId], MULTICALL_ABI, provider)
+    const multicall = new Contract(MULTICALL2_ADDRESS[liquidityTokens[0].chainId], MULTICALL2_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[liquidityTokens[0].chainId], IDXswapFactory.abi, provider)
     const liquidityTokenContract = new Contract(liquidityTokens[0].address, IDXswapPair.abi, provider)
     const calls = []
@@ -150,7 +150,7 @@ export abstract class Fetcher {
       owner: string
     }
   }> {
-    const multicall = new Contract(MULTICALL_ADDRESS[chainId], MULTICALL_ABI, provider)
+    const multicall = new Contract(MULTICALL2_ADDRESS[chainId], MULTICALL2_ABI, provider)
     const factoryContract = new Contract(FACTORY_ADDRESS[chainId], IDXswapFactory.abi, provider)
     const allPairsLength = await factoryContract.allPairsLength()
     const allSwapPairs: {

@@ -2,7 +2,6 @@ import JSBI from 'jsbi'
 import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
 import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
 import SWPR_CLAIMER_ABI from './abis/swpr-claimer.json'
-import MULTICALL_ABI from './abis/multicall.json'
 import MULTICALL2_ABI from './abis/multicall2.json'
 import {
   rinkeby as coreRinkeby,
@@ -117,14 +116,6 @@ export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
 }
 
-const MULTICALL_ADDRESS: { [chainId in ChainId]: string } = {
-  [ChainId.MAINNET]: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-  [ChainId.RINKEBY]: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
-  [ChainId.ARBITRUM_ONE]: '0xF718F2bd590E5621e53f7b89398e52f7Acced8ca',
-  [ChainId.XDAI]: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
-  [ChainId.ARBITRUM_RINKEBY]: '0xf1f8AAc64036cdd399886b1C157B7e3b361093F3',
-}
-
 const MULTICALL2_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   [ChainId.RINKEBY]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
@@ -134,9 +125,7 @@ const MULTICALL2_ADDRESS: { [chainId in ChainId]: string } = {
 }
 
 export {
-  MULTICALL_ABI,
   MULTICALL2_ABI,
-  MULTICALL_ADDRESS,
   MULTICALL2_ADDRESS,
   STAKING_REWARDS_FACTORY_ABI,
   STAKING_REWARDS_DISTRIBUTION_ABI,
