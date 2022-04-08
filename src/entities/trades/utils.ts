@@ -7,6 +7,13 @@ import { ChainId } from '../../constants'
 import { Currency } from '../currency'
 import { Token } from '../token'
 
+/**
+ * Same as `wrappedCurrency` util functiom, but for `TokenAmount`
+ * @param currencyAmount The currency amount to wrap
+ * @param chainId The chain ID
+ * @returns The wrapped currency amount if it is native, otherwise the currency itself
+ * @throws an error
+ */
 export function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId): TokenAmount {
   if (currencyAmount instanceof TokenAmount) return currencyAmount
   if (Currency.isNative(currencyAmount.currency))
@@ -14,12 +21,25 @@ export function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId):
   invariant(false, 'CURRENCY')
 }
 
+/**
+ * Returns the wrapped currency for the given currency if it is native
+ * @param currency The currency to wrap
+ * @param chainId The chain ID
+ * @returns The wrapped currency if it is native, otherwise the currency itself
+ * @throws an error
+ */
 export function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   if (currency instanceof Token) return currency
   if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
   invariant(false, 'CURRENCY')
 }
 
+/**
+ * Attempts to find the chain ID of the given currencies
+ * @param currencyAmount The currency amount to find the chain ID for
+ * @param currency The currency to find the chain ID for
+ * @returns
+ */
 export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency) {
   return currencyAmount instanceof TokenAmount
     ? currencyAmount.token.chainId
@@ -29,7 +49,7 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
 }
 
 /**
- *
+ * List of RPC provider URLs for different chains.
  */
 export const RPC_PROVIDER_LIST = {
   [ChainId.MAINNET as ChainId]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
