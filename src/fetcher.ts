@@ -109,7 +109,7 @@ export abstract class Fetcher {
         ),
       })
     }
-    const result = await multicall.aggregate(calls.map((call) => [call.address, call.callData]))
+    const result = await multicall.callStatic.aggregate(calls.map((call) => [call.address, call.callData]))
     const owner = factoryContract.interface.decodeFunctionResult(
       factoryContract.interface.getFunction('feeToSetter()'),
       result.returnData[0]
@@ -180,7 +180,7 @@ export abstract class Fetcher {
           [pairIndex]
         ),
       })
-    const result = await multicall.aggregate(calls.map((call) => [call.address, call.callData]))
+    const result = await multicall.callStatic.aggregate(calls.map((call) => [call.address, call.callData]))
     for (let resultIndex = 0; resultIndex < result.returnData.length; resultIndex++) {
       const tokenPairAddress = factoryContract.interface.decodeFunctionResult(
         factoryContract.interface.getFunction('allPairs(uint256)'),
