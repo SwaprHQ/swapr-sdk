@@ -1,16 +1,16 @@
 {
   "name": "@swapr/sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "1.0.0-beta.9",
-  "description": "An SDK for building applications on top of DXswap.",
+  "version": "1.0.1",
+  "description": "An SDK for building applications on top of Swapr",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/levelkdev/dxswap-sdk.git",
+  "repository": "https://github.com/levelkdev/swapr-sdk.git",
   "keywords": [
-    "dxswap",
+    "swapr",
     "ethereum",
     "dxdao",
     "swapr"
@@ -44,6 +44,7 @@
     "dayjs": "^1.11.0",
     "decimal.js-light": "^2.5.1",
     "jsbi": "^3.1.1",
+    "lodash.flatmap": "^4.5.0",
     "node-fetch": "2",
     "tiny-invariant": "^1.2.0",
     "tiny-warning": "^1.0.3",
@@ -54,6 +55,7 @@
     "@ethersproject/constants": "^5.6.0",
     "@types/big.js": "^4.0.5",
     "@types/jest": "^24.0.25",
+    "@types/lodash.flatmap": "^4.5.6",
     "@types/node-fetch": "^2.6.1",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",

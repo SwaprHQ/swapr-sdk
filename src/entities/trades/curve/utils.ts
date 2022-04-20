@@ -36,6 +36,12 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   return tokenIndex
 }
 
+/**
+ * Given a token address, returns the token information if found
+ * @param tokenAddress The token address
+ * @param chainId The chain ID. Default is Mainnet
+ * @returns The token information or undefined if not found
+ */
 export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
 
