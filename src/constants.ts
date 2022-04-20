@@ -49,7 +49,7 @@ export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_ONE]: coreArbitrumOne.factory,
   [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
   [ChainId.XDAI]: coreXDai.factory,
-  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
+  [ChainId.POLYGON]: ZERO_ADDRESS
 }
 
 export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -58,7 +58,7 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.XDAI]: peripheryXDai.router,
   [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
   [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router,
-  [ChainId.POLYGON] : '0x0000000000000000000000000000000000001234'
+  [ChainId.POLYGON] : ZERO_ADDRESS
 }
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
@@ -67,7 +67,7 @@ export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } =
   [ChainId.XDAI]: '0xa039793Af0bb060c597362E8155a0327d9b8BEE8',
   [ChainId.ARBITRUM_ONE]: '0xecA7F78d59D16812948849663b26FE10E320f80C',
   [ChainId.ARBITRUM_RINKEBY]: '0x41e657cAdE74f45b7E2F0F4a5AeE0239f2fB4E1F',
-  [ChainId.POLYGON] : '0x0000000000000000000000000000000000001234'
+  [ChainId.POLYGON] : ZERO_ADDRESS
 }
 
 export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -76,7 +76,7 @@ export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_RINKEBY]: '0x99583f330814E04de96C0288FBF82B5E35A009dc',
   [ChainId.ARBITRUM_ONE]: '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd',
   [ChainId.XDAI]: '0x0000000000000000000000000000000000001234',
-  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
+  [ChainId.POLYGON]: ZERO_ADDRESS
 }
 
 // converter only deployed on Arb1
@@ -86,7 +86,7 @@ export const SWPR_CONVERTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_RINKEBY]: '0x0000000000000000000000000000000000001234',
   [ChainId.ARBITRUM_ONE]: '0x2b058af96175A847Bf3E5457B3A702F807daDdFd',
   [ChainId.XDAI]: '0x0000000000000000000000000000000000001234',
-  [ChainId.POLYGON]: '0x0000000000000000000000000000000000001234'
+  [ChainId.POLYGON]: ZERO_ADDRESS
 }
 
 export const SWPR_WHITELIST_IPFS_HASH = 'QmcjTAvDJZU339jrc9Ky2pXKR68R1SjnwdyGSQjt1kad9r'
