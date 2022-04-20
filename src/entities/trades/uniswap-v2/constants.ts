@@ -1,5 +1,5 @@
 import { ChainId } from '../../../constants'
-import { DXD, Token, WETH, WXDAI } from '../../token'
+import { DXD, Token, WETH, WMATIC, WXDAI } from '../../token'
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -113,4 +113,11 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     AGAVE,
     BAO,
   ],
+  [ChainId.POLYGON]: [
+    WMATIC[ChainId.POLYGON],
+    WETH[ChainId.POLYGON],
+    WBTC[ChainId.POLYGON],
+    USDC[ChainId.POLYGON],
+    USDT[ChainId.POLYGON]
+  ]
 }
