@@ -46,7 +46,7 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on xDai'
     ),
-    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619', 18, 'WETH', 'Wrapped Ether on Polygon')
+    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619', 18, 'WETH', 'Wrapped Ether on Polygon')
   }
 
   public static readonly WXDAI: { [key: number]: Token } = {
@@ -54,7 +54,7 @@ export class Token extends Currency {
   }
 
   public static readonly WMATIC: {[key: number]: Token} = {
-    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', 18, 'WMATIC', 'Wrapped Matic')
+    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 18, 'WMATIC', 'Wrapped Matic')
   }
 
   public static readonly DXD: { [key: number]: Token } = {
