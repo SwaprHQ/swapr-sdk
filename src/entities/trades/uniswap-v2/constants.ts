@@ -1,5 +1,5 @@
 import { ChainId } from '../../../constants'
-import { DXD, Token, WETH, WXDAI } from '../../token'
+import { DXD, Token, WETH, WMATIC, WXDAI } from '../../token'
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -24,6 +24,7 @@ export const USDC: { [key: number]: Token } = {
     'USDC',
     'USD//C from Ethereum'
   ),
+  [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', 6, 'USDC', "USD//C from Ethereum")
 }
 
 export const USDT: { [key: number]: Token } = {
@@ -42,6 +43,12 @@ export const USDT: { [key: number]: Token } = {
     'USDT',
     'Tether USD'
   ),
+  [ChainId.POLYGON]: new Token(ChainId.POLYGON,
+    '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    6,
+    'USDT',
+    'Tether USD'
+  )
 }
 
 export const WBTC: { [key: number]: Token } = {
@@ -60,9 +67,16 @@ export const WBTC: { [key: number]: Token } = {
     'WBTC',
     'Wrapped BTC from Ethereum'
   ),
+  [ChainId.POLYGON]: new Token(
+    ChainId.POLYGON, 
+    '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+    8,
+    'WBTC',
+    'Wrapped BTC from Ethereum'
+    )
 }
 
-export const HONEY = new Token(ChainId.XDAI, '0x71850b7e9ee3f13ab46d67167341e4bdc905eef9', 18, 'HNY', 'Honey')
+export const HONEY = new Token(ChainId.XDAI, '0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9', 18, 'HNY', 'Honey')
 
 export const STAKE = new Token(
   ChainId.XDAI,
@@ -113,4 +127,10 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     AGAVE,
     BAO,
   ],
+  [ChainId.POLYGON]: [
+    WMATIC[ChainId.POLYGON],
+    WBTC[ChainId.POLYGON],
+    USDC[ChainId.POLYGON],
+    USDT[ChainId.POLYGON]
+  ]
 }

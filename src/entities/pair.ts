@@ -27,6 +27,7 @@ const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
   [ChainId.XDAI]: {},
+  [ChainId.POLYGON]: {}
 }
 
 let PAIR_ADDRESS_CACHE: {
@@ -50,6 +51,12 @@ let PAIR_ADDRESS_CACHE: {
     ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.LEVINSWAP.name]: {
+    ...INITIAL_CACHE_STATE,
+  },
+  [UniswapV2RoutablePlatform.QUICKSWAP.name]: {
+    ...INITIAL_CACHE_STATE,
+  },
+  [UniswapV2RoutablePlatform.DFYN.name]: {
     ...INITIAL_CACHE_STATE,
   },
 }
