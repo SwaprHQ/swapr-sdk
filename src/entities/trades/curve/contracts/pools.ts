@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts'
 import { ChainId } from '../../../../constants'
 import { poolMethods } from '../abi/common'
 import { getProvider } from '../../utils'
+import { Provider } from '@ethersproject/providers'
 
 interface PoolToken {
   index: number
@@ -17,17 +18,26 @@ interface GetPoolTokenListResults {
 
 const getPoolTokenListCache = new Map<string, GetPoolTokenListResults>()
 
+interface GetPoolTokenListParams {
+  poolAddress: string
+  chainId: ChainId
+  provider?: Provider
+}
+
 /**
  * Fetches and returns tokens from given pool address
  */
-export async function getPoolTokenList(poolAddress: string, chainId: ChainId): Promise<GetPoolTokenListResults> {
+export async function getPoolTokenList({
+  chainId,
+  poolAddress,
+  provider = getProvider(chainId),
+}: GetPoolTokenListParams): Promise<GetPoolTokenListResults> {
   const cacheKey = `${chainId}-${poolAddress}`
   const tokensFromCache = getPoolTokenListCache.get(cacheKey)
   if (tokensFromCache) {
     return tokensFromCache
   }
 
-  const provider = getProvider(chainId)
   // const multicallProvider = new MulticallProvider(provider, chainId)
   // // // UniswapV3 multicall contract
   // const multicall2Contract = new Contract('0x5ba1e12693dc8f9c48aad8770482f4739beed696', MULTICALL2_ABI, provider)
