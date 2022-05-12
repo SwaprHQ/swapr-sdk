@@ -1,4 +1,5 @@
 import { abi as UNISWAPR_PAIR_ABI } from '@swapr/core/build/IDXswapPair.json'
+import { Provider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
 import flatMap from 'lodash.flatmap'
 
@@ -52,6 +53,13 @@ export async function getUniswapPairSwapFee(pairAddress: string, chainId: ChainI
   return swapFee
 }
 
+interface GetAllCommonPairsParams {
+  currencyA: Currency
+  currencyB: Currency
+  platform: UniswapV2RoutablePlatform
+  provider?: Provider
+}
+
 /**
  * Fetches all pairs through which the given tokens can be traded.
  * @param currencyA The first currency
@@ -59,12 +67,16 @@ export async function getUniswapPairSwapFee(pairAddress: string, chainId: ChainI
  * @param platform The platform to use
  * @returns
  */
-export async function getAllCommonPairs(
-  currencyA: Currency,
-  currencyB: Currency,
-  platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR
-): Promise<Pair[]> {
+export async function getAllCommonPairs({
+  currencyA,
+  currencyB,
+  platform = UniswapV2RoutablePlatform.SWAPR,
+  provider,
+}: GetAllCommonPairsParams): Promise<Pair[]> {
   const chainId = (currencyA as Token).chainId ?? (currencyB as Token).chainId
+  // Get a provider if one isn't provided
+  provider = provider ?? getProvider(chainId)
+
   const bases: Token[] = BASES_TO_CHECK_TRADES_AGAINST[chainId] ?? []
 
   const [tokenA, tokenB] = [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)]
@@ -95,7 +107,7 @@ export async function getAllCommonPairs(
   }, [])
 
   // Fetch the pair reserves via multicall
-  const multicallContract = new Contract(MULTICALL2_ADDRESS[chainId], MULTICALL2_ABI, getProvider(chainId))
+  const multicallContract = new Contract(MULTICALL2_ADDRESS[chainId], MULTICALL2_ABI, provider)
 
   const uniswapPairInterface = new Interface(UNISWAPR_PAIR_ABI)
 

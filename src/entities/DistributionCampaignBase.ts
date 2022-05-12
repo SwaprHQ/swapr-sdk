@@ -5,30 +5,33 @@ import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
 import invariant from 'tiny-invariant'
 import { Token } from './token'
-import { utils } from 'ethers'
+import { parseUnits } from '@ethersproject/units'
 
 const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
+    parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
     ChainId.RINKEBY
   ),
   [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
+    parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
     ChainId.MAINNET
   ),
   [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
+    parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
     ChainId.XDAI
   ),
   [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
+    parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
     ChainId.ARBITRUM_ONE
   ),
   [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
-    utils.parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
+    parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
     ChainId.ARBITRUM_RINKEBY
   ),
-  [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(utils.parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(), ChainId.POLYGON)
+  [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
+    parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
+    ChainId.POLYGON
+  ),
 }
 
 export interface DistributionCampaignBaseConstructoParams {
@@ -59,7 +62,7 @@ export class DistributionCampaignBase {
     staked,
     locked,
     stakingCap,
-    address
+    address,
   }: DistributionCampaignBaseConstructoParams) {
     invariant(JSBI.lessThan(parseBigintIsh(startsAt), parseBigintIsh(endsAt)), 'INCONSISTENT_DATES')
     for (const reward of rewards) {
@@ -96,7 +99,7 @@ export class DistributionCampaignBase {
 
   public get remainingRewards(): PricedTokenAmount[] {
     const remainingDistributionPercentage = this.remainingDistributionPercentage
-    return this.rewards.map(reward => {
+    return this.rewards.map((reward) => {
       return new PricedTokenAmount(reward.token, remainingDistributionPercentage.multiply(reward.raw).toFixed(0))
     })
   }
