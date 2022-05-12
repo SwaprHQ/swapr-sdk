@@ -176,6 +176,9 @@ async function _signPayload(
       throw e
     }
   }
+
+  // eslint-disable-next-line
+  // @ts-ignore
   return { signature: signature.data.toString(), signingScheme }
 }
 

@@ -127,11 +127,11 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     let bestTrade: UniswapV2Trade | undefined
     try {
       // Fetch the commons pairs between A and B
-      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs(
-        currencyAmountIn.currency,
-        currencyOut,
-        platform
-      )
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs({
+        currencyA: currencyAmountIn.currency,
+        currencyB: currencyOut,
+        platform,
+      })
       // Compare and sort all routes from A to B
       const tradeRoutes = UniswapV2Trade.computeTradesExactIn({
         currencyAmountIn,
@@ -167,11 +167,11 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     let bestTrade: UniswapV2Trade | undefined
     try {
       // Fetch the commons pairs between A and B
-      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs(
-        currencyIn,
-        currencyAmountOut.currency,
-        platform
-      )
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs({
+        currencyA: currencyIn,
+        currencyB: currencyAmountOut.currency,
+        platform,
+      })
       // Compare and sort all routes from A to B
       const tradeRoutes = UniswapV2Trade.computeTradesExactOut({
         currencyAmountOut,

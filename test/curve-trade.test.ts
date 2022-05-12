@@ -375,7 +375,10 @@ describe('CurveTrade', () => {
     })
 
     test('Should fetch token list from the pool', async () => {
-      const results = await getPoolTokenList('0x52EA46506B9CC5Ef470C5bf89f17Dc28bB35D85C', ChainId.MAINNET)
+      const results = await getPoolTokenList({
+        poolAddress: '0x52EA46506B9CC5Ef470C5bf89f17Dc28bB35D85C',
+        chainId: ChainId.MAINNET,
+      })
       expect(Array.isArray(results.allTokens)).toBeTruthy()
       expect(Array.isArray(results.mainTokens)).toBeTruthy()
       expect(Array.isArray(results.underlyingTokens)).toBeTruthy()
