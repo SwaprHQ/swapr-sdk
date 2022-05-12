@@ -248,7 +248,7 @@ export class CurveTrade extends Trade {
 
       if (isNativeAssetOut) {
         exchangeSignature = 'exchangeExactERC20ForNativeToken'
-        exchangeParams = [amountInBN.toString(), estimatedAmountOut, receiver]
+        exchangeParams = [tokenInAddress, amountInBN.toString(), estimatedAmountOut, receiver]
       }
 
       debugCurveGetQuote('populating transaction ', {
