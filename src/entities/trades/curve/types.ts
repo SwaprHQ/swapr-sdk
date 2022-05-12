@@ -21,6 +21,7 @@ export interface CurveTradeGetQuoteParams {
   currencyAmountIn: CurrencyAmount
   currencyOut: Currency
   maximumSlippage: Percent
+  receiver?: string
 }
 
 export interface CurveTradeQuote {
@@ -36,14 +37,16 @@ export interface CurveTradeQuote {
   contract: Contract
 }
 
-export interface CurveTradeBestTradeExactInParams {
+interface CurveGetTradeCommonParams {
+  maximumSlippage: Percent
+  receiver?: string
+}
+export interface CurveTradeBestTradeExactInParams extends CurveGetTradeCommonParams {
   currencyAmountIn: CurrencyAmount
   currencyOut: Currency
-  maximumSlippage: Percent
 }
 
-export interface CurveTradeBestTradeExactOutParams {
+export interface CurveTradeBestTradeExactOutParams extends CurveGetTradeCommonParams {
   currencyIn: Currency
   currencyAmountOut: CurrencyAmount
-  maximumSlippage: Percent
 }

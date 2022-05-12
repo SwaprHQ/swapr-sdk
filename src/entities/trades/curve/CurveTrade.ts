@@ -1,10 +1,13 @@
 import type { UnsignedTransaction } from '@ethersproject/transactions'
+import { AddressZero } from '@ethersproject/constants'
 import { BigNumber } from '@ethersproject/bignumber'
-import { parseUnits } from '@ethersproject/units'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
+import { parseUnits } from '@ethersproject/units'
+
 import Decimal from 'decimal.js-light'
 import invariant from 'tiny-invariant'
+import debug from 'debug'
 
 import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { ChainId, ONE, TradeType } from '../../../constants'
@@ -16,10 +19,9 @@ import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
 import { Trade } from '../interfaces/trade'
 import { Currency } from '../../currency'
-import { debug } from '../../../utils'
 
 // Curve imports
-import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter } from './contracts'
+import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter, getCurveDAIExchangeContract } from './contracts'
 import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
@@ -39,6 +41,8 @@ interface QuoteFromPool {
   pool: CurvePool
   error?: Error
 }
+
+const debugCurveGetQuote = debug('ecoRouter:curve:getQuote')
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -152,19 +156,42 @@ export class CurveTrade extends Trade {
    * @returns the best trade if found
    */
   public static async getQuote(
-    { currencyAmountIn, currencyOut, maximumSlippage }: CurveTradeGetQuoteParams,
+    { currencyAmountIn, currencyOut, maximumSlippage, receiver = AddressZero }: CurveTradeGetQuoteParams,
     provider?: Provider
   ): Promise<CurveTradeQuote | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     // Require the chain ID
-    invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
-    // const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
+    invariant(chainId !== undefined, 'CHAIN_ID')
+
+    if (!RoutablePlatform.CURVE.supportsChain(chainId)) {
+      return undefined
+    }
+
+    const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
 
     // Get the token's data from Curve
-    const tokenIn = getCurveToken(currencyAmountIn.currency?.address as string, chainId)
-    const tokenOut = getCurveToken(currencyOut.address as string, chainId)
+    const tokenIn = getCurveToken(wrappedTokenIn.address, chainId)
+    const tokenOut = getCurveToken(wrappedtokenOut.address, chainId)
+
+    // Get the native address
+    const nativeCurrency = Currency.getNative(chainId)
+
+    // Determine if the currency sent is ETH
+    // First using address
+    // then, using symbol
+    const isNativeAssetIn =
+      currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
+        ? true
+        : currencyAmountIn.currency === nativeCurrency
+
+    const isNativeAssetOut =
+      tokenOut?.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
+        ? true
+        : currencyOut.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
+        ? true
+        : currencyOut === nativeCurrency
 
     // Validations
     invariant(tokenIn != undefined, 'NO_TOKEN_IN')
@@ -173,7 +200,6 @@ export class CurveTrade extends Trade {
 
     // const etherOut = this.outputAmount.currency === nativeCurrency
     // // the router does not support both ether in and out
-    // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     provider = provider || getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
@@ -181,23 +207,74 @@ export class CurveTrade extends Trade {
     // Get all Curve pools for the chain
     const curvePools = CURVE_POOLS[chainId]
 
-    const nativeCurrency = Currency.getNative(chainId)
-
-    // Determine if the currency sent is ETH
-    // First using address
-    // then, using symbol
-    const isNativeAssetIn =
-      tokenIn.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
-        ? true
-        : currencyAmountIn.currency.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
-        ? true
-        : currencyAmountIn.currency === nativeCurrency
-
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
     if (isNativeAssetIn) {
       value = amountInBN.toString()
+    }
+
+    // Majority of Curve pools
+    // have 4bps fee of which 50% goes to Curve
+    const FEE_DECIMAL = 0.0004
+    let fee = new Percent('4', '10000')
+
+    // Exchange fee
+    const exchangeRateWithoutFee = 1
+    const exchangeRate = 1 - FEE_DECIMAL
+
+    debugCurveGetQuote({
+      isNativeAssetIn,
+      isNativeAssetOut,
+    })
+
+    // Gnosis Chain
+    if (chainId === ChainId.XDAI && (isNativeAssetIn || isNativeAssetOut)) {
+      const poolContract = getCurveDAIExchangeContract()
+
+      const tokenInAddress =
+        isNativeAssetIn && nativeCurrency.address != undefined ? nativeCurrency.address : tokenIn.address
+      const tokenOutAddress =
+        isNativeAssetOut && nativeCurrency.address != undefined ? nativeCurrency.address : tokenOut.address
+
+      const estimatedAmountOutParams = [tokenInAddress, tokenOutAddress, amountInBN.toString()]
+
+      // Fetch estiamted out
+      const estimatedAmountOut = await poolContract.getEstimatedAmountOut(...estimatedAmountOutParams)
+
+      // Prepapre signature and params for Curve3PoolExchange
+      let exchangeSignature = 'exchangeExactNativeTokenForERC20'
+      let exchangeParams = [tokenOut.address, estimatedAmountOut, receiver]
+
+      if (isNativeAssetOut) {
+        exchangeSignature = 'exchangeExactERC20ForNativeToken'
+        exchangeParams = [amountInBN.toString(), estimatedAmountOut, receiver]
+      }
+
+      debugCurveGetQuote('populating transaction ', {
+        exchangeSignature,
+        exchangeParams,
+        value,
+      })
+
+      const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
+        value,
+      })
+
+      return {
+        currencyAmountIn,
+        populatedTransaction,
+        currencyOut,
+        estimatedAmountOut: Currency.isNative(currencyOut)
+          ? CurrencyAmount.nativeCurrency(estimatedAmountOut.toBigInt(), chainId)
+          : new TokenAmount(wrappedtokenOut, estimatedAmountOut.toBigInt()),
+        maximumSlippage,
+        fee,
+        to: poolContract.address,
+        exchangeRateWithoutFee,
+        exchangeRate,
+        contract: poolContract,
+      }
     }
 
     // Check if the two pairs are of different type
@@ -220,26 +297,16 @@ export class CurveTrade extends Trade {
           })
         : undefined
 
-    // Majority of Curve pools
-    // have 4bps fee of which 50% goes to Curve
-    const FEE_DECIMAL = 0.0004
-    let fee = new Percent('4', '10000')
-
-    // Exchange fee
-    const exchangeRateWithoutFee = 1
-    const exchangeRate = 1 - FEE_DECIMAL
-
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
-      debug(`Curve::GetQuote | Found best pool from Curve`, bestPoolAndOutputRes)
+      debugCurveGetQuote(`Found best pool from Curve registery`, bestPoolAndOutputRes)
       routablePools = curvePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
-      debug(`Curve::GetQuote | Routable pools`, routablePools)
     }
 
-    debug(routablePools)
+    debugCurveGetQuote('Routeable pools: ', routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder
@@ -263,16 +330,14 @@ export class CurveTrade extends Trade {
 
         const curveRouterContract = getRouter()
 
-        debug(`Curve::GetQuote | Found a rout via Smart Router at ${curveRouterContract.address}`, params)
+        debugCurveGetQuote(`Found a route via Smart Router at ${curveRouterContract.address}`, params)
 
         const populatedTransaction = await curveRouterContract.populateTransaction.exchange(...params, {
           value,
         })
 
         // Add 30% gas buffer
-        const gasLimitWithBuffer = populatedTransaction.gasLimit?.mul(130).div(100)
-
-        populatedTransaction.gasLimit = gasLimitWithBuffer
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(130).div(100)
 
         return {
           fee,
@@ -319,8 +384,7 @@ export class CurveTrade extends Trade {
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
 
-        debug('Curve::GetQuote | Fetching estimated output', {
-          address: pool.address,
+        debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
           dyMethodSignature,
           dyMethodParams,
         })
@@ -349,8 +413,6 @@ export class CurveTrade extends Trade {
         }
       })
     )
-
-    console.log({ quoteFromPoolList })
 
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
@@ -436,7 +498,7 @@ export class CurveTrade extends Trade {
       exchangeParams.push(isNativeAssetIn)
     }
 
-    debug(`Curve::GetQuote | Final pool`, {
+    debugCurveGetQuote('Final pool', {
       address: poolContract.address,
       exchangeSignature,
       exchangeParams,
@@ -473,7 +535,7 @@ export class CurveTrade extends Trade {
    * @returns the best trade if found
    */
   public static async bestTradeExactIn(
-    { currencyAmountIn, currencyOut, maximumSlippage }: CurveTradeBestTradeExactInParams,
+    { currencyAmountIn, currencyOut, maximumSlippage, receiver }: CurveTradeBestTradeExactInParams,
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
@@ -482,11 +544,15 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
+      // Custom handler for xDAI<>USDT and xDAI<>USDC
+      // on Gnosis Chain
+
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,
           currencyOut,
           maximumSlippage,
+          receiver,
         },
         provider
       )
@@ -524,7 +590,7 @@ export class CurveTrade extends Trade {
    * @returns the best trade if found
    */
   public static async bestTradeExactOut(
-    { currencyAmountOut, currencyIn, maximumSlippage }: CurveTradeBestTradeExactOutParams,
+    { currencyAmountOut, currencyIn, maximumSlippage, receiver }: CurveTradeBestTradeExactOutParams,
     provider?: Provider
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
@@ -539,6 +605,7 @@ export class CurveTrade extends Trade {
           currencyAmountIn: currencyAmountOut,
           currencyOut: currencyIn,
           maximumSlippage,
+          receiver,
         },
         provider
       )) as CurveTradeQuote
@@ -558,6 +625,7 @@ export class CurveTrade extends Trade {
           currencyAmountIn,
           currencyOut,
           maximumSlippage,
+          receiver,
         },
         provider
       )
