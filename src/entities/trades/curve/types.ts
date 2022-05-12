@@ -41,6 +41,7 @@ interface CurveGetTradeCommonParams {
   maximumSlippage: Percent
   receiver?: string
 }
+
 export interface CurveTradeBestTradeExactInParams extends CurveGetTradeCommonParams {
   currencyAmountIn: CurrencyAmount
   currencyOut: Currency

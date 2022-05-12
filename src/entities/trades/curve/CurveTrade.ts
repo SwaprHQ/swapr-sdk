@@ -42,6 +42,7 @@ interface QuoteFromPool {
   error?: Error
 }
 
+// Debuging logger. See documentation to enable logging.
 const debugCurveGetQuote = debug('ecoRouter:curve:getQuote')
 
 /**
@@ -228,7 +229,7 @@ export class CurveTrade extends Trade {
       isNativeAssetOut,
     })
 
-    // Gnosis Chain
+    // Use Custom contract for native xDAI<>USDT and xDAI<>USDC trades on Gnosis Chain
     if (chainId === ChainId.XDAI && (isNativeAssetIn || isNativeAssetOut)) {
       const poolContract = getCurveDAIExchangeContract()
 
@@ -300,7 +301,7 @@ export class CurveTrade extends Trade {
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
-      debugCurveGetQuote(`Found best pool from Curve registery`, bestPoolAndOutputRes)
+      debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
       routablePools = curvePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
@@ -544,9 +545,6 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
-      // Custom handler for xDAI<>USDT and xDAI<>USDC
-      // on Gnosis Chain
-
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,

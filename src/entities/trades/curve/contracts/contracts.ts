@@ -121,8 +121,8 @@ export async function getExchangeRoutingInfo({
 }
 
 /**
- * Returns an instance of the Curve DAI Exchange contract.
- * This contract is only available on Gnosis Chain.
+ * @description Returns an instance of the Curve DAI Exchange contract. This contract is only available on Gnosis Chain.
+ * @returns the DAI Exchange contract instance
  */
 export function getCurveDAIExchangeContract() {
   return new Contract('0x9C13176D08C699906fCbb3a6555fb24BD647BF06', CURVE_DAI_EXCHANGE_ABI, getProvider(ChainId.XDAI))
