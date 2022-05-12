@@ -8,7 +8,7 @@ import invariant from 'tiny-invariant'
 import { addEVMAccount, ERC20_ABI, execAsync, getGanacheRPCProvider, unlockEVMAccount } from '../jest'
 
 // Tets targets
-import { ChainId, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
+import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
 import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
 import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
 import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
@@ -20,7 +20,7 @@ describe('CurveTrade', () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
 
-    test.skip('Should be able to accept native xDAI', async () => {
+    test('Should be able to accept native xDAI', async () => {
       const currencyAmountIn = TokenAmount.nativeCurrency(parseUnits('100', 18).toBigInt(), ChainId.XDAI)
       const trade = await CurveTrade.bestTradeExactIn({
         currencyAmountIn,
@@ -29,6 +29,24 @@ describe('CurveTrade', () => {
       })
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
+      invariant(!!swapTransaction)
+      console.log(swapTransaction)
+      expect(swapTransaction?.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+    })
+
+    test('Should be able to trade to native xDAI', async () => {
+      const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('100', tokenXWDAI.decimals).toBigInt())
+      const nativeCurrency = Currency.getNative(ChainId.XDAI)
+      const trade = await CurveTrade.bestTradeExactIn({
+        currencyAmountIn,
+        currencyOut: nativeCurrency,
+        maximumSlippage,
+      })
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      invariant(!!swapTransaction)
+      console.log(swapTransaction)
       expect(swapTransaction?.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
     })
