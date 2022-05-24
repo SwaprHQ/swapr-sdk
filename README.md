@@ -4,30 +4,30 @@
 
 ### Running tests
 
-To run the tests, follow these steps. You must have at least node v10 and [yarn](https://yarnpkg.com/) installed.
+To run the tests, follow these steps. You must have at least node v16 installed.
 
 First clone the repository:
 
 ```sh
-git clone https://github.com/levelkdev/dxswap-sdk.git
+git clone https://github.com/levelkdev/swapr-sdk.git
 ```
 
 Move into the dxswap-sdk working directory
 
 ```sh
-cd dxswap-sdk/
+cd swapr-sdk
 ```
 
 Install dependencies
 
 ```sh
-yarn install
+npm install
 ```
 
 Run tests
 
 ```sh
-yarn test
+npm run test
 ```
 
 ## Eco Router Trades

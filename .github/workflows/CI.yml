@@ -22,12 +22,12 @@ jobs:
         with:
           node-version: '16'
       - name: Install
-        run: yarn install
+        run: npm ci
       - name: Lint
-        run: yarn lint
+        run: npm run lint
       - name: Build
-        run: yarn run build
+        run: npm run build
       - name: Test
         env:
           EVM_RPC_URL: ${{ secrets.EVM_RPC_URL }}
-        run: yarn test
+        run: npm run test
