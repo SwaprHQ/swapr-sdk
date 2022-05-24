@@ -1,13 +1,14 @@
-import { TypedDataV3Signer, IntChainIdTypedDataV4Signer } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/signers'
+import { Signer } from '@ethersproject/abstract-signer'
 import { Order, OrderCancellation as OrderCancellationGp } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
 import {
+  EcdsaSignature,
   Signature,
   SigningScheme,
-  EcdsaSignature,
   signOrder as signOrderGp,
   signOrderCancellation as signOrderCancellationGp,
 } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
-import { Signer } from '@ethersproject/abstract-signer'
+import { IntChainIdTypedDataV4Signer, TypedDataV3Signer } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/signers'
+
 import { ChainId } from '../../../constants'
 import { getDomain } from './utils'
 

@@ -1,4 +1,5 @@
 import invariant from 'tiny-invariant'
+
 import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Percent } from '../../fractions/percent'
 import type { Price } from '../../fractions/price'

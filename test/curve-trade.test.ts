@@ -427,7 +427,6 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.dai.name
         ),
       },
-      */
       {
         testAccount: '0xF006779eAbE823F8EEd05464A1628383af1f7afb',
         tokenInAmount: '100',
@@ -446,6 +445,7 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.wbtc.name
         ),
       },
+      */
       {
         // Random WBTC holder
         testAccount: '0x72a53cdbbcc1b9efa39c834a540550e23463aacb',

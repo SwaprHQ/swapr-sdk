@@ -1,3 +1,7 @@
+import { BigNumber } from '@ethersproject/bignumber'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
+import { Decimal } from 'decimal.js-light'
+import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType } from '../../constants'
@@ -7,14 +11,10 @@ import { Fraction } from '../fractions/fraction'
 import { Percent } from '../fractions/percent'
 import { Price } from '../fractions/price'
 import { TokenAmount } from '../fractions/tokenAmount'
+import { Breakdown, Platform } from '../platforms-breakdown'
 import { currencyEquals, Token } from '../token'
 import { TradeWithSwapTransaction } from './interfaces/trade'
-import type { UnsignedTransaction } from '@ethersproject/transactions'
-import { Breakdown, Platform } from '../platforms-breakdown'
 import { RoutablePlatform } from './routable-platform/routable-platform'
-import fetch from 'node-fetch'
-import { BigNumber } from '@ethersproject/bignumber'
-import { Decimal } from 'decimal.js-light'
 import { tryGetChainId } from './utils'
 
 interface ApiSource {

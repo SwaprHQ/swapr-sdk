@@ -1,11 +1,11 @@
 import type { BytesLike } from '@ethersproject/bytes'
 
+import type { Currency } from '../../currency'
 import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import type { Percent } from '../../fractions/percent'
-import type { Currency } from '../../currency'
 import type { Pair } from '../../pair'
-import type { UniswapV2Trade } from './UniswapV2'
 import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
+import type { UniswapV2Trade } from './UniswapV2'
 
 export type Multicall2TryAggregateResult = {
   success: boolean

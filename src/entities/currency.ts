@@ -33,7 +33,7 @@ export class Currency {
     [ChainId.ARBITRUM_ONE]: Currency.ETHER,
     [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
     [ChainId.XDAI]: Currency.XDAI,
-    [ChainId.POLYGON]: Currency.MATIC
+    [ChainId.POLYGON]: Currency.MATIC,
   }
 
   /**

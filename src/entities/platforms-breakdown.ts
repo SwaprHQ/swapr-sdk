@@ -1,10 +1,10 @@
-import { ChainId } from '../constants'
 import invariant from 'tiny-invariant'
 
+import { ChainId } from '../constants'
 import { Currency } from './currency'
-import { Token } from './token'
-import { Price } from './fractions/price'
 import { Percent } from './fractions'
+import { Price } from './fractions/price'
+import { Token } from './token'
 
 export interface Platform {
   name: string

@@ -1,13 +1,10 @@
-import { GPv2Settlement as GPv2SettlementList  } from '@gnosis.pm/gp-v2-contracts/networks.json'
-import type { _TypedDataEncoder } from "@ethersproject/hash";
+import type { _TypedDataEncoder } from '@ethersproject/hash'
+import { GPv2Settlement as GPv2SettlementList } from '@gnosis.pm/gp-v2-contracts/networks.json'
 
 /**
  * EIP-712 typed data domain.
  */
-export type TypedDataDomain = Parameters<
-  typeof _TypedDataEncoder.hashDomain
->[0];
-
+export type TypedDataDomain = Parameters<typeof _TypedDataEncoder.hashDomain>[0]
 
 /**
  * Return the Gnosis Protocol v2 domain used for signing.
@@ -17,8 +14,8 @@ export type TypedDataDomain = Parameters<
  * @return An EIP-712 compatible typed domain data.
  */
 export function getDomain(chainId: number): TypedDataDomain {
-    // Get settlement contract address
-  const verifyingContract = GPv2SettlementList[(chainId as unknown) as keyof typeof GPv2SettlementList].address
+  // Get settlement contract address
+  const verifyingContract = GPv2SettlementList[chainId as unknown as keyof typeof GPv2SettlementList].address
 
   if (!verifyingContract) {
     throw new Error('Unsupported network. Settlement contract is not deployed')
@@ -28,7 +25,6 @@ export function getDomain(chainId: number): TypedDataDomain {
     name: 'Gnosis Protocol',
     version: 'v2',
     chainId,
-    verifyingContract
+    verifyingContract,
   }
 }
-

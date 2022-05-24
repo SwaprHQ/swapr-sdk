@@ -1,9 +1,10 @@
 import type { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
-import type { CurrencyAmount } from '../../fractions/currencyAmount'
+
 import type { ChainId, TradeType } from '../../../constants'
+import type { Currency } from '../../currency'
+import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import type { Percent } from '../../fractions/percent'
 import type { SigningSchemeValue } from './signatures'
-import type { Currency } from '../../currency'
 
 export enum GnosisProtocolTradeOrderStatus {
   UNKNOWN = 'unknown',

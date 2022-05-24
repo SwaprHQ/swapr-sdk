@@ -1,4 +1,5 @@
 import invariant from 'tiny-invariant'
+
 import { ChainId } from '../constants'
 import { validateAndParseAddress } from '../utils'
 import { Currency } from './currency'
@@ -46,15 +47,27 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on xDai'
     ),
-    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619', 18, 'WETH', 'Wrapped Ether on Polygon')
+    [ChainId.POLYGON]: new Token(
+      ChainId.POLYGON,
+      '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+      18,
+      'WETH',
+      'Wrapped Ether on Polygon'
+    ),
   }
 
   public static readonly WXDAI: { [key: number]: Token } = {
-    [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI')
+    [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI'),
   }
 
-  public static readonly WMATIC: {[key: number]: Token} = {
-    [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 18, 'WMATIC', 'Wrapped Matic')
+  public static readonly WMATIC: { [key: number]: Token } = {
+    [ChainId.POLYGON]: new Token(
+      ChainId.POLYGON,
+      '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+      18,
+      'WMATIC',
+      'Wrapped Matic'
+    ),
   }
 
   public static readonly DXD: { [key: number]: Token } = {
@@ -80,7 +93,7 @@ export class Token extends Currency {
       18,
       'DXD',
       'DXdao from Ethereum'
-    )
+    ),
   }
 
   public static readonly SWPR: { [key: number]: Token } = {
@@ -100,7 +113,7 @@ export class Token extends Currency {
       18,
       'SWPR',
       'Swapr'
-    )
+    ),
   }
 
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
@@ -109,7 +122,7 @@ export class Token extends Currency {
     [ChainId.ARBITRUM_ONE]: Token.WETH[ChainId.ARBITRUM_ONE],
     [ChainId.ARBITRUM_RINKEBY]: Token.WETH[ChainId.ARBITRUM_RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
-    [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON]
+    [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {

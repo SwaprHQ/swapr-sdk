@@ -12,6 +12,6 @@ export function createCacheList<T = any>(): GeneralCacheList<T> {
     [ChainId.XDAI]: new Map(),
     [ChainId.RINKEBY]: new Map(),
     [ChainId.ARBITRUM_RINKEBY]: new Map(),
-    [ChainId.POLYGON]: new Map()
+    [ChainId.POLYGON]: new Map(),
   }
 }

@@ -1,25 +1,25 @@
-import { Price } from './fractions/price'
-import { TokenAmount } from './fractions/tokenAmount'
-import invariant from 'tiny-invariant'
-import JSBI from 'jsbi'
-import { pack, keccak256 } from '@ethersproject/solidity'
 import { getCreate2Address } from '@ethersproject/address'
+import { keccak256, pack } from '@ethersproject/solidity'
+import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
 
 import {
-  BigintIsh,
-  MINIMUM_LIQUIDITY,
-  ZERO,
-  ONE,
   _10000,
-  defaultSwapFee,
+  BigintIsh,
   defaultProtocolFeeDenominator,
+  defaultSwapFee,
+  MINIMUM_LIQUIDITY,
+  ONE,
+  ZERO,
 } from '../constants'
-import { sqrt, parseBigintIsh } from '../utils'
-import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
-import { Token } from './token'
 import { ChainId } from '../constants'
-import { UniswapV2RoutablePlatform } from './trades/routable-platform/uniswap-v2-routable-platform'
+import { InsufficientInputAmountError, InsufficientReservesError } from '../errors'
+import { parseBigintIsh, sqrt } from '../utils'
+import { Price } from './fractions/price'
+import { TokenAmount } from './fractions/tokenAmount'
 import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
+import { Token } from './token'
+import { UniswapV2RoutablePlatform } from './trades/routable-platform/uniswap-v2-routable-platform'
 
 const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.MAINNET]: {},
@@ -27,7 +27,7 @@ const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
   [ChainId.XDAI]: {},
-  [ChainId.POLYGON]: {}
+  [ChainId.POLYGON]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {
