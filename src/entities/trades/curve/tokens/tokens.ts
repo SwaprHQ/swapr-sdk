@@ -588,5 +588,5 @@ export const CURVE_TOKENS: CurveTokenList = {
   [ChainId.ARBITRUM_ONE]: TOKENS_ARBITRUM_ONE,
   [ChainId.ARBITRUM_RINKEBY]: {},
   [ChainId.RINKEBY]: {},
-  [ChainId.POLYGON]: {}
+  [ChainId.POLYGON]: {},
 }

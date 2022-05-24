@@ -1,8 +1,9 @@
 import { Contract } from '@ethersproject/contracts'
-import { ChainId } from '../../../../constants'
-import { poolMethods } from '../abi/common'
-import { getProvider } from '../../utils'
 import { Provider } from '@ethersproject/providers'
+
+import { ChainId } from '../../../../constants'
+import { getProvider } from '../../utils'
+import { poolMethods } from '../abi/common'
 
 interface PoolToken {
   index: number

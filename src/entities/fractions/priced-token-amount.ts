@@ -1,8 +1,9 @@
+import { parseUnits } from '@ethersproject/units'
+
 import { BigintIsh } from '../../constants'
 import { PricedToken } from '../priced-token'
 import { CurrencyAmount } from './currencyAmount'
 import { TokenAmount } from './tokenAmount'
-import { utils } from 'ethers'
 
 export class PricedTokenAmount extends TokenAmount {
   public readonly token: PricedToken
@@ -16,12 +17,10 @@ export class PricedTokenAmount extends TokenAmount {
   public get nativeCurrencyAmount(): CurrencyAmount {
     return new CurrencyAmount(
       this.token.price.quoteCurrency,
-      utils
-        .parseUnits(
-          this.multiply(this.token.price).toFixed(this.token.price.quoteCurrency.decimals),
-          this.token.price.quoteCurrency.decimals
-        )
-        .toString()
+      parseUnits(
+        this.multiply(this.token.price).toFixed(this.token.price.quoteCurrency.decimals),
+        this.token.price.quoteCurrency.decimals
+      ).toString()
     )
   }
 }

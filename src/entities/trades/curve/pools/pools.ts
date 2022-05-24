@@ -1,16 +1,17 @@
 import type { ContractInterface } from '@ethersproject/contracts'
+
 import { ChainId } from '../../../../constants'
 import {
-  CURVE_WETH_ERC20_POOL_ABI,
-  CURVE_CRYPTO_SWAP_ABI,
   CURVE_3POOL_ABI,
+  CURVE_3POOL_UNDERLYING_ABI,
+  CURVE_CRYPTO_SWAP_ABI,
+  CURVE_ETHXERC20_256_ABI,
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
-  CURVE_ETHXERC20_256_ABI,
-  CURVE_3POOL_UNDERLYING_ABI,
+  CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
-import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../tokens'
+import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
 import { CurveToken } from '../tokens/types'
 
 export interface CurvePool {
@@ -507,5 +508,5 @@ export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
   // Empty
   [ChainId.RINKEBY]: [],
   [ChainId.ARBITRUM_RINKEBY]: [],
-  [ChainId.POLYGON]: []
+  [ChainId.POLYGON]: [],
 }

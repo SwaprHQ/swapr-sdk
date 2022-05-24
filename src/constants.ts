@@ -1,22 +1,23 @@
-import JSBI from 'jsbi'
-import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
-import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
-import SWPR_CLAIMER_ABI from './abis/swpr-claimer.json'
-import MULTICALL2_ABI from './abis/multicall2.json'
 import {
-  rinkeby as coreRinkeby,
-  mainnet as coreMainnet,
   arbitrumOne as coreArbitrumOne,
   arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
+  mainnet as coreMainnet,
+  rinkeby as coreRinkeby,
   xdai as coreXDai,
 } from '@swapr/core/.contracts.json'
 import {
-  rinkeby as peripheryRinkeby,
-  mainnet as peripheryMainnet,
   arbitrumOne as peripheryArbitrumOne,
   arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
+  mainnet as peripheryMainnet,
+  rinkeby as peripheryRinkeby,
   xdai as peripheryXDai,
 } from '@swapr/periphery/.contracts.json'
+import JSBI from 'jsbi'
+
+import MULTICALL2_ABI from './abis/multicall2.json'
+import STAKING_REWARDS_DISTRIBUTION_ABI from './abis/staking-rewards-distribution.json'
+import STAKING_REWARDS_FACTORY_ABI from './abis/staking-rewards-distribution-factory.json'
+import SWPR_CLAIMER_ABI from './abis/swpr-claimer.json'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -49,7 +50,7 @@ export const FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_ONE]: coreArbitrumOne.factory,
   [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
   [ChainId.XDAI]: coreXDai.factory,
-  [ChainId.POLYGON]: ZERO_ADDRESS
+  [ChainId.POLYGON]: ZERO_ADDRESS,
 }
 
 export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -58,7 +59,7 @@ export const ROUTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.XDAI]: peripheryXDai.router,
   [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
   [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router,
-  [ChainId.POLYGON] : ZERO_ADDRESS
+  [ChainId.POLYGON]: ZERO_ADDRESS,
 }
 
 export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } = {
@@ -67,7 +68,7 @@ export const STAKING_REWARDS_FACTORY_ADDRESS: { [chainId in ChainId]: string } =
   [ChainId.XDAI]: '0xa039793Af0bb060c597362E8155a0327d9b8BEE8',
   [ChainId.ARBITRUM_ONE]: '0xecA7F78d59D16812948849663b26FE10E320f80C',
   [ChainId.ARBITRUM_RINKEBY]: '0x41e657cAdE74f45b7E2F0F4a5AeE0239f2fB4E1F',
-  [ChainId.POLYGON] : ZERO_ADDRESS
+  [ChainId.POLYGON]: ZERO_ADDRESS,
 }
 
 export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
@@ -76,7 +77,7 @@ export const SWPR_CLAIMER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_RINKEBY]: '0x99583f330814E04de96C0288FBF82B5E35A009dc',
   [ChainId.ARBITRUM_ONE]: '0xe54942077Df7b8EEf8D4e6bCe2f7B58B0082b0cd',
   [ChainId.XDAI]: ZERO_ADDRESS,
-  [ChainId.POLYGON]: ZERO_ADDRESS
+  [ChainId.POLYGON]: ZERO_ADDRESS,
 }
 
 // converter only deployed on Arb1
@@ -86,7 +87,7 @@ export const SWPR_CONVERTER_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_RINKEBY]: ZERO_ADDRESS,
   [ChainId.ARBITRUM_ONE]: '0x2b058af96175A847Bf3E5457B3A702F807daDdFd',
   [ChainId.XDAI]: ZERO_ADDRESS,
-  [ChainId.POLYGON]: ZERO_ADDRESS
+  [ChainId.POLYGON]: ZERO_ADDRESS,
 }
 
 export const SWPR_WHITELIST_IPFS_HASH = 'QmcjTAvDJZU339jrc9Ky2pXKR68R1SjnwdyGSQjt1kad9r'
@@ -128,13 +129,13 @@ const MULTICALL2_ADDRESS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_ONE]: '0x80c7dd17b01855a6d2347444a0fcc36136a314de',
   [ChainId.XDAI]: '0xFAa296891cA6CECAF2D86eF5F7590316d0A17dA0',
   [ChainId.ARBITRUM_RINKEBY]: '0x309e61A4c36a4a9f131f8844eA521F6384B6C9E3',
-  [ChainId.POLYGON]: '0x275617327c958bD06b5D6b871E7f491D76113dd8'
+  [ChainId.POLYGON]: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
 }
 
 export {
   MULTICALL2_ABI,
   MULTICALL2_ADDRESS,
-  STAKING_REWARDS_FACTORY_ABI,
   STAKING_REWARDS_DISTRIBUTION_ABI,
+  STAKING_REWARDS_FACTORY_ABI,
   SWPR_CLAIMER_ABI,
 }

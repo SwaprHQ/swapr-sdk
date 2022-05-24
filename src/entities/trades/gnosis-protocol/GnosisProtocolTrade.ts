@@ -1,31 +1,31 @@
+import { Signer } from '@ethersproject/abstract-signer'
+import { parseUnits } from '@ethersproject/units'
 import { Api as GnosisProtcolApi, Environment } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/api'
-import { GPv2VaultRelayer as GPv2VaultRelayerList } from '@gnosis.pm/gp-v2-contracts/networks.json'
 import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
 import { SigningScheme } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
-import { Signer } from '@ethersproject/abstract-signer'
-import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
-import { parseUnits } from '@ethersproject/units'
-import invariant from 'tiny-invariant'
+import { GPv2VaultRelayer as GPv2VaultRelayerList } from '@gnosis.pm/gp-v2-contracts/networks.json'
 import dayjs from 'dayjs'
-import { RoutablePlatform } from '../routable-platform/routable-platform'
-import { CurrencyAmount } from '../../fractions/currencyAmount'
+import invariant from 'tiny-invariant'
+
 import { ChainId, ONE, TradeType } from '../../../constants'
-import { tryGetChainId, wrappedCurrency } from '../utils'
-import { TokenAmount } from '../../fractions/tokenAmount'
+import { Currency } from '../../currency'
+import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Fraction } from '../../fractions/fraction'
 import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
+import { TokenAmount } from '../../fractions/tokenAmount'
 import { currencyEquals } from '../../token'
 import { Trade } from '../interfaces/trade'
-import { Currency } from '../../currency'
-
-import { ORDER_APP_DATA, CHAIN_ID_TO_NETWORK, ORDER_PLACEHOLDER_ADDRESS } from './constants'
+import { RoutablePlatform } from '../routable-platform/routable-platform'
+import { tryGetChainId, wrappedCurrency } from '../utils'
+import { CHAIN_ID_TO_NETWORK, ORDER_APP_DATA, ORDER_PLACEHOLDER_ADDRESS } from './constants'
+import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
 import {
   GnosisProtocolTradeBestTradeExactInParams,
   GnosisProtocolTradeBestTradeExactOutParams,
   GnosisProtocolTradeConstructorParams,
-  GnosisProtocolTradeSwapOrderParams,
   GnosisProtocolTradeOrderMetadata,
+  GnosisProtocolTradeSwapOrderParams,
 } from './types'
 
 /**
@@ -89,7 +89,7 @@ export class GnosisProtocolTrade extends Trade {
       fee,
     })
     this.order = order
-    this.approveAddress = GPv2VaultRelayerList[(chainId as unknown) as keyof typeof GPv2VaultRelayerList].address
+    this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
     // The fee token and amount are sell token
     this.feeAmount = feeAmount
   }
@@ -113,8 +113,9 @@ export class GnosisProtocolTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)

@@ -1,10 +1,10 @@
-import { ChainId } from '../constants'
 import invariant from 'tiny-invariant'
 
+import { ChainId } from '../constants'
 import { Currency } from './currency'
-import { Token } from './token'
-import { Pair } from './pair'
 import { Price } from './fractions/price'
+import { Pair } from './pair'
+import { Token } from './token'
 
 export class Route {
   public readonly pairs: Pair[]
@@ -16,11 +16,11 @@ export class Route {
   public constructor(pairs: Pair[], input: Currency, output?: Currency) {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(
-      pairs.every(pair => pair.chainId === pairs[0].chainId),
+      pairs.every((pair) => pair.chainId === pairs[0].chainId),
       'CHAIN_IDS'
     )
     invariant(
-      pairs.every(pair => pair.platform === pairs[0].platform),
+      pairs.every((pair) => pair.platform === pairs[0].platform),
       'PLATFORM'
     )
     invariant(

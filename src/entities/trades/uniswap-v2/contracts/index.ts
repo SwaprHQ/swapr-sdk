@@ -1,21 +1,20 @@
-import { abi as UNISWAPR_PAIR_ABI } from '@swapr/core/build/IDXswapPair.json'
-import { Provider } from '@ethersproject/providers'
+import { Interface } from '@ethersproject/abi'
 import { Contract } from '@ethersproject/contracts'
+import { Provider } from '@ethersproject/providers'
+import { abi as UNISWAPR_PAIR_ABI } from '@swapr/core/build/IDXswapPair.json'
 import flatMap from 'lodash.flatmap'
 
-import type { Currency } from '../../../currency'
-import { wrappedCurrency } from '../../utils'
-import { Pair } from '../../../pair'
 import { ChainId, MULTICALL2_ABI, MULTICALL2_ADDRESS } from '../../../../constants'
-import { UniswapV2RoutablePlatform } from '../../routable-platform/uniswap-v2-routable-platform'
-import { Interface } from '@ethersproject/abi'
-import { getProvider } from '../../utils'
-import { Token } from '../../../../entities/token'
 import { TokenAmount } from '../../../../entities/fractions'
-import { BASES_TO_CHECK_TRADES_AGAINST } from '../constants'
-
-import type { Multicall2TryAggregateResult } from '../types'
+import { Token } from '../../../../entities/token'
+import type { Currency } from '../../../currency'
+import { Pair } from '../../../pair'
+import { UniswapV2RoutablePlatform } from '../../routable-platform/uniswap-v2-routable-platform'
+import { wrappedCurrency } from '../../utils'
+import { getProvider } from '../../utils'
 import { createCacheList } from '../cache'
+import { BASES_TO_CHECK_TRADES_AGAINST } from '../constants'
+import type { Multicall2TryAggregateResult } from '../types'
 
 /**
  * Cache for the UniswapV2 pair fee

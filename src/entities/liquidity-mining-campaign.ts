@@ -1,7 +1,7 @@
-import { Pair, PricedTokenAmount, TokenAmount } from '../entities'
 import invariant from 'tiny-invariant'
-import { BigintIsh } from '../constants'
 
+import { BigintIsh } from '../constants'
+import { Pair, PricedTokenAmount, TokenAmount } from '../entities'
 import { DistributionCampaignBase } from './DistributionCampaignBase'
 
 export interface LiquidityMiningCampaignConstructorParams {

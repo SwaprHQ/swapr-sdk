@@ -1,11 +1,12 @@
+import { parseUnits } from '@ethersproject/units'
 import Decimal from 'decimal.js-light'
 import invariant from 'tiny-invariant'
-import { utils } from 'ethers'
-import { PricedToken } from './priced-token'
-import { Token } from '../entities/token'
+
 import { BigintIsh, ChainId } from '../constants'
-import { PricedTokenAmount, Price, TokenAmount } from '../entities/fractions'
 import { Currency } from '../entities/currency'
+import { Price, PricedTokenAmount, TokenAmount } from '../entities/fractions'
+import { Token } from '../entities/token'
+import { PricedToken } from './priced-token'
 
 export class KpiToken extends PricedToken {
   public readonly kpiId: string
@@ -32,8 +33,8 @@ export class KpiToken extends PricedToken {
       new Price({
         baseCurrency: token,
         quoteCurrency: nativeCurrency,
-        denominator: utils.parseUnits('1', nativeCurrency.decimals).toString(),
-        numerator: utils.parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString()
+        denominator: parseUnits('1', nativeCurrency.decimals).toString(),
+        numerator: parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString(),
       }),
       symbol,
       name

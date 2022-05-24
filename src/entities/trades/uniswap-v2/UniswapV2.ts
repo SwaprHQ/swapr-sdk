@@ -1,6 +1,8 @@
+import { Contract } from '@ethersproject/contracts'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
+import ROUTER_ABI from '../../../abis/router.json'
 import { ONE, TradeType, ZERO } from '../../../constants'
 import { sortedInsert, validateAndParseAddress } from '../../../utils'
 import { Currency } from '../../currency'
@@ -13,12 +15,10 @@ import { Pair } from '../../pair'
 import { Route } from '../../route'
 import { currencyEquals, Token } from '../../token'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
-import ROUTER_ABI from '../../../abis/router.json'
 import { TradeOptions } from '../interfaces/trade-options'
-import { Contract } from '@ethersproject/contracts'
 import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
 import { wrappedAmount, wrappedCurrency } from '../utils'
-
+import { getAllCommonPairs } from './contracts'
 import {
   UniswapV2TradeBestTradeExactInParams,
   UniswapV2TradeBestTradeExactOutParams,
@@ -26,7 +26,6 @@ import {
   UniswapV2TradeComputeTradesExactOutParams,
 } from './types'
 import { computePriceImpact, inputOutputComparator, toHex, ZERO_HEX } from './utilts'
-import { getAllCommonPairs } from './contracts'
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -105,8 +104,9 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)

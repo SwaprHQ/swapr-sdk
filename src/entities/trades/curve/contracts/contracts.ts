@@ -1,22 +1,22 @@
 import { Contract } from '@ethersproject/contracts'
+
 import { ZERO_ADDRESS } from '../../../../constants'
 import { ChainId } from '../../../../constants'
-import { TOKENS_MAINNET } from '../tokens'
+import { getProvider } from '../../utils'
 // ABIs: trimmed for bundle size
 import {
-  REGISTRY_EXCHANGE as REGISTRY_EXCHANGE_ABI,
   ADDRESS_PROVIDER as ADDRESS_PROVIDER_ABI,
-  CURVE_ROUTER as CURVE_ROUTER_ABI,
   CURVE_DAI_EXCHANGE_ABI,
+  CURVE_ROUTER as CURVE_ROUTER_ABI,
+  REGISTRY_EXCHANGE as REGISTRY_EXCHANGE_ABI,
 } from '../abi'
-
+import { TOKENS_MAINNET } from '../tokens'
 import {
   GetBestPoolAndOutputParams,
   GetBestPoolAndOutputResult,
   GetExchangeRoutingInfoParams,
   GetExchangeRoutingInfoResults,
 } from './types'
-import { getProvider } from '../../utils'
 
 // Constants
 export const MAINNET_CONTRACTS = {

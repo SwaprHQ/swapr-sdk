@@ -1,4 +1,5 @@
 import invariant from 'tiny-invariant'
+
 import { ChainId } from '../constants'
 import { Price } from './fractions'
 import { Token } from './token'

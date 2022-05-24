@@ -14,5 +14,5 @@ export const ORDER_PLACEHOLDER_ADDRESS = '0xAb5801a7D398351b8bE11C439e05C5B3259a
 export const CHAIN_ID_TO_NETWORK = {
   1: 'mainnet',
   100: 'xdai',
-  4: 'rinkeby'
+  4: 'rinkeby',
 }

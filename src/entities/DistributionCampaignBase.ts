@@ -1,11 +1,12 @@
-import { BigintIsh, ChainId, SECONDS_IN_YEAR } from '../constants'
+import { parseUnits } from '@ethersproject/units'
 import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
+
+import { BigintIsh, ChainId, SECONDS_IN_YEAR } from '../constants'
 import { parseBigintIsh } from '../utils'
 import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
-import invariant from 'tiny-invariant'
 import { Token } from './token'
-import { parseUnits } from '@ethersproject/units'
 
 const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(

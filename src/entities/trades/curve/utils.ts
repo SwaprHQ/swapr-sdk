@@ -1,6 +1,6 @@
-import { CurvePool } from './pools'
 import { ChainId } from '../../../constants'
-import { CURVE_TOKENS, TOKENS_MAINNET, CurveToken } from './tokens'
+import { CurvePool } from './pools'
+import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET } from './tokens'
 
 /**
  * Returns the token index of a token in a Curve pool

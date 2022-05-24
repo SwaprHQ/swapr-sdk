@@ -1,10 +1,10 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import invariant from 'tiny-invariant'
 
-import { CurrencyAmount } from '../fractions/currencyAmount'
-import { TokenAmount } from '../fractions/tokenAmount'
 import { ChainId } from '../../constants'
 import { Currency } from '../currency'
+import { CurrencyAmount } from '../fractions/currencyAmount'
+import { TokenAmount } from '../fractions/tokenAmount'
 import { Token } from '../token'
 
 /**

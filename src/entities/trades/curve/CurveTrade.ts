@@ -1,39 +1,37 @@
-import type { UnsignedTransaction } from '@ethersproject/transactions'
-import { AddressZero } from '@ethersproject/constants'
 import { BigNumber } from '@ethersproject/bignumber'
+import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 import { Provider } from '@ethersproject/providers'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { parseUnits } from '@ethersproject/units'
-
+import debug from 'debug'
 import Decimal from 'decimal.js-light'
 import invariant from 'tiny-invariant'
-import debug from 'debug'
 
-import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { ChainId, ONE, TradeType } from '../../../constants'
+import { Currency } from '../../currency'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
-import { TokenAmount } from '../../fractions/tokenAmount'
 import { Fraction } from '../../fractions/fraction'
-import { currencyEquals, Token } from '../../token'
 import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
+import { TokenAmount } from '../../fractions/tokenAmount'
+import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
-import { Currency } from '../../currency'
-
-// Curve imports
-import { getExchangeRoutingInfo, getBestCurvePoolAndOutput, getRouter, getCurveDAIExchangeContract } from './contracts'
-import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
+import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
+// Curve imports
+import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
+import { CURVE_POOLS, CurvePool } from './pools'
 import type { CurveToken } from './tokens/types'
-import { CurvePool, CURVE_POOLS } from './pools'
 import {
+  CurveTradeBestTradeExactInParams,
+  CurveTradeBestTradeExactOutParams,
   CurveTradeConstructorParams,
   CurveTradeGetQuoteParams,
   CurveTradeQuote,
-  CurveTradeBestTradeExactOutParams,
-  CurveTradeBestTradeExactInParams,
 } from './types'
+import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 
 interface QuoteFromPool {
   estimatedAmountOut: BigNumber
@@ -127,8 +125,9 @@ export class CurveTrade extends Trade {
     if (this.tradeType === TradeType.EXACT_INPUT) {
       return this.inputAmount
     } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE).add(this.maximumSlippage).multiply(this.inputAmount.raw)
-        .quotient
+      const slippageAdjustedAmountIn = new Fraction(ONE)
+        .add(this.maximumSlippage)
+        .multiply(this.inputAmount.raw).quotient
       return this.inputAmount instanceof TokenAmount
         ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
