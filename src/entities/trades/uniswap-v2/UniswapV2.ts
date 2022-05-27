@@ -2,7 +2,7 @@ import { Contract } from '@ethersproject/contracts'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
-import ROUTER_ABI from '../../../abis/router.json'
+import ROUTER_ABI from '../../../abis/source/router.json'
 import { ONE, TradeType, ZERO } from '../../../constants'
 import { sortedInsert, validateAndParseAddress } from '../../../utils'
 import { Currency } from '../../currency'

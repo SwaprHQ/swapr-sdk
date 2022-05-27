@@ -1,5 +1,5 @@
+import { AddressZero } from '@ethersproject/constants'
 import { ChainId, Fetcher, JSBI, Token } from '../src'
-import { ZERO_ADDRESS } from '../src/constants'
 import { rinkeby } from '@swapr/core/.contracts.json'
 import { getAddress } from '@ethersproject/address'
 import { TEST_TOKENS } from './commons'
@@ -69,11 +69,11 @@ describe('fees', () => {
       const fees = await Fetcher.fetchAllSwapFees(ChainId.RINKEBY, {
         [WETH_WEENUS_RINKEBY.liquidityToken.address]: {
           fee: JSBI.BigInt(10),
-          owner: ZERO_ADDRESS,
+          owner: AddressZero,
         },
         [WETH_XEENUS_RINKEBY.liquidityToken.address]: {
           fee: JSBI.BigInt(15),
-          owner: ZERO_ADDRESS,
+          owner: AddressZero,
         },
       })
       expect(fees[WETH_WEENUS_RINKEBY.liquidityToken.address].fee).toEqual(JSBI.BigInt(10))

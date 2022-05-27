@@ -1,6 +1,6 @@
+import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 
-import { ZERO_ADDRESS } from '../../../../constants'
 import { ChainId } from '../../../../constants'
 import { getProvider } from '../../utils'
 // ABIs: trimmed for bundle size
@@ -67,7 +67,7 @@ export async function getBestCurvePoolAndOutput({
     amountIn.toString()
   )
 
-  if (poolAddress === ZERO_ADDRESS) {
+  if (poolAddress === AddressZero) {
     return
   }
 
@@ -101,7 +101,7 @@ export async function getExchangeRoutingInfo({
     const params = [tokenInAddress, tokenOutAddress, amountIn.toString()]
 
     const exchangeRoutingRes = await routerContract.get_exchange_routing(...params, {
-      from: ZERO_ADDRESS,
+      from: AddressZero,
     })
 
     const [routes, indices, expectedAmountOut] = exchangeRoutingRes
