@@ -21,7 +21,7 @@
     "lint:fix": "eslint src/ --ext .ts --fix",
     "build": "tsc",
     "test": "jest",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "npm run build",
     "docker:up": "docker-compose up -d",
     "docker:restart": "docker-compose restart",
     "docker:clean": "docker-compose kill",
