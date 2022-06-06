@@ -13,6 +13,7 @@ import {
 import { AlphaRouter, SwapRoute } from '@uniswap/smart-order-router'
 import { Pair as UniswapV2Pair } from '@uniswap/v2-sdk'
 import dayjs from 'dayjs'
+import debug from 'debug'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 
@@ -26,8 +27,11 @@ import { RoutablePlatform } from '../../routable-platform/routable-platform'
 import { getProvider, tryGetChainId } from '../../utils'
 import { UniswapTradeGetQuoteParams, UniswapTradeParams } from '../types/UniswapV3.types'
 
+// Debuging logger. See documentation to enable logging.
+const debugUniswapTradeGetQuote = debug('ecoRouter:uniswap:getQuote')
+
 /**
- * UniswapTrade wrapper uses the AutoRouter to find best trade accross all V2 and V3 pools
+ * UniswapTrade uses the AutoRouter to find best trade across V2 and V3 pools
  */
 export class UniswapTrade extends TradeWithSwapTransaction {
   /**
@@ -109,11 +113,6 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     maximumSlippage = maximumSlippage || defaultMaximumSlippage
     provider = provider || getProvider(chainId)
 
-    console.log({
-      amount,
-      quoteCurrency,
-    })
-
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
@@ -146,7 +145,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
           quoteCurrency.name
         )
 
-    console.log('fethcing quote from Uniswap AutoRoute', {
+    debugUniswapTradeGetQuote({
       amountV3,
       quoteCurrencyV3,
       tradeType,
@@ -169,7 +168,9 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       }
     )
 
-    console.log(routeResponse)
+    // Debug
+    debugUniswapTradeGetQuote(routeResponse)
+
     if (routeResponse) {
       return new UniswapTrade({ maximumSlippage, swapRoute: routeResponse })
     }
