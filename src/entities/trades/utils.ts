@@ -51,12 +51,13 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
 /**
  * List of RPC provider URLs for different chains.
  */
-export const RPC_PROVIDER_LIST = {
-  [ChainId.MAINNET as ChainId]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
-  [ChainId.XDAI as ChainId]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
-  [ChainId.RINKEBY as ChainId]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
-  [ChainId.ARBITRUM_ONE as ChainId]: 'https://arb1.arbitrum.io/rpc',
-  [ChainId.ARBITRUM_RINKEBY as ChainId]: 'https://rinkeby.arbitrum.io/rpc',
+export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
+  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.XDAI]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
+  [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.ARBITRUM_ONE]: 'https://arb1.arbitrum.io/rpc',
+  [ChainId.ARBITRUM_RINKEBY]: 'https://rinkeby.arbitrum.io/rpc',
+  [ChainId.POLYGON]: 'https://polygon-rpc.com',
 }
 
 /**
