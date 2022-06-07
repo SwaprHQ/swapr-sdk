@@ -21,6 +21,6 @@ export class RoutablePlatform {
   }
 
   public supportsChain(chainId: ChainId): boolean {
-    return this.chainIds.indexOf(chainId) >= 0
+    return this.chainIds.includes(chainId)
   }
 }

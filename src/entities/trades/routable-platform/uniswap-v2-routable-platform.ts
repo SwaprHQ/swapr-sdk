@@ -1,3 +1,5 @@
+import { AddressZero } from '@ethersproject/constants'
+
 import {
   _30,
   BigintIsh,
@@ -136,6 +138,10 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
   }
 
   public supportsChain(chainId: ChainId): boolean {
-    return !!this.factoryAddress[chainId] && !!this.routerAddress[chainId]
+    return (
+      this.chainIds.includes(chainId) &&
+      this.factoryAddress[chainId] !== AddressZero &&
+      this.routerAddress[chainId] !== AddressZero
+    )
   }
 }
