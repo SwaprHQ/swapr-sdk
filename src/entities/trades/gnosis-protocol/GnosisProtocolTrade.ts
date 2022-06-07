@@ -14,7 +14,7 @@ import { Fraction } from '../../fractions/fraction'
 import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
-import { currencyEquals } from '../../token'
+import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform/routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
@@ -170,7 +170,7 @@ export class GnosisProtocolTrade extends Trade {
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
-    const tokenOut = wrappedCurrency(currencyOut, chainId)
+    const tokenOut = currencyOut as Token
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 
@@ -234,7 +234,7 @@ export class GnosisProtocolTrade extends Trade {
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyIn, chainId)
-    const tokenOut = wrappedCurrency(currencyAmountOut.currency, chainId)
+    const tokenOut = currencyAmountOut.currency as Token
     const amountOutBN = parseUnits(currencyAmountOut.toSignificant(), tokenOut.decimals)
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 

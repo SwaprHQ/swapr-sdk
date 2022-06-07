@@ -24,8 +24,13 @@ export class Currency {
     'Ether',
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
   )
-  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI')
-  public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic')
+  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+  public static readonly MATIC: Currency = new Currency(
+    18,
+    'MATIC',
+    'Matic',
+    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+  )
 
   private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
     [ChainId.MAINNET]: Currency.ETHER,
