@@ -170,7 +170,7 @@ export class GnosisProtocolTrade extends Trade {
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
-    const tokenOut = wrappedCurrency(currencyOut, chainId)
+    const tokenOut = currencyOut as Token
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 
