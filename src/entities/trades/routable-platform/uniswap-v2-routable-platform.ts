@@ -44,6 +44,7 @@ export interface UniswapV2RoutablePlatformConstructorParams {
   name: string
   factoryAddress: { [supportedChainId in ChainId]?: string }
   routerAddress: { [supportedChainId in ChainId]?: string }
+  subgraphEndpoint?: { [supportedChainId in ChainId]?: string }
   initCodeHash: string
   defaultSwapFee: BigintIsh
 }
@@ -54,6 +55,7 @@ export interface UniswapV2RoutablePlatformConstructorParams {
 export class UniswapV2RoutablePlatform extends RoutablePlatform {
   public readonly factoryAddress: { [supportedChainId in ChainId]?: string }
   public readonly routerAddress: { [supportedChainId in ChainId]?: string }
+  public readonly subgraphEndpoint: { [supportedChainId in ChainId]?: string }
   public readonly initCodeHash: string
   public readonly defaultSwapFee: BigintIsh
 
@@ -64,6 +66,13 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     routerAddress: ROUTER_ADDRESS,
     initCodeHash: INIT_CODE_HASH,
     defaultSwapFee,
+    subgraphEndpoint: {
+      [ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-mainnet-v2',
+      [ChainId.ARBITRUM_ONE]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-arbitrum-one-v3',
+      [ChainId.XDAI]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-xdai-v2',
+      [ChainId.RINKEBY]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-rinkeby',
+      [ChainId.ARBITRUM_RINKEBY]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-arbitrum-rinkeby-v2',
+    },
   })
   public static readonly UNISWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.MAINNET, ChainId.RINKEBY],
@@ -72,6 +81,9 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     routerAddress: { [ChainId.MAINNET]: UNISWAP_ROUTER_ADDRESS, [ChainId.RINKEBY]: UNISWAP_ROUTER_ADDRESS },
     initCodeHash: '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     defaultSwapFee: _30,
+    subgraphEndpoint: {
+      [ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2',
+    },
   })
   public static readonly SUSHISWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.POLYGON],
@@ -80,6 +92,7 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     routerAddress: SUSHISWAP_ROUTER_ADDRESS,
     initCodeHash: '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
     defaultSwapFee: _30,
+    subgraphEndpoint: {},
   })
   public static readonly HONEYSWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.XDAI],
@@ -129,12 +142,14 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     routerAddress,
     initCodeHash,
     defaultSwapFee,
+    subgraphEndpoint,
   }: UniswapV2RoutablePlatformConstructorParams) {
     super(chainIds, name)
     this.factoryAddress = factoryAddress
     this.routerAddress = routerAddress
     this.initCodeHash = initCodeHash
     this.defaultSwapFee = defaultSwapFee
+    this.subgraphEndpoint = subgraphEndpoint || {}
   }
 
   public supportsChain(chainId: ChainId): boolean {
