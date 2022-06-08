@@ -1,0 +1,11 @@
+
+
+overwrite: true
+schema: "https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-xdai-v2"
+documents: 'src/**/!(*.d).{ts,tsx}'
+generates:
+  ./src/generated/graphql/index.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request
