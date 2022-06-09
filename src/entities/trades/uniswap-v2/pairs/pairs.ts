@@ -85,50 +85,40 @@ export async function getAllCommonUniswapV2Pairs({
     multicall2CallData
   )) as Multicall2TryAggregateResult[]
 
-  const pairList = getReservesAndSwapFeeCallResults.map(({ success, returnData }, pairIndex) => {
-    if (!success) return undefined
+  const pairList: Pair[] = []
 
-    const pairAddress = pairAddressList[pairIndex]
+  for (let i = 0; i < getReservesAndSwapFeeCallResults.length; i += 2) {
+    const getReservesResults = getReservesAndSwapFeeCallResults[i]
+    const swapFeeResults = getReservesAndSwapFeeCallResults[i + 1]
 
-    if (!pairAddress) return undefined
+    // Skip failed calls
+    if (!getReservesResults.success || !swapFeeResults.success) {
+      continue
+    }
 
-    let pair: Pair | undefined
+    // Decode reserves and swap fee from the results
+    const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult(
+      'getReserves',
+      getReservesResults.returnData
+    )
+    const swapFee =
+      uniswapPairInterface.decodeFunctionResult('swapFee', swapFeeResults.returnData) || platform.defaultSwapFee
 
-    try {
-      // decode the return data
-      const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult('getReserves', returnData)
-      // The next element multicall result has the swap fee
-      const swapFee =
-        uniswapPairInterface.decodeFunctionResult(
-          'swapFee',
-          getReservesAndSwapFeeCallResults[pairIndex + 1].returnData
-        ) || platform.defaultSwapFee
+    const [tokenA, tokenB] = allPairCombinations[i]
+    const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
 
-      const [tokenA, tokenB] = allPairCombinations[pairIndex]
-      const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
-
-      pair = new Pair(
+    pairList.push(
+      new Pair(
         new TokenAmount(token0, reserve0.toString()),
         new TokenAmount(token1, reserve1.toString()),
         swapFee.toString(),
         BigInt(0),
         platform
       )
-    } catch (error) {
-      // ignore errors
-    }
+    )
+  }
 
-    return pair
-  })
-
-  return pairList.reduce<Pair[]>((list, pair) => {
-    // Remove undefined and duplicate pairs
-    if (pair !== undefined && !list.some((p) => p.equals(pair))) {
-      list.push(pair)
-    }
-
-    return list
-  }, [])
+  return pairList
 }
 
 /**
