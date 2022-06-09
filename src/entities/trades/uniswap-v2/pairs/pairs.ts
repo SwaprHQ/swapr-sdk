@@ -136,9 +136,12 @@ export async function getAllCommonUniswapV2PairsFromSubgraph({
     throw new Error(`No subgraph endpoint for chainId ${chainId}`)
   }
 
+  const wrappedCurrencyA = wrappedCurrency(currencyA, chainId)
+  const wrappedCurrencyB = wrappedCurrency(currencyB, chainId)
+
   const results = await getSdk(new GraphQLClient(subgraphEndpoint)).GetAllCommonPairsBetweenTokenAAndTokenB({
-    tokenA: currencyA.address?.toLowerCase() as string,
-    tokenB: currencyB.address?.toLowerCase() as string,
+    tokenA: wrappedCurrencyA.address.toLowerCase() as string,
+    tokenB: wrappedCurrencyB.address.toLowerCase() as string,
   })
 
   const pairListWithDuplicates = [...results.pairsWithTokenA, ...results.pairsWithTokenB]
