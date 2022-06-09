@@ -159,9 +159,7 @@ export async function getAllCommonUniswapV2PairsFromSubgraph({
   return pairList.map((pair) => {
     const token0 = new Token(chainId, pair.token0.id, pair.token0.decimals, pair.token0.symbol, pair.token0.name)
     const token1 = new Token(chainId, pair.token1.id, pair.token1.decimals, pair.token1.symbol, pair.token1.name)
-    const swapFee =
-      pairSwapFeeList.find(({ pairAddress }) => pairAddress.toLowerCase() === pair.id.toLowerCase())?.swapFee ||
-      platform.defaultSwapFee
+    const swapFee = pairSwapFeeList[pair.id.toLowerCase()] || platform.defaultSwapFee
 
     return new Pair(
       new TokenAmount(token0, parseUnits(pair.reserve0, token0.decimals).toString()),
