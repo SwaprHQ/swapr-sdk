@@ -11,6 +11,10 @@ export class Token extends Currency {
   public readonly chainId: ChainId
   public readonly address: string
 
+  public static readonly GNO: { [key: number]: Token } = {
+    [ChainId.XDAI]: new Token(ChainId.XDAI, '0x9c58bacc331c9aa871afd802db6379a98e80cedb', 18, 'GNO', 'Gnosis Token'),
+  }
+
   public static readonly WETH: { [key: number]: Token } = {
     [ChainId.MAINNET]: new Token(
       ChainId.MAINNET,
@@ -185,3 +189,4 @@ export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
 export const SWPR = Token.SWPR
 export const WMATIC = Token.WMATIC
+export const GNO = Token.GNO
