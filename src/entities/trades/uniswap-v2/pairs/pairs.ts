@@ -65,53 +65,61 @@ export async function getAllCommonUniswapV2Pairs({
 
   const uniswapPairInterface = new Interface(UNISWAPR_PAIR_ABI)
 
-  const callData = uniswapPairInterface.encodeFunctionData('getReserves', [])
+  const getReservesCallData = uniswapPairInterface.encodeFunctionData('getReserves', [])
+  const swapFeeCallData = uniswapPairInterface.encodeFunctionData('swapFee', [])
+  const multicall2CallData: { target: string; callData: string }[] = []
 
-  const getReservesCallResults = (await multicallContract.callStatic.tryAggregate(
+  for (const pairAddress of pairAddressList) {
+    multicall2CallData.push({
+      target: pairAddress,
+      callData: getReservesCallData,
+    })
+    multicall2CallData.push({
+      target: pairAddress,
+      callData: swapFeeCallData,
+    })
+  }
+
+  const getReservesAndSwapFeeCallResults = (await multicallContract.callStatic.tryAggregate(
     false,
-    pairAddressList.map((target) => ({ target, callData }))
+    multicall2CallData
   )) as Multicall2TryAggregateResult[]
 
-  // Get the fees
-  const pairSwapFeeList = await getUniswapV2PairSwapFee({
-    pairAddressList,
-    chainId,
+  const pairList = getReservesAndSwapFeeCallResults.map(({ success, returnData }, pairIndex) => {
+    if (!success) return undefined
+
+    const pairAddress = pairAddressList[pairIndex]
+
+    if (!pairAddress) return undefined
+
+    let pair: Pair | undefined
+
+    try {
+      // decode the return data
+      const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult('getReserves', returnData)
+      // The next element multicall result has the swap fee
+      const swapFee =
+        uniswapPairInterface.decodeFunctionResult(
+          'swapFee',
+          getReservesAndSwapFeeCallResults[pairIndex + 1].returnData
+        ) || platform.defaultSwapFee
+
+      const [tokenA, tokenB] = allPairCombinations[pairIndex]
+      const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+
+      pair = new Pair(
+        new TokenAmount(token0, reserve0.toString()),
+        new TokenAmount(token1, reserve1.toString()),
+        swapFee.toString(),
+        BigInt(0),
+        platform
+      )
+    } catch (error) {
+      // ignore errors
+    }
+
+    return pair
   })
-
-  const pairList = await Promise.all(
-    getReservesCallResults.map(async ({ success, returnData }, i) => {
-      if (!success) return undefined
-
-      let pair: Pair | undefined
-
-      try {
-        const pairAddress = pairAddressList[i]
-        // decode the return data
-        const reserves = uniswapPairInterface.decodeFunctionResult('getReserves', returnData)
-
-        const [tokenA, tokenB] = allPairCombinations[i]
-        const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
-        const { reserve0, reserve1 } = reserves
-
-        // fetch the swap fee
-        const swapFee =
-          pairSwapFeeList.find((p) => p.pairAddress.toLowerCase() === pairAddress.toLowerCase())?.swapFee ||
-          platform.defaultSwapFee
-
-        pair = new Pair(
-          new TokenAmount(token0, reserve0.toString()),
-          new TokenAmount(token1, reserve1.toString()),
-          swapFee?.toString() || platform.defaultSwapFee,
-          BigInt(0),
-          platform
-        )
-      } catch (error) {
-        // ignore errors
-      }
-
-      return pair
-    })
-  )
 
   return pairList.reduce<Pair[]>((list, pair) => {
     // Remove undefined and duplicate pairs
