@@ -23,6 +23,8 @@ jobs:
           node-version: '16'
       - name: Install
         run: npm ci
+      - name: Codegen
+        run: npm run graphql:codegen
       - name: Lint
         run: npm run lint
       - name: Build

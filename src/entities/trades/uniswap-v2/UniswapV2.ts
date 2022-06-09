@@ -18,7 +18,7 @@ import { TradeWithSwapTransaction } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
 import { wrappedAmount, wrappedCurrency } from '../utils'
-import { getAllCommonPairs } from './contracts'
+import { getAllCommonUniswapV2Pairs } from './pairs'
 import {
   UniswapV2TradeBestTradeExactInParams,
   UniswapV2TradeBestTradeExactOutParams,
@@ -127,7 +127,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     let bestTrade: UniswapV2Trade | undefined
     try {
       // Fetch the commons pairs between A and B
-      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs({
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonUniswapV2Pairs({
         currencyA: currencyAmountIn.currency,
         currencyB: currencyOut,
         platform,
@@ -167,7 +167,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     let bestTrade: UniswapV2Trade | undefined
     try {
       // Fetch the commons pairs between A and B
-      const commonPairsBetweenCurrenyInAndOut = await getAllCommonPairs({
+      const commonPairsBetweenCurrenyInAndOut = await getAllCommonUniswapV2Pairs({
         currencyA: currencyIn,
         currencyB: currencyAmountOut.currency,
         platform,

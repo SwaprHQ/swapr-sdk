@@ -26,7 +26,8 @@
     "docker:restart": "docker-compose restart",
     "docker:clean": "docker-compose kill",
     "install-peers": "install-peers",
-    "prepare": "install-peers"
+    "prepare": "install-peers",
+    "graphql:codegen": "graphql-codegen --config graphql-codegen.yml"
   },
   "dependencies": {
     "@ethersproject/abi": "^5.4.0",
@@ -47,6 +48,7 @@
     "dayjs": "^1.11.0",
     "debug": "^4.3.4",
     "decimal.js-light": "^2.5.1",
+    "graphql-request": "^4.3.0",
     "jsbi": "^3.1.1",
     "lodash.flatmap": "^4.5.0",
     "node-fetch": "2",
@@ -56,6 +58,10 @@
     "tslib": "^2.3.1"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "2.6.2",
+    "@graphql-codegen/typescript": "2.4.11",
+    "@graphql-codegen/typescript-graphql-request": "^4.4.8",
+    "@graphql-codegen/typescript-operations": "^2.4.0",
     "@types/big.js": "^4.0.5",
     "@types/debug": "^4.1.7",
     "@types/jest": "^27.0.0",
