@@ -2,9 +2,6 @@ import { gql } from 'graphql-request'
 
 export const GET_ALL_COMMON_PAIRS_BETWEEN_TOKEN_A_AND_TOKEN_B = gql`
   query GetAllCommonPairsBetweenTokenAAndTokenB($tokenA: String!, $tokenB: String!) {
-    directPairs: pairs(where: { token0_in: [$tokenA, $tokenB], token1_in: [$tokenB, $tokenA] }) {
-      ...PairDetails
-    }
     pairsWithTokenA: pairs(where: { token0_in: [$tokenA, $tokenB] }) {
       ...PairDetails
     }

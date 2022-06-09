@@ -143,16 +143,12 @@ export async function getAllCommonUniswapV2PairsFromSubgraph({
     tokenB: currencyB.address?.toLowerCase() as string,
   })
 
-  const pairListWithDuplicates = [...results.directPairs, ...results.pairsWithTokenA, ...results.pairsWithTokenB]
+  const pairListWithDuplicates = [...results.pairsWithTokenA, ...results.pairsWithTokenB]
 
   // Remove duplicate pairs
-  const pairList = pairListWithDuplicates.reduce((list, pair) => {
-    const hasPair = list.some((p) => p.id.toLowerCase() === pair.id.toLowerCase())
-    if (pair !== undefined && !hasPair) {
-      list.push(pair)
-    }
-    return list
-  }, [] as typeof pairListWithDuplicates)
+  const pairList = pairListWithDuplicates.filter((pair, index, self) => {
+    return self.findIndex((p) => p.id.toLowerCase() === pair.id.toLowerCase()) === index
+  })
 
   // Fetch the swap fees for all pairs from the chain
   const pairSwapFeeList = await getUniswapV2PairSwapFee({
