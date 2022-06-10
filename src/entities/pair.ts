@@ -19,7 +19,7 @@ import { Price } from './fractions/price'
 import { TokenAmount } from './fractions/tokenAmount'
 import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
 import { Token } from './token'
-import { UniswapV2RoutablePlatform } from './trades/routable-platform/uniswap-v2-routable-platform'
+import { UniswapV2RoutablePlatform } from './trades/routable-platform'
 
 const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
   [ChainId.MAINNET]: {},

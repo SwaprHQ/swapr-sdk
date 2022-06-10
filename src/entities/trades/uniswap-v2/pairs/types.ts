@@ -2,7 +2,7 @@ import type { Provider } from '@ethersproject/providers'
 
 import type { ChainId } from '../../../../constants'
 import type { Currency } from '../../../currency'
-import type { UniswapV2RoutablePlatform } from '../../routable-platform/uniswap-v2-routable-platform'
+import type { UniswapV2RoutablePlatform } from '../../routable-platform'
 
 export interface GetAllCommonUniswapV2Pairs {
   currencyA: Currency

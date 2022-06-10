@@ -4,7 +4,7 @@ import type { Currency } from '../../currency'
 import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import type { Percent } from '../../fractions/percent'
 import type { Pair } from '../../pair'
-import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
+import { UniswapV2RoutablePlatform } from '../routable-platform'
 import type { UniswapV2Trade } from './UniswapV2'
 
 export type Multicall2TryAggregateResult = {

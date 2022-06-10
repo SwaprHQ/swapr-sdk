@@ -17,7 +17,7 @@ import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
 import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
-import { RoutablePlatform } from '../routable-platform/routable-platform'
+import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports

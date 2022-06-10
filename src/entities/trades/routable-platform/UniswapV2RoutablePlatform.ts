@@ -9,7 +9,7 @@ import {
   INIT_CODE_HASH,
   ROUTER_ADDRESS,
 } from '../../../constants'
-import { RoutablePlatform } from './routable-platform'
+import { BaseRoutablePlatform } from './BaseRoutablePlatform'
 
 const UNISWAP_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
 const SUSHISWAP_FACTORY_ADDRESS: { [chainId: number]: string } = {
@@ -39,23 +39,56 @@ const LEVINSWAP_ROUTER_ADDRESS = '0xb18d4f69627F8320619A696202Ad2C430CeF7C53'
 const QUICKSWAP_ROUTER_ADDRESS = '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'
 const DFYN_ROUTER_ADDRESS = '0xA102072A4C07F06EC3B4900FDC4C7B80b6c57429'
 
-export interface UniswapV2RoutablePlatformConstructorParams {
+export interface UniswapV2RoutablePlatformParams {
+  /**
+   * The chainIds this platform supports
+   */
   chainIds: ChainId[]
+  /**
+   * The name of the platform.
+   */
   name: string
-  factoryAddress: { [supportedChainId in ChainId]?: string }
-  routerAddress: { [supportedChainId in ChainId]?: string }
-  subgraphEndpoint?: { [supportedChainId in ChainId]?: string }
+  /**
+   * List of factory addresses, one for each chainId.
+   */
+  factoryAddress: {
+    [supportedChainId in ChainId]?: string
+  }
+  /**
+   * List of router addresses, one for each chainId.
+   */
+  routerAddress: {
+    [supportedChainId in ChainId]?: string
+  }
+  /**
+   * List of subgraph endpoints, one for each chainId.
+   */
+  subgraphEndpoint?: {
+    [supportedChainId in ChainId]?: string
+  }
+  /**
+   * Initial code hash
+   */
   initCodeHash: string
+  /**
+   * The default swap fee for this platform.
+   */
   defaultSwapFee: BigintIsh
 }
 
 /**
- * A platform to which Swapr can route through.
+ * A Uniswap V2 platform to which Swapr can route through.
  */
-export class UniswapV2RoutablePlatform extends RoutablePlatform {
-  public readonly factoryAddress: { [supportedChainId in ChainId]?: string }
-  public readonly routerAddress: { [supportedChainId in ChainId]?: string }
-  public readonly subgraphEndpoint: { [supportedChainId in ChainId]?: string }
+export class UniswapV2RoutablePlatform extends BaseRoutablePlatform {
+  public readonly factoryAddress: {
+    [supportedChainId in ChainId]?: string
+  }
+  public readonly routerAddress: {
+    [supportedChainId in ChainId]?: string
+  }
+  public readonly subgraphEndpoint: {
+    [supportedChainId in ChainId]?: string
+  }
   public readonly initCodeHash: string
   public readonly defaultSwapFee: BigintIsh
 
@@ -74,19 +107,27 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
       [ChainId.ARBITRUM_RINKEBY]: 'https://api.thegraph.com/subgraphs/name/dxgraphs/swapr-arbitrum-rinkeby-v2',
     },
   })
+
   public static readonly UNISWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.MAINNET, ChainId.RINKEBY],
     name: 'Uniswap v2',
-    factoryAddress: { [ChainId.MAINNET]: UNISWAP_FACTORY_ADDRESS, [ChainId.RINKEBY]: UNISWAP_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.MAINNET]: UNISWAP_ROUTER_ADDRESS, [ChainId.RINKEBY]: UNISWAP_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.MAINNET]: UNISWAP_FACTORY_ADDRESS,
+      [ChainId.RINKEBY]: UNISWAP_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.MAINNET]: UNISWAP_ROUTER_ADDRESS,
+      [ChainId.RINKEBY]: UNISWAP_ROUTER_ADDRESS,
+    },
     initCodeHash: '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     defaultSwapFee: _30,
     subgraphEndpoint: {
       [ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2',
     },
   })
+
   public static readonly SUSHISWAP = new UniswapV2RoutablePlatform({
-    chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.POLYGON],
+    chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.POLYGON],
     name: 'Sushiswap',
     factoryAddress: SUSHISWAP_FACTORY_ADDRESS,
     routerAddress: SUSHISWAP_ROUTER_ADDRESS,
@@ -94,47 +135,75 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     defaultSwapFee: _30,
     subgraphEndpoint: {},
   })
+
   public static readonly HONEYSWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.XDAI],
     name: 'Honeyswap',
-    factoryAddress: { [ChainId.XDAI]: HONEYSWAP_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.XDAI]: HONEYSWAP_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.XDAI]: HONEYSWAP_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.XDAI]: HONEYSWAP_ROUTER_ADDRESS,
+    },
     initCodeHash: '0x3f88503e8580ab941773b59034fb4b2a63e86dbc031b3633a925533ad3ed2b93',
     defaultSwapFee: _30,
   })
+
   public static readonly BAOSWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.XDAI],
     name: 'Baoswap',
-    factoryAddress: { [ChainId.XDAI]: BAOSWAP_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.XDAI]: BAOSWAP_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.XDAI]: BAOSWAP_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.XDAI]: BAOSWAP_ROUTER_ADDRESS,
+    },
     initCodeHash: '0x0bae3ead48c325ce433426d2e8e6b07dac10835baec21e163760682ea3d3520d',
     defaultSwapFee: _30,
   })
+
   public static readonly LEVINSWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.XDAI],
     name: 'Levinswap',
-    factoryAddress: { [ChainId.XDAI]: LEVINSWAP_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.XDAI]: LEVINSWAP_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.XDAI]: LEVINSWAP_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.XDAI]: LEVINSWAP_ROUTER_ADDRESS,
+    },
     initCodeHash: '0x4955fd9146732ca7a64d43c7a8d65fe6db1acca27e9c5b3bee7c3abe5849f441',
     defaultSwapFee: _30,
   })
+
   public static readonly QUICKSWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.POLYGON],
     name: 'Quickswap',
-    factoryAddress: { [ChainId.POLYGON]: QUICKSWAP_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.POLYGON]: QUICKSWAP_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.POLYGON]: QUICKSWAP_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.POLYGON]: QUICKSWAP_ROUTER_ADDRESS,
+    },
     initCodeHash: '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f',
     defaultSwapFee: _30,
   })
+
   public static readonly DFYN = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.POLYGON],
     name: 'DFYN',
-    factoryAddress: { [ChainId.POLYGON]: DFYN_FACTORY_ADDRESS },
-    routerAddress: { [ChainId.POLYGON]: DFYN_ROUTER_ADDRESS },
+    factoryAddress: {
+      [ChainId.POLYGON]: DFYN_FACTORY_ADDRESS,
+    },
+    routerAddress: {
+      [ChainId.POLYGON]: DFYN_ROUTER_ADDRESS,
+    },
     initCodeHash: '0xf187ed688403aa4f7acfada758d8d53698753b998a3071b06f1b777f4330eaf3',
     defaultSwapFee: _30,
   })
 
+  /**
+   * Create a new UniswapV2RoutablePlatform instance.
+   */
   public constructor({
     chainIds,
     name,
@@ -143,7 +212,7 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     initCodeHash,
     defaultSwapFee,
     subgraphEndpoint,
-  }: UniswapV2RoutablePlatformConstructorParams) {
+  }: UniswapV2RoutablePlatformParams) {
     super(chainIds, name)
     this.factoryAddress = factoryAddress
     this.routerAddress = routerAddress
@@ -152,6 +221,11 @@ export class UniswapV2RoutablePlatform extends RoutablePlatform {
     this.subgraphEndpoint = subgraphEndpoint || {}
   }
 
+  /**
+   * Check if the platform supports the given chain
+   * @param chainId The chainId of the desired platform
+   * @returns Whether the platform supports the given chain
+   */
   public supportsChain(chainId: ChainId): boolean {
     return (
       this.chainIds.includes(chainId) &&

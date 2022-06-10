@@ -1,9 +1,10 @@
 import { ChainId } from '../../../constants'
+import { BaseRoutablePlatform } from './BaseRoutablePlatform'
 
 /**
  * A platform to which Swapr can route through.
  */
-export class RoutablePlatform {
+export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly ZEROX = new RoutablePlatform([ChainId.MAINNET], '0x')
   public static readonly CURVE = new RoutablePlatform([ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.XDAI], 'Curve')
   public static readonly GNOSIS_PROTOCOL = new RoutablePlatform([ChainId.MAINNET, ChainId.XDAI], 'COW')
@@ -11,16 +12,4 @@ export class RoutablePlatform {
     [ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.POLYGON],
     'Uniswap'
   )
-
-  public readonly chainIds: ChainId[]
-  public readonly name: string
-
-  public constructor(chainIds: ChainId[], name: string) {
-    this.chainIds = chainIds
-    this.name = name
-  }
-
-  public supportsChain(chainId: ChainId): boolean {
-    return this.chainIds.includes(chainId)
-  }
 }

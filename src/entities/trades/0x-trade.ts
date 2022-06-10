@@ -14,7 +14,7 @@ import { TokenAmount } from '../fractions/tokenAmount'
 import { Breakdown, Platform } from '../platforms-breakdown'
 import { currencyEquals, Token } from '../token'
 import { TradeWithSwapTransaction } from './interfaces/trade'
-import { RoutablePlatform } from './routable-platform/routable-platform'
+import { RoutablePlatform } from './routable-platform'
 import { tryGetChainId } from './utils'
 
 interface ApiSource {

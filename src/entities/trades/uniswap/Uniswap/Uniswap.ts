@@ -23,7 +23,7 @@ import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../../
 import { Token } from '../../../token'
 import { maximumSlippage as defaultMaximumSlippage } from '../../constants'
 import { TradeWithSwapTransaction } from '../../interfaces/trade'
-import { RoutablePlatform } from '../../routable-platform/routable-platform'
+import { RoutablePlatform } from '../../routable-platform'
 import { getProvider, tryGetChainId } from '../../utils'
 import { UniswapTradeGetQuoteParams, UniswapTradeParams } from '../types/UniswapV3.types'
 
