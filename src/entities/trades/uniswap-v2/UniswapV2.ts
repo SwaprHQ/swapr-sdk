@@ -16,7 +16,7 @@ import { Route } from '../../route'
 import { currencyEquals, Token } from '../../token'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
-import { UniswapV2RoutablePlatform } from '../routable-platform/uniswap-v2-routable-platform'
+import { UniswapV2RoutablePlatform } from '../routable-platform'
 import { wrappedAmount, wrappedCurrency } from '../utils'
 import { getAllCommonUniswapV2Pairs } from './pairs'
 import {

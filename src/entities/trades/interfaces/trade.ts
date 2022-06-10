@@ -6,7 +6,7 @@ import { Percent } from '../../fractions/percent'
 import type { Price } from '../../fractions/price'
 import type { Breakdown } from '../../platforms-breakdown'
 import type { Route } from '../../route'
-import type { RoutablePlatform } from '../routable-platform/routable-platform'
+import type { RoutablePlatform } from '../routable-platform'
 import type { TradeOptions } from './trade-options'
 
 export type Details = Route | Breakdown | undefined

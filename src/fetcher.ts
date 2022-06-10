@@ -11,7 +11,7 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform/uniswap-v2-routable-platform'
+import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
