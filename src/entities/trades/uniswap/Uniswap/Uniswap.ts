@@ -65,10 +65,10 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       : new TokenAmount(outpuCurrency as Token, outputAmountBN.toBigInt())
 
     const executionPrice = new Price({
-      baseCurrency: inputCurrency,
-      quoteCurrency: outpuCurrency,
-      denominator: inputAmount.raw,
-      numerator: inputAmount.raw,
+      baseCurrency: swapRoute.trade.executionPrice.baseCurrency,
+      quoteCurrency: swapRoute.trade.executionPrice.quoteCurrency,
+      denominator: swapRoute.trade.executionPrice.denominator,
+      numerator: swapRoute.trade.executionPrice.numerator,
     })
 
     const priceImpact = new Percent(swapRoute.trade.priceImpact.numerator, swapRoute.trade.priceImpact.denominator)
