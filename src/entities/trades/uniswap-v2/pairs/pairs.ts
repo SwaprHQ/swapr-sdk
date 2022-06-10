@@ -2,6 +2,7 @@ import { Interface } from '@ethersproject/abi'
 import { Contract } from '@ethersproject/contracts'
 import { parseUnits } from '@ethersproject/units'
 import { abi as UNISWAPR_PAIR_ABI } from '@swapr/core/build/IDXswapPair.json'
+import debug from 'debug'
 import { GraphQLClient } from 'graphql-request'
 import flatMap from 'lodash.flatmap'
 
@@ -17,6 +18,8 @@ import type { Multicall2TryAggregateResult } from '../types'
 import { getUniswapV2PairSwapFee } from './fees'
 import { GetAllCommonUniswapV2Pairs, GetAllCommonUniswapV2PairsFromSubgraphParams } from './types'
 
+const getAllCommonUniswapV2PairsDebug = debug('ecoRouter:uniswap:getAllCommonUniswapV2Pairs')
+
 /**
  * Fetches all pairs through which the given tokens can be traded. Use `getAllCommonPairsFromSubgraph` for better results.
  * @returns the pair list
@@ -27,10 +30,16 @@ export async function getAllCommonUniswapV2Pairs({
   platform,
   provider,
 }: GetAllCommonUniswapV2Pairs): Promise<Pair[]> {
-  const chainId = (currencyA as Token).chainId ?? (currencyB as Token).chainId
-  // Get a provider if one isn't provided
-  provider = provider ?? getProvider(chainId)
+  // Return value
+  const pairList: Pair[] = []
 
+  // Extract the chain Id from the currencies
+  const chainId = (currencyA as Token).chainId ?? (currencyB as Token).chainId
+
+  // Get a provider if one isn't provided
+  provider = provider || getProvider(chainId)
+
+  // Create list of all possible pairs for the given currencies
   const bases: Token[] = BASES_TO_CHECK_TRADES_AGAINST[chainId] ?? []
 
   const [tokenA, tokenB] = [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)]
@@ -43,22 +52,25 @@ export async function getAllCommonUniswapV2Pairs({
     // the direct pair
     [tokenA, tokenB],
     // token A against all bases
-    ...bases.map((base): [Token, Token] => [tokenA, base]),
+    ...bases.map((base) => [tokenA, base]),
     // token B against all bases
-    ...bases.map((base): [Token, Token] => [tokenB, base]),
+    ...bases.map((base) => [tokenB, base]),
     // each base against all bases
     ...basePairs,
   ]
     .filter((tokens): tokens is [Token, Token] => Boolean(tokens[0] && tokens[1]))
     .filter(([t0, t1]) => t0.address !== t1.address)
 
-  // Compute the pair addresses
-  const pairAddressList = allPairCombinations.reduce<string[]>((list, [tokenA, tokenB]) => {
+  // Compute the pair addresses along with token0 and token1, sorted
+  const pairTokenList = allPairCombinations.reduce<Record<string, [Token, Token]>>((list, [tokenA, tokenB]) => {
     if (tokenA && tokenB && !tokenA.equals(tokenB) && chainId && platform.supportsChain(chainId)) {
-      list.push(Pair.getAddress(tokenA, tokenB, platform))
+      const pairAddress = Pair.getAddress(tokenA, tokenB, platform)
+      list[pairAddress] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     }
     return list
-  }, [])
+  }, {})
+
+  const pairAddressList = Object.keys(pairTokenList)
 
   // Fetch the pair reserves via multicall
   const multicallContract = new Contract(MULTICALL2_ADDRESS[chainId], MULTICALL2_ABI, provider)
@@ -85,37 +97,44 @@ export async function getAllCommonUniswapV2Pairs({
     multicall2CallData
   )) as Multicall2TryAggregateResult[]
 
-  const pairList: Pair[] = []
-
   for (let i = 0; i < getReservesAndSwapFeeCallResults.length; i += 2) {
+    const pairAddressIndex = i / 2
+    const pairAddress = pairAddressList[pairAddressIndex]
     const getReservesResults = getReservesAndSwapFeeCallResults[i]
     const swapFeeResults = getReservesAndSwapFeeCallResults[i + 1]
 
-    // Skip failed calls
-    if (!getReservesResults.success || !swapFeeResults.success) {
+    // Skip failed getReserves calls
+    if (!getReservesResults.success || !pairAddress) {
       continue
     }
 
-    // Decode reserves and swap fee from the results
-    const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult(
-      'getReserves',
-      getReservesResults.returnData
-    )
-    const swapFee =
-      uniswapPairInterface.decodeFunctionResult('swapFee', swapFeeResults.returnData) || platform.defaultSwapFee
-
-    const [tokenA, tokenB] = allPairCombinations[i]
-    const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
-
-    pairList.push(
-      new Pair(
-        new TokenAmount(token0, reserve0.toString()),
-        new TokenAmount(token1, reserve1.toString()),
-        swapFee.toString(),
-        BigInt(0),
-        platform
+    try {
+      // Decode reserves and swap fee from the results
+      const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult(
+        'getReserves',
+        getReservesResults.returnData
       )
-    )
+
+      // Swap fee is only available in Swapr's extended UniswapV2Pair contract
+      // For any other fork, we use the default swap fee
+      const swapFee = swapFeeResults?.success
+        ? uniswapPairInterface.decodeFunctionResult('swapFee', swapFeeResults.returnData)
+        : platform.defaultSwapFee
+
+      const [token0, token1] = pairTokenList[pairAddress]
+
+      pairList.push(
+        new Pair(
+          new TokenAmount(token0, reserve0.toString()),
+          new TokenAmount(token1, reserve1.toString()),
+          swapFee.toString(),
+          BigInt(0),
+          platform
+        )
+      )
+    } catch (e) {
+      getAllCommonUniswapV2PairsDebug(e)
+    }
   }
 
   return pairList
