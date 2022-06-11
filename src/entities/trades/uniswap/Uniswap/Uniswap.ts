@@ -6,7 +6,6 @@ import { parseUnits } from '@ethersproject/units'
 import { Protocol } from '@uniswap/router-sdk'
 import {
   CurrencyAmount as UniswapCurrencyAmount,
-  Ether as UniswapEther,
   Percent as UniswapPercent,
   Token as UniswapToken,
 } from '@uniswap/sdk-core'
@@ -26,6 +25,7 @@ import { TradeWithSwapTransaction } from '../../interfaces/trade'
 import { RoutablePlatform } from '../../routable-platform'
 import { getProvider, tryGetChainId } from '../../utils'
 import { UniswapTradeGetQuoteParams, UniswapTradeParams } from '../types/UniswapV3.types'
+import { getUniswapNativeCurrency } from '../utils'
 
 // Debuging logger. See documentation to enable logging.
 const debugUniswapTradeGetQuote = debug('ecoRouter:uniswap:getQuote')
@@ -124,7 +124,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     // Map the current currencies to compatible types from the Uniswap SDK
     const amountV3 = UniswapCurrencyAmount.fromRawAmount(
       Currency.isNative(amount.currency)
-        ? UniswapEther.onChain(chainId)
+        ? getUniswapNativeCurrency(chainId)
         : new UniswapToken(
             chainId,
             amount.currency.address as string,
@@ -136,7 +136,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     )
 
     const quoteCurrencyV3 = Currency.isNative(quoteCurrency)
-      ? UniswapEther.onChain(chainId)
+      ? getUniswapNativeCurrency(chainId)
       : new UniswapToken(
           chainId,
           quoteCurrency.address as string,
