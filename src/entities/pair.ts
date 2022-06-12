@@ -124,7 +124,7 @@ export class Pair {
       ? [tokenAmountA, tokenAmountB]
       : [tokenAmountB, tokenAmountA]
 
-    this.platform = platform ? platform : UniswapV2RoutablePlatform.SWAPR
+    this.platform = platform
     const liquidityTokenAddress = Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token, platform)
     this.liquidityToken = new Token(tokenAmounts[0].token.chainId, liquidityTokenAddress, 18, 'DXS', 'DXswap')
     this.protocolFeeDenominator = protocolFeeDenominator ? protocolFeeDenominator : defaultProtocolFeeDenominator
@@ -225,7 +225,9 @@ export class Pair {
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
         this.swapFee,
-        this.protocolFeeDenominator
+        this.protocolFeeDenominator,
+        this.platform,
+        this.liquidityMiningCampaigns
       ),
     ]
   }
@@ -257,7 +259,9 @@ export class Pair {
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
         this.swapFee,
-        this.protocolFeeDenominator
+        this.protocolFeeDenominator,
+        this.platform,
+        this.liquidityMiningCampaigns
       ),
     ]
   }
