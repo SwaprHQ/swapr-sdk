@@ -97,6 +97,8 @@ export const BAO = new Token(
 
 export const AGAVE = new Token(ChainId.XDAI, '0x3a97704a1b25F08aa230ae53B352e2e72ef52843', 18, 'AGVE', 'Agave token')
 
+export const GNO = new Token(ChainId.XDAI, '0x9c58bacc331c9aa871afd802db6379a98e80cedb', 18, 'GNO', 'Gnosis Token')
+
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [ChainId.MAINNET]: [
@@ -127,6 +129,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     STAKE,
     AGAVE,
     BAO,
+    GNO,
   ],
   [ChainId.POLYGON]: [WMATIC[ChainId.POLYGON], WBTC[ChainId.POLYGON], USDC[ChainId.POLYGON], USDT[ChainId.POLYGON]],
 }
