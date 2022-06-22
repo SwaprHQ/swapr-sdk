@@ -30,7 +30,7 @@
     "graphql:codegen": "graphql-codegen --config graphql-codegen.yml"
   },
   "dependencies": {
-    "@ethersproject/abi": "^5.4.0",
+    "@ethersproject/abi": "^5.6.4",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.0",
     "@ethersproject/constants": "^5.4.0",
