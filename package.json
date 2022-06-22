@@ -35,7 +35,7 @@
     "@ethersproject/bignumber": "^5.4.0",
     "@ethersproject/constants": "^5.4.0",
     "@ethersproject/contracts": "^5.4.0",
-    "@ethersproject/networks": "^5.4.0",
+    "@ethersproject/networks": "^5.6.4",
     "@ethersproject/providers": "^5.4.0",
     "@ethersproject/solidity": "^5.4.0",
     "@ethersproject/transactions": "^5.4.0",
