@@ -264,7 +264,7 @@ export class GnosisProtocolTrade extends Trade {
         ? CurrencyAmount.nativeCurrency(quote.sellAmount.toString(), chainId)
         : new TokenAmount(tokenIn, quote.sellAmount.toString())
 
-      const outputAmount = Currency.isNative(currencyIn)
+      const outputAmount = Currency.isNative(currencyAmountOut.currency)
         ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
         : new TokenAmount(tokenOut, quote.buyAmount.toString())
 
