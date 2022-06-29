@@ -1,95 +1,22 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
-import { Decimal } from 'decimal.js-light'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType } from '../../constants'
-import { Currency } from '../currency'
-import { CurrencyAmount } from '../fractions/currencyAmount'
-import { Fraction } from '../fractions/fraction'
-import { Percent } from '../fractions/percent'
-import { Price } from '../fractions/price'
-import { TokenAmount } from '../fractions/tokenAmount'
-import { Breakdown, Platform } from '../platforms-breakdown'
-import { currencyEquals, Token } from '../token'
-import { TradeWithSwapTransaction } from './interfaces/trade'
-import { RoutablePlatform } from './routable-platform'
-import { tryGetChainId } from './utils'
-
-interface ApiSource {
-  name: string
-  proportion: string
-}
-
-interface ApiResponse {
-  price: string
-  guaranteedPrice: string
-  to: string
-  data: string
-  value: string
-  gas: string
-  estimatedGas: string
-  gasPrice: string
-  protocolFee: string
-  minimumProtocolFee: string
-  buyTokenAddress: string
-  sellTokenAddress: string
-  buyAmount: string
-  sellAmount: string
-  estimatedGasTokenRefund: string
-  sources: ApiSource[]
-}
-
-const CODE_TO_PLATFORM_NAME: { [apiName: string]: string } = {
-  Uniswap_V2: 'Uniswap v2',
-  'Liquidity provider': 'LP',
-  Balancer_V2: 'Balancer v2',
-  DODO_V2: 'Dodo v2',
-  Uniswap_V3: 'Uniswap v3',
-  PancakeSwap_V2: 'PancakeSwap v2', // shouldn't be used since it's on BSC, but added to be extra sure
-}
-
-const decodePlatformName = (apiName: string): string => CODE_TO_PLATFORM_NAME[apiName] || apiName
-
-const platformsFromSources = (sources: ApiSource[]): Platform[] => {
-  return sources
-    .map((source) => {
-      const proportion = new Decimal(source.proportion)
-      const denominator = new Decimal('10').pow(proportion.decimalPlaces())
-      const numerator = proportion.times(denominator)
-      return {
-        name: decodePlatformName(source.name),
-        percentage: new Percent(numerator.toString(), denominator.toString()),
-      }
-    })
-    .filter((platform) => platform.percentage.greaterThan('0'))
-    .sort((a, b) => (a.percentage.greaterThan(b.percentage) ? -1 : a.percentage.equalTo(b.percentage) ? 0 : 1))
-}
-
-function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId): TokenAmount {
-  if (currencyAmount instanceof TokenAmount) return currencyAmount
-  if (Currency.isNative(currencyAmount.currency))
-    return new TokenAmount(Token.getNativeWrapper(chainId), currencyAmount.raw)
-  invariant(false, 'CURRENCY')
-}
-
-function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
-  if (currency instanceof Token) return currency
-  if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
-  invariant(false, 'CURRENCY')
-}
-
-export interface ZeroXTradeConstructorParams {
-  breakdown: Breakdown
-  input: CurrencyAmount
-  output: CurrencyAmount
-  maximumSlippage: Percent
-  tradeType: TradeType
-  to: string
-  callData: string
-  value: string
-}
+import { ChainId, ONE, TradeType } from '../../../constants'
+import { Currency } from '../../currency'
+import { CurrencyAmount } from '../../fractions/currencyAmount'
+import { Fraction } from '../../fractions/fraction'
+import { Percent } from '../../fractions/percent'
+import { Price } from '../../fractions/price'
+import { TokenAmount } from '../../fractions/tokenAmount'
+import { Breakdown } from '../../platforms-breakdown'
+import { currencyEquals } from '../../token'
+import { TradeWithSwapTransaction } from '../interfaces/trade'
+import { RoutablePlatform } from '../routable-platform'
+import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
+import { ApiResponse, ZeroXTradeConstructorParams } from './types'
+import { decodeStringToPercent, platformsFromSources } from './utils'
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -109,6 +36,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     to,
     callData,
     value,
+    priceImpact,
   }: ZeroXTradeConstructorParams) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
     const chainId = breakdown.chainId
@@ -124,7 +52,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         numerator: output.raw,
       }),
       maximumSlippage,
-      priceImpact: new Percent('0', '100'),
+      priceImpact,
       chainId,
       platform: RoutablePlatform.ZEROX,
     })
@@ -179,11 +107,13 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         ? currencyAmountIn.currency.symbol
         : tokenIn.address
 
+      // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
       const response = await fetch(
         `https://api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountIn.raw
-        }&slippagePercentage=${maximumSlippage.toFixed(3)}`
+        }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
       )
+
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
       const breakdown = new Breakdown(
@@ -209,6 +139,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         to: json.to,
         callData: json.data,
         value: json.value,
+        priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
@@ -234,10 +165,12 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       const sellToken = Currency.isNative(currencyAmountOut.currency)
         ? currencyAmountOut.currency.symbol
         : tokenOut.address
+
+      // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
       const response = await fetch(
         `https://api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountOut.raw
-        }&slippagePercentage=${maximumSlippage.toFixed(3)}`
+        }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
       )
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
@@ -264,6 +197,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         to: json.to,
         callData: json.data,
         value: json.value,
+        priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
