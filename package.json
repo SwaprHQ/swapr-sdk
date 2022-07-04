@@ -43,7 +43,7 @@
     "@gnosis.pm/gp-v2-contracts": "^1.1.2",
     "@swapr/core": "^0.3.18",
     "@swapr/periphery": "^0.3.20",
-    "@uniswap/smart-order-router": "^2.5.30",
+    "@uniswap/smart-order-router": "^2.5.31",
     "big.js": "^5.2.2",
     "dayjs": "^1.11.0",
     "debug": "^4.3.4",
