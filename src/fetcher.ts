@@ -5,13 +5,36 @@ import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
+// import { CurvePool } from './entities/trades/curve/pools'
 
 import { MULTICALL2_ABI } from './abis'
 import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './constants'
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
+import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
+import { CurveToken } from './entities/trades/curve/tokens'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
+interface FactoryPoolsApiResponse {
+  data: {
+    poolData: {
+      address: string
+      assetTypeName: string
+      coins: {
+        address: string
+        decimals: string
+        symbol: string
+      }[]
+      coinsAddresses: string[]
+      decimals: string[]
+      id: string
+      implementation: string
+      implementationAddress: string
+      name: string
+      symbol: string
+    }[]
+  }
+}
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
@@ -214,5 +237,24 @@ export abstract class Fetcher {
     const feeDenominator = await factoryContract.protocolFeeDenominator()
     const feeReceiver = await factoryContract.feeTo()
     return { feeDenominator, feeReceiver }
+  }
+  /**
+   * Fetches user created factory pools for curve protocol
+   */
+
+  public static async fetchCurveFactoryPools(
+    tokenIn: CurveToken,
+    tokenOut: CurveToken,
+    chainId: ChainId
+  ): Promise<any> {
+    if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return undefined
+    console.log('tokenOut', tokenOut)
+    console.log('tokenIn', tokenIn)
+    const response = await fetch(`https://api.curve.fi/api/getPools/${CURVE_FACTORY_SUPPORTED_APIS[chainId]}/factory`)
+
+    if (!response.ok) throw new Error('response not ok')
+    const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
+
+    return allPoolsArray.data.poolData
   }
 }

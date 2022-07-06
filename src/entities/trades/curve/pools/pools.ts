@@ -500,6 +500,14 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   */
 ]
+export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: 'ethereum',
+  [ChainId.XDAI]: 'xdai',
+  [ChainId.ARBITRUM_ONE]: 'arbitrum',
+  [ChainId.POLYGON]: 'polygon',
+  [ChainId.RINKEBY]: '',
+  [ChainId.ARBITRUM_RINKEBY]: '',
+}
 
 export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
   [ChainId.MAINNET]: POOLS_MAINNET,

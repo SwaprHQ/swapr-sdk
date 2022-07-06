@@ -1,4 +1,5 @@
 import { ChainId } from '../../../constants'
+import { Fetcher } from '../../../fetcher'
 import { CurvePool } from './pools'
 import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET } from './tokens'
 
@@ -55,7 +56,14 @@ export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.M
  * @param tokenOutAddress Token out address
  * @returns List of potential pools at which the trade can be done
  */
-export function getRoutablePools(pools: CurvePool[], tokenIn: CurveToken, tokenOut: CurveToken, chainId: ChainId) {
+export async function getRoutablePools(
+  pools: CurvePool[],
+  tokenIn: CurveToken,
+  tokenOut: CurveToken,
+  chainId: ChainId
+) {
+  const factoryPools = await Fetcher.fetchCurveFactoryPools(tokenIn, tokenOut, chainId)
+  console.log('right place', factoryPools)
   return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
