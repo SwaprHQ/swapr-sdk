@@ -3,7 +3,7 @@ import type { UnsignedTransaction } from '@ethersproject/transactions'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType } from '../../../constants'
+import { ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Fraction } from '../../fractions/fraction'
@@ -15,6 +15,7 @@ import { currencyEquals } from '../../token'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
+import { ZEROX_API_URL } from './constants'
 import { ApiResponse, ZeroXTradeConstructorParams } from './types'
 import { decodeStringToPercent, platformsFromSources } from './utils'
 
@@ -94,7 +95,8 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     maximumSlippage: Percent
   ): Promise<ZeroXTrade | undefined> {
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
-    invariant(chainId !== undefined && chainId === ChainId.MAINNET, 'CHAIN_ID') // 0x is only supported in mainnet for now
+    const apiUrl = chainId && ZEROX_API_URL[chainId]
+    invariant(chainId !== undefined && apiUrl !== undefined && apiUrl.length > 0, 'CHAIN_ID')
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const tokenOut = wrappedCurrency(currencyOut, chainId)
@@ -109,7 +111,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
       const response = await fetch(
-        `https://api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
+        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountIn.raw
         }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
       )
@@ -153,7 +155,8 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     maximumSlippage: Percent
   ): Promise<ZeroXTrade | undefined> {
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
-    invariant(chainId !== undefined && chainId === ChainId.MAINNET, 'CHAIN_ID') // 0x is only supported in mainnet for now
+    const apiUrl = chainId && ZEROX_API_URL[chainId]
+    invariant(chainId !== undefined && apiUrl !== undefined && apiUrl.length > 0, 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyIn, chainId)
     const amountOut = wrappedAmount(currencyAmountOut, chainId)
     const tokenOut = wrappedCurrency(currencyAmountOut.currency, chainId)
@@ -168,7 +171,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
       const response = await fetch(
-        `https://api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
+        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountOut.raw
         }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
       )

@@ -8,7 +8,7 @@ import { ChainId, CurrencyAmount, Percent, Token, TokenAmount, ZeroXTrade } from
 import { CODE_TO_PLATFORM_NAME } from '../src/entities/trades/0x/constants'
 import { ApiSource } from '../src/entities/trades/0x/types'
 import { decodePlatformName, decodeStringToPercent, platformsFromSources } from '../src/entities/trades/0x/utils'
-import { TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
+import { TOKENS_MAINNET, TokenType } from '../src/entities/trades/curve/tokens'
 
 describe('ZeroXTrade', () => {
   const maximumSlippage = new Percent('3', '10000')
@@ -83,10 +83,10 @@ describe('ZeroXTrade', () => {
       await execAsync('npm run docker:clean')
     })
 
-    test('Should find a route from 1 stETH to ETH', async () => {
+    test('Should find a route from 1.5 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
-        parseUnits('1', tokenStETH.decimals).toString()
+        parseUnits('1.5', tokenStETH.decimals).toString()
       ) as CurrencyAmount
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountIn, tokenETH, maximumSlippage)
       invariant(!!trade)
@@ -140,6 +140,115 @@ describe('ZeroXTrade', () => {
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
 
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+    })
+  })
+  describe('Polygon', () => {
+    // Enable debugging
+    process.env.__SWAPR_SDK_DEBUG__ = 'true'
+
+    const TOKENS_POLYGON = {
+      wmatic: {
+        address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        name: 'Wrapped Matic',
+        symbol: 'WMATIC',
+        decimals: 18,
+        type: TokenType.ETH,
+      },
+      wbtc: {
+        symbol: 'wBTC',
+        name: 'wBTC',
+        decimals: 8,
+        address: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+        type: TokenType.BTC,
+      },
+      usdt: {
+        symbol: 'USDT',
+        name: 'USDT',
+        address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+        decimals: 6,
+        type: TokenType.USD,
+      },
+    }
+
+    const tokenWMATIC = new Token(
+      ChainId.POLYGON,
+      TOKENS_POLYGON.wmatic.address,
+      TOKENS_POLYGON.wmatic.decimals,
+      TOKENS_POLYGON.wmatic.symbol,
+      TOKENS_POLYGON.wmatic.name
+    )
+
+    const tokenWBTC = new Token(
+      ChainId.POLYGON,
+      TOKENS_POLYGON.wbtc.address,
+      TOKENS_POLYGON.wbtc.decimals,
+      TOKENS_POLYGON.wbtc.symbol,
+      TOKENS_POLYGON.wbtc.name
+    )
+
+    const tokenUSDT = new Token(
+      ChainId.POLYGON,
+      TOKENS_POLYGON.usdt.address,
+      TOKENS_POLYGON.usdt.decimals,
+      TOKENS_POLYGON.usdt.symbol,
+      TOKENS_POLYGON.usdt.name
+    )
+
+    // Common token amounts
+    const currencyAmountWMATIC = new TokenAmount(
+      tokenWMATIC,
+      parseUnits('1.2', tokenWMATIC.decimals).toString()
+    ) as CurrencyAmount
+
+    const currencyAmountUSDT = new TokenAmount(
+      tokenUSDT,
+      parseUnits('0.2', tokenUSDT.decimals).toString()
+    ) as CurrencyAmount
+
+    const currencyAmountWBTC = new TokenAmount(
+      tokenWBTC,
+      parseUnits('0.002', tokenWBTC.decimals).toString()
+    ) as CurrencyAmount
+
+    beforeAll(async () => {
+      await execAsync('npm run docker:up')
+    })
+
+    afterAll(async () => {
+      await execAsync('npm run docker:clean')
+    })
+
+    test('Should find a route from 1.2 WMATIC to USDT', async () => {
+      const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountWMATIC, tokenUSDT, maximumSlippage)
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+    })
+    test('Should find a route from 0.2 USDT to WBTC', async () => {
+      const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountUSDT, tokenWBTC, maximumSlippage)
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+    })
+    test('Should find a route from 0.002 WBTC to WMATIC', async () => {
+      const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountWBTC, tokenWMATIC, maximumSlippage)
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
+      expect(swapTransaction?.value?.toString()).toEqual('0')
+    })
+    test('Should find a route from 0.002 WBTC to WMATIC', async () => {
+      const trade = await ZeroXTrade.bestTradeExactOut(tokenWMATIC, currencyAmountWBTC, maximumSlippage)
+      invariant(!!trade)
+      const swapTransaction = await trade.swapTransaction()
+      expect(swapTransaction.data).toBeDefined()
+      expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
     })
   })
