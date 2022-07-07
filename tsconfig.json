@@ -7,7 +7,6 @@
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -25,5 +24,5 @@
     "resolveJsonModule": true,
   },
   "exclude": ["node_modules", "**/*.spec.ts"],
-  "include": ["./src/**/*.ts", "./jest/jest-env.d.ts"],
+  "include": ["./test/**/*.ts", "./src/**/*.ts", "./jest/jest-env.d.ts"],
 }
