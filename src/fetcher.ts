@@ -267,7 +267,7 @@ export abstract class Fetcher {
         address: address,
         abi: CURVE_3POOL_ABI,
         isMeta: true,
-        tokens: tokens,
+        tokens,
       }
     })
     return modifiedArray

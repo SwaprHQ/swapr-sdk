@@ -141,8 +141,8 @@ const btc = ['btc']
 const eth = ['eth']
 
 export function determineTokeType(symbol: string): TokenType {
-  if (checkIfStringExists(symbol, usd)) return TokenType.USD
   if (checkIfStringExists(symbol, eth)) return TokenType.ETH
   if (checkIfStringExists(symbol, btc)) return TokenType.BTC
+  if (checkIfStringExists(symbol, usd)) return TokenType.USD
   else return TokenType.OTHER
 }

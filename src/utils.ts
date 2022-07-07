@@ -103,9 +103,5 @@ export function debug(...data: any[]) {
  * @returns boolean if string is contained in array of string
  */
 export function checkIfStringExists(needle: string, hayStack: string[]): boolean {
-  const matches = hayStack.findIndex((element) => {
-    if (element.toLocaleLowerCase().includes(needle.toLocaleLowerCase())) return true
-    else return false
-  })
-  return matches !== 0
+  return hayStack.some((element) => needle.toLocaleLowerCase().includes(element.toLocaleLowerCase()))
 }
