@@ -64,8 +64,11 @@ export async function getRoutablePools(
   chainId: ChainId
 ) {
   const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
+  const allPools = pools.concat(factoryPools)
+
   console.log('right place', factoryPools)
-  return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
+
+  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
 
