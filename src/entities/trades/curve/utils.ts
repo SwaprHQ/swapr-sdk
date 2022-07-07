@@ -62,7 +62,7 @@ export async function getRoutablePools(
   tokenOut: CurveToken,
   chainId: ChainId
 ) {
-  const factoryPools = await Fetcher.fetchCurveFactoryPools(tokenIn, tokenOut, chainId)
+  const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
   console.log('right place', factoryPools)
   return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
