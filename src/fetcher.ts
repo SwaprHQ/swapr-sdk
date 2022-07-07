@@ -14,7 +14,8 @@ import { Pair } from './entities/pair'
 import { Token } from './entities/token'
 import { CURVE_3POOL_ABI } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CurvePool, CurveToken, TokenType } from './entities/trades/curve/tokens'
+import { CurvePool, CurveToken } from './entities/trades/curve/tokens'
+import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 interface FactoryPoolsApiResponse {
   data: {
@@ -257,7 +258,7 @@ export abstract class Fetcher {
           name: symbol.toUpperCase(),
           address,
           decimals: parseInt(decimals),
-          type: TokenType.USD,
+          type: determineTokeType(symbol),
         }
       })
       return {

@@ -1,7 +1,8 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
+import { checkIfStringExists } from '../../../utils'
 import { CurvePool } from './pools'
-import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET } from './tokens'
+import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType } from './tokens'
 
 /**
  * Returns the token index of a token in a Curve pool
@@ -98,4 +99,50 @@ export async function getRoutablePools(
       (hasTokenOut || hasUnderlyingTokenOut || hasMetaTokenOut)
     )
   })
+}
+
+/**
+ * Returns tokenType based on token symbol
+ * @param symbol The list of Curve pools
+ * @returns List of potential pools at which the trade can be done
+ */
+const usd = [
+  'dai',
+  'jpy',
+  'aud',
+  'dei',
+  'home',
+  'fiat',
+  'alcx',
+  'cad',
+  'usx',
+  'fei',
+  'crv',
+  'ust',
+  'vst',
+  'fxs',
+  'fox',
+  'cvx',
+  'angle',
+  'gamma',
+  'apw',
+  'usd',
+  'mim',
+  'frax',
+  'apv',
+  'rai',
+  'eur',
+  'gbp',
+  'chf',
+  'dola',
+  'krw',
+]
+const btc = ['btc']
+const eth = ['eth']
+
+export function determineTokeType(symbol: string): TokenType {
+  if (checkIfStringExists(symbol, usd)) return TokenType.USD
+  if (checkIfStringExists(symbol, eth)) return TokenType.ETH
+  if (checkIfStringExists(symbol, btc)) return TokenType.BTC
+  else return TokenType.OTHER
 }
