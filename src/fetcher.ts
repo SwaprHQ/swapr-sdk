@@ -12,7 +12,7 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-import { CURVE_3POOL_ABI, CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
+import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
 import { CurvePool, CurveToken } from './entities/trades/curve/tokens'
 import { determineTokeType } from './entities/trades/curve/utils'
