@@ -12,8 +12,10 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
+import { CURVE_3POOL_ABI } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CurveToken } from './entities/trades/curve/tokens'
+import { CurvePool, CurveToken } from './entities/trades/curve/tokens'
+import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 interface FactoryPoolsApiResponse {
   data: {
@@ -242,19 +244,32 @@ export abstract class Fetcher {
    * Fetches user created factory pools for curve protocol
    */
 
-  public static async fetchCurveFactoryPools(
-    tokenIn: CurveToken,
-    tokenOut: CurveToken,
-    chainId: ChainId
-  ): Promise<any> {
-    if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return undefined
-    console.log('tokenOut', tokenOut)
-    console.log('tokenIn', tokenIn)
+  public static async fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePool[]> {
+    if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return []
+
     const response = await fetch(`https://api.curve.fi/api/getPools/${CURVE_FACTORY_SUPPORTED_APIS[chainId]}/factory`)
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-
-    return allPoolsArray.data.poolData
+    const modifiedArray: CurvePool[] = allPoolsArray.data.poolData.map(({ symbol, name, coins, address }) => {
+      const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
+        return {
+          symbol,
+          name: symbol.toUpperCase(),
+          address,
+          decimals: parseInt(decimals),
+          type: determineTokeType(symbol),
+        }
+      })
+      return {
+        id: symbol,
+        name: name,
+        address: address,
+        abi: CURVE_3POOL_ABI,
+        isMeta: true,
+        tokens,
+      }
+    })
+    return modifiedArray
   }
 }
