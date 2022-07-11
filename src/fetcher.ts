@@ -254,6 +254,8 @@ export abstract class Fetcher {
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
     const modifiedArray: CurvePool[] = allPoolsArray.data.poolData.map(
       ({ symbol, name, coins, address, implementation }) => {
+        console.log('implemenattion', implementation)
+        console.log('checker', implementation.includes('meta'))
         const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
           return {
             symbol,
@@ -268,7 +270,7 @@ export abstract class Fetcher {
           name: name,
           address: address,
           abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta: true,
+          isMeta: implementation.includes('meta'),
           tokens,
         }
       }
