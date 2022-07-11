@@ -1,5 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
+import JSBI from 'jsbi'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
@@ -113,7 +114,10 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       const response = await fetch(
         `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountIn.raw
-        }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
+        }&slippagePercentage=${new Percent(
+          maximumSlippage.numerator,
+          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
+        ).toFixed(2)}`
       )
 
       if (!response.ok) throw new Error('response not ok')
@@ -173,7 +177,10 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       const response = await fetch(
         `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
           amountOut.raw
-        }&slippagePercentage=${new Percent(maximumSlippage.numerator, '10000').toFixed(2)}`
+        }&slippagePercentage=${new Percent(
+          maximumSlippage.numerator,
+          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
+        ).toFixed(2)}`
       )
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse

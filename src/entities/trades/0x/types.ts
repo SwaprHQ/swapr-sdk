@@ -1,3 +1,5 @@
+import Decimal from 'decimal.js-light'
+
 import { TradeType } from '../../../constants'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Percent } from '../../fractions/percent'
@@ -38,4 +40,9 @@ export interface ZeroXTradeConstructorParams {
   callData: string
   value: string
   priceImpact: Percent
+}
+
+export interface DecodeStringFractionReturn {
+  numerator: Decimal
+  denominator: Decimal
 }

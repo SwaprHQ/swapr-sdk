@@ -3,15 +3,20 @@ import Decimal from 'decimal.js-light'
 import { Percent } from '../../fractions/percent'
 import { Platform } from '../../platforms-breakdown'
 import { CODE_TO_PLATFORM_NAME } from './constants'
-import { ApiSource } from './types'
+import { ApiSource, DecodeStringFractionReturn } from './types'
 
 export const decodePlatformName = (apiName: string): string => CODE_TO_PLATFORM_NAME[apiName] || apiName
 
-export const decodeStringToPercent = (value: string, isStringPercent?: boolean): Percent => {
+export const decodeStringFraction = (value: string): DecodeStringFractionReturn => {
   const proportion = new Decimal(value)
   const denominator = new Decimal('10').pow(proportion.decimalPlaces())
-  const percent = isStringPercent ? new Decimal('10').pow(2) : 1
   const numerator = proportion.times(denominator)
+  return { numerator, denominator }
+}
+
+export const decodeStringToPercent = (value: string, isStringPercent?: boolean): Percent => {
+  const { numerator, denominator } = decodeStringFraction(value)
+  const percent = isStringPercent ? new Decimal('10').pow(2) : 1
   return new Percent(numerator.toString(), denominator.times(percent).toString())
 }
 
