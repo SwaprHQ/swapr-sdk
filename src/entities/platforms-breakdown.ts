@@ -23,7 +23,7 @@ export class Breakdown {
     invariant(
       platforms
         .reduce((accumulator, platform) => accumulator.add(platform.percentage), new Percent('0', '100'))
-        .toFixed(2) === '100.00',
+        .toFixed(2) === '1.00',
       'Inconsistent breakdown percentage'
     )
     if (input instanceof Token && output instanceof Token)

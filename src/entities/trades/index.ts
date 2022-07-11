@@ -1,4 +1,4 @@
-export * from './0x-trade'
+export * from './0x'
 export * from './curve'
 export * from './gnosis-protocol'
 export * from './interfaces/trade'
