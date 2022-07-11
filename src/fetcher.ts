@@ -12,7 +12,8 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-import { CURVE_3POOL_ABI } from './entities/trades/curve/abi'
+
+import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
 import { CurvePool, CurveToken } from './entities/trades/curve/tokens'
 import { determineTokeType } from './entities/trades/curve/utils'
@@ -251,25 +252,27 @@ export abstract class Fetcher {
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    const modifiedArray: CurvePool[] = allPoolsArray.data.poolData.map(({ symbol, name, coins, address }) => {
-      const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
+    const modifiedArray: CurvePool[] = allPoolsArray.data.poolData.map(
+      ({ symbol, name, coins, address, implementation }) => {
+        const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
+          return {
+            symbol,
+            name: symbol.toUpperCase(),
+            address,
+            decimals: parseInt(decimals),
+            type: determineTokeType(symbol),
+          }
+        })
         return {
-          symbol,
-          name: symbol.toUpperCase(),
-          address,
-          decimals: parseInt(decimals),
-          type: determineTokeType(symbol),
+          id: symbol,
+          name: name,
+          address: address,
+          abi: CURVE_POOL_ABI_MAP[implementation],
+          isMeta: true,
+          tokens,
         }
-      })
-      return {
-        id: symbol,
-        name: name,
-        address: address,
-        abi: CURVE_3POOL_ABI,
-        isMeta: true,
-        tokens,
       }
-    })
+    )
     return modifiedArray
   }
 }
