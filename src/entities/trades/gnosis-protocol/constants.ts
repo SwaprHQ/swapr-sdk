@@ -1,7 +1,7 @@
 /**
  * Default App Data for submitting orders to GPv2 API
  */
-export const ORDER_APP_DATA = '0xe0b7067c7ae666fecbfe5780c62fa58cea3c6daa8968015baf11d0ab4c568662'
+export const ORDER_APP_DATA = '0xE0B7067C7AE666FECBFE5780C62FA58CEA3C6DAA8968015BAF11D0AB4C568650'
 
 /**
  * Default placeholder address for fetching quotes from GPV2 API when a wallet is not connected
