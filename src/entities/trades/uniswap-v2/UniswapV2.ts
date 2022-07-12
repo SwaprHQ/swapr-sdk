@@ -83,6 +83,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
       priceImpact: computePriceImpact(route.midPrice, inputAmount, outputAmount),
       chainId: route.chainId,
       platform: route.pairs[0].platform,
+      approveAddress: route.pairs[0].platform.routerAddress[chainId] as string,
     })
   }
 

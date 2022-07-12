@@ -22,6 +22,7 @@ export interface TradeConstructorParams {
   chainId: ChainId
   platform: RoutablePlatform
   fee?: Percent
+  approveAddress: string
 }
 
 /**
@@ -30,17 +31,44 @@ export interface TradeConstructorParams {
  */
 export abstract class Trade {
   public readonly details: Details
-  public readonly tradeType: TradeType
-  public readonly inputAmount: CurrencyAmount
-  public readonly outputAmount: CurrencyAmount
-  public readonly maximumSlippage: Percent
-  public readonly executionPrice: Price
-  public readonly priceImpact: Percent
-  public readonly chainId: ChainId
-  public readonly platform: RoutablePlatform
-
   /**
-   * The protocol fee
+   * The input amount of the trade.
+   */
+  public readonly tradeType: TradeType
+  /**
+   * The input amount of the trade.
+   */
+  public readonly inputAmount: CurrencyAmount
+  /**
+   * The output amount of the trade.
+   */
+  public readonly outputAmount: CurrencyAmount
+  /**
+   * The maximum slippage allowed in the trade.
+   */
+  public readonly maximumSlippage: Percent
+  /**
+   * The execution price of the trade.
+   */
+  public readonly executionPrice: Price
+  /**
+   * The price impact of the trade, as a percentage.
+   */
+  public readonly priceImpact: Percent
+  /**
+   * The chainId of the trade.
+   */
+  public readonly chainId: ChainId
+  /**
+   * A platform that this trade is executed on.
+   */
+  public readonly platform: RoutablePlatform
+  /**
+   * An address the EOA must approve to spend its tokenIn
+   */
+  public readonly approveAddress: string
+  /**
+   * The trade fee
    */
   public readonly fee: Percent
 
@@ -55,6 +83,7 @@ export abstract class Trade {
     chainId,
     platform,
     fee = new Percent('0'),
+    approveAddress,
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
@@ -66,6 +95,7 @@ export abstract class Trade {
     this.chainId = chainId
     this.platform = platform
     this.fee = fee
+    this.approveAddress = approveAddress
   }
 
   /**
