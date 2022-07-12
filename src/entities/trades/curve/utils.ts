@@ -1,3 +1,4 @@
+import { Token } from '../../../entities/token'
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
 import { checkIfStringExists } from '../../../utils'
@@ -44,10 +45,15 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
  * @param chainId The chain ID. Default is Mainnet
  * @returns The token information or undefined if not found
  */
-export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
+export function getCurveToken(tokenAddress: Token, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
-
-  return Object.values(tokenList).find((token) => token.address.toLowerCase() === tokenAddress?.toLowerCase())
+  const tokenItself = Object.values(tokenList).find(
+    (token) => token.address.toLowerCase() === tokenAddress.address?.toLowerCase()
+  )
+  console.log('eval', tokenItself)
+  console.log('madeupObject', { ...tokenAddress, type: 'other' } as CurveToken)
+  console.log('reurns before', tokenItself ? tokenItself : ({ ...tokenAddress, type: 'other' } as CurveToken))
+  return tokenItself ? tokenItself : ({ ...tokenAddress, type: 'other' } as CurveToken)
 }
 
 /**
@@ -65,7 +71,7 @@ export async function getRoutablePools(
 ) {
   const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
   const allPools = pools.concat(factoryPools)
-
+  console.log('allPools in routable', allPools)
   return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address

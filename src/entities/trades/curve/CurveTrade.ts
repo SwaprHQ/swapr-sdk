@@ -170,11 +170,13 @@ export class CurveTrade extends Trade {
 
     const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
-
+    console.log(wrappedTokenIn)
+    console.log('wrappedTokenOut', wrappedtokenOut)
     // Get the token's data from Curve
-    const tokenIn = getCurveToken(wrappedTokenIn.address, chainId)
-    const tokenOut = getCurveToken(wrappedtokenOut.address, chainId)
-
+    const tokenIn = getCurveToken(wrappedTokenIn, chainId)
+    const tokenOut = getCurveToken(wrappedtokenOut, chainId)
+    console.log('tokenin', tokenIn)
+    console.log('tokenOut', tokenOut)
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 

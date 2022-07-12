@@ -31,6 +31,7 @@ interface FactoryPoolsApiResponse {
       coinsAddresses: string[]
       decimals: string[]
       id: string
+      usdTotal: number
       implementation: string
       implementationAddress: string
       name: string
@@ -252,29 +253,27 @@ export abstract class Fetcher {
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    const modifiedArray: CurvePool[] = allPoolsArray.data.poolData.map(
-      ({ symbol, name, coins, address, implementation }) => {
-        console.log('implemenattion', implementation)
-        console.log('checker', implementation.includes('meta'))
-        const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
-          return {
-            symbol,
-            name: symbol.toUpperCase(),
-            address,
-            decimals: parseInt(decimals),
-            type: determineTokeType(symbol),
-          }
-        })
+    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal !== 0)
+    console.log('filteredPools', filterEmptyPools)
+    const modifiedArray: CurvePool[] = filterEmptyPools.map(({ symbol, name, coins, address, implementation }) => {
+      const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
         return {
-          id: symbol,
-          name: name,
-          address: address,
-          abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta: implementation.includes('meta'),
-          tokens,
+          symbol,
+          name: symbol.toUpperCase(),
+          address,
+          decimals: parseInt(decimals),
+          type: determineTokeType(symbol),
         }
+      })
+      return {
+        id: symbol,
+        name: name,
+        address: address,
+        abi: CURVE_POOL_ABI_MAP[implementation],
+        isMeta: implementation.includes('meta'),
+        tokens,
       }
-    )
+    })
     return modifiedArray
   }
 }
