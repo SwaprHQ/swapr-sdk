@@ -27,9 +27,11 @@
     "docker:clean": "docker-compose kill",
     "install-peers": "install-peers",
     "prepare": "install-peers",
-    "graphql:codegen": "graphql-codegen --config graphql-codegen.yml"
+    "graphql:codegen": "graphql-codegen --config graphql-codegen.yml",
+    "codegen:cow": "./node_modules/.bin/ts-node --project tsconfig.json ./bin/cow-app-data.ts"
   },
   "dependencies": {
+    "@cowprotocol/cow-sdk": "^0.0.15-RC.1",
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.0",
@@ -82,7 +84,9 @@
     "install-peers-cli": "^2.2.0",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.7.4"
+    "ts-node": "^10.8.2",
+    "typescript": "^4.7.4",
+    "yargs": "^17.5.1"
   },
   "peerDependencies": {
     "ethers": "^5.4.0"

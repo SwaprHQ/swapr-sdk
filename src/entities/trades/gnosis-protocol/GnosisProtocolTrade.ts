@@ -18,7 +18,8 @@ import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
-import { CHAIN_ID_TO_NETWORK, ORDER_APP_DATA, ORDER_PLACEHOLDER_ADDRESS } from './constants'
+import cowAppData from './app-data.json'
+import { CHAIN_ID_TO_NETWORK, ORDER_PLACEHOLDER_ADDRESS } from './constants'
 import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
 import {
   GnosisProtocolTradeBestTradeExactInParams,
@@ -173,6 +174,8 @@ export class GnosisProtocolTrade extends Trade {
     // // the router does not support both ether in and out
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
+      const orderMetadata = cowAppData[chainId as unknown as keyof typeof cowAppData]
+
       const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
         kind: OrderKind.SELL,
         sellAmountBeforeFee: amountInBN.toString(),
@@ -180,7 +183,7 @@ export class GnosisProtocolTrade extends Trade {
         buyToken: tokenOut.address,
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
         receiver,
-        appData: ORDER_APP_DATA,
+        appData: orderMetadata?.ipfsHashInfo?.appDataHash,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
         partiallyFillable: false,
       })
@@ -236,6 +239,8 @@ export class GnosisProtocolTrade extends Trade {
     // the router does not support both ether in and out
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
+      const orderMetadata = cowAppData[chainId as unknown as keyof typeof cowAppData]
+
       const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
         kind: OrderKind.BUY,
         buyAmountAfterFee: amountOutBN.toString(),
@@ -243,7 +248,7 @@ export class GnosisProtocolTrade extends Trade {
         buyToken: tokenOut.address,
         from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
         receiver,
-        appData: ORDER_APP_DATA,
+        appData: orderMetadata?.ipfsHashInfo?.appDataHash,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
         partiallyFillable: false,
       })
