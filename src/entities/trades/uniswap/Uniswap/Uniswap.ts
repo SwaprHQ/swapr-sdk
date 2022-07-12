@@ -35,11 +35,6 @@ const debugUniswapTradeGetQuote = debug('ecoRouter:uniswap:getQuote')
  */
 export class UniswapTrade extends TradeWithSwapTransaction {
   /**
-   * An address the EOA must approve to spend its tokenIn
-   */
-  public readonly approveAddress: string
-
-  /**
    * @property The original SwapRoute object from the Routing API
    */
   swapRoute: SwapRoute
@@ -95,10 +90,10 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       executionPrice,
       priceImpact,
       fee: new Percent(JSBI.BigInt(fee), '10000'),
+      // Uniswap V3 Router v2 address
+      approveAddress: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
     })
     this.swapRoute = swapRoute
-    // Uniswap V3 Router v2 address
-    this.approveAddress = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
   }
 
   static async getQuote(

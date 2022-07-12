@@ -38,11 +38,6 @@ export class GnosisProtocolTrade extends Trade {
   public order: Order
 
   /**
-   * An address the EOA must approve to spend its tokenIn
-   */
-  public readonly approveAddress: string
-
-  /**
    * Order signature
    */
   private orderSignatureInfo?: {
@@ -87,9 +82,9 @@ export class GnosisProtocolTrade extends Trade {
       priceImpact: new Percent('0'),
       platform: RoutablePlatform.GNOSIS_PROTOCOL,
       fee,
+      approveAddress: GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address,
     })
     this.order = order
-    this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
     // The fee token and amount are sell token
     this.feeAmount = feeAmount
   }

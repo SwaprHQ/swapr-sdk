@@ -25,9 +25,9 @@ import { decodeStringToPercent, platformsFromSources } from './utils'
  * Does not account for slippage, i.e. trades that front run this trade and move the price.
  */
 export class ZeroXTrade extends TradeWithSwapTransaction {
-  private readonly to: string
-  private readonly callData: string
-  private readonly value: string
+  public readonly to: string
+  public readonly callData: string
+  public readonly value: string
 
   public constructor({
     breakdown,
@@ -57,6 +57,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       priceImpact,
       chainId,
       platform: RoutablePlatform.ZEROX,
+      approveAddress: to,
     })
     this.to = to
     this.callData = callData
