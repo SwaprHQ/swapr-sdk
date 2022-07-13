@@ -87,6 +87,8 @@ export const CURVE_POOL_ABI_MAP: Record<string, ContractInterface> = {
   ['metabtc']: CURVE_METABTC_ABI,
   ['metabtcbalances']: CURVE_METABTC_ABI,
   ['metausd']: CURVE_METAUSD_ABI,
+  ['v1metausd']: CURVE_METAUSD_ABI,
+  ['metausd-fraxusdc']: CURVE_METAUSD_ABI,
   ['metausdbalances']: CURVE_METAUSD_ABI,
   ['plain2balances']: CURVE_PLAIN_ABI,
   ['plain2basic']: CURVE_PLAIN_ABI,

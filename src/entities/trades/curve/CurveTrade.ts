@@ -170,16 +170,22 @@ export class CurveTrade extends Trade {
 
     const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
-    console.log(wrappedTokenIn)
-    console.log('wrappedTokenOut', wrappedtokenOut)
+
+    const curveTokenIn = getCurveToken(wrappedTokenIn.address, chainId)
+    const curveTokenOut = getCurveToken(wrappedtokenOut.address, chainId)
+
     // Get the token's data from Curve
-    const tokenIn = getCurveToken(wrappedTokenIn, chainId)
-    const tokenOut = getCurveToken(wrappedtokenOut, chainId)
-    console.log('tokenin', tokenIn)
-    console.log('tokenOut', tokenOut)
+    const tokenIn = curveTokenIn || ({ ...wrappedTokenIn, type: 'other' } as CurveToken)
+    const tokenOut = curveTokenOut || ({ ...wrappedtokenOut, type: 'other' } as CurveToken)
+    console.log('curvein', curveTokenIn)
+    console.log('curveout', curveTokenOut)
+    // console.log('or statment',curveTokenIn===undefined || )
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
+    //check if tokens are not from official list
+    const areMuffTokens = curveTokenIn != undefined || curveTokenIn != undefined
+    console.log('fucking muffs', areMuffTokens)
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
@@ -290,7 +296,7 @@ export class CurveTrade extends Trade {
     console.log('WOKSKSJDKSJDKSJDKSJDKS', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
-      chainId === ChainId.MAINNET
+      chainId === ChainId.MAINNET && !areMuffTokens
         ? await getBestCurvePoolAndOutput({
             amountIn: amountInBN,
             tokenInAddress: tokenIn.address,
@@ -327,7 +333,7 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           exchangeRoutingInfo.routes,
           exchangeRoutingInfo.indices,
-          exchangeRoutingInfo.expectedAmountOut.mul(98).div(100).toString(),
+          exchangeRoutingInfo.expectedAmountOut.mul(0.98).toString(),
         ]
 
         const curveRouterContract = getRouter()
@@ -339,7 +345,7 @@ export class CurveTrade extends Trade {
         })
 
         // Add 30% gas buffer
-        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(130).div(100)
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(1.3)
 
         return {
           fee,
@@ -368,6 +374,7 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
+        console.log('routable LOOOPING', pool)
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)

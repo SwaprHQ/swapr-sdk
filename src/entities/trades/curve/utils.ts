@@ -1,4 +1,3 @@
-import { Token } from '../../../entities/token'
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
 import { checkIfStringExists } from '../../../utils'
@@ -45,15 +44,13 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
  * @param chainId The chain ID. Default is Mainnet
  * @returns The token information or undefined if not found
  */
-export function getCurveToken(tokenAddress: Token, chainId: ChainId = ChainId.MAINNET) {
+export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
   const tokenItself = Object.values(tokenList).find(
-    (token) => token.address.toLowerCase() === tokenAddress.address?.toLowerCase()
+    (token) => token.address.toLowerCase() === tokenAddress?.toLowerCase()
   )
-  console.log('eval', tokenItself)
-  console.log('madeupObject', { ...tokenAddress, type: 'other' } as CurveToken)
-  console.log('reurns before', tokenItself ? tokenItself : ({ ...tokenAddress, type: 'other' } as CurveToken))
-  return tokenItself ? tokenItself : ({ ...tokenAddress, type: 'other' } as CurveToken)
+
+  return tokenItself
 }
 
 /**
@@ -110,8 +107,8 @@ export async function getRoutablePools(
 
 /**
  * Returns tokenType based on token symbol
- * @param symbol The list of Curve pools
- * @returns List of potential pools at which the trade can be done
+ * @param symbol symbol of curve token
+ * @returns token type of given symbol
  */
 const usd = [
   'dai',
