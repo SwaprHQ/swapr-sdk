@@ -184,8 +184,8 @@ export class CurveTrade extends Trade {
     const nativeCurrency = Currency.getNative(chainId)
 
     //check if tokens are not from official list
-    const areMuffTokens = curveTokenIn != undefined || curveTokenIn != undefined
-    console.log('fucking muffs', areMuffTokens)
+    const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
+    console.log('fucking muffs 1', areMuffTokens)
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
