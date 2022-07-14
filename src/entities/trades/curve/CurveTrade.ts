@@ -373,60 +373,54 @@ export class CurveTrade extends Trade {
     // Compile all the output
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
-      routablePools
-        .filter((pool) => {
-          const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-          const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-          return !(tokenInIndex < 0 || tokenOutIndex < 0)
+      routablePools.map(async (pool) => {
+        console.log('routable LOOOPING', pool)
+        const poolContract = new Contract(pool.address, pool.abi as any, provider)
+        // Map token address to index
+        const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+        const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+
+        console.log({ tokenIn: tokenInIndex < 0, tokenOut: tokenOutIndex < 0 })
+        // Skip pool that return -1
+        if (tokenInIndex < 0 || tokenOutIndex < 0) {
+          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
+        }
+
+        // Get expected output from the pool
+        // Use underylying signature if the pool is a meta pool
+        // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
+        const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
+
+        // Construct the params
+        const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
+
+        debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
+          dyMethodSignature,
+          dyMethodParams,
         })
-        .map(async (pool) => {
-          console.log('routable LOOOPING', pool)
-          const poolContract = new Contract(pool.address, pool.abi as any, provider)
-          // Map token address to index
-          const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-          const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
-          console.log({ tokenIn: tokenInIndex < 0, tokenOut: tokenOutIndex < 0 })
-          // Skip pool that return -1
-          if (tokenInIndex < 0 || tokenOutIndex < 0) {
-            throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
+        try {
+          const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
+          // Return the call bytes
+          return {
+            pool,
+            estimatedAmountOut,
+            poolContract,
           }
-
-          // Get expected output from the pool
-          // Use underylying signature if the pool is a meta pool
-          // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
-          const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
-
-          // Construct the params
-          const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
-
-          debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
+        } catch (error) {
+          console.error(`CurveTrade error: failed to fetch estimated out from `, {
+            address: pool.address,
             dyMethodSignature,
             dyMethodParams,
+            error,
           })
-          try {
-            const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
-            // Return the call bytes
-            return {
-              pool,
-              estimatedAmountOut,
-              poolContract,
-            }
-          } catch (error) {
-            console.error(`CurveTrade error: failed to fetch estimated out from `, {
-              address: pool.address,
-              dyMethodSignature,
-              dyMethodParams,
-              error,
-            })
-            return {
-              pool,
-              estimatedAmountOut: BigNumber.from(0),
-              poolContract,
-              error,
-            }
+          return {
+            pool,
+            estimatedAmountOut: BigNumber.from(0),
+            poolContract,
+            error,
           }
-        })
+        }
+      })
     )
 
     // Sort the pool by best output
