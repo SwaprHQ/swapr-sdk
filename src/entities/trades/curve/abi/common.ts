@@ -49,6 +49,17 @@ export const poolMethods = {
       ],
       outputs: [{ type: 'uint256', name: '' }],
     },
+    'get_dy_underlying(int128,int128,uint256)': {
+      stateMutability: 'view',
+      type: 'function',
+      name: 'get_dy_underlying',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'uint256', name: 'dx' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+    },
     'get_dy_underlying(uint256,uint256,uint256)': {
       stateMutability: 'view',
       type: 'function',
@@ -88,6 +99,20 @@ export const poolMethods = {
         { type: 'int128', name: 'i' },
         { type: 'int128', name: 'j' },
         { type: 'int256', name: '_dx' },
+        { type: 'int256', name: '_min_dy' },
+        { type: 'address', name: '_receiver' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+      // there was no gas in the  in the metaUSD ABI
+    },
+    'exchange(int128,int128,uint256,uint256,address)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'uint256', name: '_dx' },
         { type: 'uint256', name: '_min_dy' },
         { type: 'address', name: '_receiver' },
       ],

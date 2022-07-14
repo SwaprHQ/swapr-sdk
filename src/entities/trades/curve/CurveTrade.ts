@@ -373,54 +373,60 @@ export class CurveTrade extends Trade {
     // Compile all the output
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
-      routablePools.map(async (pool) => {
-        console.log('routable LOOOPING', pool)
-        const poolContract = new Contract(pool.address, pool.abi as any, provider)
-        // Map token address to index
-        const tokenInIndex = getTokenIndex(pool, tokenIn.address)
-        const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
-        // Skip pool that return -1
-        if (tokenInIndex < 0 || tokenOutIndex < 0) {
-          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
-        }
-
-        // Get expected output from the pool
-        // Use underylying signature if the pool is a meta pool
-        // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
-        const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
-
-        // Construct the params
-        const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
-
-        debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
-          dyMethodSignature,
-          dyMethodParams,
+      routablePools
+        .filter((pool) => {
+          const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+          const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+          return !(tokenInIndex < 0 || tokenOutIndex < 0)
         })
+        .map(async (pool) => {
+          console.log('routable LOOOPING', pool)
+          const poolContract = new Contract(pool.address, pool.abi as any, provider)
+          // Map token address to index
+          const tokenInIndex = getTokenIndex(pool, tokenIn.address)
+          const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
 
-        try {
-          const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
-          // Return the call bytes
-          return {
-            pool,
-            estimatedAmountOut,
-            poolContract,
+          console.log({ tokenIn: tokenInIndex < 0, tokenOut: tokenOutIndex < 0 })
+          // Skip pool that return -1
+          if (tokenInIndex < 0 || tokenOutIndex < 0) {
+            throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
           }
-        } catch (error) {
-          console.error(`CurveTrade error: failed to fetch estimated out from `, {
-            address: pool.address,
+
+          // Get expected output from the pool
+          // Use underylying signature if the pool is a meta pool
+          // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
+          const dyMethodSignature = pool.isMeta ? 'get_dy_underlying' : 'get_dy'
+
+          // Construct the params
+          const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
+
+          debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
             dyMethodSignature,
             dyMethodParams,
-            error,
           })
-          return {
-            pool,
-            estimatedAmountOut: BigNumber.from(0),
-            poolContract,
-            error,
+          try {
+            const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
+            // Return the call bytes
+            return {
+              pool,
+              estimatedAmountOut,
+              poolContract,
+            }
+          } catch (error) {
+            console.error(`CurveTrade error: failed to fetch estimated out from `, {
+              address: pool.address,
+              dyMethodSignature,
+              dyMethodParams,
+              error,
+            })
+            return {
+              pool,
+              estimatedAmountOut: BigNumber.from(0),
+              poolContract,
+              error,
+            }
           }
-        }
-      })
+        })
     )
 
     // Sort the pool by best output
@@ -468,15 +474,19 @@ export class CurveTrade extends Trade {
     // If the pool has meta coins
     // Exit to avoid issues
     if (pool.isMeta || pool?.underlyingTokens) {
+      pool.isMeta && console.log('Pool is meta')
+      pool?.underlyingTokens && console.log('there are underlyingTokens')
       // Try uint256
       exchangeSignature = 'exchange_underlying(uint256,uint256,uint256,uint256)'
       if (!(exchangeSignature in poolContract.functions)) {
+        // Try int128
         exchangeSignature = 'exchange_underlying(int128,int128,uint256,uint256)'
         if (!(exchangeSignature in poolContract.functions)) {
           // Exit the search
           console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+          console.log('Returning undefined')
+          return
         }
-        return
       }
     }
 
