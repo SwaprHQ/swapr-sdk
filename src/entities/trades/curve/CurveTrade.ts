@@ -475,8 +475,9 @@ export class CurveTrade extends Trade {
         if (!(exchangeSignature in poolContract.functions)) {
           // Exit the search
           console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+          console.log('Return undefined')
+          return
         }
-        return
       }
     }
 
