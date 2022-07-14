@@ -32,6 +32,17 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
  * Arbitrum
  */
 export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
+  '2CRV': {
+    name: '2pool',
+    symbol: '2CRV',
+    decimals: 18,
+    address: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
+    isLPToken: true,
+    type: TokenType.USD,
+    poolTokens: function () {
+      return [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
+    },
+  },
   usdc: {
     symbol: 'USDC',
     name: 'USDC',
@@ -546,6 +557,9 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     isLPToken: true,
     type: TokenType.USD,
+    poolTokens: function () {
+      return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
+    },
   },
   sbtccrv: {
     symbol: 'sbtcCrv',

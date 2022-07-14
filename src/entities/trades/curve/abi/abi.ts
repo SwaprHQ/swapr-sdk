@@ -60,6 +60,7 @@ export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
 
 export const CURVE_METAUSD_ABI: ContractInterface = [
   poolMethods['view']['fee'],
+  poolMethods['view']['get_dy_underlying(int128,int128,uint256)'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
   poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
   poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],

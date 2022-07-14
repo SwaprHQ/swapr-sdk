@@ -23,6 +23,7 @@ export enum TokenType {
  */
 export interface CurveToken {
   isLPToken?: boolean
+  poolTokens?: () => CurveToken[]
   address: string
   symbol: string
   name: string

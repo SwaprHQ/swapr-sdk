@@ -83,7 +83,7 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     ],
   },
 ]
-
+const tricrvMetaTokensMainnet = TOKENS_MAINNET.tricrv.poolTokens ? TOKENS_MAINNET.tricrv.poolTokens() : undefined
 export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'compound',
@@ -166,7 +166,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.gusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956',
   },
   {
@@ -175,7 +175,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.husd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604',
   },
   {
@@ -184,7 +184,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.usdk, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
   },
   {
@@ -193,7 +193,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.usdn, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x0f9cb53Ebe405d49A0bbdBD291A65Ff571bC83e1',
   },
   {
@@ -202,7 +202,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.musd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6',
   },
   {
@@ -210,7 +210,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'rsv',
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.rsv, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xC18cC39da8b11dA8c3541C598eE022258F9744da',
   },
   {
@@ -226,7 +226,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'dusd',
     tokens: [TOKENS_MAINNET.dusd, TOKENS_MAINNET.tricrv],
     abi: CURVE_3POOL_ABI,
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x8038C01A0390a8c547446a0b2c18fc9aEFEcc10c',
   },
   {
@@ -258,7 +258,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'ust',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.ust, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x890f4e345B1dAED0367A877a1612f86A1f86985f',
   },
   {
@@ -282,7 +282,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.usdp, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x42d7025938bEc20B69cBae5A77421082407f053A',
   },
   {
@@ -298,7 +298,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.tusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xecd5e75afb02efa118af914515d6521aabd189f1',
   },
   {
@@ -307,7 +307,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.frax, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
   },
   {
@@ -315,7 +315,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'lusd',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.lusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA',
   },
   {
@@ -324,7 +324,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_CRYPTO_SWAP_ABI,
     tokens: [TOKENS_MAINNET.busd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x4807862AA8b2bF68830e4C8dc86D0e9A998e085a',
   },
 
@@ -334,7 +334,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.alusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c',
   },
   // {
@@ -374,7 +374,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.eurt, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x9838eCcC42659FA8AA7daF2aD134b53984c9427b',
   },
   {
@@ -390,7 +390,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_CRYPTO_SWAP_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.rai, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x618788357D0EBd8A37e763ADab3bc575D54c2C7d',
   },
   {

@@ -15,7 +15,7 @@ import { Token } from './entities/token'
 
 import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CurvePool, CurveToken } from './entities/trades/curve/tokens'
+import { CurvePool, CurveToken, CURVE_TOKENS } from './entities/trades/curve/tokens'
 import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 interface FactoryPoolsApiResponse {
@@ -265,14 +265,24 @@ export abstract class Fetcher {
           type: determineTokeType(symbol),
         }
       })
-      return {
+      const isMeta = implementation.includes('meta')
+      const findMetaPoolToken =
+        isMeta &&
+        tokens[1] &&
+        CURVE_TOKENS[chainId][tokens[1].symbol] &&
+        CURVE_TOKENS[chainId][tokens[1].symbol]?.poolTokens?.()
+
+      let curveObject: CurvePool = {
         id: symbol,
         name: name,
         address: address,
         abi: CURVE_POOL_ABI_MAP[implementation],
-        isMeta: implementation.includes('meta'),
+        isMeta: isMeta,
         tokens,
       }
+      if (findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
+      console.log(curveObject, 'Krvavi objekat')
+      return curveObject
     })
     return modifiedArray
   }
