@@ -12,11 +12,12 @@ export const CODE_TO_PLATFORM_NAME: { [apiName: string]: string } = {
   PancakeSwap_V2: 'PancakeSwap v2', // shouldn't be used since it's on BSC, but added to be extra sure
 }
 
-export const ZEROX_API_URL: { [chainId in ChainId]: string } = {
+export const ZEROX_API_URL: Record<ChainId, string> = {
   [ChainId.MAINNET]: 'https://api.0x.org/',
   [ChainId.RINKEBY]: '',
   [ChainId.ARBITRUM_ONE]: '',
   [ChainId.ARBITRUM_RINKEBY]: '',
   [ChainId.XDAI]: '',
   [ChainId.POLYGON]: 'https://polygon.api.0x.org/',
+  [ChainId.GOERLI]: '',
 }
