@@ -501,7 +501,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   */
 ]
 
-export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
+export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.MAINNET]: POOLS_MAINNET,
   [ChainId.XDAI]: POOLS_XDAI,
   [ChainId.ARBITRUM_ONE]: POOLS_ARBITRUM_ONE,
@@ -509,4 +509,5 @@ export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
   [ChainId.RINKEBY]: [],
   [ChainId.ARBITRUM_RINKEBY]: [],
   [ChainId.POLYGON]: [],
+  [ChainId.GOERLI]: [],
 }
