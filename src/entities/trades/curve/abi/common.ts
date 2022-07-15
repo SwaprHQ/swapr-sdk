@@ -87,6 +87,18 @@ export const poolMethods = {
       outputs: [{ type: 'uint256', name: '' }],
       gas: '5499133',
     },
+    'exchange(uint256,uint256,uint256,uint256)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { type: 'uint256', name: 'i' },
+        { type: 'uint256', name: 'j' },
+        { type: 'uint256', name: '_dx' },
+        { type: 'uint256', name: '_min_dy' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+    },
 
     /**
      * Exchange methods
