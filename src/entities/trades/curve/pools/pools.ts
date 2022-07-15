@@ -315,8 +315,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'lusd',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.lusd, TOKENS_MAINNET.tricrv],
-    metaTokens: tricrvMetaTokensMainnet,
-    isMeta: true,
+    underlyingTokens: tricrvMetaTokensMainnet,
     address: '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA',
   },
   {

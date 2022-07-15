@@ -371,6 +371,7 @@ export class CurveTrade extends Trade {
     // The final step
     // Compile all the output
     // Using Multicall contract
+    console.log('routbale pools beofre shit', routablePools)
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
@@ -421,7 +422,7 @@ export class CurveTrade extends Trade {
         }
       })
     )
-
+    console.log('poolList', quoteFromPoolList)
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
       .filter((pool) => {

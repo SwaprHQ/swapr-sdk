@@ -266,7 +266,7 @@ export abstract class Fetcher {
             type: determineTokeType(symbol),
           }
         })
-        const isMeta = isMetaPool || implementation.includes('meta')
+        const isMeta = isMetaPool
         let curveObject: CurvePool = {
           id: symbol,
           name: name,
@@ -279,7 +279,8 @@ export abstract class Fetcher {
 
         const findMetaPoolToken =
           isMeta && tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
-        if (findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
+        if (isMetaPool && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
+        if (!isMeta && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
 
         return curveObject
       }
