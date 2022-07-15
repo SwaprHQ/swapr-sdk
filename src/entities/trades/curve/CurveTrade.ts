@@ -392,6 +392,13 @@ export class CurveTrade extends Trade {
 
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
+        console.log('tokenInIndex', tokenInIndex)
+        console.log('tokenoutIndex', tokenOutIndex)
+        console.log('dyMethodParams', [
+          tokenInIndex.toString(),
+          tokenOutIndex.toString(),
+          currencyAmountIn.raw.toString(),
+        ])
 
         debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
           dyMethodSignature,

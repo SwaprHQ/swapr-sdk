@@ -268,21 +268,21 @@ export abstract class Fetcher {
             type: determineTokeType(symbol),
           }
         })
-
+        const isMeta = isMetaPool || implementation.includes('meta')
         let curveObject: CurvePool = {
           id: symbol,
           name: name,
           address: address,
           abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta: isMetaPool,
+          isMeta: isMeta,
           tokens,
         }
         //tries to find meta pool tokens
 
         const findMetaPoolToken =
           tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
-        if (isMetaPool && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
-        if (!isMetaPool && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
+        if (isMeta && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
+        if (!isMeta && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
         if (name === 'Curve.fi Factory USD Metapool: Origin Dollar') {
           console.log('isMeta?', isMetaPool)
           console.log('foundPools?', findMetaPoolToken)

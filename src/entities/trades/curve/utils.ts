@@ -32,7 +32,8 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
 
   // Search for the main/underlying token
   let tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
-
+  console.log('tokenList', tokenList)
+  console.log('tokenIndex', tokenIndex)
   // ETH is always at 0 all pools
   if (tokenIndex < 0 && poolHasWETH) {
     tokenIndex = 0
