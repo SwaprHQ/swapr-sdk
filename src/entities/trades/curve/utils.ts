@@ -11,7 +11,10 @@ import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType } from './tokens'
  */
 export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   // Combine all tokens without 3CRV
-  const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
+  // const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
+  const tokenWithout3CRV = pool.tokens.filter(
+    (token) => token.symbol.toLowerCase() !== '3crv' && token.symbol.toLowerCase() !== '2crv'
+  )
   // Use main tokens
   console.log('pool', pool)
   console.log('meta tst', pool.isMeta)
