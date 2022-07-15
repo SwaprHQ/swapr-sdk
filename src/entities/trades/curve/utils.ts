@@ -16,9 +16,6 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
     (token) => token.symbol.toLowerCase() !== '3crv' && token.symbol.toLowerCase() !== '2crv'
   )
   // Use main tokens
-  console.log('pool', pool)
-  console.log('meta tst', pool.isMeta)
-  console.log('meta tokens', pool.metaTokens)
   let tokenList = pool.tokens
   // Append underlying tokens
   if (pool.underlyingTokens) {
@@ -90,7 +87,7 @@ export async function getRoutablePools(
     // main tokens
     const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
     const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
-    if (name === 'Curve.fi Factory USD Metapool: Liquity') {
+    if (name === 'Curve.fi Factory USD Metapool: Origin Dollar') {
       console.log(tokens, 'tokens')
       console.log('metatokens', metaTokens)
     }

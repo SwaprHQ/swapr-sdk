@@ -254,7 +254,9 @@ export abstract class Fetcher {
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal !== 0)
+    //we filter pools with low liquduity
+    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
+    //restructures pools so they fit into curvePool type
     const modifiedArray: CurvePool[] = filterEmptyPools.map(
       ({ symbol, name, coins, address, implementation, isMetaPool }) => {
         const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
@@ -266,21 +268,25 @@ export abstract class Fetcher {
             type: determineTokeType(symbol),
           }
         })
-        const isMeta = isMetaPool
+
         let curveObject: CurvePool = {
           id: symbol,
           name: name,
           address: address,
           abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta: isMeta,
+          isMeta: isMetaPool,
           tokens,
         }
         //tries to find meta pool tokens
 
         const findMetaPoolToken =
-          isMeta && tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
+          tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
         if (isMetaPool && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
-        if (!isMeta && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
+        if (!isMetaPool && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
+        if (name === 'Curve.fi Factory USD Metapool: Origin Dollar') {
+          console.log('isMeta?', isMetaPool)
+          console.log('foundPools?', findMetaPoolToken)
+        }
 
         return curveObject
       }
