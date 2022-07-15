@@ -13,6 +13,9 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   // Combine all tokens without 3CRV
   const tokenWithout3CRV = pool.tokens.filter((token) => token.symbol.toLowerCase() !== '3crv')
   // Use main tokens
+  console.log('pool', pool)
+  console.log('meta tst', pool.isMeta)
+  console.log('meta tokens', pool.metaTokens)
   let tokenList = pool.tokens
   // Append underlying tokens
   if (pool.underlyingTokens) {
@@ -68,8 +71,7 @@ export async function getRoutablePools(
 ) {
   const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
   const allPools = pools.concat(factoryPools)
-  console.log('allPools in routable', allPools)
-  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
+  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH, name }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
 
@@ -85,7 +87,10 @@ export async function getRoutablePools(
     // main tokens
     const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
     const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
-
+    if (name === 'Curve.fi Factory USD Metapool: Liquity') {
+      console.log(tokens, 'tokens')
+      console.log('metatokens', metaTokens)
+    }
     // Meta tokens in MetaPools [ERC20, [...3PoolTokens]]
     const hasMetaTokenIn = metaTokens?.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
     const hasMetaTokenOut = metaTokens?.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())

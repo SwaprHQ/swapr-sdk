@@ -32,6 +32,7 @@ interface FactoryPoolsApiResponse {
       decimals: string[]
       id: string
       usdTotal: number
+      isMetaPool: boolean
       implementation: string
       implementationAddress: string
       name: string
@@ -254,36 +255,35 @@ export abstract class Fetcher {
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
     const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal !== 0)
-    console.log('filteredPools', filterEmptyPools)
-    const modifiedArray: CurvePool[] = filterEmptyPools.map(({ symbol, name, coins, address, implementation }) => {
-      const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
-        return {
-          symbol,
-          name: symbol.toUpperCase(),
-          address,
-          decimals: parseInt(decimals),
-          type: determineTokeType(symbol),
+    const modifiedArray: CurvePool[] = filterEmptyPools.map(
+      ({ symbol, name, coins, address, implementation, isMetaPool }) => {
+        const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
+          return {
+            symbol,
+            name: symbol.toUpperCase(),
+            address,
+            decimals: parseInt(decimals),
+            type: determineTokeType(symbol),
+          }
+        })
+        const isMeta = isMetaPool || implementation.includes('meta')
+        let curveObject: CurvePool = {
+          id: symbol,
+          name: name,
+          address: address,
+          abi: CURVE_POOL_ABI_MAP[implementation],
+          isMeta: isMeta,
+          tokens,
         }
-      })
-      const isMeta = implementation.includes('meta')
-      const findMetaPoolToken =
-        isMeta &&
-        tokens[1] &&
-        CURVE_TOKENS[chainId][tokens[1].symbol] &&
-        CURVE_TOKENS[chainId][tokens[1].symbol]?.poolTokens?.()
+        //tries to find meta pool tokens
 
-      let curveObject: CurvePool = {
-        id: symbol,
-        name: name,
-        address: address,
-        abi: CURVE_POOL_ABI_MAP[implementation],
-        isMeta: isMeta,
-        tokens,
+        const findMetaPoolToken =
+          isMeta && tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
+        if (findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
+
+        return curveObject
       }
-      if (findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
-      console.log(curveObject, 'Krvavi objekat')
-      return curveObject
-    })
+    )
     return modifiedArray
   }
 }

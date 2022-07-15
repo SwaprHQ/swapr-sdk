@@ -177,15 +177,13 @@ export class CurveTrade extends Trade {
     // Get the token's data from Curve
     const tokenIn = curveTokenIn || ({ ...wrappedTokenIn, type: 'other' } as CurveToken)
     const tokenOut = curveTokenOut || ({ ...wrappedtokenOut, type: 'other' } as CurveToken)
-    console.log('curvein', curveTokenIn)
-    console.log('curveout', curveTokenOut)
-    // console.log('or statment',curveTokenIn===undefined || )
+
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
     //check if tokens are not from official list
     const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
-    console.log('fucking muffs 1', areMuffTokens)
+
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
@@ -293,7 +291,8 @@ export class CurveTrade extends Trade {
     // Find all pools that the trade can go through
     // Manually find all routable pools
     let routablePools = await getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
-    console.log('WOKSKSJDKSJDKSJDKSJDKS', routablePools)
+    console.log('routable pools', routablePools)
+    console.log('curveica', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET && !areMuffTokens
@@ -374,16 +373,16 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
-        console.log('routable LOOOPING', pool)
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
+        console.log('beforeval', pool)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
-          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
+          console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
         }
+        console.log('continues', pool)
 
         // Get expected output from the pool
         // Use underylying signature if the pool is a meta pool
