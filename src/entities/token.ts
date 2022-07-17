@@ -131,6 +131,8 @@ export class Token extends Currency {
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
     [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON],
     [ChainId.GOERLI]: Token.WETH[ChainId.GOERLI],
+    [ChainId.OPTIMISM_MAINNET]: Token.WETH[ChainId.OPTIMISM_MAINNET],
+    [ChainId.OPTIMISM_GOERLI]: Token.WETH[ChainId.OPTIMISM_MAINNET],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {

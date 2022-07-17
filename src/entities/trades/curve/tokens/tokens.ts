@@ -590,4 +590,6 @@ export const CURVE_TOKENS: CurveTokenList = {
   [ChainId.RINKEBY]: {},
   [ChainId.POLYGON]: {},
   [ChainId.GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
 }
