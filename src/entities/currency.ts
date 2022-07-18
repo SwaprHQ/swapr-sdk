@@ -50,6 +50,8 @@ export class Currency {
     [ChainId.XDAI]: Currency.XDAI,
     [ChainId.POLYGON]: Currency.MATIC,
     [ChainId.GOERLI]: Currency.ETHER,
+    [ChainId.OPTIMISM_MAINNET]: Currency.ETHER,
+    [ChainId.OPTIMISM_GOERLI]: Currency.ETHER,
   }
 
   /**

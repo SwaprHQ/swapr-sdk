@@ -29,6 +29,8 @@ const INITIAL_CACHE_STATE: Record<ChainId, any> = {
   [ChainId.XDAI]: {},
   [ChainId.POLYGON]: {},
   [ChainId.GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {

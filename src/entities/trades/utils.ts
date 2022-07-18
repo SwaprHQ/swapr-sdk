@@ -59,6 +59,8 @@ export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.ARBITRUM_RINKEBY]: 'https://rinkeby.arbitrum.io/rpc',
   [ChainId.POLYGON]: 'https://polygon-rpc.com',
   [ChainId.GOERLI]: 'https://goerli.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.OPTIMISM_MAINNET]: 'https://mannet.optimism.io',
+  [ChainId.OPTIMISM_GOERLI]: 'https://goerli.optimism.io',
 }
 
 /**
