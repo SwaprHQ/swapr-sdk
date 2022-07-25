@@ -276,17 +276,23 @@ export abstract class Fetcher {
           abi: CURVE_POOL_ABI_MAP[implementation],
           isMeta: isMeta,
           tokens,
+          allowsTradingETH: tokens.some((item) => item.name === 'eth'),
         }
+        tokens.forEach((item) => {
+          console.log(item.name)
+        })
+        console.log(
+          'eval for eth',
+          tokens.some((item) => item.name.toLocaleLowerCase().includes('eth'))
+        )
+        console.log('shithead')
+        console.log('shithead')
         //tries to find meta pool tokens
 
         const findMetaPoolToken =
           tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
         if (isMeta && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
         if (!isMeta && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
-        if (name === 'Curve.fi Factory USD Metapool: Origin Dollar') {
-          console.log('isMeta?', isMetaPool)
-          console.log('foundPools?', findMetaPoolToken)
-        }
 
         return curveObject
       }
