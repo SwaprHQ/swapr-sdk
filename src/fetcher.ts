@@ -24,6 +24,7 @@ interface FactoryPoolsApiResponse {
       address: string
       assetTypeName: string
       coins: {
+        name: string
         address: string
         decimals: string
         symbol: string
@@ -259,13 +260,20 @@ export abstract class Fetcher {
     //restructures pools so they fit into curvePool type
     const modifiedArray: CurvePool[] = filterEmptyPools.map(
       ({ symbol, name, coins, address, implementation, isMetaPool }) => {
-        const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
+        const tokens: CurveToken[] = coins.map((token) => {
+          let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
+          if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+            currentToken = Token.getNativeWrapper(chainId)
+          console.log('address', token.address)
+          console.log('equsl3', address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+          console.log('nativewrapper', Token.getNativeWrapper(chainId))
+
           return {
-            symbol,
-            name: symbol.toUpperCase(),
-            address,
-            decimals: parseInt(decimals),
-            type: determineTokeType(symbol),
+            symbol: currentToken.symbol ? currentToken.symbol : token.symbol,
+            name: currentToken.name ? currentToken.name.toUpperCase() : token.name,
+            address: currentToken.address,
+            decimals: currentToken.decimals,
+            type: determineTokeType(currentToken.symbol ? currentToken.symbol : token.symbol),
           }
         })
         const isMeta = isMetaPool || implementation.includes('meta')
@@ -278,14 +286,11 @@ export abstract class Fetcher {
           tokens,
           allowsTradingETH: tokens.some((item) => item.name === 'eth'),
         }
-        tokens.forEach((item) => {
-          console.log(item.name)
-        })
-        console.log(
-          'eval for eth',
-          tokens.some((item) => item.name.toLocaleLowerCase().includes('eth'))
-        )
-        console.log('shithead')
+        if (name === 'Curve.fi Factory Pool: alETH') {
+          console.log('GOTCHA BITCH', tokens)
+        }
+
+        console.log('NIFIFIFIFIFIIFIFIIF')
         console.log('shithead')
         //tries to find meta pool tokens
 

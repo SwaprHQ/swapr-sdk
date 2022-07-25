@@ -292,7 +292,7 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through
     // Manually find all routable pools
-    let routablePools = await getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
+    let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     console.log('routable pools', routablePools)
     console.log('curveica', routablePools)
     // On mainnet, use the exchange info to get the best pool
@@ -563,6 +563,7 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
+      console.log('tries to get quote')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,
@@ -574,6 +575,7 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
+        console.log('gets aa quore', quote)
         const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
@@ -635,7 +637,7 @@ export class CurveTrade extends Trade {
         currencyIn as Token,
         parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
       )
-
+      console.log('tries to get quote')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,

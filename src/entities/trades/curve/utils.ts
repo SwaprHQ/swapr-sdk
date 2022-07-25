@@ -50,11 +50,8 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
  */
 export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
-  const tokenItself = Object.values(tokenList).find(
-    (token) => token.address.toLowerCase() === tokenAddress?.toLowerCase()
-  )
 
-  return tokenItself
+  return Object.values(tokenList).find((token) => token.address.toLowerCase() === tokenAddress?.toLowerCase())
 }
 
 /**
@@ -82,6 +79,13 @@ export async function getRoutablePools(
       const isTokenOutEther = tokenOut.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
 
       tokenInAddress = allowsTradingETH === true && isTokenInEther ? TOKENS_MAINNET.weth.address : tokenIn.address
+      if (name === 'Curve.fi Factory Pool: alETH') {
+        console.log('isTokenInEther', isTokenInEther)
+        console.log('address?')
+        console.log('allowsTrading', allowsTradingETH)
+        console.log('TOKENS_MAINNET.weth.address', TOKENS_MAINNET.weth.address)
+        console.log('tokenIn.address', tokenIn.address)
+      }
       tokenOutAddress = allowsTradingETH === true && isTokenOutEther ? TOKENS_MAINNET.weth.address : tokenOut.address
     }
 
@@ -100,7 +104,7 @@ export async function getRoutablePools(
     const hasUnderlyingTokenOut = underlyingTokens?.some(
       (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
     )
-    if (name === 'Curve.fi Factory USD Metapool: MIM') {
+    if (name === 'Curve.fi Factory Pool: alETH') {
       console.log('info', tokenIn)
       console.log('infot2', tokenOut)
       console.log('tokens', tokens)
