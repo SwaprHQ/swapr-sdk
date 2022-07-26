@@ -99,12 +99,11 @@ export async function getRoutablePools(
     const hasUnderlyingTokenOut = underlyingTokens?.some(
       (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
     )
-    if (name === 'Curve.fi Factory USD Metapool: LUSDFRAXBP') {
+    if (name === 'Curve.fi Factory Pool: deBridge-ETH') {
       console.log('info', tokenIn)
       console.log('infot2', tokenOut)
       console.log('tokens', tokens)
-      console.log('metatokens', metaTokens)
-      console.log('underlying', underlyingTokens)
+
       console.log('eval1', hasTokenIn || hasUnderlyingTokenIn || hasMetaTokenIn)
       console.log('eval2', hasTokenOut || hasUnderlyingTokenOut || hasMetaTokenOut)
     }

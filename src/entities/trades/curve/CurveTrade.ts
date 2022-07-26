@@ -190,7 +190,7 @@ export class CurveTrade extends Trade {
     // First using address
     // then, using symbol
     const isNativeAssetIn =
-      currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
+      tokenIn?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
         : currencyAmountIn.currency === nativeCurrency
 
@@ -218,10 +218,6 @@ export class CurveTrade extends Trade {
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
-    if (isNativeAssetIn) {
-      value = amountInBN.toString()
-    }
-
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
     const FEE_DECIMAL = 0.0004
@@ -238,6 +234,9 @@ export class CurveTrade extends Trade {
 
     // Use Custom contract for native xDAI<>USDT and xDAI<>USDC trades on Gnosis Chain
     if (chainId === ChainId.XDAI && (isNativeAssetIn || isNativeAssetOut)) {
+      if (isNativeAssetIn) {
+        value = amountInBN.toString()
+      }
       const poolContract = getCurveDAIExchangeContract()
 
       const tokenInAddress =
@@ -505,6 +504,7 @@ export class CurveTrade extends Trade {
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
+      console.log('eth trading')
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
       if (
