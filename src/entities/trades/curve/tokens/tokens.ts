@@ -32,7 +32,7 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
  * Arbitrum
  */
 export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
-  '2CRV': {
+  '2crv': {
     name: '2pool',
     symbol: '2CRV',
     decimals: 18,
@@ -332,11 +332,25 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     decimals: 6,
     type: TokenType.USD,
   },
+  crvfrax: {
+    address: '0x3175Df0976dFA876431C2E9eE6Bc45b65d3473CC',
+    name: 'crvFRAX',
+    symbol: 'crvFRAX',
+    decimals: 18,
+    isLPToken: true,
+    poolTokens: function () {
+      return [TOKENS_MAINNET.frax, TOKENS_MAINNET.usdc]
+    },
+    type: TokenType.USD,
+  },
   '3crv': {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     name: 'Curve.fi DAI/USDC/USDT',
     symbol: '3Crv',
     decimals: 18,
+    poolTokens: function () {
+      return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
+    },
     type: TokenType.USD,
   },
   usdk: {

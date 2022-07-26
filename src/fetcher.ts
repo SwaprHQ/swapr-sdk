@@ -24,6 +24,7 @@ interface FactoryPoolsApiResponse {
       address: string
       assetTypeName: string
       coins: {
+        name: string
         address: string
         decimals: string
         symbol: string
@@ -32,6 +33,7 @@ interface FactoryPoolsApiResponse {
       decimals: string[]
       id: string
       usdTotal: number
+      isMetaPool: boolean
       implementation: string
       implementationAddress: string
       name: string
@@ -253,37 +255,53 @@ export abstract class Fetcher {
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal !== 0)
-    console.log('filteredPools', filterEmptyPools)
-    const modifiedArray: CurvePool[] = filterEmptyPools.map(({ symbol, name, coins, address, implementation }) => {
-      const tokens: CurveToken[] = coins.map(({ symbol, address, decimals }) => {
-        return {
-          symbol,
-          name: symbol.toUpperCase(),
-          address,
-          decimals: parseInt(decimals),
-          type: determineTokeType(symbol),
-        }
-      })
-      const isMeta = implementation.includes('meta')
-      const findMetaPoolToken =
-        isMeta &&
-        tokens[1] &&
-        CURVE_TOKENS[chainId][tokens[1].symbol] &&
-        CURVE_TOKENS[chainId][tokens[1].symbol]?.poolTokens?.()
+    //we filter pools with low liquduity
+    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
+    //restructures pools so they fit into curvePool type
+    const modifiedArray: CurvePool[] = filterEmptyPools.map(
+      ({ symbol, name, coins, address, implementation, isMetaPool }) => {
+        const tokens: CurveToken[] = coins.map((token) => {
+          let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
 
-      let curveObject: CurvePool = {
-        id: symbol,
-        name: name,
-        address: address,
-        abi: CURVE_POOL_ABI_MAP[implementation],
-        isMeta: isMeta,
-        tokens,
+          //wraps token if its Native so that it passes loop for routable pools
+          if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+            currentToken = Token.getNativeWrapper(chainId)
+
+          const symbol = currentToken.symbol ? currentToken.symbol : token.symbol
+
+          return {
+            symbol: symbol,
+            name: symbol,
+            address: currentToken.address,
+            decimals: currentToken.decimals,
+            type: determineTokeType(symbol),
+          }
+        })
+
+        const isMeta = isMetaPool || implementation.includes('meta')
+
+        let curveObject: CurvePool = {
+          id: symbol,
+          name: name,
+          address: address,
+          abi: CURVE_POOL_ABI_MAP[implementation],
+          isMeta: isMeta,
+          tokens,
+          isFactory: true,
+          // allowsTradingETH: tokens.some((item) => item.name.toLocaleLowerCase().includes('eth')),
+        }
+
+        //tries to find meta pool tokens
+        const findPoolTokens = tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
+        //if its meta pool puts token under metaTokens else under underlying tokens
+        if (findPoolTokens) {
+          if (isMeta) curveObject.metaTokens = findPoolTokens
+          else curveObject.underlyingTokens = findPoolTokens
+        }
+
+        return curveObject
       }
-      if (findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
-      console.log(curveObject, 'Krvavi objekat')
-      return curveObject
-    })
+    )
     return modifiedArray
   }
 }

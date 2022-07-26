@@ -22,8 +22,8 @@ import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports
 import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
-import { CURVE_POOLS, CurvePool } from './pools'
-import type { CurveToken } from './tokens/types'
+import { CURVE_POOLS } from './pools'
+import type { CurvePool, CurveToken } from './tokens/types'
 import {
   CurveTradeBestTradeExactInParams,
   CurveTradeBestTradeExactOutParams,
@@ -177,20 +177,20 @@ export class CurveTrade extends Trade {
     // Get the token's data from Curve
     const tokenIn = curveTokenIn || ({ ...wrappedTokenIn, type: 'other' } as CurveToken)
     const tokenOut = curveTokenOut || ({ ...wrappedtokenOut, type: 'other' } as CurveToken)
-    console.log('curvein', curveTokenIn)
-    console.log('curveout', curveTokenOut)
-    // console.log('or statment',curveTokenIn===undefined || )
+    console.log('currency in ', currencyAmountIn.currency)
+    console.log('tokenIn', tokenIn)
+    console.log('wrap', wrappedTokenIn)
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
     //check if tokens are not from official list
-    const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
-    console.log('fucking muffs 1', areMuffTokens)
+    // const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
+
     // Determine if the currency sent is ETH
     // First using address
     // then, using symbol
     const isNativeAssetIn =
-      currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
+      tokenIn?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
         : currencyAmountIn.currency === nativeCurrency
 
@@ -218,10 +218,6 @@ export class CurveTrade extends Trade {
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
 
-    if (isNativeAssetIn) {
-      value = amountInBN.toString()
-    }
-
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
     const FEE_DECIMAL = 0.0004
@@ -238,6 +234,9 @@ export class CurveTrade extends Trade {
 
     // Use Custom contract for native xDAI<>USDT and xDAI<>USDC trades on Gnosis Chain
     if (chainId === ChainId.XDAI && (isNativeAssetIn || isNativeAssetOut)) {
+      if (isNativeAssetIn) {
+        value = amountInBN.toString()
+      }
       const poolContract = getCurveDAIExchangeContract()
 
       const tokenInAddress =
@@ -292,11 +291,12 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through
     // Manually find all routable pools
-    let routablePools = await getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
-    console.log('WOKSKSJDKSJDKSJDKSJDKS', routablePools)
-    // On mainnet, use the exchange info to get the best pool
+    let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
+    console.log('routable pools', routablePools)
+    console.log('curveica', routablePools)
+    // // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
-      chainId === ChainId.MAINNET && !areMuffTokens
+      chainId === ChainId.MAINNET
         ? await getBestCurvePoolAndOutput({
             amountIn: amountInBN,
             tokenInAddress: tokenIn.address,
@@ -308,13 +308,15 @@ export class CurveTrade extends Trade {
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
+      console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
       routablePools = curvePools.filter(
-        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase() || pool.isFactory
       )
     }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)
+    console.log('has pools or naw ', routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder
@@ -372,18 +374,19 @@ export class CurveTrade extends Trade {
     // The final step
     // Compile all the output
     // Using Multicall contract
+    console.log('routbale pools beofre shit', routablePools)
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
-        console.log('routable LOOOPING', pool)
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
+        console.log('beforeval', pool)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
-          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
+          console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
         }
+        console.log('continues', pool)
 
         // Get expected output from the pool
         // Use underylying signature if the pool is a meta pool
@@ -392,6 +395,13 @@ export class CurveTrade extends Trade {
 
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
+        console.log('tokenInIndex', tokenInIndex)
+        console.log('tokenoutIndex', tokenOutIndex)
+        console.log('dyMethodParams', [
+          tokenInIndex.toString(),
+          tokenOutIndex.toString(),
+          currencyAmountIn.raw.toString(),
+        ])
 
         debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
           dyMethodSignature,
@@ -422,7 +432,7 @@ export class CurveTrade extends Trade {
         }
       })
     )
-
+    console.log('poolList', quoteFromPoolList)
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
       .filter((pool) => {
@@ -494,6 +504,7 @@ export class CurveTrade extends Trade {
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
+      console.log('eth trading')
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
       if (
@@ -554,6 +565,7 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
+      console.log('tries to get quote')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,
@@ -565,6 +577,7 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
+        console.log('gets aa quore', quote)
         const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
@@ -626,7 +639,7 @@ export class CurveTrade extends Trade {
         currencyIn as Token,
         parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
       )
-
+      console.log('tries to get quote')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,

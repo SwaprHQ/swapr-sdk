@@ -1,5 +1,3 @@
-import type { ContractInterface } from '@ethersproject/contracts'
-
 import { ChainId } from '../../../../constants'
 import {
   CURVE_3POOL_ABI,
@@ -9,25 +7,11 @@ import {
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
   CURVE_TRICRYPTO_ABI,
+  CURVE_METAUSD_ABI,
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
-import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
-import { CurveToken } from '../tokens/types'
-
-export interface CurvePool {
-  id: string
-  name: string
-  address: string
-  abi: ContractInterface
-  approveAddress?: string
-  tokens: CurveToken[]
-  underlyingTokens?: CurveToken[]
-  metaTokens?: CurveToken[]
-  riskLevel?: number
-  isMeta?: boolean
-  allowsTradingETH?: boolean
-}
+import { CurvePool, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
 
 /**
  * xDAI pools
@@ -314,8 +298,9 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'lusd',
     name: 'lusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.lusd, TOKENS_MAINNET.tricrv],
+    isMeta: true,
     metaTokens: tricrvMetaTokensMainnet,
     address: '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA',
   },
@@ -422,14 +407,14 @@ export const POOLS_MAINNET: CurvePool[] = [
     id: 'reth',
     name: 'rETH',
     abi: CURVE_ETHXERC20_256_ABI,
-    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.reth],
+    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.reth],
     address: '0xF9440930043eb3997fc70e1339dBb11F341de7A8',
   },
   {
     id: 'seth',
     name: 'seth',
     abi: CURVE_ETHXERC20_ABI,
-    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.seth],
+    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.seth],
     address: '0xc5424b857f758e906013f3555dad202e4bdb4567',
   },
   {
@@ -442,7 +427,7 @@ export const POOLS_MAINNET: CurvePool[] = [
       poolMethods['payable']['exchange_underlying(uint256,uint256,uint256,uint256)'],
       poolMethods['view']['get_dy(int128,int128,uint256)'],
     ],
-    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.steth],
+    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.steth],
     address: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022',
     allowsTradingETH: true,
   },

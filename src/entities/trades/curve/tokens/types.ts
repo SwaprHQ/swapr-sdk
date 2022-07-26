@@ -43,4 +43,5 @@ export interface CurvePool {
   riskLevel?: number
   isMeta?: boolean
   allowsTradingETH?: boolean
+  isFactory?: boolean
 }
