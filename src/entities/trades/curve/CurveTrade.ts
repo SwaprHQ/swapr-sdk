@@ -21,7 +21,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports
-import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
+import { getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
 import { CURVE_POOLS, CurvePool } from './pools'
 import type { CurveToken } from './tokens/types'
 import {
@@ -184,7 +184,7 @@ export class CurveTrade extends Trade {
     const nativeCurrency = Currency.getNative(chainId)
 
     //check if tokens are not from official list
-    const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
+    // const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
 
     // Determine if the currency sent is ETH
     // First using address
@@ -295,27 +295,29 @@ export class CurveTrade extends Trade {
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     console.log('routable pools', routablePools)
     console.log('curveica', routablePools)
-    // On mainnet, use the exchange info to get the best pool
-    const bestPoolAndOutputRes =
-      chainId === ChainId.MAINNET && !areMuffTokens
-        ? await getBestCurvePoolAndOutput({
-            amountIn: amountInBN,
-            tokenInAddress: tokenIn.address,
-            tokenOutAddress: tokenOut.address,
-            chainId,
-          })
-        : undefined
+    // // On mainnet, use the exchange info to get the best pool
+    // const bestPoolAndOutputRes =
+    //   chainId === ChainId.MAINNET && !areMuffTokens
+    //     ? await getBestCurvePoolAndOutput({
+    //         amountIn: amountInBN,
+    //         tokenInAddress: tokenIn.address,
+    //         tokenOutAddress: tokenOut.address,
+    //         chainId,
+    //       })
+    //     : undefined
 
     // If a pool is found
     // Ignore the manual off-chain search
-    if (bestPoolAndOutputRes) {
-      debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
-      routablePools = curvePools.filter(
-        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
-      )
-    }
+    // if (bestPoolAndOutputRes) {
+    //   console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
+    //   debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
+    //   routablePools = curvePools.filter(
+    //     (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+    //   )
+    // }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)
+    console.log('has pools or naw ', routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder

@@ -79,18 +79,13 @@ export async function getRoutablePools(
       const isTokenOutEther = tokenOut.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
 
       tokenInAddress = allowsTradingETH === true && isTokenInEther ? TOKENS_MAINNET.weth.address : tokenIn.address
-      if (name === 'Curve.fi Factory Pool: alETH') {
-        console.log('isTokenInEther', isTokenInEther)
-        console.log('address?')
-        console.log('allowsTrading', allowsTradingETH)
-        console.log('TOKENS_MAINNET.weth.address', TOKENS_MAINNET.weth.address)
-        console.log('tokenIn.address', tokenIn.address)
-      }
+
       tokenOutAddress = allowsTradingETH === true && isTokenOutEther ? TOKENS_MAINNET.weth.address : tokenOut.address
     }
 
     // main tokens
     const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
+
     const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
 
     // Meta tokens in MetaPools [ERC20, [...3PoolTokens]]
@@ -104,7 +99,7 @@ export async function getRoutablePools(
     const hasUnderlyingTokenOut = underlyingTokens?.some(
       (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
     )
-    if (name === 'Curve.fi Factory Pool: alETH') {
+    if (name === 'Curve.fi Factory USD Metapool: LUSDFRAXBP') {
       console.log('info', tokenIn)
       console.log('infot2', tokenOut)
       console.log('tokens', tokens)

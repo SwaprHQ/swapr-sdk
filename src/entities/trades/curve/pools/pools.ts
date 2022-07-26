@@ -8,6 +8,7 @@ import {
   CURVE_ETHXERC20_256_ABI,
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
+  CURVE_METAUSD_ABI,
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
@@ -313,9 +314,10 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'lusd',
     name: 'lusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.lusd, TOKENS_MAINNET.tricrv],
-    underlyingTokens: tricrvMetaTokensMainnet,
+    isMeta: true,
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA',
   },
   {
@@ -449,7 +451,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     id: 'ankreth',
     name: 'ankreth',
     abi: CURVE_ETHXERC20_256_ABI,
-    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.ankreth],
+    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.ankreth],
     address: '0xA96A65c051bF88B4095Ee1f2451C2A9d43F53Ae2',
   },
   /**

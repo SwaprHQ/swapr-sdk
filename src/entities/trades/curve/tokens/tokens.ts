@@ -332,6 +332,17 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     decimals: 6,
     type: TokenType.USD,
   },
+  crvfrax: {
+    address: '0x3175Df0976dFA876431C2E9eE6Bc45b65d3473CC',
+    name: 'crvFRAX',
+    symbol: 'crvFRAX',
+    decimals: 18,
+    isLPToken: true,
+    poolTokens: function () {
+      return [TOKENS_MAINNET.frax, TOKENS_MAINNET.usdc]
+    },
+    type: TokenType.USD,
+  },
   '3crv': {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     name: 'Curve.fi DAI/USDC/USDT',

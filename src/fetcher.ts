@@ -264,19 +264,20 @@ export abstract class Fetcher {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
           if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
             currentToken = Token.getNativeWrapper(chainId)
-          console.log('address', token.address)
-          console.log('equsl3', address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
-          console.log('nativewrapper', Token.getNativeWrapper(chainId))
+          // console.log('address', token.address)
+          // console.log('equsl3', address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+          // console.log('nativewrapper', Token.getNativeWrapper(chainId))
 
           return {
             symbol: currentToken.symbol ? currentToken.symbol : token.symbol,
-            name: currentToken.name ? currentToken.name.toUpperCase() : token.name,
+            name: token.symbol,
             address: currentToken.address,
             decimals: currentToken.decimals,
             type: determineTokeType(currentToken.symbol ? currentToken.symbol : token.symbol),
           }
         })
         const isMeta = isMetaPool || implementation.includes('meta')
+
         let curveObject: CurvePool = {
           id: symbol,
           name: name,
@@ -284,18 +285,29 @@ export abstract class Fetcher {
           abi: CURVE_POOL_ABI_MAP[implementation],
           isMeta: isMeta,
           tokens,
-          allowsTradingETH: tokens.some((item) => item.name === 'eth'),
+          // allowsTradingETH: tokens.some((item) => item.name.toLocaleLowerCase().includes('eth')),
         }
-        if (name === 'Curve.fi Factory Pool: alETH') {
-          console.log('GOTCHA BITCH', tokens)
+        if (name === 'Curve.fi Factory USD Metapool: Liquity') {
+          console.log('GARGANTUA')
+          console.log('ismeta', isMeta)
+          console.log('ismetapool', isMetaPool)
+          console.log('implemnattion', implementation.includes('meta'))
+          console.log('imeple', implementation)
         }
 
         console.log('NIFIFIFIFIFIIFIFIIF')
-        console.log('shithead')
+        console.log('meathead')
         //tries to find meta pool tokens
 
         const findMetaPoolToken =
           tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
+
+        if (name === 'Curve.fi Factory USD Metapool: LUSDFRAXBP') {
+          console.log('metapool tokens', findMetaPoolToken)
+          console.log('token', tokens[1].symbol.toLocaleLowerCase())
+          console.log('new tones', CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()])
+          console.log('tokens', CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.())
+        }
         if (isMeta && findMetaPoolToken) curveObject.metaTokens = findMetaPoolToken
         if (!isMeta && findMetaPoolToken) curveObject.underlyingTokens = findMetaPoolToken
 
