@@ -1,8 +1,8 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
 import { checkIfStringExists } from '../../../utils'
-import { CurvePool } from './pools'
-import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType } from './tokens'
+
+import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType, CurvePool } from './tokens'
 
 /**
  * Returns the token index of a token in a Curve pool
@@ -69,7 +69,7 @@ export async function getRoutablePools(
 ) {
   const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
   const allPools = pools.concat(factoryPools)
-  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH, name }) => {
+  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
 
@@ -99,14 +99,6 @@ export async function getRoutablePools(
     const hasUnderlyingTokenOut = underlyingTokens?.some(
       (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
     )
-    if (name === 'Curve.fi Factory Pool: deBridge-ETH') {
-      console.log('info', tokenIn)
-      console.log('infot2', tokenOut)
-      console.log('tokens', tokens)
-
-      console.log('eval1', hasTokenIn || hasUnderlyingTokenIn || hasMetaTokenIn)
-      console.log('eval2', hasTokenOut || hasUnderlyingTokenOut || hasMetaTokenOut)
-    }
 
     return (
       (hasTokenIn || hasUnderlyingTokenIn || hasMetaTokenIn) &&

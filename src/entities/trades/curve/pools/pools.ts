@@ -1,5 +1,3 @@
-import type { ContractInterface } from '@ethersproject/contracts'
-
 import { ChainId } from '../../../../constants'
 import {
   CURVE_3POOL_ABI,
@@ -12,22 +10,7 @@ import {
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
-import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
-import { CurveToken } from '../tokens/types'
-
-export interface CurvePool {
-  id: string
-  name: string
-  address: string
-  abi: ContractInterface
-  approveAddress?: string
-  tokens: CurveToken[]
-  underlyingTokens?: CurveToken[]
-  metaTokens?: CurveToken[]
-  riskLevel?: number
-  isMeta?: boolean
-  allowsTradingETH?: boolean
-}
+import { CurvePool, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
 
 /**
  * xDAI pools

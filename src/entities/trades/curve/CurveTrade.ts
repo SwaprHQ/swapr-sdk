@@ -21,9 +21,9 @@ import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports
-import { getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
-import { CURVE_POOLS, CurvePool } from './pools'
-import type { CurveToken } from './tokens/types'
+import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
+import { CURVE_POOLS } from './pools'
+import type { CurvePool, CurveToken } from './tokens/types'
 import {
   CurveTradeBestTradeExactInParams,
   CurveTradeBestTradeExactOutParams,
@@ -295,25 +295,25 @@ export class CurveTrade extends Trade {
     console.log('routable pools', routablePools)
     console.log('curveica', routablePools)
     // // On mainnet, use the exchange info to get the best pool
-    // const bestPoolAndOutputRes =
-    //   chainId === ChainId.MAINNET && !areMuffTokens
-    //     ? await getBestCurvePoolAndOutput({
-    //         amountIn: amountInBN,
-    //         tokenInAddress: tokenIn.address,
-    //         tokenOutAddress: tokenOut.address,
-    //         chainId,
-    //       })
-    //     : undefined
+    const bestPoolAndOutputRes =
+      chainId === ChainId.MAINNET
+        ? await getBestCurvePoolAndOutput({
+            amountIn: amountInBN,
+            tokenInAddress: tokenIn.address,
+            tokenOutAddress: tokenOut.address,
+            chainId,
+          })
+        : undefined
 
     // If a pool is found
     // Ignore the manual off-chain search
-    // if (bestPoolAndOutputRes) {
-    //   console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
-    //   debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
-    //   routablePools = curvePools.filter(
-    //     (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
-    //   )
-    // }
+    if (bestPoolAndOutputRes) {
+      console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
+      debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
+      routablePools = curvePools.filter(
+        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase() || pool.isFactory
+      )
+    }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)
     console.log('has pools or naw ', routablePools)
