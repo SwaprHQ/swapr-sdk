@@ -180,7 +180,7 @@ export class CurveTrade extends Trade {
     // First using address
     // then, using symbol
     const isNativeAssetIn =
-      tokenIn?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
+      currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
         : currencyAmountIn.currency === nativeCurrency
 
