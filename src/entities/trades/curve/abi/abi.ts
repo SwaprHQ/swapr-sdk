@@ -50,6 +50,13 @@ export const CURVE_ETHXERC20_ABI: ContractInterface = [
   poolMethods['payable']['exchange(int128,int128,uint256,uint256)'],
 ]
 
+export const CURVE_TRICRYPTO_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(uint256,uint256,uint256)'],
+  poolMethods['payable']['exchange(uint256,uint256,uint256,uint256)'],
+  poolMethods['payable']['exchange(uint256,uint256,uint256,uint256,bool)'],
+]
+
 export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(uint256,uint256,uint256)'],

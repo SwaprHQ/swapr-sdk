@@ -6,6 +6,7 @@ import {
   CURVE_ETHXERC20_256_ABI,
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
+  CURVE_TRICRYPTO_ABI,
   CURVE_METAUSD_ABI,
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
@@ -40,7 +41,7 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
   {
     id: 'tricrypto',
     name: 'Tricrypto',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_TRICRYPTO_ABI,
     isMeta: false,
     address: '0x960ea3e3C7FB317332d990873d354E18d7645590',
     tokens: [TOKENS_ARBITRUM_ONE.usdt, TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.weth],
