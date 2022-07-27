@@ -102,6 +102,6 @@ export function debug(...data: any[]) {
  * @param haystack array of strings to be compared against
  * @returns boolean if string is contained in array of string
  */
-export function checkIfStringExists(needle: string, hayStack: string[]): boolean {
+export function checkIfStringExistsInArray(needle: string, hayStack: string[]): boolean {
   return hayStack.some((element) => needle.toLocaleLowerCase().includes(element.toLocaleLowerCase()))
 }

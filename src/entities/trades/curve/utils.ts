@@ -1,6 +1,6 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
-import { checkIfStringExists } from '../../../utils'
+import { checkIfStringExistsInArray } from '../../../utils'
 
 import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType, CurvePool } from './tokens'
 
@@ -144,8 +144,8 @@ const btc = ['btc']
 const eth = ['eth']
 
 export function determineTokeType(symbol: string): TokenType {
-  if (checkIfStringExists(symbol, eth)) return TokenType.ETH
-  if (checkIfStringExists(symbol, btc)) return TokenType.BTC
-  if (checkIfStringExists(symbol, usd)) return TokenType.USD
+  if (checkIfStringExistsInArray(symbol, eth)) return TokenType.ETH
+  if (checkIfStringExistsInArray(symbol, btc)) return TokenType.BTC
+  if (checkIfStringExistsInArray(symbol, usd)) return TokenType.USD
   else return TokenType.OTHER
 }
