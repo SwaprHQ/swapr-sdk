@@ -292,8 +292,6 @@ export class CurveTrade extends Trade {
     // Find all pools that the trade can go through
     // Manually find all routable pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
-    console.log('routable pools', routablePools)
-    console.log('curveica', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -308,7 +306,6 @@ export class CurveTrade extends Trade {
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
-      console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
       const bestPool = routablePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
@@ -317,7 +314,6 @@ export class CurveTrade extends Trade {
     }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)
-    console.log('has pools or naw ', routablePools)
 
     // Start finding a possible pool
     // First via Curve's internal best pool finder
@@ -375,20 +371,16 @@ export class CurveTrade extends Trade {
     // The final step
     // Compile all the output
     // Using Multicall contract
-    console.log('routbale pools beofre shit', routablePools)
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-        console.log('beforeval', pool)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
           console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
         }
-        console.log('continues', pool)
-
         // Get expected output from the pool
         // Use underylying signature if the pool is a meta pool
         // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
@@ -396,13 +388,6 @@ export class CurveTrade extends Trade {
 
         // Construct the params
         const dyMethodParams = [tokenInIndex.toString(), tokenOutIndex.toString(), currencyAmountIn.raw.toString()]
-        console.log('tokenInIndex', tokenInIndex)
-        console.log('tokenoutIndex', tokenOutIndex)
-        console.log('dyMethodParams', [
-          tokenInIndex.toString(),
-          tokenOutIndex.toString(),
-          currencyAmountIn.raw.toString(),
-        ])
 
         debugCurveGetQuote(`Fetching estimated output from ${pool.address}`, {
           dyMethodSignature,
@@ -433,7 +418,6 @@ export class CurveTrade extends Trade {
         }
       })
     )
-    console.log('poolList', quoteFromPoolList)
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
       .filter((pool) => {
@@ -486,7 +470,6 @@ export class CurveTrade extends Trade {
         if (!(exchangeSignature in poolContract.functions)) {
           // Exit the search
           console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
-          console.log('Return undefined')
           return
         }
       }
@@ -505,7 +488,6 @@ export class CurveTrade extends Trade {
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
-      console.log('eth trading')
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
       if (

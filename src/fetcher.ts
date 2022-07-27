@@ -255,7 +255,7 @@ export abstract class Fetcher {
 
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    //we filter pools with low liquduity
+    //filter for low liquidty pool
     const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
     //restructures pools so they fit into curvePool type
     const modifiedArray: CurvePool[] = filterEmptyPools.map(
@@ -263,7 +263,7 @@ export abstract class Fetcher {
         const tokens: CurveToken[] = coins.map((token) => {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
 
-          //wraps token if its Native so that it passes loop for routable pools
+          //wraps token if its Native so that it can be matched
           if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
             currentToken = Token.getNativeWrapper(chainId)
 
@@ -287,8 +287,6 @@ export abstract class Fetcher {
           abi: CURVE_POOL_ABI_MAP[implementation],
           isMeta: isMeta,
           tokens,
-          isFactory: true,
-          // allowsTradingETH: tokens.some((item) => item.name.toLocaleLowerCase().includes('eth')),
         }
 
         //tries to find meta pool tokens
