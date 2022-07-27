@@ -294,7 +294,7 @@ export class CurveTrade extends Trade {
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     console.log('routable pools', routablePools)
     console.log('curveica', routablePools)
-    // // On mainnet, use the exchange info to get the best pool
+    // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
         ? await getBestCurvePoolAndOutput({
@@ -310,8 +310,8 @@ export class CurveTrade extends Trade {
     if (bestPoolAndOutputRes) {
       console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
-      routablePools = curvePools.filter(
-        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase() || pool.isFactory
+      routablePools = routablePools.filter(
+        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
     }
 

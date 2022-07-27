@@ -26,6 +26,17 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
     decimals: 6,
     type: TokenType.USD,
   },
+  x3crv: {
+    name: 'x3CRV',
+    symbol: 'x3CRV',
+    decimals: 18,
+    address: '0x1337BedC9D22ecbe766dF105c9623922A27963EC',
+    isLPToken: true,
+    type: TokenType.USD,
+    poolTokens: function () {
+      return [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
+    },
+  },
 }
 
 /**
