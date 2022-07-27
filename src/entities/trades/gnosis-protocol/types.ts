@@ -1,85 +1,35 @@
-import type { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/esm/order'
+import { ApiOrderStatus, SimpleGetQuoteResponse } from '@cowprotocol/cow-sdk'
 
 import type { ChainId, TradeType } from '../../../constants'
 import type { Currency } from '../../currency'
 import type { CurrencyAmount } from '../../fractions/currencyAmount'
 import type { Percent } from '../../fractions/percent'
-import type { SigningSchemeValue } from './signatures'
 
-export enum GnosisProtocolTradeOrderStatus {
-  UNKNOWN = 'unknown',
-  PENDING = 'pending',
-  PRESIGNATURE_PENDING = 'presignaturePending',
-  FULFILLED = 'fulfilled',
-  EXPIRED = 'expired',
-  CANCELLED = 'cancelled',
-}
-
-export interface GnosisProtocolTradeConstructorParams {
+export interface CoWTradeParams {
   inputAmount: CurrencyAmount
   outputAmount: CurrencyAmount
   maximumSlippage: Percent
   tradeType: TradeType
   chainId: ChainId
-  order: Order
   fee?: Percent
   feeAmount: CurrencyAmount
+  quote: SimpleGetQuoteResponse
 }
 
-export interface GnosisProtocolTradeBestTradeExactInParams {
+export interface CoWTradeGetBestTradeExactInParams {
   currencyAmountIn: CurrencyAmount
   currencyOut: Currency
   maximumSlippage: Percent
-  receiver?: string
+  receiver: string
+  user: string
 }
 
-export interface GnosisProtocolTradeBestTradeExactOutParams {
+export interface CoWTradeGetBestTradeExactOutParams {
   currencyAmountOut: CurrencyAmount
   currencyIn: Currency
   maximumSlippage: Percent
-  receiver?: string
-}
-
-export type GnosisProtocolTradeSwapOrderParams = Required<Pick<Order, 'receiver'>>
-export type GnosisProtocolTradeOrder = Order
-
-export enum GnosisProtocolTradeOrderOrderStatus {
-  UNKNOWN = 'unknown',
-  OPEN = 'open',
-  PRESIGNATURE_PENDING = 'presignaturePending',
-  FULFILLED = 'fulfilled',
-  EXPIRED = 'expired',
-  CANCELLED = 'cancelled',
-}
-
-export type GnosisProtocolTradeApiOrderOrderStatus =
-  | 'fulfilled'
-  | 'expired'
-  | 'cancelled'
-  | 'presignaturePending'
-  | 'open'
-
-export interface GnosisProtocolTradeOrderMetadata {
-  creationDate: string
-  owner: string
-  uid: string
-  availableBalance: string
-  executedBuyAmount: string
-  executedSellAmount: string
-  executedSellAmountBeforeFees: string
-  executedFeeAmount: string
-  invalidated: false
-  sellToken: string
-  buyToken: string
-  sellAmount: string
-  buyAmount: string
-  validTo: number
-  appData: number
-  feeAmount: string
-  kind: OrderKind
-  partiallyFillable: false
-  signature: string
-  signingScheme: SigningSchemeValue
-  status: GnosisProtocolTradeApiOrderOrderStatus
   receiver: string
+  user: string
 }
+
+export type CoWTradeApiOrderStatus = ApiOrderStatus
