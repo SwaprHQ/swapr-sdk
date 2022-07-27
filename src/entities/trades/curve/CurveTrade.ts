@@ -310,9 +310,10 @@ export class CurveTrade extends Trade {
     if (bestPoolAndOutputRes) {
       console.log(bestPoolAndOutputRes, 'best pool wtf are you doing man')
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
-      routablePools = routablePools.filter(
+      const bestPool = routablePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
+      if (bestPool.length !== 0) routablePools = bestPool
     }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)

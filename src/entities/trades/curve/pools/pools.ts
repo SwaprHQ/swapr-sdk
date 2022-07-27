@@ -288,7 +288,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'frax',
     name: 'Frax',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.frax, TOKENS_MAINNET.tricrv],
     metaTokens: tricrvMetaTokensMainnet,
