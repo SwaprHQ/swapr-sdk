@@ -171,20 +171,15 @@ export class CurveTrade extends Trade {
     const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
 
+    // Get the token's data from Curve
     const curveTokenIn = getCurveToken(wrappedTokenIn.address, chainId)
     const curveTokenOut = getCurveToken(wrappedtokenOut.address, chainId)
 
-    // Get the token's data from Curve
     const tokenIn = curveTokenIn || ({ ...wrappedTokenIn, type: 'other' } as CurveToken)
     const tokenOut = curveTokenOut || ({ ...wrappedtokenOut, type: 'other' } as CurveToken)
-    console.log('currency in ', currencyAmountIn.currency)
-    console.log('tokenIn', tokenIn)
-    console.log('wrap', wrappedTokenIn)
+
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
-
-    //check if tokens are not from official list
-    // const areMuffTokens = curveTokenIn === undefined || curveTokenIn === undefined
 
     // Determine if the currency sent is ETH
     // First using address
@@ -289,7 +284,7 @@ export class CurveTrade extends Trade {
     // a potential that Curve Smart Router can handle the trade
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
-    // Find all pools that the trade can go through
+    // Find all pools that the trade can go through from both factory and inp
     // Manually find all routable pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     // On mainnet, use the exchange info to get the best pool
@@ -548,7 +543,6 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
-      console.log('tries to get quote')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,
@@ -560,7 +554,6 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
-        console.log('gets aa quore', quote)
         const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
