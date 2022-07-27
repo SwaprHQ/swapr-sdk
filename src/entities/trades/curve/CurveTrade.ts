@@ -293,6 +293,7 @@ export class CurveTrade extends Trade {
           })
         : undefined
 
+    console.log({ bestPoolAndOutputRes })
     // If a pool is found
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
@@ -316,6 +317,7 @@ export class CurveTrade extends Trade {
         tokenOutAddress: tokenOut.address,
       })
 
+      console.log({ exchangeRoutingInfo })
       // If the swap can be handled by the smart router, use it
       if (exchangeRoutingInfo) {
         const params = [
@@ -351,6 +353,7 @@ export class CurveTrade extends Trade {
       }
     }
 
+    console.log({ routablePools })
     // Continue using pool-by-pool cases
     // Exit since no pools have been found
     if (routablePools.length === 0) {
@@ -361,8 +364,10 @@ export class CurveTrade extends Trade {
     // The final step
     // Compile all the output
     // Using Multicall contract
+    console.log('routable pools before quotes', routablePools)
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
+        console.log({ pool })
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
@@ -385,6 +390,7 @@ export class CurveTrade extends Trade {
         })
 
         try {
+          console.log('poolContract', poolContract)
           const estimatedAmountOut = (await poolContract[dyMethodSignature](...dyMethodParams)) as BigNumber
           // Return the call bytes
           return {

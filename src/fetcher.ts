@@ -6,6 +6,7 @@ import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 // import { CurvePool } from './entities/trades/curve/pools'
+import fetch from 'node-fetch'
 
 import { MULTICALL2_ABI } from './abis'
 import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './constants'

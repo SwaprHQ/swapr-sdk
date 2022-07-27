@@ -6,8 +6,8 @@ import {
   CURVE_ETHXERC20_256_ABI,
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
-  CURVE_TRICRYPTO_ABI,
   CURVE_METAUSD_ABI,
+  CURVE_TRICRYPTO_ABI,
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
@@ -317,7 +317,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'alusd',
     name: 'alUSD',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.alusd, TOKENS_MAINNET.tricrv],
     metaTokens: tricrvMetaTokensMainnet,

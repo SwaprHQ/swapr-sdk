@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 interface CustomMatchers<R = unknown> {
   toBeAddress(): R
 }
