@@ -610,7 +610,7 @@ export class CurveTrade extends Trade {
         currencyIn as Token,
         parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
       )
-      console.log('tries to get quote')
+
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,

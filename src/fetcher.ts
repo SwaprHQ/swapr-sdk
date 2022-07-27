@@ -256,9 +256,9 @@ export abstract class Fetcher {
     if (!response.ok) throw new Error('response not ok')
     const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
     //filter for low liquidty pool
-    const filterEmptyPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
+    const filteredLowLiquidityPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
     //restructures pools so they fit into curvePool type
-    const modifiedArray: CurvePool[] = filterEmptyPools.map(
+    const modifiedArray: CurvePool[] = filteredLowLiquidityPools.map(
       ({ symbol, name, coins, address, implementation, isMetaPool }) => {
         const tokens: CurveToken[] = coins.map((token) => {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
