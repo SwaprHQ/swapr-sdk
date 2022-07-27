@@ -23,7 +23,7 @@ import { getProvider } from '../utils'
 // Curve imports
 import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
 import { CURVE_POOLS } from './pools'
-import type { CurvePool, CurveToken } from './tokens/types'
+import type { CurvePool } from './tokens/types'
 import {
   CurveTradeBestTradeExactInParams,
   CurveTradeBestTradeExactOutParams,
@@ -170,14 +170,9 @@ export class CurveTrade extends Trade {
 
     const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
-
     // Get the token's data from Curve
-    const curveTokenIn = getCurveToken(wrappedTokenIn.address, chainId)
-    const curveTokenOut = getCurveToken(wrappedtokenOut.address, chainId)
-
-    const tokenIn = curveTokenIn || ({ ...wrappedTokenIn, type: 'other' } as CurveToken)
-    const tokenOut = curveTokenOut || ({ ...wrappedtokenOut, type: 'other' } as CurveToken)
-
+    const tokenIn = getCurveToken(wrappedTokenIn, chainId)
+    const tokenOut = getCurveToken(wrappedtokenOut, chainId)
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
@@ -284,7 +279,7 @@ export class CurveTrade extends Trade {
     // a potential that Curve Smart Router can handle the trade
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
-    // Find all pools that the trade can go through from both factory and inp
+    // Find all pools that the trade can go through from both factory and regular pools
     // Manually find all routable pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     // On mainnet, use the exchange info to get the best pool

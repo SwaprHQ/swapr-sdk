@@ -1,6 +1,7 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
 import { checkIfStringExistsInArray } from '../../../utils'
+import { Token } from '../../token'
 
 import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType, CurvePool } from './tokens'
 
@@ -40,15 +41,18 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
 }
 
 /**
- * Given a token address, returns the token information if found
- * @param tokenAddress The token address
+ * Given a token, returns the token information if found otherwise returns token passed
+ * @param token The token
  * @param chainId The chain ID. Default is Mainnet
  * @returns The token information or undefined if not found
  */
-export function getCurveToken(tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
+export function getCurveToken(token: Token, chainId: ChainId = ChainId.MAINNET) {
   const tokenList = CURVE_TOKENS[chainId as keyof typeof CURVE_TOKENS]
 
-  return Object.values(tokenList).find((token) => token.address.toLowerCase() === tokenAddress?.toLowerCase())
+  return (
+    Object.values(tokenList).find(({ address }) => address.toLowerCase() === token.address?.toLowerCase()) ||
+    ({ ...token, type: 'other' } as CurveToken)
+  )
 }
 
 /**
