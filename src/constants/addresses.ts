@@ -1,16 +1,16 @@
 import { AddressZero } from '@ethersproject/constants'
 import {
+  arbitrumGoerliTestnet as coreArbitrumGoerliTestnet,
   arbitrumOne as coreArbitrumOne,
   arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
-  arbitrumGoerliTestnet as coreArbitrumGoerliTestnet,
   mainnet as coreMainnet,
   rinkeby as coreRinkeby,
   xdai as coreXDai,
 } from '@swapr/core/.contracts.json'
 import {
+  arbitrumGoerliTestnet as peripheryArbitrumGoerliTestnet,
   arbitrumOne as peripheryArbitrumOne,
   arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
-  arbitrumGoerliTestnet as peripheryArbitrumGoerliTestnet,
   mainnet as peripheryMainnet,
   rinkeby as peripheryRinkeby,
   xdai as peripheryXDai,
