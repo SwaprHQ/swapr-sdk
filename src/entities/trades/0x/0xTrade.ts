@@ -118,7 +118,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         }&slippagePercentage=${new Percent(
           maximumSlippage.numerator,
           JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(3)}`
+        ).toFixed(4)}`
       )
 
       if (!response.ok) throw new Error('response not ok')
