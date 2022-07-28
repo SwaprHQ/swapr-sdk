@@ -508,6 +508,7 @@ export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   // Empty
   [ChainId.RINKEBY]: [],
   [ChainId.ARBITRUM_RINKEBY]: [],
+  [ChainId.ARBITRUM_GOERLI]: [],
   [ChainId.POLYGON]: [],
   [ChainId.GOERLI]: [],
   [ChainId.OPTIMISM_MAINNET]: [],

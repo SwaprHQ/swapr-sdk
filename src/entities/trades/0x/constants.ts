@@ -17,6 +17,7 @@ export const ZEROX_API_URL: Record<ChainId, string> = {
   [ChainId.RINKEBY]: '',
   [ChainId.ARBITRUM_ONE]: '',
   [ChainId.ARBITRUM_RINKEBY]: '',
+  [ChainId.ARBITRUM_GOERLI]: '',
   [ChainId.XDAI]: '',
   [ChainId.POLYGON]: 'https://polygon.api.0x.org/',
   [ChainId.GOERLI]: '',

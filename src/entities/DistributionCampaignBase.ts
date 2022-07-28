@@ -29,6 +29,10 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
     parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
     ChainId.ARBITRUM_RINKEBY
   ),
+  [ChainId.ARBITRUM_GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_GOERLI).decimals).toString(),
+    ChainId.ARBITRUM_GOERLI
+  ),
   [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
     ChainId.POLYGON

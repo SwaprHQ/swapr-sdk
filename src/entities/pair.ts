@@ -26,6 +26,7 @@ const INITIAL_CACHE_STATE: Record<ChainId, any> = {
   [ChainId.RINKEBY]: {},
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
+  [ChainId.ARBITRUM_GOERLI]: {},
   [ChainId.XDAI]: {},
   [ChainId.POLYGON]: {},
   [ChainId.GOERLI]: {},
