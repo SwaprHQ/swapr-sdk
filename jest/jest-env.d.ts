@@ -4,9 +4,9 @@ interface CustomMatchers<R = unknown> {
 
 declare global {
   namespace jest {
-    interface Expect extends CustomMatchers {}
-    interface Matchers<R> extends CustomMatchers<R> {}
-    interface InverseAsymmetricMatchers extends CustomMatchers {}
+    type Expect = CustomMatchers
+    type Matchers<R> = CustomMatchers<R>
+    type InverseAsymmetricMatchers = CustomMatchers
   }
 }
 

@@ -1,17 +1,16 @@
-import { parseEther, parseUnits } from '@ethersproject/units'
-import { MaxUint256 } from '@ethersproject/constants'
 import { BigNumber } from '@ethersproject/bignumber'
+import { MaxUint256 } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
+import { parseEther, parseUnits } from '@ethersproject/units'
 import invariant from 'tiny-invariant'
 
 // Jest
 import { addEVMAccount, ERC20_ABI, execAsync, getGanacheRPCProvider, unlockEVMAccount } from '../jest'
-
 // Tets targets
 import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
-import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
 import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
 import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
+import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../src/entities/trades/curve/tokens'
 
 describe('CurveTrade', () => {
   const maximumSlippage = new Percent('3', '100')
@@ -314,7 +313,6 @@ describe('CurveTrade', () => {
       const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
-      console.log(trade.minimumAmountOut().toExact())
       expect(swapTransaction?.value?.toString()).toEqual(
         parseUnits('1', currencyAmountETH1.currency.decimals).toString()
       )

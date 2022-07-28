@@ -176,9 +176,9 @@ export class CurveTrade extends Trade {
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
-    // Determine if the currency sent is ETH
+    // Determine if the currency sent is native
     // First using address
-    // then, using symbol
+    // then, using symbol/name
     const isNativeAssetIn =
       currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
@@ -207,7 +207,9 @@ export class CurveTrade extends Trade {
 
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
-
+    if (isNativeAssetIn) {
+      value = amountInBN.toString()
+    }
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
     const FEE_DECIMAL = 0.0004
@@ -236,7 +238,6 @@ export class CurveTrade extends Trade {
 
       const estimatedAmountOutParams = [tokenInAddress, tokenOutAddress, amountInBN.toString()]
 
-      // Fetch estiamted out
       const estimatedAmountOut = await poolContract.getEstimatedAmountOut(...estimatedAmountOutParams)
 
       // Prepapre signature and params for Curve3PoolExchange
@@ -280,7 +281,6 @@ export class CurveTrade extends Trade {
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
     // Find all pools that the trade can go through from both factory and regular pools
-    // Manually find all routable pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
@@ -322,7 +322,7 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           exchangeRoutingInfo.routes,
           exchangeRoutingInfo.indices,
-          exchangeRoutingInfo.expectedAmountOut.mul(0.98).toString(),
+          exchangeRoutingInfo.expectedAmountOut.mul(98).div(100).toString(),
         ]
 
         const curveRouterContract = getRouter()
@@ -334,7 +334,7 @@ export class CurveTrade extends Trade {
         })
 
         // Add 30% gas buffer
-        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(1.3)
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(13).div(10)
 
         return {
           fee,
