@@ -207,7 +207,9 @@ export class CurveTrade extends Trade {
 
     // Baisc trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
-
+    if (isNativeAssetIn) {
+      value = amountInBN.toString()
+    }
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
     const FEE_DECIMAL = 0.0004
@@ -324,7 +326,7 @@ export class CurveTrade extends Trade {
           amountInBN.toString(),
           exchangeRoutingInfo.routes,
           exchangeRoutingInfo.indices,
-          exchangeRoutingInfo.expectedAmountOut.mul(0.98).toString(),
+          exchangeRoutingInfo.expectedAmountOut.mul(98).div(100).toString(),
         ]
 
         const curveRouterContract = getRouter()
@@ -336,7 +338,7 @@ export class CurveTrade extends Trade {
         })
 
         // Add 30% gas buffer
-        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(1.3)
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(13).div(10)
 
         return {
           fee,

@@ -346,6 +346,7 @@ describe('CurveTrade', () => {
         },
         provider
       )
+      console.log('it is failing here')
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction.data).toBeDefined()
