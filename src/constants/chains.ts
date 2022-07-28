@@ -8,7 +8,11 @@ export enum ChainId {
    */
   RINKEBY = 4,
   GOERLI = 5,
+  /**
+   * @deprecated Use GNOSIS instead
+   */
   XDAI = 100,
+  GNOSIS = 100,
   POLYGON = 137,
   ARBITRUM_ONE = 42161,
   ARBITRUM_RINKEBY = 421611,
