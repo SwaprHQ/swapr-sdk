@@ -215,7 +215,10 @@ export class CoWTrade extends Trade {
         .mul(100)
       const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
       const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
-      const feeAmount = new TokenAmount(tokenIn, quoteResponse.quote.feeAmount.toString())
+
+      const feeAmount = Currency.isNative(currencyAmountIn.currency)
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
+        : new TokenAmount(currencyAmountIn.currency as Token, quoteResponse.quote.feeAmount.toString())
 
       return new CoWTrade({
         chainId,
@@ -287,7 +290,9 @@ export class CoWTrade extends Trade {
         ? CurrencyAmount.nativeCurrency(quoteResponse.quote.buyAmount.toString(), chainId)
         : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString())
 
-      const feeAmount = new TokenAmount(tokenIn, quoteResponse.quote.feeAmount.toString())
+      const feeAmount = Currency.isNative(currencyIn)
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
+        : new TokenAmount(currencyIn as Token, quoteResponse.quote.feeAmount.toString())
 
       return new CoWTrade({
         chainId,
