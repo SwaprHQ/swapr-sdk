@@ -75,17 +75,6 @@ export const CURVE_METAUSD_ABI: ContractInterface = [
   poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256,address)'],
 ]
 
-export const CURVE_V1METAUSD_ABI: ContractInterface = [
-  poolMethods['view']['fee'],
-  poolMethods['view']['get_dy_underlying(int128,int128,uint256)'],
-  //poolMethods['view']['get_dy_underlying(int128,int128,uint256,uint256[2])'],
-  poolMethods['view']['get_dy(int128,int128,uint256)'],
-  poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
-  poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],
-  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256)'],
-  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256,address)'],
-]
-
 export const CURVE_PLAIN_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
@@ -106,7 +95,7 @@ export const CURVE_POOL_ABI_MAP: Record<string, ContractInterface> = {
   ['metabtc']: CURVE_METABTC_ABI,
   ['metabtcbalances']: CURVE_METABTC_ABI,
   ['metausd']: CURVE_METAUSD_ABI,
-  ['v1metausd']: CURVE_V1METAUSD_ABI,
+  ['v1metausd']: CURVE_METAUSD_ABI,
   ['metausd-fraxusdc']: CURVE_METAUSD_ABI,
   ['metausdbalances']: CURVE_METAUSD_ABI,
   ['plain2balances']: CURVE_PLAIN_ABI,
