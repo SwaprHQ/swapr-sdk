@@ -226,9 +226,6 @@ export class CurveTrade extends Trade {
 
     // Use Custom contract for native xDAI<>USDT and xDAI<>USDC trades on Gnosis Chain
     if (chainId === ChainId.XDAI && (isNativeAssetIn || isNativeAssetOut)) {
-      if (isNativeAssetIn) {
-        value = amountInBN.toString()
-      }
       const poolContract = getCurveDAIExchangeContract()
 
       const tokenInAddress =
