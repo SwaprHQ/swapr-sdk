@@ -493,6 +493,10 @@ export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
   [ChainId.POLYGON]: 'polygon',
   [ChainId.RINKEBY]: '',
   [ChainId.ARBITRUM_RINKEBY]: '',
+  [ChainId.GOERLI]: '',
+  [ChainId.OPTIMISM_MAINNET]: '',
+  [ChainId.OPTIMISM_GOERLI]: '',
+  [ChainId.ARBITRUM_GOERLI]: '',
 }
 
 export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
