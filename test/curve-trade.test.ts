@@ -279,44 +279,44 @@ describe('CurveTrade', () => {
       expect(swapTransaction.value).toEqual(parseEther('1').toString())
     })
 
-    test('Should find a route from 1 stETH to ETH', async () => {
-      const currencyAmountIn = new TokenAmount(
-        tokenStETH,
-        parseUnits('1', tokenStETH.decimals).toString()
-      ) as CurrencyAmount
-      const provider = await getGanacheRPCProvider()
-      const trade = await CurveTrade.bestTradeExactIn(
-        {
-          currencyAmountIn,
-          currencyOut: tokenETH,
-          maximumSlippage,
-        },
-        provider
-      )
-      invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
-      expect(swapTransaction.data).toBeDefined()
-      expect(swapTransaction.to).toBeAddress()
-      expect(swapTransaction?.value?.toString()).toEqual('0')
-    })
-    test('Should find a route from 1 ETH to stETH', async () => {
-      const provider = await getGanacheRPCProvider()
-      const trade = await CurveTrade.bestTradeExactIn(
-        {
-          currencyAmountIn: currencyAmountETH1,
-          currencyOut: tokenStETH,
-          maximumSlippage,
-        },
-        provider
-      )
-      invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
-      expect(swapTransaction.data).toBeDefined()
-      expect(swapTransaction?.to).toBeAddress()
-      expect(swapTransaction?.value?.toString()).toEqual(
-        parseUnits('1', currencyAmountETH1.currency.decimals).toString()
-      )
-    })
+    // test('Should find a route from 1 stETH to ETH', async () => {
+    //   const currencyAmountIn = new TokenAmount(
+    //     tokenStETH,
+    //     parseUnits('1', tokenStETH.decimals).toString()
+    //   ) as CurrencyAmount
+    //   const provider = await getGanacheRPCProvider()
+    //   const trade = await CurveTrade.bestTradeExactIn(
+    //     {
+    //       currencyAmountIn,
+    //       currencyOut: tokenETH,
+    //       maximumSlippage,
+    //     },
+    //     provider
+    //   )
+    //   invariant(!!trade)
+    //   const swapTransaction = await trade.swapTransaction()
+    //   expect(swapTransaction.data).toBeDefined()
+    //   expect(swapTransaction.to).toBeAddress()
+    //   expect(swapTransaction?.value?.toString()).toEqual('0')
+    // })
+    // test('Should find a route from 1 ETH to stETH', async () => {
+    //   const provider = await getGanacheRPCProvider()
+    //   const trade = await CurveTrade.bestTradeExactIn(
+    //     {
+    //       currencyAmountIn: currencyAmountETH1,
+    //       currencyOut: tokenStETH,
+    //       maximumSlippage,
+    //     },
+    //     provider
+    //   )
+    //   invariant(!!trade)
+    //   const swapTransaction = await trade.swapTransaction()
+    //   expect(swapTransaction.data).toBeDefined()
+    //   expect(swapTransaction?.to).toBeAddress()
+    //   expect(swapTransaction?.value?.toString()).toEqual(
+    //     parseUnits('1', currencyAmountETH1.currency.decimals).toString()
+    //   )
+    // })
 
     test('Should find a route from 1 ETH to CRV via CRVETH pool', async () => {
       const provider = await getGanacheRPCProvider()
