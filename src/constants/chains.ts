@@ -16,6 +16,7 @@ export enum ChainId {
   POLYGON = 137,
   ARBITRUM_ONE = 42161,
   ARBITRUM_RINKEBY = 421611,
+  ARBITRUM_GOERLI = 421613,
 
   /**
    * Optimism Mainnet

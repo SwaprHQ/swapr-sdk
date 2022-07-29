@@ -40,6 +40,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
+    [ChainId.ARBITRUM_GOERLI]: new Token(
+      ChainId.GOERLI,
+      '0x89C0DBbF7559E200443735e113039cE5f1e0e6F0',
+      18,
+      'WETH',
+      'Wrapped Ether on Görli'
+    ),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
       '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
@@ -133,6 +140,7 @@ export class Token extends Currency {
     [ChainId.GOERLI]: Token.WETH[ChainId.GOERLI],
     [ChainId.OPTIMISM_MAINNET]: Token.WETH[ChainId.OPTIMISM_MAINNET],
     [ChainId.OPTIMISM_GOERLI]: Token.WETH[ChainId.OPTIMISM_MAINNET],
+    [ChainId.ARBITRUM_GOERLI]: Token.WETH[ChainId.ARBITRUM_GOERLI],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
