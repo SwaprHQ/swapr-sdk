@@ -407,7 +407,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     id: 'reth',
     name: 'rETH',
     abi: CURVE_ETHXERC20_256_ABI,
-    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.reth],
+    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.reth],
     address: '0xF9440930043eb3997fc70e1339dBb11F341de7A8',
   },
   {
