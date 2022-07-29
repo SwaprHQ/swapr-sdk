@@ -17,14 +17,24 @@ export class Currency {
   // fiat currencies used to represent countervalues
   public static readonly USD: Currency = new Currency(18, 'USD', 'US dollar')
 
-  // Native currencies for deployment chains
+  /**
+   * Ethereum and Ethereum testnets native currency.
+   */
   public static readonly ETHER: Currency = new Currency(
     18,
     'ETH',
     'Ether',
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
   )
+
+  /**
+   * Gnosis Chain native curreny
+   */
   public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+
+  /**
+   * Polygon PoS native currency
+   */
   public static readonly MATIC: Currency = new Currency(
     18,
     'MATIC',
@@ -32,13 +42,17 @@ export class Currency {
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
   )
 
-  private static readonly NATIVE_CURRENCY: { [chainId in ChainId]: Currency } = {
+  private static readonly NATIVE_CURRENCY: Record<ChainId, Currency> = {
     [ChainId.MAINNET]: Currency.ETHER,
     [ChainId.RINKEBY]: Currency.ETHER,
     [ChainId.ARBITRUM_ONE]: Currency.ETHER,
     [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
+    [ChainId.ARBITRUM_GOERLI]: Currency.ETHER,
     [ChainId.XDAI]: Currency.XDAI,
     [ChainId.POLYGON]: Currency.MATIC,
+    [ChainId.GOERLI]: Currency.ETHER,
+    [ChainId.OPTIMISM_MAINNET]: Currency.ETHER,
+    [ChainId.OPTIMISM_GOERLI]: Currency.ETHER,
   }
 
   /**

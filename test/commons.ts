@@ -1,6 +1,6 @@
 import { ChainId, Token } from '../src'
 
-export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
+export const TEST_TOKENS: Record<string, Record<number, Token>> = {
   WEENUS: {
     [ChainId.MAINNET]: new Token(
       ChainId.MAINNET,
@@ -15,7 +15,7 @@ export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
       18,
       'WEENUS',
       'Weenus 💪'
-    )
+    ),
   },
   XEENUS: {
     [ChainId.MAINNET]: new Token(
@@ -31,7 +31,7 @@ export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
       18,
       'XEENUS',
       'Xeenus 💪'
-    )
+    ),
   },
   YEENUS: {
     [ChainId.MAINNET]: new Token(
@@ -47,7 +47,7 @@ export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
       8,
       'YEENUS',
       'Yeenus 💪'
-    )
+    ),
   },
   ZEENUS: {
     [ChainId.MAINNET]: new Token(
@@ -63,6 +63,6 @@ export const TEST_TOKENS: { [key: string]: { [key: number]: Token } } = {
       8,
       'ZEENUS',
       'Zeenus 💪'
-    )
-  }
+    ),
+  },
 }

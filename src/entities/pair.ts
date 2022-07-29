@@ -21,13 +21,17 @@ import { LiquidityMiningCampaign } from './liquidity-mining-campaign'
 import { Token } from './token'
 import { UniswapV2RoutablePlatform } from './trades/routable-platform'
 
-const INITIAL_CACHE_STATE: { [chainId in ChainId]: any } = {
+const INITIAL_CACHE_STATE: Record<ChainId, any> = {
   [ChainId.MAINNET]: {},
   [ChainId.RINKEBY]: {},
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
+  [ChainId.ARBITRUM_GOERLI]: {},
   [ChainId.XDAI]: {},
   [ChainId.POLYGON]: {},
+  [ChainId.GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {

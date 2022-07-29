@@ -1,9 +1,12 @@
+// eslint-disable-next-line no-restricted-imports
+import contractNetworks from '@cowprotocol/contracts/networks.json'
+import { CowSdk, OrderKind, SimpleGetQuoteResponse, SupportedChainId } from '@cowprotocol/cow-sdk'
+// eslint-disable-next-line no-restricted-imports
+import { CowContext } from '@cowprotocol/cow-sdk/dist/utils/context'
+// eslint-disable-next-line no-restricted-imports
+import { SigningResult, UnsignedOrder } from '@cowprotocol/cow-sdk/dist/utils/sign'
 import { Signer } from '@ethersproject/abstract-signer'
 import { parseUnits } from '@ethersproject/units'
-import { Api as GnosisProtcolApi, Environment } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/api'
-import { Order, OrderKind } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/order'
-import { SigningScheme } from '@gnosis.pm/gp-v2-contracts/lib/commonjs/sign'
-import { GPv2VaultRelayer as GPv2VaultRelayerList } from '@gnosis.pm/gp-v2-contracts/networks.json'
 import dayjs from 'dayjs'
 import invariant from 'tiny-invariant'
 
@@ -18,37 +21,35 @@ import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
-import { CHAIN_ID_TO_NETWORK, ORDER_APP_DATA, ORDER_PLACEHOLDER_ADDRESS } from './constants'
-import { signOrder as signOrderGP, signOrderCancellation as signOrderCancellationGP } from './signatures'
-import {
-  GnosisProtocolTradeBestTradeExactInParams,
-  GnosisProtocolTradeBestTradeExactOutParams,
-  GnosisProtocolTradeConstructorParams,
-  GnosisProtocolTradeOrderMetadata,
-  GnosisProtocolTradeSwapOrderParams,
-} from './types'
+import cowAppData from './app-data.json'
+import { CoWTradeError } from './CoWTradeError'
+import { CoWTradeGetBestTradeExactInParams, CoWTradeGetBestTradeExactOutParams, CoWTradeParams } from './types'
 
 /**
- * Gnosis Protcol Trade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
+ * CoWTrade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
  */
-export class GnosisProtocolTrade extends Trade {
+export class CoWTrade extends Trade {
+  readonly inputAmountWithoutFee: CurrencyAmount
+  readonly outputAmountWithoutFee: CurrencyAmount
   /**
-   * CowFi order details. The payload is signed and sent to CowFi API
+   * The original quote from CoW
    */
-  public order: Order
-
-  /**
-   * An address the EOA must approve to spend its tokenIn
-   */
-  public readonly approveAddress: string
+  public readonly quote: SimpleGetQuoteResponse
 
   /**
    * Order signature
    */
-  private orderSignatureInfo?: {
-    signingScheme: SigningScheme
-    signature: string | null
-  }
+  private orderSignatureInfo?: SigningResult
+
+  /**
+   * The order
+   */
+  public readonly order: Omit<UnsignedOrder, 'appData'>
+
+  /**
+   * The execution price of the trade without CoW fee
+   */
+  public readonly executionPriceWithoutFee: Price
 
   /**
    * The Order Id. Obtained and set from after submitting the order from API
@@ -60,17 +61,20 @@ export class GnosisProtocolTrade extends Trade {
    */
   public readonly feeAmount: CurrencyAmount
 
-  constructor({
-    chainId,
-    inputAmount,
-    maximumSlippage,
-    outputAmount,
-    tradeType,
-    order,
-    fee,
-    feeAmount,
-  }: GnosisProtocolTradeConstructorParams) {
+  constructor(params: CoWTradeParams) {
+    const { chainId, feeAmount, inputAmount, maximumSlippage, outputAmount, quote, tradeType, fee } = params
+
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
+
+    const GPv2Settlement = contractNetworks.GPv2Settlement as Record<
+      ChainId,
+      Record<'transactionHash' | 'address', string>
+    >
+
+    const approveAddress = GPv2Settlement[chainId]?.address
+
+    invariant(approveAddress, 'Missing GPv2Settlement address')
+
     super({
       details: undefined,
       type: tradeType,
@@ -85,12 +89,27 @@ export class GnosisProtocolTrade extends Trade {
       maximumSlippage,
       chainId,
       priceImpact: new Percent('0'),
-      platform: RoutablePlatform.GNOSIS_PROTOCOL,
+      platform: RoutablePlatform.COW,
       fee,
+      approveAddress,
     })
-    this.order = order
-    this.approveAddress = GPv2VaultRelayerList[chainId as unknown as keyof typeof GPv2VaultRelayerList].address
-    // The fee token and amount are sell token
+    this.quote = quote
+    // construct the order
+    this.order = {
+      ...quote.quote,
+      validTo: parseInt(quote.quote.validTo),
+      receiver: quote.quote.receiver ?? quote.from,
+    }
+
+    this.executionPriceWithoutFee = new Price({
+      baseCurrency: inputAmount.currency,
+      quoteCurrency: outputAmount.currency,
+      denominator: inputAmount.subtract(feeAmount).raw,
+      numerator: outputAmount.raw,
+    })
+
+    this.inputAmountWithoutFee = this.inputAmount.subtract(feeAmount)
+    this.outputAmountWithoutFee = this.outputAmount
     this.feeAmount = feeAmount
   }
 
@@ -128,8 +147,18 @@ export class GnosisProtocolTrade extends Trade {
    * @param chainId The chainId, defaults to Mainnet (1)
    * @returns
    */
-  public static getApi(chainId = ChainId.MAINNET) {
-    return new GnosisProtcolApi(CHAIN_ID_TO_NETWORK[chainId as keyof typeof CHAIN_ID_TO_NETWORK], Environment.Prod)
+  public static getCowSdk(chainId = ChainId.MAINNET, cowContext?: CowContext) {
+    return new CowSdk(
+      chainId as number,
+      {
+        ...cowContext,
+        // Always append correct app data
+        appDataHash: CoWTrade.getAppData(chainId).ipfsHashInfo.appDataHash,
+      },
+      {
+        loglevel: 'debug',
+      }
+    )
   }
 
   /**
@@ -137,17 +166,8 @@ export class GnosisProtocolTrade extends Trade {
    * @param orderId The order ID
    * @param chainId The chainId, defaults to Mainnet (1)
    */
-  public static async getOrderMetadata(
-    orderId: string,
-    chainId: ChainId = ChainId.MAINNET
-  ): Promise<GnosisProtocolTradeOrderMetadata> {
-    const response = await fetch(`${GnosisProtocolTrade.getApi(chainId).baseUrl}/api/v1/orders/${orderId}`)
-
-    if (!response.ok) {
-      throw new Error('GnosisProtocolTrade: Failed to fetch order metadata')
-    }
-
-    return response.json()
+  public static async getOrderMetadata(orderId: string, chainId: ChainId = ChainId.MAINNET) {
+    return CoWTrade.getCowSdk(chainId).cowApi.getOrder(orderId)
   }
 
   /**
@@ -163,12 +183,13 @@ export class GnosisProtocolTrade extends Trade {
     currencyAmountIn,
     currencyOut,
     maximumSlippage,
-    receiver = ORDER_PLACEHOLDER_ADDRESS,
-  }: GnosisProtocolTradeBestTradeExactInParams): Promise<GnosisProtocolTrade | undefined> {
+    receiver,
+    user,
+  }: CoWTradeGetBestTradeExactInParams): Promise<CoWTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     // Require the chain ID
-    invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
+    invariant(chainId !== undefined && RoutablePlatform.COW.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const tokenOut = currencyOut as Token
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
@@ -178,36 +199,38 @@ export class GnosisProtocolTrade extends Trade {
     // // the router does not support both ether in and out
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
-      const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
+      const quoteResponse = await CoWTrade.getCowSdk(chainId).cowApi.getQuote({
         kind: OrderKind.SELL,
-        sellAmountBeforeFee: amountInBN.toString(),
+        amount: amountInBN.toString(),
         sellToken: tokenIn.address,
         buyToken: tokenOut.address,
-        from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
+        userAddress: user.toLowerCase(),
         receiver,
-        appData: ORDER_APP_DATA,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
-        partiallyFillable: false,
       })
 
       // Calculate the fee in terms of percentages
-      const feeAmountBN = parseUnits(quote.feeAmount.toString(), tokenIn.decimals)
-        .div(quote.sellAmount.toString())
+      const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
+        .div(quoteResponse.quote.sellAmount.toString())
         .mul(100)
       const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
       const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
 
-      return new GnosisProtocolTrade({
+      const feeAmount = Currency.isNative(currencyAmountIn.currency)
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
+        : new TokenAmount(currencyAmountIn.currency as Token, quoteResponse.quote.feeAmount.toString())
+
+      return new CoWTrade({
         chainId,
         maximumSlippage,
         tradeType: TradeType.EXACT_INPUT,
         inputAmount: currencyAmountIn,
         outputAmount: Currency.isNative(currencyOut)
-          ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
-          : new TokenAmount(tokenOut, quote.buyAmount.toString()),
+          ? CurrencyAmount.nativeCurrency(quoteResponse.quote.buyAmount.toString(), chainId)
+          : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString()),
         fee,
-        order: quote,
-        feeAmount: new TokenAmount(tokenIn, quote.feeAmount.toString()),
+        feeAmount,
+        quote: quoteResponse,
       })
     } catch (error) {
       console.error('could not fetch Cow trade', error)
@@ -227,56 +250,59 @@ export class GnosisProtocolTrade extends Trade {
     currencyAmountOut,
     currencyIn,
     maximumSlippage,
-    receiver = ORDER_PLACEHOLDER_ADDRESS,
-  }: GnosisProtocolTradeBestTradeExactOutParams): Promise<GnosisProtocolTrade | undefined> {
+    receiver,
+    user,
+  }: CoWTradeGetBestTradeExactOutParams): Promise<CoWTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     // Require the chain ID
-    invariant(chainId !== undefined && RoutablePlatform.GNOSIS_PROTOCOL.supportsChain(chainId), 'CHAIN_ID')
+    invariant(chainId !== undefined && RoutablePlatform.COW.supportsChain(chainId), 'CHAIN_ID')
     const tokenIn = wrappedCurrency(currencyIn, chainId)
     const tokenOut = currencyAmountOut.currency as Token
     const amountOutBN = parseUnits(currencyAmountOut.toSignificant(), tokenOut.decimals)
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 
-    // the router does not support both ether in and out
-    // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
-      const { quote } = await GnosisProtocolTrade.getApi(chainId).getQuote({
+      const cowSdk = CoWTrade.getCowSdk(chainId)
+
+      const quoteResponse = await cowSdk.cowApi.getQuote({
         kind: OrderKind.BUY,
-        buyAmountAfterFee: amountOutBN.toString(),
+        amount: amountOutBN.toString(),
         sellToken: tokenIn.address,
         buyToken: tokenOut.address,
-        from: receiver ?? ORDER_PLACEHOLDER_ADDRESS,
+        userAddress: user.toLowerCase(),
         receiver,
-        appData: ORDER_APP_DATA,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
-        partiallyFillable: false,
       })
 
       // Calculate the fee in terms of percentages
-      const feeAmountBN = parseUnits(quote.feeAmount.toString(), tokenIn.decimals)
-        .div(quote.sellAmount.toString())
+      const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
+        .div(quoteResponse.quote.sellAmount.toString())
         .mul(100)
       const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
       const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
 
       const inputAmount = Currency.isNative(tokenIn)
-        ? CurrencyAmount.nativeCurrency(quote.sellAmount.toString(), chainId)
-        : new TokenAmount(tokenIn, quote.sellAmount.toString())
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.sellAmount.toString(), chainId)
+        : new TokenAmount(tokenIn, quoteResponse.quote.sellAmount.toString())
 
       const outputAmount = Currency.isNative(currencyAmountOut.currency)
-        ? CurrencyAmount.nativeCurrency(quote.buyAmount.toString(), chainId)
-        : new TokenAmount(tokenOut, quote.buyAmount.toString())
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.buyAmount.toString(), chainId)
+        : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString())
 
-      return new GnosisProtocolTrade({
+      const feeAmount = Currency.isNative(currencyIn)
+        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
+        : new TokenAmount(currencyIn as Token, quoteResponse.quote.feeAmount.toString())
+
+      return new CoWTrade({
         chainId,
         maximumSlippage,
         tradeType: TradeType.EXACT_OUTPUT,
         inputAmount,
         outputAmount,
         fee,
-        feeAmount: new TokenAmount(tokenIn, quote.feeAmount.toString()),
-        order: quote,
+        feeAmount,
+        quote: quoteResponse,
       })
     } catch (error) {
       console.error('could not fetch COW trade', error)
@@ -285,42 +311,43 @@ export class GnosisProtocolTrade extends Trade {
   }
 
   /**
-   * Returns the order payload. The order must be signed
-   * @param options
-   * @returns
-   */
-  public swapOrder({ receiver }: GnosisProtocolTradeSwapOrderParams): Order {
-    return {
-      ...this.order,
-      receiver,
-    }
-  }
-
-  /**
    * Signs the order by adding signature
-   * @param signature
+   * @param signer The signer
+   * @returns The current instance
+   * @throws {CoWTradeError} If the order is missing a receiver
    */
   public async signOrder(signer: Signer) {
-    const { receiver } = this.order
+    const { receiver } = this.quote.quote
 
     if (!receiver) {
-      throw new Error('GnosisProtocolTrade: Missing order receiver')
+      throw new CoWTradeError('Missing order receiver')
     }
 
-    // assign signature info and return instance
-    this.orderSignatureInfo = await signOrderGP({ ...this.order, receiver }, this.chainId, signer)
+    const signOrderResults = await CoWTrade.getCowSdk(this.chainId, {
+      signer,
+    }).signOrder(this.order)
+
+    if (!signOrderResults.signature) {
+      throw new CoWTradeError('Order was not signed')
+    }
+
+    this.orderSignatureInfo = signOrderResults
+
     return this
   }
 
   /**
    * Cancels the current instance order, if submitted
+   * @param signer The signer
+   * @returns True if the order was cancelled, false otherwise
+   * @throws {CoWTradeError} If the order is yet to be submitted
    */
   public async cancelOrder(signer: Signer) {
     if (!this.orderId) {
-      throw new Error('GnosisProtocolTrade: Missing order ID')
+      throw new CoWTradeError('CoWTrade: Missing order ID')
     }
 
-    return GnosisProtocolTrade.cancelOrder(this.orderId, this.chainId, signer)
+    return CoWTrade.cancelOrder(this.orderId, this.chainId, signer)
   }
 
   /**
@@ -331,9 +358,15 @@ export class GnosisProtocolTrade extends Trade {
    * @returns the signing results
    */
   public static async cancelOrder(orderId: string, chainId: ChainId, signer: Signer) {
-    const orderCancellationSignature = await signOrderCancellationGP(orderId, chainId, signer)
+    const cowSdk = CoWTrade.getCowSdk(chainId, {
+      signer,
+    })
 
-    const response = await fetch(`${GnosisProtocolTrade.getApi(chainId).baseUrl}/api/v1/orders/${orderId}`, {
+    const orderCancellationSignature = await cowSdk.signOrderCancellation(orderId)
+
+    const url = `${cowSdk.cowApi.API_BASE_URL[chainId as unknown as SupportedChainId]}/api/v1/orders/${orderId}`
+
+    const response = await fetch(url, {
       method: 'delete',
       body: JSON.stringify(orderCancellationSignature),
     })
@@ -342,37 +375,58 @@ export class GnosisProtocolTrade extends Trade {
       return true
     }
 
-    throw new Error(`GnosisProtocolTrade: Failed to cancel order. API Status code: ${response.status}`)
+    throw new CoWTradeError(`CoWTrade: Failed to cancel order. API Status code: ${response.status}`)
   }
 
   /**
    * Submits the order to GPv2 API
    * @returns The order ID from GPv2
+   * @throws {CoWTradeError} If the order is missing a signature
    */
   public async submitOrder(): Promise<string> {
     if (!this.orderSignatureInfo) {
-      throw new Error('GnosisProtocolTrade: Missing order signature')
+      throw new CoWTradeError('CoWTrade: Missing order signature')
     }
 
-    console.log({
-      orderSignatureInfo: this.orderSignatureInfo,
-    })
+    const { from, id: quoteId } = this.quote
 
-    this.orderId = await GnosisProtocolTrade.getApi(this.chainId).placeOrder({
-      order: this.order,
-      signature: {
-        data: this.orderSignatureInfo.signature as any,
-        scheme: this.orderSignatureInfo.signingScheme,
+    const sendOrderParams = {
+      order: {
+        ...this.order,
+        quoteId,
+        signature: this.orderSignatureInfo.signature as any,
+        signingScheme: this.orderSignatureInfo.signingScheme as any,
       },
-    })
+      owner: from,
+    }
+
+    this.orderId = await CoWTrade.getCowSdk(this.chainId).cowApi.sendOrder(sendOrderParams)
 
     return this.orderId
   }
 
   /**
    * Fetches the order status from the API
+   * @throws {CoWTradeError} if the order ID is missing
    */
-  public getOrderMetadata(): Promise<GnosisProtocolTradeOrderMetadata> {
-    return GnosisProtocolTrade.getOrderMetadata(this.orderId as string, this.chainId)
+  public getOrderMetadata() {
+    if (!this.orderId) {
+      throw new CoWTradeError('CoWTrade: Missing order ID')
+    }
+
+    return CoWTrade.getOrderMetadata(this.orderId, this.chainId)
+  }
+
+  /**
+   * Gets the app data for Swapr's CoW trade
+   * @param chainId The chain Id
+   */
+  public static getAppData(chainId: ChainId) {
+    return cowAppData[chainId as unknown as keyof typeof cowAppData]
   }
 }
+
+/**
+ * @deprecated use CoWTrade instead
+ */
+export class GnosisProtocolTrade extends CoWTrade {}

@@ -49,10 +49,6 @@ const debugCurveGetQuote = debug('ecoRouter:curve:getQuote')
  */
 export class CurveTrade extends Trade {
   /**
-   * An address the EOA must approve to spend its tokenIn
-   */
-  public readonly approveAddress: string
-  /**
    * The Unsigned transaction
    */
   public readonly transactionRequest: UnsignedTransaction
@@ -100,9 +96,9 @@ export class CurveTrade extends Trade {
       chainId,
       platform: RoutablePlatform.CURVE,
       fee,
+      approveAddress: approveAddress || (transactionRequest.to as string),
     })
     this.transactionRequest = transactionRequest
-    this.approveAddress = approveAddress || (transactionRequest.to as string)
     this.contract = contract
   }
 

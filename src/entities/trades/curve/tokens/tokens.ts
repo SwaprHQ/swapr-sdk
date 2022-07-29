@@ -626,6 +626,10 @@ export const CURVE_TOKENS: CurveTokenList = {
   [ChainId.XDAI]: TOKENS_XDAI,
   [ChainId.ARBITRUM_ONE]: TOKENS_ARBITRUM_ONE,
   [ChainId.ARBITRUM_RINKEBY]: {},
+  [ChainId.ARBITRUM_GOERLI]: {},
   [ChainId.RINKEBY]: {},
   [ChainId.POLYGON]: {},
+  [ChainId.GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
 }

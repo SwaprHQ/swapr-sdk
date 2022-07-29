@@ -8,7 +8,7 @@ import { CurrencyAmount, Fraction, Percent, TokenAmount } from './fractions'
 import { PricedTokenAmount } from './fractions/priced-token-amount'
 import { Token } from './token'
 
-const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmount } = {
+const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
     ChainId.RINKEBY
@@ -29,9 +29,25 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: { [chainId in ChainId]: CurrencyAmo
     parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
     ChainId.ARBITRUM_RINKEBY
   ),
+  [ChainId.ARBITRUM_GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_GOERLI).decimals).toString(),
+    ChainId.ARBITRUM_GOERLI
+  ),
   [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
     ChainId.POLYGON
+  ),
+  [ChainId.GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.GOERLI).decimals).toString(),
+    ChainId.GOERLI
+  ),
+  [ChainId.OPTIMISM_MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_MAINNET).decimals).toString(),
+    ChainId.OPTIMISM_MAINNET
+  ),
+  [ChainId.OPTIMISM_GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_GOERLI).decimals).toString(),
+    ChainId.OPTIMISM_GOERLI
   ),
 }
 

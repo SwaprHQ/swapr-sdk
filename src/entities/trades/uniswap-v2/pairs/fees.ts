@@ -37,7 +37,7 @@ export async function getUniswapV2PairSwapFee({
 
     // Push only the successful call results
     if (success) {
-      const { swapFee } = uniswapPairInterface.decodeFunctionResult('swapFee', returnData)
+      const [swapFee] = uniswapPairInterface.decodeFunctionResult('swapFee', returnData)
       acc[pairAddress.toLowerCase()] = swapFee
     }
 

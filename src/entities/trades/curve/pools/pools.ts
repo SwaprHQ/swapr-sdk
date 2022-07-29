@@ -495,12 +495,16 @@ export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM_RINKEBY]: '',
 }
 
-export const CURVE_POOLS: { [chainId in ChainId]: CurvePool[] } = {
+export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.MAINNET]: POOLS_MAINNET,
   [ChainId.XDAI]: POOLS_XDAI,
   [ChainId.ARBITRUM_ONE]: POOLS_ARBITRUM_ONE,
   // Empty
   [ChainId.RINKEBY]: [],
   [ChainId.ARBITRUM_RINKEBY]: [],
+  [ChainId.ARBITRUM_GOERLI]: [],
   [ChainId.POLYGON]: [],
+  [ChainId.GOERLI]: [],
+  [ChainId.OPTIMISM_MAINNET]: [],
+  [ChainId.OPTIMISM_GOERLI]: [],
 }

@@ -11,7 +11,7 @@ export class Token extends Currency {
   public readonly chainId: ChainId
   public readonly address: string
 
-  public static readonly WETH: { [key: number]: Token } = {
+  public static readonly WETH: Record<number, Token> = {
     [ChainId.MAINNET]: new Token(
       ChainId.MAINNET,
       '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -40,6 +40,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether'
     ),
+    [ChainId.ARBITRUM_GOERLI]: new Token(
+      ChainId.GOERLI,
+      '0x89C0DBbF7559E200443735e113039cE5f1e0e6F0',
+      18,
+      'WETH',
+      'Wrapped Ether on Görli'
+    ),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
       '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
@@ -54,13 +61,20 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on Polygon'
     ),
+    [ChainId.GOERLI]: new Token(
+      ChainId.GOERLI,
+      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      18,
+      'WETH',
+      'Wrapped Ether on Görli'
+    ),
   }
 
-  public static readonly WXDAI: { [key: number]: Token } = {
+  public static readonly WXDAI: Record<number, Token> = {
     [ChainId.XDAI]: new Token(ChainId.XDAI, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'Wrapped xDAI'),
   }
 
-  public static readonly WMATIC: { [key: number]: Token } = {
+  public static readonly WMATIC: Record<number, Token> = {
     [ChainId.POLYGON]: new Token(
       ChainId.POLYGON,
       '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
@@ -70,7 +84,7 @@ export class Token extends Currency {
     ),
   }
 
-  public static readonly DXD: { [key: number]: Token } = {
+  public static readonly DXD: Record<number, Token> = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'),
     [ChainId.XDAI]: new Token(
@@ -96,7 +110,7 @@ export class Token extends Currency {
     ),
   }
 
-  public static readonly SWPR: { [key: number]: Token } = {
+  public static readonly SWPR: Record<number, Token> = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x6cAcDB97e3fC8136805a9E7c342d866ab77D0957', 18, 'SWPR', 'Swapr'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0xDcb0BeB93139c3e5eD0Edb749baccADd6badAc4f', 18, 'SWPR', 'Swapr'),
     [ChainId.XDAI]: new Token(ChainId.XDAI, '0x532801ED6f82FFfD2DAB70A19fC2d7B2772C4f4b', 18, 'SWPR', 'Swapr'),
@@ -123,6 +137,10 @@ export class Token extends Currency {
     [ChainId.ARBITRUM_RINKEBY]: Token.WETH[ChainId.ARBITRUM_RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
     [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON],
+    [ChainId.GOERLI]: Token.WETH[ChainId.GOERLI],
+    [ChainId.OPTIMISM_MAINNET]: Token.WETH[ChainId.OPTIMISM_MAINNET],
+    [ChainId.OPTIMISM_GOERLI]: Token.WETH[ChainId.OPTIMISM_MAINNET],
+    [ChainId.ARBITRUM_GOERLI]: Token.WETH[ChainId.ARBITRUM_GOERLI],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
