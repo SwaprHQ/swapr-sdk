@@ -43,7 +43,7 @@
     "@ethersproject/transactions": "^5.4.0",
     "@ethersproject/units": "^5.4.0",
     "@swapr/core": "^0.3.19",
-    "@swapr/periphery": "^0.3.21",
+    "@swapr/periphery": "^0.3.22",
     "@uniswap/smart-order-router": "^2.6.0",
     "big.js": "^5.2.2",
     "dayjs": "^1.11.0",
