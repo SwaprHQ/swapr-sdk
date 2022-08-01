@@ -1,6 +1,5 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
-import { checkIfStringExistsInArray } from '../../../utils'
 import { Token } from '../../token'
 
 import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType, CurvePool } from './tokens'
@@ -108,11 +107,6 @@ export async function getRoutablePools(
   })
 }
 
-/**
- * Returns tokenType based on token symbol
- * @param symbol symbol of curve token
- * @returns token type of given symbol
- */
 const usd = [
   'dai',
   'jpy',
@@ -147,9 +141,16 @@ const usd = [
 const btc = ['btc']
 const eth = ['eth']
 
+/**
+ * Returns tokenType based on token symbol
+ * @param symbol symbol of curve token
+ * @returns token type of given symbol
+ */
+
 export function determineTokeType(symbol: string): TokenType {
-  if (checkIfStringExistsInArray(symbol, eth)) return TokenType.ETH
-  if (checkIfStringExistsInArray(symbol, btc)) return TokenType.BTC
-  if (checkIfStringExistsInArray(symbol, usd)) return TokenType.USD
+  const symbolLowercased = symbol.toLocaleLowerCase()
+  if (eth.includes(symbolLowercased)) return TokenType.ETH
+  if (btc.includes(symbolLowercased)) return TokenType.BTC
+  if (usd.includes(symbolLowercased)) return TokenType.USD
   else return TokenType.OTHER
 }

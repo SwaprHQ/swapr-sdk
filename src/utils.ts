@@ -95,13 +95,3 @@ export function debug(...data: any[]) {
 
   shouldDebug && console.debug(...data)
 }
-
-/**
- * Given a array of string, returns boolean if it exists *case insensitive
- * @param needle string to be compared to
- * @param haystack array of strings to be compared against
- * @returns boolean if string is contained in array of string
- */
-export function checkIfStringExistsInArray(needle: string, hayStack: string[]): boolean {
-  return hayStack.some((element) => needle.toLocaleLowerCase().includes(element.toLocaleLowerCase()))
-}
