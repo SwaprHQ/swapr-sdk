@@ -259,7 +259,7 @@ export abstract class Fetcher {
     //filter for low liquidty pool
     const filteredLowLiquidityPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
     //restructures pools so they fit into curvePool type
-    const modifiedArray: CurvePool[] = filteredLowLiquidityPools.map(
+    const pooList: CurvePool[] = filteredLowLiquidityPools.map(
       ({ symbol, name, coins, address, implementation, isMetaPool }) => {
         const tokens: CurveToken[] = coins.map((token) => {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
@@ -281,7 +281,7 @@ export abstract class Fetcher {
 
         const isMeta = isMetaPool || implementation.includes('meta')
 
-        let curveObject: CurvePool = {
+        let curvePoolObject: CurvePool = {
           id: symbol,
           name: name,
           address: address,
@@ -294,13 +294,13 @@ export abstract class Fetcher {
         const findPoolTokens = tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
         //if its meta pool puts token under metaTokens else under underlying tokens
         if (findPoolTokens) {
-          if (isMeta) curveObject.metaTokens = findPoolTokens
-          else curveObject.underlyingTokens = findPoolTokens
+          if (isMeta) curvePoolObject.metaTokens = findPoolTokens
+          else curvePoolObject.underlyingTokens = findPoolTokens
         }
 
-        return curveObject
+        return curvePoolObject
       }
     )
-    return modifiedArray
+    return pooList
   }
 }
