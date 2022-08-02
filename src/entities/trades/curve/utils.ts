@@ -1,8 +1,7 @@
 import { ChainId } from '../../../constants'
 import { Fetcher } from '../../../fetcher'
 import { Token } from '../../token'
-
-import { CURVE_TOKENS, CurveToken, TOKENS_MAINNET, TokenType, CurvePool } from './tokens'
+import { CURVE_TOKENS, CurvePool, CurveToken, TOKENS_MAINNET, TokenType } from './tokens'
 
 /**
  * Returns the token index of a token in a Curve pool

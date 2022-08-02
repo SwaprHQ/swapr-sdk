@@ -33,7 +33,7 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
     address: '0x1337BedC9D22ecbe766dF105c9623922A27963EC',
     isLPToken: true,
     type: TokenType.USD,
-    poolTokens: function () {
+    poolTokens() {
       return [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
     },
   },
@@ -50,7 +50,7 @@ export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
     address: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
     isLPToken: true,
     type: TokenType.USD,
-    poolTokens: function () {
+    poolTokens() {
       return [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
     },
   },
@@ -349,7 +349,7 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     symbol: 'crvFRAX',
     decimals: 18,
     isLPToken: true,
-    poolTokens: function () {
+    poolTokens() {
       return [TOKENS_MAINNET.frax, TOKENS_MAINNET.usdc]
     },
     type: TokenType.USD,
@@ -359,7 +359,7 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     name: 'Curve.fi DAI/USDC/USDT',
     symbol: '3Crv',
     decimals: 18,
-    poolTokens: function () {
+    poolTokens() {
       return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
     },
     type: TokenType.USD,
@@ -582,7 +582,7 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     isLPToken: true,
     type: TokenType.USD,
-    poolTokens: function () {
+    poolTokens() {
       return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
     },
   },

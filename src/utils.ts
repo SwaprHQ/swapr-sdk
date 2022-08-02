@@ -77,6 +77,7 @@ export function sortedInsert<T>(items: T[], add: T, maxSize: number, comparator:
       }
     }
     items.splice(lo, 0, add)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return isFull ? items.pop()! : null
   }
 }
