@@ -279,7 +279,7 @@ describe('CurveTrade', () => {
       expect(swapTransaction.value).toEqual(parseEther('1').toString())
     })
 
-    test('Should find a route from 1 stETH to ETH', async () => {
+    test.skip('Should find a route from 1 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
         parseUnits('1', tokenStETH.decimals).toString()
