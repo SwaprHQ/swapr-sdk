@@ -4,7 +4,6 @@ import { getDefaultProvider } from '@ethersproject/providers'
 import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
-// import { CurvePool } from './entities/trades/curve/pools'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
