@@ -4,19 +4,18 @@ import { getDefaultProvider } from '@ethersproject/providers'
 import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
-import invariant from 'tiny-invariant'
 // import { CurvePool } from './entities/trades/curve/pools'
 import fetch from 'node-fetch'
+import invariant from 'tiny-invariant'
 
 import { MULTICALL2_ABI } from './abis'
 import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './constants'
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-
 import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
 import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CurvePool, CurveToken, CURVE_TOKENS } from './entities/trades/curve/tokens'
+import { CURVE_TOKENS, CurvePool, CurveToken } from './entities/trades/curve/tokens'
 import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 interface FactoryPoolsApiResponse {
@@ -271,7 +270,7 @@ export abstract class Fetcher {
           const symbol = currentToken.symbol ? currentToken.symbol : token.symbol
 
           return {
-            symbol: symbol,
+            symbol,
             name: symbol,
             address: currentToken.address,
             decimals: currentToken.decimals,
@@ -281,12 +280,12 @@ export abstract class Fetcher {
 
         const isMeta = isMetaPool || implementation.includes('meta')
 
-        let curvePoolObject: CurvePool = {
+        const curvePoolObject: CurvePool = {
           id: symbol,
-          name: name,
-          address: address,
+          name,
+          address,
           abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta: isMeta,
+          isMeta,
           tokens,
         }
 
