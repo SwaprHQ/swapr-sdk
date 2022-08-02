@@ -356,6 +356,7 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
+        console.log({ pool })
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
