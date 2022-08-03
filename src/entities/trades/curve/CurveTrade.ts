@@ -201,6 +201,10 @@ export class CurveTrade extends Trade {
       console.warn('Default provider has a network problem. Fetching chain provider.')
       provider = getProvider(chainId)
     }
+    // if the provider is undefined, the above expression doesn't throw an exception
+    if (!provider) {
+      provider = getProvider(chainId)
+    }
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
@@ -362,7 +366,6 @@ export class CurveTrade extends Trade {
     // Using Multicall contract
     const quoteFromPoolList: QuoteFromPool[] = await Promise.all(
       routablePools.map(async (pool) => {
-        console.log({ pool })
         const poolContract = new Contract(pool.address, pool.abi as any, provider)
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
