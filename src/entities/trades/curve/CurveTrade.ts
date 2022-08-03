@@ -194,7 +194,7 @@ export class CurveTrade extends Trade {
 
     // const etherOut = this.outputAmount.currency === nativeCurrency
     // // the router does not support both ether in and out
-    provider = provider || getProvider(chainId)
+    provider = getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
