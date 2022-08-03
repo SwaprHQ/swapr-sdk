@@ -194,14 +194,20 @@ export class CurveTrade extends Trade {
 
     // const etherOut = this.outputAmount.currency === nativeCurrency
     // // the router does not support both ether in and out
-    provider = getProvider(chainId)
+    try {
+      await provider?.getNetwork()
+    } catch (e) {
+      // If it throws no network while computing the provider we take the chain provider as a redundancy
+      console.warn('Default provider has a network problem. Fetching chain provider.')
+      provider = getProvider(chainId)
+    }
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
     // Get all Curve pools for the chain
     const curvePools = CURVE_POOLS[chainId]
 
-    // Baisc trade information
+    // Basic trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
     if (isNativeAssetIn) {
       value = amountInBN.toString()
