@@ -197,7 +197,7 @@ export class CurveTrade extends Trade {
     try {
       await provider?.getNetwork()
     } catch (e) {
-      // If it throws no network while computing the provider we take the chain provider as a redundancy
+      // If it throws NoNetwork while computing the provider we take the chain provider as a redundancy
       console.warn('Default provider has a network problem. Fetching chain provider.')
       provider = getProvider(chainId)
     }
