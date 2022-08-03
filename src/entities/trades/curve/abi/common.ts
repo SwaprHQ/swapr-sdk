@@ -186,6 +186,19 @@ export const poolMethods = {
       outputs: [{ type: 'uint256', name: '' }],
       gas: '2810134',
     },
+    'exchange(int128,int128,uint256,uint256,address)': {
+      stateMutability: 'payable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { name: 'i', type: 'int128' },
+        { name: 'j', type: 'int128' },
+        { name: '_dx', type: 'uint256' },
+        { name: '_min_dy', type: 'uint256' },
+        { name: '_receiver', type: 'address' },
+      ],
+      outputs: [{ name: '', type: 'uint256' }],
+    },
     'exchange(uint256,uint256,uint256,uint256)': {
       stateMutability: 'payable',
       type: 'function',

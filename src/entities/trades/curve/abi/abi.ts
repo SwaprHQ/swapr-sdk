@@ -82,6 +82,13 @@ export const CURVE_PLAIN_ABI: ContractInterface = [
   poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],
 ]
 
+export const CURVE_PLAIN_ETH_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['payable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['payable']['exchange(int128,int128,uint256,uint256,address)'],
+]
+
 export const CURVE_METABTC_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
@@ -100,15 +107,15 @@ export const CURVE_POOL_ABI_MAP: Record<string, ContractInterface> = {
   ['metausdbalances']: CURVE_METAUSD_ABI,
   ['plain2balances']: CURVE_PLAIN_ABI,
   ['plain2basic']: CURVE_PLAIN_ABI,
-  ['plain2eth']: CURVE_PLAIN_ABI,
+  ['plain2eth']: CURVE_PLAIN_ETH_ABI,
   ['plain2optimized']: CURVE_PLAIN_ABI,
   ['plain3balances']: CURVE_PLAIN_ABI,
   ['plain3basic']: CURVE_PLAIN_ABI,
-  ['plain3eth']: CURVE_PLAIN_ABI,
+  ['plain3eth']: CURVE_PLAIN_ETH_ABI,
   ['plain3optimized']: CURVE_PLAIN_ABI,
   ['plain4balances']: CURVE_PLAIN_ABI,
   ['plain4basic']: CURVE_PLAIN_ABI,
-  ['plain4eth']: CURVE_PLAIN_ABI,
+  ['plain4eth']: CURVE_PLAIN_ETH_ABI,
   ['plain4optimized']: CURVE_PLAIN_ABI,
 }
 /**
