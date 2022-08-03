@@ -165,7 +165,6 @@ describe('CurveTrade', () => {
       currencyOut: tokenUSDC,
       maximumSlippage,
     })
-    console.log(trade)
     invariant(!!trade)
     expect(trade?.platform.name).toEqual(RoutablePlatform.CURVE.name)
     const swapTransaction = await trade.swapTransaction()
