@@ -66,14 +66,9 @@ export class CoWTrade extends Trade {
 
     invariant(!currencyEquals(inputAmount.currency, outputAmount.currency), 'SAME_TOKEN')
 
-    const GPv2Settlement = contractNetworks.GPv2Settlement as Record<
-      ChainId,
-      Record<'transactionHash' | 'address', string>
-    >
+    const approveAddress = CoWTrade.getVaultRelayerAddress(chainId)
 
-    const approveAddress = GPv2Settlement[chainId]?.address
-
-    invariant(approveAddress, 'Missing GPv2Settlement address')
+    invariant(approveAddress, 'Missing GPv2VaultRelayer address')
 
     super({
       details: undefined,
@@ -423,6 +418,35 @@ export class CoWTrade extends Trade {
    */
   public static getAppData(chainId: ChainId) {
     return cowAppData[chainId as unknown as keyof typeof cowAppData]
+  }
+
+  /**
+   * Returns the vault relayer contract address for the given chain.
+   * ERC20 tokens must approve this address.
+   * @param chainId The chain Id
+   * @returns The vault relayer address
+   */
+  public static getVaultRelayerAddress(chainId: ChainId) {
+    const GPv2VaultRelayer = contractNetworks.GPv2VaultRelayer as Record<
+      ChainId,
+      Record<'transactionHash' | 'address', string>
+    >
+
+    return GPv2VaultRelayer[chainId]?.address
+  }
+
+  /**
+   * Returns the settlement contract address for the given chain
+   * @param chainId The chain Id
+   * @returns The settlement address
+   */
+  public static getSettlementAddress(chainId: ChainId) {
+    const GPv2Settlement = contractNetworks.GPv2Settlement as Record<
+      ChainId,
+      Record<'transactionHash' | 'address', string>
+    >
+
+    return GPv2Settlement[chainId]?.address
   }
 }
 
