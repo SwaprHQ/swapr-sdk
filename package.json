@@ -44,7 +44,7 @@
     "@ethersproject/units": "^5.4.0",
     "@swapr/core": "^0.3.19",
     "@swapr/periphery": "^0.3.22",
-    "@uniswap/smart-order-router": "^2.6.0",
+    "@uniswap/smart-order-router": "^2.8.2",
     "big.js": "^5.2.2",
     "dayjs": "^1.11.0",
     "debug": "^4.3.4",
