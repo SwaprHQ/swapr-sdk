@@ -68,6 +68,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on Görli'
     ),
+    [ChainId.OPTIMISM_MAINNET]: new Token(
+      ChainId.OPTIMISM_MAINNET,
+      '0x4200000000000000000000000000000000000006',
+      18,
+      'WETH',
+      'Wrapped Ether on Optimism'
+    ),
   }
 
   public static readonly WXDAI: Record<number, Token> = {
