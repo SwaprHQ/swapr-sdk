@@ -30,6 +30,7 @@ export function wrappedAmount(currencyAmount: CurrencyAmount, chainId: ChainId):
  */
 export function wrappedCurrency(currency: Currency, chainId: ChainId): Token {
   if (currency instanceof Token) return currency
+  if (Currency.isNative(currency)) console.log('currency', currency)
   if (Currency.isNative(currency)) return Token.getNativeWrapper(chainId)
   invariant(false, 'CURRENCY')
 }

@@ -285,6 +285,7 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through from both factory and regular pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
+    console.log('routablepools', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -370,6 +371,10 @@ export class CurveTrade extends Trade {
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+        console.log('tokenIn', tokenIn)
+        console.log('tokenInIndex', tokenInIndex)
+        console.log('tokenOut', tokenOut)
+        console.log('tokenOutIndex', tokenOutIndex)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
           console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
@@ -423,7 +428,7 @@ export class CurveTrade extends Trade {
           ? 0
           : 1
       )
-
+    console.log('quoteFromPoolList', quoteFromPoolList)
     if (estimatedAmountOutPerPoolSorted.length === 0) {
       throw new Error('CurveTrade: zero pools returned an quote')
     }
@@ -480,6 +485,8 @@ export class CurveTrade extends Trade {
 
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
+    console.log('pool', pool)
+    console.log('allowsTradingINeth', pool.allowsTradingETH)
     if (pool.allowsTradingETH) {
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
