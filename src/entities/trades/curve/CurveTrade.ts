@@ -192,19 +192,8 @@ export class CurveTrade extends Trade {
     invariant(tokenOut != undefined, 'NO_TOKEN_OUT')
     invariant(tokenIn.address.toLowerCase() != tokenOut.address.toLowerCase(), 'SAME_TOKEN')
 
-    // const etherOut = this.outputAmount.currency === nativeCurrency
-    // // the router does not support both ether in and out
-    try {
-      await provider?.getNetwork()
-    } catch (e) {
-      // If it throws NoNetwork while computing the provider we take the chain provider as a redundancy
-      console.warn('Default provider has a network problem. Fetching chain provider.')
-      provider = getProvider(chainId)
-    }
-    // if the provider is undefined, the above expression doesn't throw an exception
-    if (!provider) {
-      provider = getProvider(chainId)
-    }
+    console.info({ provider, newProvider: getProvider(chainId) })
+    provider = getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
