@@ -13,9 +13,12 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   const tokenWithout2CRVand3CRV = pool.tokens.filter(
     (token) => token.symbol.toLowerCase() !== '3crv' && token.symbol.toLowerCase() !== '2crv'
   )
+  console.log('pool', pool)
+
   // Use main tokens
   let tokenList = pool.tokens
   // Append underlying tokens
+  const underlyingTokens = pool.underlyingTokens && (pool.underlyingTokens as CurveToken[])
   if (pool.underlyingTokens) {
     tokenList = [...tokenWithout2CRVand3CRV, ...(pool.underlyingTokens as CurveToken[])]
   }
@@ -27,9 +30,20 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   const poolHasWETH = tokenList.find(
     ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
   )
+  let tokenIndex
+  console.log('here', underlyingTokens)
+  console.log('ehre', pool.tokens)
+  if (underlyingTokens && pool.underlyingTokens?.length === tokenList.length) {
+    tokenIndex = pool.tokens.findIndex(
+      (item, index) =>
+        item.address.toLowerCase() == tokenAddress.toLowerCase() ||
+        underlyingTokens[index].address.toLowerCase() == tokenAddress.toLowerCase()
+    )
+  } else {
+    // Search for the main/underlying token
+    tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
+  }
 
-  // Search for the main/underlying token
-  let tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
   // ETH is always at 0 all pools
   if (tokenIndex < 0 && poolHasWETH) {
     tokenIndex = 0
