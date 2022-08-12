@@ -136,7 +136,7 @@ export class Token extends Currency {
       'Swapr'
     ),
     [ChainId.GOERLI]: new Token(
-      ChainId.ARBITRUM_GOERLI,
+      ChainId.GOERLI,
       '0x2F9343Cf18BAAcF57AC4a4e20188b9b00CFce3f1',
       18,
       'SWPR',
