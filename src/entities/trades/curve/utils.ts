@@ -13,7 +13,8 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   const tokenWithout2CRVand3CRV = pool.tokens.filter(
     (token) => token.symbol.toLowerCase() !== '3crv' && token.symbol.toLowerCase() !== '2crv'
   )
-  console.log('pool', pool)
+  console.log('poolSZSZSyalc p', pool)
+  console.log('address', tokenAddress)
 
   // Use main tokens
   let tokenList = pool.tokens
@@ -31,14 +32,16 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
     ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
   )
   let tokenIndex
-  console.log('here', underlyingTokens)
-  console.log('ehre', pool.tokens)
-  if (underlyingTokens && pool.underlyingTokens?.length === tokenList.length) {
+  console.log('Umderlying', underlyingTokens)
+  console.log('PoolTokens', pool.tokens)
+  if (underlyingTokens && pool.underlyingTokens?.length === pool.tokens.length) {
+    console.log('inside')
     tokenIndex = pool.tokens.findIndex(
       (item, index) =>
         item.address.toLowerCase() == tokenAddress.toLowerCase() ||
         underlyingTokens[index].address.toLowerCase() == tokenAddress.toLowerCase()
     )
+    console.log('finish')
   } else {
     // Search for the main/underlying token
     tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())
