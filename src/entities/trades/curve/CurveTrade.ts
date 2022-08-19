@@ -274,7 +274,7 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through from both factory and regular pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
-    console.log('routable pools', routablePools)
+    console.log('Working pools', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -413,7 +413,7 @@ export class CurveTrade extends Trade {
           ? 0
           : 1
       )
-    console.log('quoteFromPoolList', quoteFromPoolList)
+
     if (estimatedAmountOutPerPoolSorted.length === 0) {
       throw new Error('CurveTrade: zero pools returned an quote')
     }
