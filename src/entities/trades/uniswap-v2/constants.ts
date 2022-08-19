@@ -50,7 +50,7 @@ export const USDC: Record<number, Token> = {
     '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
     6,
     'USDC',
-    'USD//C from Ethereum'
+    'USD Coin'
   ),
 }
 
@@ -76,7 +76,7 @@ export const USDT: Record<number, Token> = {
     '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
     6,
     'USDT',
-    'Tether USD from Ethereum'
+    'Tether USD'
   ),
 }
 
@@ -108,7 +108,7 @@ export const WBTC: Record<number, Token> = {
     '0x68f180fcce6836688e9084f035309e29bf0a2095',
     8,
     'WBTC',
-    'Wrapped BTC from Ethereum'
+    'Wrapped BTC'
   ),
 }
 
