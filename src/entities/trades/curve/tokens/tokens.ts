@@ -593,6 +593,9 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     address: '0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3',
     isLPToken: true,
     type: TokenType.BTC,
+    poolTokens() {
+      return [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc]
+    },
   },
   rai: {
     name: ' Rai Reflex Index',

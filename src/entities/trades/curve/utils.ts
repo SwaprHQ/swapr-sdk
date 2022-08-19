@@ -9,19 +9,15 @@ import { CURVE_TOKENS, CurvePool, CurveToken, TOKENS_MAINNET, TokenType } from '
  * @param tokenAddress the token address
  */
 export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
-  // Combine all tokens without 3CRV
-  const tokenWithout2CRVand3CRV = pool.tokens.filter(
-    (token) => token.symbol.toLowerCase() !== '3crv' && token.symbol.toLowerCase() !== '2crv'
-  )
-  console.log('poolSZSZSyalc p', pool)
-  console.log('address', tokenAddress)
+  // Combine all tokens without lpTokens
+  const tokenWithout2CRVand3CRV = pool.tokens.filter((token) => token.isLPToken)
 
   // Use main tokens
   let tokenList = pool.tokens
   // Append underlying tokens
   const underlyingTokens = pool.underlyingTokens && (pool.underlyingTokens as CurveToken[])
-  if (pool.underlyingTokens) {
-    tokenList = [...tokenWithout2CRVand3CRV, ...(pool.underlyingTokens as CurveToken[])]
+  if (underlyingTokens) {
+    tokenList = [...tokenWithout2CRVand3CRV, ...underlyingTokens]
   }
   // Append meta tokens
   else if (pool.isMeta && pool.metaTokens) {
@@ -32,16 +28,14 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
     ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
   )
   let tokenIndex
-  console.log('Umderlying', underlyingTokens)
-  console.log('PoolTokens', pool.tokens)
+
+  // Case where both pool tokens and underlying tokens can be routed through
   if (underlyingTokens && pool.underlyingTokens?.length === pool.tokens.length) {
-    console.log('inside')
     tokenIndex = pool.tokens.findIndex(
       (item, index) =>
         item.address.toLowerCase() == tokenAddress.toLowerCase() ||
         underlyingTokens[index].address.toLowerCase() == tokenAddress.toLowerCase()
     )
-    console.log('finish')
   } else {
     // Search for the main/underlying token
     tokenIndex = tokenList.findIndex(({ address }) => address.toLowerCase() == tokenAddress.toLowerCase())

@@ -69,6 +69,9 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
   },
 ]
 const tricrvMetaTokensMainnet = TOKENS_MAINNET.tricrv.poolTokens ? TOKENS_MAINNET.tricrv.poolTokens() : undefined
+
+const sbtccrvMetaTokens = TOKENS_MAINNET.sbtccrv.poolTokens ? TOKENS_MAINNET.sbtccrv.poolTokens() : undefined
+
 export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'compound',
@@ -203,7 +206,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'tbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.tbtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    metaTokens: sbtccrvMetaTokens,
     address: '0xC25099792E9349C7DD09759744ea681C7de2cb66',
   },
   {
@@ -219,7 +222,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'pbtc',
     tokens: [TOKENS_MAINNET.pbtc, TOKENS_MAINNET.sbtccrv],
     abi: CURVE_3POOL_ABI,
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    metaTokens: sbtccrvMetaTokens,
     address: '0x7F55DDe206dbAD629C080068923b36fe9D6bDBeF',
   },
   {
@@ -227,7 +230,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'bbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.bbtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    metaTokens: sbtccrvMetaTokens,
     address: '0x071c661B4DeefB59E2a3DdB20Db036821eeE8F4b',
   },
   {
@@ -235,7 +238,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'obtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.obtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    metaTokens: sbtccrvMetaTokens,
     address: '0xd81dA8D904b52208541Bade1bD6595D8a251F8dd',
   },
   {

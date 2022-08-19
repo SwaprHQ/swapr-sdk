@@ -360,10 +360,6 @@ export class CurveTrade extends Trade {
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-        console.log('tokenIn', tokenIn)
-        console.log('tokenInIndex', tokenInIndex)
-        console.log('tokenOut', tokenOut)
-        console.log('tokenOutIndex', tokenOutIndex)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
           console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
@@ -474,8 +470,6 @@ export class CurveTrade extends Trade {
 
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
-    console.log('pool', pool)
-    console.log('allowsTradingINeth', pool.allowsTradingETH)
     if (pool.allowsTradingETH) {
       exchangeSignature = 'exchange(uint256,uint256,uint256,uint256,bool)'
 
