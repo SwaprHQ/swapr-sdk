@@ -99,14 +99,21 @@ export class Token extends Currency {
       '0xC3Ae0333F0F34aa734D5493276223d95B8F9Cb37',
       18,
       'DXD',
-      'DXdao from Ethereum'
+      'DXdao'
     ),
     [ChainId.ARBITRUM_RINKEBY]: new Token(
       ChainId.ARBITRUM_RINKEBY,
       '0x5d47100B0854525685907D5D773b92c22c0c745e',
       18,
       'DXD',
-      'DXdao from Ethereum'
+      'DXdao'
+    ),
+    [ChainId.ARBITRUM_GOERLI]: new Token(
+      ChainId.ARBITRUM_GOERLI,
+      '0xCEf91E326978fEDbb14825E17DAFCa18508E6232',
+      18,
+      'DXD',
+      'DXdao'
     ),
   }
 
@@ -124,6 +131,20 @@ export class Token extends Currency {
     [ChainId.ARBITRUM_ONE]: new Token(
       ChainId.ARBITRUM_ONE,
       '0xdE903E2712288A1dA82942DDdF2c20529565aC30',
+      18,
+      'SWPR',
+      'Swapr'
+    ),
+    [ChainId.GOERLI]: new Token(
+      ChainId.GOERLI,
+      '0x2F9343Cf18BAAcF57AC4a4e20188b9b00CFce3f1',
+      18,
+      'SWPR',
+      'Swapr'
+    ),
+    [ChainId.ARBITRUM_GOERLI]: new Token(
+      ChainId.ARBITRUM_GOERLI,
+      '0x75902ae4D8AB92d38e20D65f758b03d595C0047B',
       18,
       'SWPR',
       'Swapr'
