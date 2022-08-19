@@ -6,8 +6,22 @@ type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
 }
 
-export const DAI = new Token(ChainId.MAINNET, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'Dai Stablecoin')
-
+export const DAI: Record<number, Token> = {
+  [ChainId.MAINNET]: new Token(
+    ChainId.MAINNET,
+    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
+}
 export const USDC: Record<number, Token> = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C'),
   [ChainId.ARBITRUM_ONE]: new Token(
@@ -31,6 +45,13 @@ export const USDC: Record<number, Token> = {
     'USDC',
     'USD//C from Ethereum'
   ),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+    6,
+    'USDC',
+    'USD//C from Ethereum'
+  ),
 }
 
 export const USDT: Record<number, Token> = {
@@ -50,6 +71,13 @@ export const USDT: Record<number, Token> = {
     'Tether USD'
   ),
   [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 6, 'USDT', 'Tether USD'),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
+    6,
+    'USDT',
+    'Tether USD from Ethereum'
+  ),
 }
 
 export const WBTC: Record<number, Token> = {
@@ -71,6 +99,13 @@ export const WBTC: Record<number, Token> = {
   [ChainId.POLYGON]: new Token(
     ChainId.POLYGON,
     '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+    8,
+    'WBTC',
+    'Wrapped BTC from Ethereum'
+  ),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0x68f180fcce6836688e9084f035309e29bf0a2095',
     8,
     'WBTC',
     'Wrapped BTC from Ethereum'
@@ -104,7 +139,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [ChainId.MAINNET]: [
     WETH[ChainId.MAINNET],
     DXD[ChainId.MAINNET],
-    DAI,
+    DAI[ChainId.MAINNET],
     USDC[ChainId.MAINNET],
     WBTC[ChainId.MAINNET],
     USDT[ChainId.MAINNET],
@@ -134,6 +169,12 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ],
   [ChainId.POLYGON]: [WMATIC[ChainId.POLYGON], WBTC[ChainId.POLYGON], USDC[ChainId.POLYGON], USDT[ChainId.POLYGON]],
   [ChainId.GOERLI]: [WETH[ChainId.GOERLI]],
-  [ChainId.OPTIMISM_MAINNET]: [WETH[ChainId.OPTIMISM_MAINNET]],
+  [ChainId.OPTIMISM_MAINNET]: [
+    WETH[ChainId.OPTIMISM_MAINNET],
+    USDC[ChainId.OPTIMISM_MAINNET],
+    USDT[ChainId.OPTIMISM_MAINNET],
+    WBTC[ChainId.OPTIMISM_MAINNET],
+    DAI[ChainId.OPTIMISM_MAINNET],
+  ],
   [ChainId.OPTIMISM_GOERLI]: [WETH[ChainId.OPTIMISM_GOERLI]],
 }
