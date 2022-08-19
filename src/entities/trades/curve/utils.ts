@@ -10,18 +10,18 @@ import { CURVE_TOKENS, CurvePool, CurveToken, TOKENS_MAINNET, TokenType } from '
  */
 export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: ChainId = ChainId.MAINNET) {
   // Combine all tokens without lpTokens
-  const tokenWithout2CRVand3CRV = pool.tokens.filter((token) => token.isLPToken)
+  const tokensWithoutLpToken = pool.tokens.filter((token) => token.isLPToken)
 
   // Use main tokens
   let tokenList = pool.tokens
   // Append underlying tokens
   const underlyingTokens = pool.underlyingTokens && (pool.underlyingTokens as CurveToken[])
   if (underlyingTokens) {
-    tokenList = [...tokenWithout2CRVand3CRV, ...underlyingTokens]
+    tokenList = [...tokensWithoutLpToken, ...underlyingTokens]
   }
   // Append meta tokens
   else if (pool.isMeta && pool.metaTokens) {
-    tokenList = [...tokenWithout2CRVand3CRV, ...(pool.metaTokens as CurveToken[])]
+    tokenList = [...tokensWithoutLpToken, ...(pool.metaTokens as CurveToken[])]
   }
   // Search for WETH in the pool
   const poolHasWETH = tokenList.find(
