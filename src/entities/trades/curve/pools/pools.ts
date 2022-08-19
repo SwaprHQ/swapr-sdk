@@ -73,7 +73,7 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'compound',
     name: 'Compound',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_3POOL_UNDERLYING_ABI,
     tokens: [TOKENS_MAINNET.cdai, TOKENS_MAINNET.cusdc],
     underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc],
     address: '0xA2B47E3D5c44877cca798226B7B8118F9BFb7A56',
