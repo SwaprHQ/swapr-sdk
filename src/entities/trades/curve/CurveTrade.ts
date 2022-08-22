@@ -367,6 +367,9 @@ export class CurveTrade extends Trade {
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
+
+        console.log('tokenInINdex', tokenInIndex)
+        console.log('tokenOutIndex', tokenOutIndex)
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
           console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)

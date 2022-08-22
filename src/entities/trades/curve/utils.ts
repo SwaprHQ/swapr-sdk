@@ -90,9 +90,9 @@ export async function getRoutablePools(
 
     // For mainnet, account for ETH/WETH
     if (chainId === ChainId.MAINNET) {
-      tokenInAddress = allowsTradingETH === true && isTokenInNative ? TOKENS_MAINNET.weth.address : tokenIn.address
+      tokenInAddress = allowsTradingETH === true && isTokenInNative ? TOKENS_MAINNET.eth.address : tokenIn.address
 
-      tokenOutAddress = allowsTradingETH === true && isTokenOutNative ? TOKENS_MAINNET.weth.address : tokenOut.address
+      tokenOutAddress = allowsTradingETH === true && isTokenOutNative ? TOKENS_MAINNET.eth.address : tokenOut.address
     }
     if (name === 'steth' || name === 'ankreth' || name === 'seth' || name === 'rETH' || name === 'crveth') {
       console.log('isTokenInNative', isTokenInNative)
@@ -107,11 +107,7 @@ export async function getRoutablePools(
 
     // main tokens
 
-    const hasTokenIn = tokens.some((token) =>
-      isTokenInNative
-        ? token.address.toLowerCase() === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLocaleLowerCase()
-        : token.address.toLowerCase() === tokenInAddress.toLowerCase()
-    )
+    const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
 
     const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
 

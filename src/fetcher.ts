@@ -286,6 +286,7 @@ export abstract class Fetcher {
           abi: CURVE_POOL_ABI_MAP[implementation],
           isMeta,
           tokens,
+          allowsTradingETH: tokens.some((token) => token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'),
         }
 
         //tries to find meta pool tokens
