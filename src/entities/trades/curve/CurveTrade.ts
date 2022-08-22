@@ -179,14 +179,14 @@ export class CurveTrade extends Trade {
       currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
         : currencyAmountIn.currency === nativeCurrency
-
+    console.log('isNativeAssetIn', isNativeAssetIn)
     const isNativeAssetOut =
       tokenOut?.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
         ? true
         : currencyOut.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
         ? true
         : currencyOut === nativeCurrency
-
+    console.log('isNativeAssetOut', isNativeAssetOut)
     // Validations
     invariant(tokenIn != undefined, 'NO_TOKEN_IN')
     invariant(tokenOut != undefined, 'NO_TOKEN_OUT')
@@ -273,8 +273,15 @@ export class CurveTrade extends Trade {
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
     // Find all pools that the trade can go through from both factory and regular pools
-    let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
-    console.log('Working pools', routablePools)
+    let routablePools = await getRoutablePools(
+      curvePools,
+      tokenIn,
+      tokenOut,
+      chainId,
+      isNativeAssetIn,
+      isNativeAssetOut
+    )
+    console.log('maybe', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -531,6 +538,8 @@ export class CurveTrade extends Trade {
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
+      console.log('currencyAmountIN', currencyAmountIn)
+      console.log('currencyOut')
       const quote = await CurveTrade.getQuote(
         {
           currencyAmountIn,

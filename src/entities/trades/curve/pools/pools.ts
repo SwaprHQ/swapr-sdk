@@ -402,7 +402,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     id: 'crveth',
     name: 'crveth',
     abi: CURVE_ETHXERC20_256_ABI,
-    tokens: [TOKENS_MAINNET.weth, TOKENS_MAINNET.crv],
+    tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.crv],
     address: '0x8301AE4fc9c624d1D396cbDAa1ed877821D7C511',
     allowsTradingETH: true,
   },
@@ -412,11 +412,13 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_ETHXERC20_256_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.reth],
     address: '0xF9440930043eb3997fc70e1339dBb11F341de7A8',
+    allowsTradingETH: true,
   },
   {
     id: 'seth',
     name: 'seth',
     abi: CURVE_ETHXERC20_ABI,
+    allowsTradingETH: true,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.seth],
     address: '0xc5424b857f758e906013f3555dad202e4bdb4567',
   },
@@ -440,6 +442,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     abi: CURVE_ETHXERC20_256_ABI,
     tokens: [TOKENS_MAINNET.eth, TOKENS_MAINNET.ankreth],
     address: '0xA96A65c051bF88B4095Ee1f2451C2A9d43F53Ae2',
+    allowsTradingETH: true,
   },
   /**
    * @todo debug these

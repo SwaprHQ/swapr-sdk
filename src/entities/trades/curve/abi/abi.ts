@@ -48,6 +48,7 @@ export const CURVE_WETH_ERC20_POOL_ABI: ContractInterface = [
 export const CURVE_ETHXERC20_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['payable']['exchange(uint256,uint256,uint256,uint256,bool)'],
   poolMethods['payable']['exchange(int128,int128,uint256,uint256)'],
 ]
 

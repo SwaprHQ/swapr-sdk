@@ -27,6 +27,9 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   const poolHasWETH = tokenList.find(
     ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
   )
+  const poolHasEth = tokenList.find(
+    ({ address }) => CURVE_TOKENS[chainId]?.eth?.address?.toLowerCase() === address.toLowerCase()
+  )
   let tokenIndex
 
   // Case where both pool tokens and underlying tokens can be routed through
@@ -42,7 +45,7 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   }
 
   // ETH is always at 0 all pools
-  if (tokenIndex < 0 && poolHasWETH) {
+  if (tokenIndex < 0 && (poolHasWETH || poolHasEth)) {
     tokenIndex = 0
   }
 
@@ -75,27 +78,40 @@ export async function getRoutablePools(
   pools: CurvePool[],
   tokenIn: CurveToken,
   tokenOut: CurveToken,
-  chainId: ChainId
+  chainId: ChainId,
+  isTokenInNative: boolean,
+  isTokenOutNative: boolean
 ) {
   const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
   const allPools = pools.concat(factoryPools)
-  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
+  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH, name }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
 
     // For mainnet, account for ETH/WETH
     if (chainId === ChainId.MAINNET) {
-      console.log('mainnet', tokenInAddress)
-      const isTokenInEther = tokenIn.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
-      const isTokenOutEther = tokenOut.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
+      tokenInAddress = allowsTradingETH === true && isTokenInNative ? TOKENS_MAINNET.weth.address : tokenIn.address
 
-      tokenInAddress = allowsTradingETH === true && isTokenInEther ? TOKENS_MAINNET.weth.address : tokenIn.address
-
-      tokenOutAddress = allowsTradingETH === true && isTokenOutEther ? TOKENS_MAINNET.weth.address : tokenOut.address
+      tokenOutAddress = allowsTradingETH === true && isTokenOutNative ? TOKENS_MAINNET.weth.address : tokenOut.address
+    }
+    if (name === 'steth' || name === 'ankreth' || name === 'seth' || name === 'rETH' || name === 'crveth') {
+      console.log('isTokenInNative', isTokenInNative)
+      console.log('name', name)
+      console.log('native in ', tokenInAddress)
+      console.log('native out', tokenOutAddress)
+      console.log('tokens', tokens)
+      console.log('tokeninRaw', tokenIn.address)
+      console.log('tokenOutRaw', tokenOut.address)
+      console.log('allowsTraingEth', allowsTradingETH)
     }
 
     // main tokens
-    const hasTokenIn = tokens.some((token) => token.address.toLowerCase() === tokenInAddress.toLowerCase())
+
+    const hasTokenIn = tokens.some((token) =>
+      isTokenInNative
+        ? token.address.toLowerCase() === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLocaleLowerCase()
+        : token.address.toLowerCase() === tokenInAddress.toLowerCase()
+    )
 
     const hasTokenOut = tokens.some((token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase())
 

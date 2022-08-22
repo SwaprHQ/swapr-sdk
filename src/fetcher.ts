@@ -263,8 +263,8 @@ export abstract class Fetcher {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
 
           //wraps token if its Native so that it can be matched
-          if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
-            currentToken = Token.getNativeWrapper(chainId)
+          // if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+          //   currentToken = Token.getNativeWrapper(chainId)
 
           const symbol = currentToken.symbol ? currentToken.symbol : token.symbol
 
