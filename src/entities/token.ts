@@ -68,6 +68,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on Görli'
     ),
+    [ChainId.OPTIMISM_MAINNET]: new Token(
+      ChainId.OPTIMISM_MAINNET,
+      '0x4200000000000000000000000000000000000006',
+      18,
+      'WETH',
+      'Wrapped Ether'
+    ),
   }
 
   public static readonly WXDAI: Record<number, Token> = {
@@ -135,13 +142,7 @@ export class Token extends Currency {
       'SWPR',
       'Swapr'
     ),
-    [ChainId.GOERLI]: new Token(
-      ChainId.GOERLI,
-      '0x2F9343Cf18BAAcF57AC4a4e20188b9b00CFce3f1',
-      18,
-      'SWPR',
-      'Swapr'
-    ),
+    [ChainId.GOERLI]: new Token(ChainId.GOERLI, '0x2F9343Cf18BAAcF57AC4a4e20188b9b00CFce3f1', 18, 'SWPR', 'Swapr'),
     [ChainId.ARBITRUM_GOERLI]: new Token(
       ChainId.ARBITRUM_GOERLI,
       '0x75902ae4D8AB92d38e20D65f758b03d595C0047B',

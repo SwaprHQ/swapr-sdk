@@ -13,7 +13,7 @@ export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly GNOSIS_PROTOCOL = new RoutablePlatform([ChainId.MAINNET, ChainId.XDAI], 'CoW')
   public static readonly COW = new RoutablePlatform([ChainId.MAINNET, ChainId.XDAI], 'CoW')
   public static readonly UNISWAP = new RoutablePlatform(
-    [ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.POLYGON],
+    [ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.POLYGON, ChainId.OPTIMISM_MAINNET],
     'Uniswap'
   )
 }
