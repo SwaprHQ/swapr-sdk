@@ -94,7 +94,13 @@ export async function getRoutablePools(
 
       tokenOutAddress = allowsTradingETH === true && isTokenOutNative ? TOKENS_MAINNET.eth.address : tokenOut.address
     }
-    if (name === 'steth' || name === 'ankreth' || name === 'seth' || name === 'rETH' || name === 'crveth') {
+    if (
+      // name === 'steth' ||
+      name === 'Curve.fi Factory Plain Pool: stETH concentrated'
+      // name === 'seth' ||
+      // name === 'rETH' ||
+      // name === 'crveth'
+    ) {
       console.log('isTokenInNative', isTokenInNative)
       console.log('name', name)
       console.log('native in ', tokenInAddress)

@@ -18,7 +18,7 @@ import { TokenAmount } from '../../fractions/tokenAmount'
 import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform'
-import { tryGetChainId, wrappedCurrency } from '../utils'
+import { tryGetChainId } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports
 import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
@@ -164,8 +164,8 @@ export class CurveTrade extends Trade {
       return undefined
     }
 
-    const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
-    const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
+    const wrappedTokenIn = currencyAmountIn.currency as Token
+    const wrappedtokenOut = currencyOut as Token
     // Get the token's data from Curve
     const tokenIn = getCurveToken(wrappedTokenIn, chainId)
     const tokenOut = getCurveToken(wrappedtokenOut, chainId)
@@ -477,7 +477,7 @@ export class CurveTrade extends Trade {
       amountInBN.toString(),
       dyMinimumReceived.toString(),
     ]
-
+    console.log('pool', pool)
     // Some pools allow trading ETH
     // Use the correct method signature for swaps that involve ETH
     if (pool.allowsTradingETH) {
@@ -500,7 +500,7 @@ export class CurveTrade extends Trade {
       exchangeSignature,
       exchangeParams,
     })
-
+    console.log('exhcange Signature', exchangeSignature)
     const populatedTransaction = await poolContract.populateTransaction[exchangeSignature](...exchangeParams, {
       value,
     })
@@ -537,6 +537,9 @@ export class CurveTrade extends Trade {
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
+    console.log('exactIn')
+    console.log('currencyAmountIN', currencyAmountIn)
+    console.log('currencyOut', currencyOut)
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
@@ -569,6 +572,8 @@ export class CurveTrade extends Trade {
         })
       }
     } catch (error) {
+      console.log('currencyAmountIN', currencyAmountIn)
+      console.log('currencyOut')
       console.error('could not fetch Curve trade', error)
     }
 
@@ -591,10 +596,13 @@ export class CurveTrade extends Trade {
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
+    console.log('exactout', chainId)
+    console.log('data', currencyAmountOut, currencyIn)
     // Require the chain ID
     invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
 
     try {
+      console.log('firs one')
       // Get quote for original amounts in
       const baseQuote = (await CurveTrade.getQuote(
         {
@@ -615,6 +623,7 @@ export class CurveTrade extends Trade {
         currencyIn as Token,
         parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
       )
+      console.log('quote', currencyAmountIn, currencyOut, receiver)
 
       const quote = await CurveTrade.getQuote(
         {
@@ -627,6 +636,7 @@ export class CurveTrade extends Trade {
       )
 
       if (quote) {
+        console.log('quote')
         const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
         // Return the CurveTrade
         return new CurveTrade({
@@ -642,6 +652,7 @@ export class CurveTrade extends Trade {
         })
       }
     } catch (error) {
+      console.log('here')
       console.error('could not fetch Curve trade', error)
     }
 
