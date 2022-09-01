@@ -41,7 +41,7 @@ export class Token extends Currency {
       'Wrapped Ether'
     ),
     [ChainId.ARBITRUM_GOERLI]: new Token(
-      ChainId.GOERLI,
+      ChainId.ARBITRUM_GOERLI,
       '0x89C0DBbF7559E200443735e113039cE5f1e0e6F0',
       18,
       'WETH',
