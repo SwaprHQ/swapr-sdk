@@ -93,7 +93,15 @@ export class UniswapV2RoutablePlatform extends BaseRoutablePlatform {
   public readonly defaultSwapFee: BigintIsh
 
   public static readonly SWAPR = new UniswapV2RoutablePlatform({
-    chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.ARBITRUM_RINKEBY, ChainId.XDAI],
+    chainIds: [
+      ChainId.MAINNET,
+      ChainId.RINKEBY,
+      ChainId.ARBITRUM_ONE,
+      ChainId.ARBITRUM_RINKEBY,
+      ChainId.ARBITRUM_GOERLI,
+      ChainId.XDAI,
+      ChainId.GOERLI,
+    ],
     name: 'Swapr',
     factoryAddress: FACTORY_ADDRESS,
     routerAddress: ROUTER_ADDRESS,
