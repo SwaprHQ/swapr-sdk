@@ -1,7 +1,7 @@
 {
   "name": "@swapr/sdk",
   "license": "AGPL-3.0-or-later",
-  "version": "1.6.0",
+  "version": "1.6.0-rc.4",
   "description": "An SDK for building applications on top of Swapr",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
