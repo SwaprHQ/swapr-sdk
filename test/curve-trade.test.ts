@@ -125,7 +125,7 @@ describe('CurveTrade', () => {
       TOKENS_ARBITRUM_ONE.usdt.name
     )
 
-    test.skip('Should find a route from 1 USDC to USDT via 2pool', async () => {
+    test('Should find a route from 1 USDC to USDT via 2pool', async () => {
       const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
 
       const trade = await CurveTrade.bestTradeExactIn({
