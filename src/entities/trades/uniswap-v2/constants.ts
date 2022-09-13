@@ -47,7 +47,7 @@ export const USDC: Record<number, Token> = {
   ),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
-    '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+    '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
     6,
     'USDC',
     'USD Coin'
@@ -73,7 +73,7 @@ export const USDT: Record<number, Token> = {
   [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 6, 'USDT', 'Tether USD'),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
-    '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
+    '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
     6,
     'USDT',
     'Tether USD'
@@ -105,7 +105,7 @@ export const WBTC: Record<number, Token> = {
   ),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
-    '0x68f180fcce6836688e9084f035309e29bf0a2095',
+    '0x68f180fcCe6836688e9084f035309E29Bf0A2095',
     8,
     'WBTC',
     'Wrapped BTC'

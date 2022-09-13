@@ -26,7 +26,12 @@ export class Currency {
     'Ether',
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
   )
-
+  public static readonly OPTIMISM_ETHER: Currency = new Currency(
+    18,
+    'ETH',
+    'Ether',
+    '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000'
+  )
   /**
    * Gnosis Chain native curreny
    */
@@ -51,8 +56,8 @@ export class Currency {
     [ChainId.XDAI]: Currency.XDAI,
     [ChainId.POLYGON]: Currency.MATIC,
     [ChainId.GOERLI]: Currency.ETHER,
-    [ChainId.OPTIMISM_MAINNET]: Currency.ETHER,
-    [ChainId.OPTIMISM_GOERLI]: Currency.ETHER,
+    [ChainId.OPTIMISM_MAINNET]: Currency.OPTIMISM_ETHER,
+    [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
   }
 
   /**

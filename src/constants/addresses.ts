@@ -3,6 +3,7 @@ import {
   arbitrumGoerliTestnet as coreArbitrumGoerliTestnet,
   arbitrumOne as coreArbitrumOne,
   arbitrumRinkebyTestnet as coreArbitrumRinkebyTestnet,
+  goerli as coreGoerli,
   mainnet as coreMainnet,
   rinkeby as coreRinkeby,
   xdai as coreXDai,
@@ -11,6 +12,7 @@ import {
   arbitrumGoerliTestnet as peripheryArbitrumGoerliTestnet,
   arbitrumOne as peripheryArbitrumOne,
   arbitrumRinkebyTestnet as peripheryArbitrumRinkebyTestnet,
+  goerli as peripheryGoerli,
   mainnet as peripheryMainnet,
   rinkeby as peripheryRinkeby,
   xdai as peripheryXDai,
@@ -42,6 +44,7 @@ export const FACTORY_ADDRESS: Record<ChainId, string> = {
   [ChainId.ARBITRUM_RINKEBY]: coreArbitrumRinkebyTestnet.factory,
   [ChainId.ARBITRUM_GOERLI]: coreArbitrumGoerliTestnet.factory,
   [ChainId.XDAI]: coreXDai.factory,
+  [ChainId.GOERLI]: coreGoerli.factory,
 }
 
 /**
@@ -55,6 +58,7 @@ export const ROUTER_ADDRESS: Record<ChainId, string> = {
   [ChainId.ARBITRUM_ONE]: peripheryArbitrumOne.router,
   [ChainId.ARBITRUM_RINKEBY]: peripheryArbitrumRinkebyTestnet.router,
   [ChainId.ARBITRUM_GOERLI]: peripheryArbitrumGoerliTestnet.router,
+  [ChainId.GOERLI]: peripheryGoerli.router,
 }
 
 /**
