@@ -6,6 +6,16 @@ type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
 }
 
+export const ETH: Record<number, Token> = {
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+    18,
+    'ETH',
+    'Binance-Peg Ethereum'
+  ),
+}
+
 export const DAI: Record<number, Token> = {
   [ChainId.MAINNET]: new Token(
     ChainId.MAINNET,
@@ -20,6 +30,20 @@ export const DAI: Record<number, Token> = {
     18,
     'DAI',
     'Dai Stablecoin'
+  ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+    18,
+    'DAI',
+    'Binance-Peg Dai Stablecoin'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867',
+    18,
+    'DAI',
+    'Dai Token'
   ),
 }
 export const USDC: Record<number, Token> = {
@@ -52,6 +76,20 @@ export const USDC: Record<number, Token> = {
     'USDC',
     'USD Coin'
   ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+    6,
+    'USDC',
+    'Binance-Peg USD Coin'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0x64544969ed7EBf5f083679233325356EbE738930',
+    6,
+    'USDC',
+    'USDC Token'
+  ),
 }
 
 export const USDT: Record<number, Token> = {
@@ -77,6 +115,20 @@ export const USDT: Record<number, Token> = {
     6,
     'USDT',
     'Tether USD'
+  ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x55d398326f99059ff775485246999027b3197955',
+    6,
+    'USDT',
+    'Binance-Peg BSC-USD (BSC-USD)'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    6,
+    'USDT',
+    'USDT Token'
   ),
 }
 
@@ -177,4 +229,11 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     DAI[ChainId.OPTIMISM_MAINNET],
   ],
   [ChainId.OPTIMISM_GOERLI]: [WETH[ChainId.OPTIMISM_GOERLI]],
+  [ChainId.BSC_MAINNET]: [
+    ETH[ChainId.BSC_MAINNET],
+    DAI[ChainId.BSC_MAINNET],
+    USDT[ChainId.BSC_MAINNET],
+    USDC[ChainId.BSC_MAINNET],
+  ],
+  [ChainId.BSC_TESTNET]: [DAI[ChainId.BSC_TESTNET], USDT[ChainId.BSC_TESTNET], USDC[ChainId.BSC_TESTNET]],
 }

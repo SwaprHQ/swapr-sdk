@@ -1,6 +1,7 @@
 import { AddressZero } from '@ethersproject/constants'
 
 import {
+  _25,
   _30,
   BigintIsh,
   ChainId,
@@ -18,12 +19,14 @@ const SUSHISWAP_FACTORY_ADDRESS: { [chainId: number]: string } = {
   [ChainId.XDAI]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
   [ChainId.ARBITRUM_ONE]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
   [ChainId.POLYGON]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
+  [ChainId.BSC_MAINNET]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
 }
 const HONEYSWAP_FACTORY_ADDRESS = '0xA818b4F111Ccac7AA31D0BCc0806d64F2E0737D7'
 const BAOSWAP_FACTORY_ADDRESS = '0x45de240fbe2077dd3e711299538a09854fae9c9b'
 const LEVINSWAP_FACTORY_ADDRESS = '0x965769C9CeA8A7667246058504dcdcDb1E2975A5'
 const QUICKSWAP_FACTORY_ADDRESS = '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32'
 const DFYN_FACTORY_ADDRESS = '0xE7Fb3e833eFE5F9c441105EB65Ef8b261266423B'
+const PANCAKESWAP_FACTORY_ADDRESS = { [ChainId.BSC_MAINNET]: '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73' }
 
 const UNISWAP_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const SUSHISWAP_ROUTER_ADDRESS: { [chainId: number]: string } = {
@@ -32,13 +35,14 @@ const SUSHISWAP_ROUTER_ADDRESS: { [chainId: number]: string } = {
   [ChainId.XDAI]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
   [ChainId.ARBITRUM_ONE]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
   [ChainId.POLYGON]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
+  [ChainId.BSC_MAINNET]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
 }
 const HONEYSWAP_ROUTER_ADDRESS = '0x1C232F01118CB8B424793ae03F870aa7D0ac7f77'
 const BAOSWAP_ROUTER_ADDRESS = '0x6093AeBAC87d62b1A5a4cEec91204e35020E38bE'
 const LEVINSWAP_ROUTER_ADDRESS = '0xb18d4f69627F8320619A696202Ad2C430CeF7C53'
 const QUICKSWAP_ROUTER_ADDRESS = '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'
 const DFYN_ROUTER_ADDRESS = '0xA102072A4C07F06EC3B4900FDC4C7B80b6c57429'
-
+const PANCAKESWAP_ROUTER_ADDRESS = { [ChainId.BSC_MAINNET]: '0x10ED43C718714eb63d5aA57B78B54704E256024E' }
 export interface UniswapV2RoutablePlatformParams {
   /**
    * The chainIds this platform supports
@@ -135,13 +139,23 @@ export class UniswapV2RoutablePlatform extends BaseRoutablePlatform {
   })
 
   public static readonly SUSHISWAP = new UniswapV2RoutablePlatform({
-    chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.POLYGON],
+    chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.POLYGON, ChainId.BSC_MAINNET],
     name: 'Sushiswap',
     factoryAddress: SUSHISWAP_FACTORY_ADDRESS,
     routerAddress: SUSHISWAP_ROUTER_ADDRESS,
     initCodeHash: '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
     defaultSwapFee: _30,
     subgraphEndpoint: {},
+  })
+
+  public static readonly PANCAKESWAP = new UniswapV2RoutablePlatform({
+    chainIds: [ChainId.BSC_MAINNET],
+    name: 'Pancakeswap',
+    factoryAddress: PANCAKESWAP_FACTORY_ADDRESS,
+    routerAddress: PANCAKESWAP_ROUTER_ADDRESS,
+    initCodeHash: '0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5',
+    defaultSwapFee: _25,
+    subgraphEndpoint: { [ChainId.BSC_MAINNET]: 'https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2' },
   })
 
   public static readonly HONEYSWAP = new UniswapV2RoutablePlatform({

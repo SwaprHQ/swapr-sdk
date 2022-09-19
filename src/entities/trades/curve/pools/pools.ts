@@ -513,4 +513,6 @@ export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.GOERLI]: [],
   [ChainId.OPTIMISM_MAINNET]: [],
   [ChainId.OPTIMISM_GOERLI]: [],
+  [ChainId.BSC_MAINNET]: [],
+  [ChainId.BSC_TESTNET]: [],
 }

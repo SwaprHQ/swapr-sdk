@@ -152,6 +152,22 @@ export class Token extends Currency {
     ),
   }
 
+  public static readonly WBNB: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+      18,
+      'WBNB',
+      'Wrapped BNB'
+    ),
+    [ChainId.BSC_TESTNET]: new Token(
+      ChainId.BSC_TESTNET,
+      '0x094616F0BdFB0b526bD735Bf66Eca0Ad254ca81F',
+      18,
+      'WBNB',
+      'Wrapped BNB'
+    ),
+  }
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
@@ -163,6 +179,8 @@ export class Token extends Currency {
     [ChainId.OPTIMISM_MAINNET]: Token.WETH[ChainId.OPTIMISM_MAINNET],
     [ChainId.OPTIMISM_GOERLI]: Token.WETH[ChainId.OPTIMISM_MAINNET],
     [ChainId.ARBITRUM_GOERLI]: Token.WETH[ChainId.ARBITRUM_GOERLI],
+    [ChainId.BSC_MAINNET]: Token.WBNB[ChainId.BSC_MAINNET],
+    [ChainId.BSC_TESTNET]: Token.WBNB[ChainId.BSC_TESTNET],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {

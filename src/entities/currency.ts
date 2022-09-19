@@ -14,6 +14,12 @@ export class Currency {
   public readonly name?: string
   public readonly address?: string
 
+  public static readonly BNB: Currency = new Currency(
+    18,
+    'BNB',
+    'Binance Coin',
+    '0x0000000000000000000000000000000000000000'
+  )
   // fiat currencies used to represent countervalues
   public static readonly USD: Currency = new Currency(18, 'USD', 'US dollar')
 
@@ -58,6 +64,8 @@ export class Currency {
     [ChainId.GOERLI]: Currency.ETHER,
     [ChainId.OPTIMISM_MAINNET]: Currency.OPTIMISM_ETHER,
     [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
+    [ChainId.BSC_MAINNET]: Currency.BNB,
+    [ChainId.BSC_TESTNET]: Currency.BNB,
   }
 
   /**
@@ -89,3 +97,4 @@ export const USD = Currency.USD
 export const ETHER = Currency.ETHER
 export const XDAI = Currency.XDAI
 export const MATIC = Currency.MATIC
+export const BNB = Currency.BNB
