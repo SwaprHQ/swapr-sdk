@@ -240,14 +240,17 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
       }
       // we have arrived at the output token, so this is the final trade of one of the paths
       if (amountOut.token.equals(tokenOut)) {
-        const uniswapTrade = new UniswapV2Trade(
-          new Route([...currentPairs, pair], originalAmountIn.currency, currencyOut),
-          originalAmountIn,
-          maximumSlippage,
-          TradeType.EXACT_INPUT
+        sortedInsert(
+          bestTrades,
+          new UniswapV2Trade(
+            new Route([...currentPairs, pair], originalAmountIn.currency, currencyOut),
+            originalAmountIn,
+            maximumSlippage,
+            TradeType.EXACT_INPUT
+          ),
+          maxNumResults,
+          UniswapV2Trade.tradeComparator
         )
-        console.log({ uniswapTrade })
-        sortedInsert(bestTrades, uniswapTrade, maxNumResults, UniswapV2Trade.tradeComparator)
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
 
