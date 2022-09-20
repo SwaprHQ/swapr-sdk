@@ -155,7 +155,7 @@ export class UniswapV2RoutablePlatform extends BaseRoutablePlatform {
     routerAddress: PANCAKESWAP_ROUTER_ADDRESS,
     initCodeHash: '0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5',
     defaultSwapFee: _25,
-    subgraphEndpoint: { [ChainId.BSC_MAINNET]: 'https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2' },
+    subgraphEndpoint: {},
   })
 
   public static readonly HONEYSWAP = new UniswapV2RoutablePlatform({
