@@ -1,5 +1,5 @@
 import { ChainId } from '../../../constants'
-import { DXD, Token, WETH, WMATIC, WXDAI } from '../../token'
+import { DXD, Token, WBNB, WETH, WMATIC, WXDAI } from '../../token'
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -230,6 +230,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ],
   [ChainId.OPTIMISM_GOERLI]: [WETH[ChainId.OPTIMISM_GOERLI]],
   [ChainId.BSC_MAINNET]: [
+    WBNB[ChainId.BSC_MAINNET],
     ETH[ChainId.BSC_MAINNET],
     DAI[ChainId.BSC_MAINNET],
     USDT[ChainId.BSC_MAINNET],
