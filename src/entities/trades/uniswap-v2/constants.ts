@@ -6,16 +6,6 @@ type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
 }
 
-export const ETH: Record<number, Token> = {
-  [ChainId.BSC_MAINNET]: new Token(
-    ChainId.BSC_MAINNET,
-    '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
-    18,
-    'ETH',
-    'Binance-Peg Ethereum'
-  ),
-}
-
 export const DAI: Record<number, Token> = {
   [ChainId.MAINNET]: new Token(
     ChainId.MAINNET,
@@ -231,7 +221,6 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [ChainId.OPTIMISM_GOERLI]: [WETH[ChainId.OPTIMISM_GOERLI]],
   [ChainId.BSC_MAINNET]: [
     WBNB[ChainId.BSC_MAINNET],
-    ETH[ChainId.BSC_MAINNET],
     DAI[ChainId.BSC_MAINNET],
     USDT[ChainId.BSC_MAINNET],
     USDC[ChainId.BSC_MAINNET],
