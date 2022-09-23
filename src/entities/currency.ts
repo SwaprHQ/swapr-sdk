@@ -3,7 +3,7 @@ import JSBI from 'jsbi'
 import { ChainId, SolidityType } from '../constants'
 import { validateSolidityTypeInstance } from '../utils'
 
-const BURN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+const NULL_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 /**
  * A currency is any fungible financial instrument on the target chain.
  *
@@ -21,7 +21,7 @@ export class Currency {
   /**
    * Ethereum and Ethereum testnets native currency.
    */
-  public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether', BURN_ADDRESS)
+  public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether', NULL_ADDRESS)
   public static readonly OPTIMISM_ETHER: Currency = new Currency(
     18,
     'ETH',
@@ -31,17 +31,17 @@ export class Currency {
   /**
    * Gnosis Chain native currency
    */
-  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', BURN_ADDRESS)
+  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', NULL_ADDRESS)
 
   /**
    * Polygon PoS native currency
    */
-  public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic', BURN_ADDRESS)
+  public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic', NULL_ADDRESS)
 
   /**
    * BSC native currency
    */
-  public static readonly BNB: Currency = new Currency(18, 'BNB', 'Binance Coin', BURN_ADDRESS)
+  public static readonly BNB: Currency = new Currency(18, 'BNB', 'Binance Coin', NULL_ADDRESS)
 
   private static readonly NATIVE_CURRENCY: Record<ChainId, Currency> = {
     [ChainId.MAINNET]: Currency.ETHER,
