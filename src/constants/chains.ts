@@ -26,4 +26,7 @@ export enum ChainId {
    * Optimism Göerli
    */
   OPTIMISM_GOERLI = 420,
+
+  BSC_MAINNET = 56,
+  BSC_TESTNET = 97,
 }

@@ -31,6 +31,8 @@ const emptyAddressList: Record<ChainId, string> = {
   [ChainId.GOERLI]: AddressZero,
   [ChainId.OPTIMISM_MAINNET]: AddressZero,
   [ChainId.OPTIMISM_GOERLI]: AddressZero,
+  [ChainId.BSC_MAINNET]: AddressZero,
+  [ChainId.BSC_TESTNET]: AddressZero,
 }
 
 /**
@@ -106,4 +108,6 @@ export const MULTICALL2_ADDRESS: Record<ChainId, string> = {
   [ChainId.GOERLI]: '0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696',
   [ChainId.OPTIMISM_MAINNET]: '0xca11bde05977b3631167028862be2a173976ca11',
   [ChainId.OPTIMISM_GOERLI]: '0xca11bde05977b3631167028862be2a173976ca11',
+  [ChainId.BSC_MAINNET]: '0xca11bde05977b3631167028862be2a173976ca11',
+  [ChainId.BSC_TESTNET]: '0xca11bde05977b3631167028862be2a173976ca11',
 }

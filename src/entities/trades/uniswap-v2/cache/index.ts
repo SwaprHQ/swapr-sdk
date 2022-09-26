@@ -17,5 +17,7 @@ export function createCacheList<T = any>(): GeneralCacheList<T> {
     [ChainId.GOERLI]: new Map(),
     [ChainId.OPTIMISM_MAINNET]: new Map(),
     [ChainId.OPTIMISM_GOERLI]: new Map(),
+    [ChainId.BSC_MAINNET]: new Map(),
+    [ChainId.BSC_TESTNET]: new Map(),
   }
 }
