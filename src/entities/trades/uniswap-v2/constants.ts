@@ -36,6 +36,7 @@ export const DAI: Record<number, Token> = {
     'Dai Token'
   ),
 }
+
 export const USDC: Record<number, Token> = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C'),
   [ChainId.ARBITRUM_ONE]: new Token(
@@ -69,7 +70,7 @@ export const USDC: Record<number, Token> = {
   [ChainId.BSC_MAINNET]: new Token(
     ChainId.BSC_MAINNET,
     '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
-    6,
+    18,
     'USDC',
     'Binance-Peg USD Coin'
   ),
@@ -108,10 +109,10 @@ export const USDT: Record<number, Token> = {
   ),
   [ChainId.BSC_MAINNET]: new Token(
     ChainId.BSC_MAINNET,
-    '0x55d398326f99059ff775485246999027b3197955',
-    6,
+    '0x55d398326f99059fF775485246999027B3197955',
+    18,
     'USDT',
-    'Binance-Peg BSC-USD (BSC-USD)'
+    'Binance-Peg BSC-USD'
   ),
   [ChainId.BSC_TESTNET]: new Token(
     ChainId.BSC_TESTNET,
