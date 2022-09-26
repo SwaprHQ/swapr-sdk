@@ -91,6 +91,26 @@ export class Token extends Currency {
     ),
   }
 
+  public static readonly BUSD: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+      18,
+      'BUSD',
+      'Binance-Peg BUSD Token'
+    ),
+  }
+
+  public static readonly CAKE: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82',
+      18,
+      'CAKE',
+      'PancakeSwap Token'
+    ),
+  }
+
   public static readonly DXD: Record<number, Token> = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'),
