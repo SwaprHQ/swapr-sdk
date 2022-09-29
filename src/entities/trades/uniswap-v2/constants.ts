@@ -14,6 +14,20 @@ export const DAI: Record<number, Token> = {
     'DAI',
     'Dai Stablecoin'
   ),
+  [ChainId.POLYGON]: new Token(
+    ChainId.POLYGON,
+    '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
+  [ChainId.ARBITRUM_ONE]: new Token(
+    ChainId.ARBITRUM_ONE,
+    '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
     '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
