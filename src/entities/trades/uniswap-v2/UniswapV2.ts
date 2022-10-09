@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
@@ -26,6 +27,8 @@ import {
   UniswapV2TradeComputeTradesExactOutParams,
 } from './types'
 import { computePriceImpact, inputOutputComparator, toHex, ZERO_HEX } from './utilts'
+
+const DFYN_GAS_LIMIT = 166004
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -376,26 +379,28 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     const path: string[] = this.route.path.map((token) => token.address)
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
 
+    const override: Record<string, string | BigNumber | undefined> = { value: ZERO_HEX, gasLimit: undefined }
+
+    if (routerAddress === UniswapV2RoutablePlatform.DFYN.routerAddress[this.chainId])
+      override.gasLimit = BigNumber.from(DFYN_GAS_LIMIT)
+
     let methodName: string
     let args: (string | string[])[]
-    let value: string = ZERO_HEX
     switch (this.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
           methodName = 'swapExactETHForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountOut, path, to, deadline]
-          value = amountIn
+          override.value = amountIn
         } else if (etherOut) {
           methodName = 'swapExactTokensForETH'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountIn, amountOut, path, to, deadline]
-          value = ZERO_HEX
         } else {
           methodName = 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountIn, amountOut, path, to, deadline]
-          value = ZERO_HEX
         }
         break
       case TradeType.EXACT_OUTPUT:
@@ -403,22 +408,22 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
           methodName = 'swapETHForExactTokens'
           // (uint amountOut, address[] calldata path, address to, uint deadline)
           args = [amountOut, path, to, deadline]
-          value = amountIn
+          override.value = amountIn
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
           args = [amountOut, amountIn, path, to, deadline]
-          value = ZERO_HEX
         } else {
           methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
           args = [amountOut, amountIn, path, to, deadline]
-          value = ZERO_HEX
         }
         break
     }
 
-    return new Contract(routerAddress, ROUTER_ABI).populateTransaction[methodName](...args, { value })
+    return new Contract(routerAddress, ROUTER_ABI).populateTransaction[methodName](...args, {
+      ...override,
+    })
   }
 
   public get route() {
