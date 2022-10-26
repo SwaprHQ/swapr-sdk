@@ -7,6 +7,7 @@ import { BaseRoutablePlatform } from './BaseRoutablePlatform'
 export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly ZEROX = new RoutablePlatform([ChainId.MAINNET, ChainId.POLYGON], '0x')
   public static readonly CURVE = new RoutablePlatform([ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.XDAI], 'Curve')
+  public static readonly VELODROME = new RoutablePlatform([ChainId.OPTIMISM_MAINNET], 'Velodrome')
   /**
    * @deprecated Use {@link RoutablePlatform.COW} instead.
    */

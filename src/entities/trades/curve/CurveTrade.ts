@@ -274,7 +274,7 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through from both factory and regular pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
-    console.log('Working pools', routablePools)
+    console.log('VELODROME SHITWA!', routablePools)
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
