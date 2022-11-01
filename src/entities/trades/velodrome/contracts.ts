@@ -22,12 +22,14 @@ export async function getVelodromeRoutes({ amount, currencyIn, currencyOut, chai
     currencyIn,
     currencyOut
   )
-  console.log('worksss')
-  const poolAddress = await addressProviderContract.pairFor(currencyIn, currencyOut, stable)
+  // console.log('worksss', amountOut.toNumber())
+
+  console.log('stable', stable)
+
   // const fee = await addressProviderContract.getFee(stable)
   // console.log('fee', fee)
-  console.log('pairForsss', poolAddress)
+
   console.log('result', amountOut)
 
-  return { amount, poolAddress }
+  return { amountOut, stable }
 }
