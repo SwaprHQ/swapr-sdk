@@ -500,6 +500,8 @@ export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
   [ChainId.OPTIMISM_MAINNET]: '',
   [ChainId.OPTIMISM_GOERLI]: '',
   [ChainId.ARBITRUM_GOERLI]: '',
+  [ChainId.BSC_MAINNET]: '',
+  [ChainId.BSC_TESTNET]: '',
 }
 
 export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
@@ -514,4 +516,6 @@ export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.GOERLI]: [],
   [ChainId.OPTIMISM_MAINNET]: [],
   [ChainId.OPTIMISM_GOERLI]: [],
+  [ChainId.BSC_MAINNET]: [],
+  [ChainId.BSC_TESTNET]: [],
 }

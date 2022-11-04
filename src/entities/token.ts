@@ -91,6 +91,26 @@ export class Token extends Currency {
     ),
   }
 
+  public static readonly BUSD: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+      18,
+      'BUSD',
+      'Binance-Peg BUSD Token'
+    ),
+  }
+
+  public static readonly CAKE: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82',
+      18,
+      'CAKE',
+      'PancakeSwap Token'
+    ),
+  }
+
   public static readonly DXD: Record<number, Token> = {
     [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xa1d65E8fB6e87b60FECCBc582F7f97804B725521', 18, 'DXD', 'DXdao'),
     [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, '0x554898A0BF98aB0C03ff86C7DccBE29269cc4d29', 18, 'DXD', 'DXdao'),
@@ -152,6 +172,22 @@ export class Token extends Currency {
     ),
   }
 
+  public static readonly WBNB: Record<number, Token> = {
+    [ChainId.BSC_MAINNET]: new Token(
+      ChainId.BSC_MAINNET,
+      '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+      18,
+      'WBNB',
+      'Wrapped BNB'
+    ),
+    [ChainId.BSC_TESTNET]: new Token(
+      ChainId.BSC_TESTNET,
+      '0x094616F0BdFB0b526bD735Bf66Eca0Ad254ca81F',
+      18,
+      'WBNB',
+      'Wrapped BNB'
+    ),
+  }
   private static readonly NATIVE_CURRENCY_WRAPPER: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: Token.WETH[ChainId.MAINNET],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
@@ -163,6 +199,8 @@ export class Token extends Currency {
     [ChainId.OPTIMISM_MAINNET]: Token.WETH[ChainId.OPTIMISM_MAINNET],
     [ChainId.OPTIMISM_GOERLI]: Token.WETH[ChainId.OPTIMISM_MAINNET],
     [ChainId.ARBITRUM_GOERLI]: Token.WETH[ChainId.ARBITRUM_GOERLI],
+    [ChainId.BSC_MAINNET]: Token.WBNB[ChainId.BSC_MAINNET],
+    [ChainId.BSC_TESTNET]: Token.WBNB[ChainId.BSC_TESTNET],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
@@ -225,3 +263,4 @@ export const DXD = Token.DXD
 export const WXDAI = Token.WXDAI
 export const SWPR = Token.SWPR
 export const WMATIC = Token.WMATIC
+export const WBNB = Token.WBNB

@@ -63,6 +63,8 @@ export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.GOERLI]: 'https://goerli.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
   [ChainId.OPTIMISM_MAINNET]: 'https://mainnet.optimism.io',
   [ChainId.OPTIMISM_GOERLI]: 'https://goerli.optimism.io',
+  [ChainId.BSC_MAINNET]: 'https://bsc-dataseed1.binance.org/',
+  [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
 }
 
 /**

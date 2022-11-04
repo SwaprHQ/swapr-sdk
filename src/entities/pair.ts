@@ -32,6 +32,8 @@ const INITIAL_CACHE_STATE: Record<ChainId, any> = {
   [ChainId.GOERLI]: {},
   [ChainId.OPTIMISM_MAINNET]: {},
   [ChainId.OPTIMISM_GOERLI]: {},
+  [ChainId.BSC_MAINNET]: {},
+  [ChainId.BSC_TESTNET]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {
@@ -58,6 +60,9 @@ let PAIR_ADDRESS_CACHE: {
     ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.QUICKSWAP.name]: {
+    ...INITIAL_CACHE_STATE,
+  },
+  [UniswapV2RoutablePlatform.PANCAKESWAP.name]: {
     ...INITIAL_CACHE_STATE,
   },
   [UniswapV2RoutablePlatform.DFYN.name]: {

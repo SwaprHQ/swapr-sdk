@@ -3,6 +3,7 @@ import JSBI from 'jsbi'
 import { ChainId, SolidityType } from '../constants'
 import { validateSolidityTypeInstance } from '../utils'
 
+const NULL_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 /**
  * A currency is any fungible financial instrument on the target chain.
  *
@@ -20,12 +21,7 @@ export class Currency {
   /**
    * Ethereum and Ethereum testnets native currency.
    */
-  public static readonly ETHER: Currency = new Currency(
-    18,
-    'ETH',
-    'Ether',
-    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-  )
+  public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether', NULL_ADDRESS)
   public static readonly OPTIMISM_ETHER: Currency = new Currency(
     18,
     'ETH',
@@ -33,19 +29,19 @@ export class Currency {
     '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000'
   )
   /**
-   * Gnosis Chain native curreny
+   * Gnosis Chain native currency
    */
-  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+  public static readonly XDAI: Currency = new Currency(18, 'XDAI', 'xDAI', NULL_ADDRESS)
 
   /**
    * Polygon PoS native currency
    */
-  public static readonly MATIC: Currency = new Currency(
-    18,
-    'MATIC',
-    'Matic',
-    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-  )
+  public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic', NULL_ADDRESS)
+
+  /**
+   * BSC native currency
+   */
+  public static readonly BNB: Currency = new Currency(18, 'BNB', 'Binance Coin', NULL_ADDRESS)
 
   private static readonly NATIVE_CURRENCY: Record<ChainId, Currency> = {
     [ChainId.MAINNET]: Currency.ETHER,
@@ -58,6 +54,8 @@ export class Currency {
     [ChainId.GOERLI]: Currency.ETHER,
     [ChainId.OPTIMISM_MAINNET]: Currency.OPTIMISM_ETHER,
     [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
+    [ChainId.BSC_MAINNET]: Currency.BNB,
+    [ChainId.BSC_TESTNET]: Currency.BNB,
   }
 
   /**
@@ -89,3 +87,4 @@ export const USD = Currency.USD
 export const ETHER = Currency.ETHER
 export const XDAI = Currency.XDAI
 export const MATIC = Currency.MATIC
+export const BNB = Currency.BNB

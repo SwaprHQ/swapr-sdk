@@ -1,16 +1,19 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
+
 import {
   ChainId,
-  ETHER,
   CurrencyAmount,
+  ETHER,
   Pair,
   Percent,
   Route,
   Token,
   TokenAmount,
   TradeType,
-  UniswapV2Trade,
   UniswapV2RoutablePlatform,
+  UniswapV2Trade,
 } from '../src'
 
 describe('UniswapV2Trade', () => {
@@ -21,11 +24,22 @@ describe('UniswapV2Trade', () => {
   const token2 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000003', 18, 't2')
   const token3 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000004', 18, 't3')
 
+  const token0_POLYGON = new Token(ChainId.POLYGON, '0x0000000000000000000000000000000000000001', 18, 't0')
+  const token1_POLYGON = new Token(ChainId.POLYGON, '0x0000000000000000000000000000000000000002', 18, 't1')
+
   const pair_0_1 = new Pair(new TokenAmount(token0, JSBI.BigInt(1000)), new TokenAmount(token1, JSBI.BigInt(1000)))
   const pair_0_2 = new Pair(new TokenAmount(token0, JSBI.BigInt(1000)), new TokenAmount(token2, JSBI.BigInt(1100)))
   const pair_0_3 = new Pair(new TokenAmount(token0, JSBI.BigInt(1000)), new TokenAmount(token3, JSBI.BigInt(900)))
   const pair_1_2 = new Pair(new TokenAmount(token1, JSBI.BigInt(1200)), new TokenAmount(token2, JSBI.BigInt(1000)))
   const pair_1_3 = new Pair(new TokenAmount(token1, JSBI.BigInt(1200)), new TokenAmount(token3, JSBI.BigInt(1300)))
+
+  const pair_0_1_DFYN = new Pair(
+    new TokenAmount(token0_POLYGON, JSBI.BigInt(1000)),
+    new TokenAmount(token1_POLYGON, JSBI.BigInt(1000)),
+    undefined,
+    undefined,
+    UniswapV2RoutablePlatform.DFYN
+  )
 
   const pair_weth_0 = new Pair(
     new TokenAmount(Token.WETH[ChainId.MAINNET], JSBI.BigInt(1000)),
@@ -203,6 +217,42 @@ describe('UniswapV2Trade', () => {
       expect(result[0]?.route.path).toEqual([token3, token0, Token.WETH[ChainId.MAINNET]])
       expect(result[0]?.inputAmount.currency).toEqual(token3)
       expect(result[0]?.outputAmount.currency).toEqual(ETHER)
+    })
+
+    it('trade gasLimit not be defined', async () => {
+      const trade = UniswapV2Trade.computeTradesExactIn({
+        pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
+        currencyAmountIn: new TokenAmount(token3, JSBI.BigInt(100)),
+        currencyOut: ETHER,
+        maximumSlippage,
+      })
+      invariant(!!trade)
+
+      const swapTransaction = await trade[0].swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000002',
+        ttl: 1,
+      })
+      invariant(!!swapTransaction)
+
+      expect(swapTransaction.gasLimit).toBe(undefined)
+    })
+
+    it('DFYN transaction has gasLimit set', async () => {
+      const trade = UniswapV2Trade.computeTradesExactIn({
+        pairs: [pair_0_1_DFYN],
+        currencyAmountIn: new TokenAmount(token0_POLYGON, JSBI.BigInt(100)),
+        currencyOut: token1_POLYGON,
+        maximumSlippage,
+      })
+      invariant(!!trade)
+
+      const DFYNTransaction = await trade[0].swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000002',
+        ttl: 1,
+      })
+      invariant(!!DFYNTransaction)
+
+      expect(DFYNTransaction.gasLimit).toStrictEqual(BigNumber.from(166004))
     })
   })
 
@@ -446,6 +496,42 @@ describe('UniswapV2Trade', () => {
       expect(result[1]?.inputAmount.currency).toEqual(token3)
       expect(result[1]?.outputAmount.currency).toEqual(ETHER)
       expect(result[1]?.route.path).toEqual([token3, token1, token0, Token.WETH[ChainId.MAINNET]])
+    })
+
+    it('trade gasLimit not be defined', async () => {
+      const trade = UniswapV2Trade.computeTradesExactOut({
+        pairs: [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
+        currencyIn: ETHER,
+        currencyAmountOut: new TokenAmount(token3, JSBI.BigInt(100)),
+        maximumSlippage,
+      })
+      invariant(!!trade)
+
+      const swapTransaction = await trade[0].swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000002',
+        ttl: 1,
+      })
+      invariant(!!swapTransaction)
+
+      expect(swapTransaction.gasLimit).toBe(undefined)
+    })
+
+    it('DFYN transaction has gasLimit set', async () => {
+      const trade = UniswapV2Trade.computeTradesExactOut({
+        pairs: [pair_0_1_DFYN],
+        currencyIn: token1_POLYGON,
+        currencyAmountOut: new TokenAmount(token0_POLYGON, JSBI.BigInt(100)),
+        maximumSlippage,
+      })
+      invariant(!!trade)
+
+      const DFYNTransaction = await trade[0].swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000002',
+        ttl: 1,
+      })
+      invariant(!!DFYNTransaction)
+
+      expect(DFYNTransaction.gasLimit).toStrictEqual(BigNumber.from(166004))
     })
   })
 })
