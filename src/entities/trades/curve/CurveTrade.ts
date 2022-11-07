@@ -274,7 +274,7 @@ export class CurveTrade extends Trade {
 
     // Find all pools that the trade can go through from both factory and regular pools
     let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
-    console.log('Working pools', routablePools)
+
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -327,7 +327,7 @@ export class CurveTrade extends Trade {
         })
 
         // Add 30% gas buffer
-        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(13).div(10)
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(130).div(100)
 
         return {
           fee,

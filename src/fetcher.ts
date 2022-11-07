@@ -27,6 +27,7 @@ interface FactoryPoolsApiResponse {
         address: string
         decimals: string
         symbol: string
+        isBasePoolLpToken: boolean
       }[]
       coinsAddresses: string[]
       decimals: string[]
@@ -258,7 +259,7 @@ export abstract class Fetcher {
     const filteredLowLiquidityPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
     //restructures pools so they fit into curvePool type
     const pooList: CurvePool[] = filteredLowLiquidityPools.map(
-      ({ symbol, name, coins, address, implementation, isMetaPool }) => {
+      ({ symbol, name, coins, address, implementation, isMetaPool, isBasePoolLpToken }) => {
         const tokens: CurveToken[] = coins.map((token) => {
           let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
 
@@ -274,6 +275,7 @@ export abstract class Fetcher {
             address: currentToken.address,
             decimals: currentToken.decimals,
             type: determineTokeType(symbol),
+            isLPToken: isBasePoolLpToken,
           }
         })
 
