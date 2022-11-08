@@ -4,7 +4,6 @@ import { getDefaultProvider } from '@ethersproject/providers'
 import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
-import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
 import { MULTICALL2_ABI } from './abis'
@@ -12,10 +11,6 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
-import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CURVE_TOKENS, CurvePool, CurveToken } from './entities/trades/curve/tokens'
-import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
 
 /**
