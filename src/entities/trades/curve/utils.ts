@@ -69,7 +69,7 @@ export function getCurveToken(token: Token, chainId: ChainId = ChainId.MAINNET) 
  * Fetches user created factory pools for curve protocol
  */
 
-async function fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePool[]> {
+export async function fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePool[]> {
   if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return []
 
   const response = await fetch(`https://api.curve.fi/api/getPools/${CURVE_FACTORY_SUPPORTED_APIS[chainId]}/factory`)
@@ -138,9 +138,7 @@ export async function getRoutablePools(
   tokenOut: CurveToken,
   chainId: ChainId
 ) {
-  const factoryPools = await fetchCurveFactoryPools(chainId)
-  const allPools = pools.concat(factoryPools)
-  return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
+  return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
     let tokenOutAddress = tokenOut.address
 
