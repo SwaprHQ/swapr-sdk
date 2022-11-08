@@ -1,7 +1,9 @@
 import { ChainId } from '../../../constants'
-import { Fetcher } from '../../../fetcher'
 import { Token } from '../../token'
+import { CURVE_POOL_ABI_MAP } from './abi'
+import { CURVE_FACTORY_SUPPORTED_APIS } from './pools'
 import { CURVE_TOKENS, CurvePool, CurveToken, TOKENS_MAINNET, TokenType } from './tokens'
+import { FactoryPoolsApiResponse } from './types'
 
 /**
  * Returns the token index of a token in a Curve pool
@@ -63,6 +65,65 @@ export function getCurveToken(token: Token, chainId: ChainId = ChainId.MAINNET) 
     ({ ...token, type: 'other' } as CurveToken)
   )
 }
+/**
+ * Fetches user created factory pools for curve protocol
+ */
+
+async function fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePool[]> {
+  if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return []
+
+  const response = await fetch(`https://api.curve.fi/api/getPools/${CURVE_FACTORY_SUPPORTED_APIS[chainId]}/factory`)
+
+  if (!response.ok) throw new Error('response not ok')
+  const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
+  //filter for low liquidty pool
+  const filteredLowLiquidityPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
+  //restructures pools so they fit into curvePool type
+  const pooList: CurvePool[] = filteredLowLiquidityPools.map(
+    ({ symbol, name, coins, address, implementation, isMetaPool, isBasePoolLpToken }) => {
+      const tokens: CurveToken[] = coins.map((token) => {
+        let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
+
+        //wraps token if its Native so that it can be matched
+        if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
+          currentToken = Token.getNativeWrapper(chainId)
+
+        const symbol = currentToken.symbol ? currentToken.symbol : token.symbol
+
+        return {
+          symbol,
+          name: symbol,
+          address: currentToken.address,
+          decimals: currentToken.decimals,
+          type: determineTokeType(symbol),
+          isLPToken: isBasePoolLpToken,
+        }
+      })
+
+      const isMeta = isMetaPool || implementation.includes('meta')
+
+      const curvePoolObject: CurvePool = {
+        id: symbol,
+        name,
+        address,
+        abi: CURVE_POOL_ABI_MAP[implementation],
+        isMeta,
+        tokens,
+      }
+
+      //tries to find meta pool tokens
+      const findPoolTokens = tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
+      //if its meta pool puts token under metaTokens else under underlying tokens
+      if (findPoolTokens) {
+        if (isMeta) curvePoolObject.metaTokens = findPoolTokens
+        else curvePoolObject.underlyingTokens = findPoolTokens
+      }
+
+      return curvePoolObject
+    }
+  )
+  return pooList
+}
 
 /**
  *
@@ -77,7 +138,7 @@ export async function getRoutablePools(
   tokenOut: CurveToken,
   chainId: ChainId
 ) {
-  const factoryPools = await Fetcher.fetchCurveFactoryPools(chainId)
+  const factoryPools = await fetchCurveFactoryPools(chainId)
   const allPools = pools.concat(factoryPools)
   return allPools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address

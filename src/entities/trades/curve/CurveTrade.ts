@@ -193,7 +193,7 @@ export class CurveTrade extends Trade {
     invariant(tokenIn.address.toLowerCase() != tokenOut.address.toLowerCase(), 'SAME_TOKEN')
 
     console.info({ provider, newProvider: getProvider(chainId) })
-    provider = getProvider(chainId)
+    provider = provider || getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
