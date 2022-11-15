@@ -3,7 +3,7 @@ import { BaseProvider } from '@ethersproject/providers'
 import { parseUnits } from '@ethersproject/units'
 
 import debug from 'debug'
-import { BigNumber, Contract, UnsignedTransaction } from 'ethers'
+import { Contract, UnsignedTransaction } from 'ethers'
 
 import invariant from 'tiny-invariant'
 
@@ -103,7 +103,7 @@ export class VelodromeTrade extends Trade {
       recipient,
       maximumSlippage,
     })
-
+    console.log('amount', amount.toSignificant(18))
     try {
       const bestAmountOut = await getBestRoute({
         currencyIn: wrappedCurrencyIn,
@@ -112,22 +112,21 @@ export class VelodromeTrade extends Trade {
         provider,
         chainId,
       })
-      console.log('out of loop')
+
       if (!bestAmountOut) {
         return null
       }
-      console.log('got the best amoutn?', bestAmountOut.toString())
 
       const libraryContract = new Contract('0xfb1Fc21D2937bF5a49D480189e7FEd42bF8282aD', LIBRARY_ABI, provider)
       let totalRatio = parseUnits('1')
+      console.log('totalRationInitial', totalRatio.toString())
       console.log('bestAmountOut', bestAmountOut)
 
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
-        console.log('Iterator', bestAmountOut.routes[i])
         let amountIn = bestAmountOut.receiveAmounts[i]
         console.log('AmountInItergarot', amountIn.toString())
         // let amountOut = bestAmountOut.receiveAmounts[i + 1]
-        console.log('libraryContract', libraryContract['getTradeDiff(uint256,address,address,bool)'])
+
         const res = await libraryContract['getTradeDiff(uint256,address,address,bool)'](
           amountIn,
           bestAmountOut.routes[i].from,
@@ -136,9 +135,9 @@ export class VelodromeTrade extends Trade {
         )
         console.log('res', res)
         console.log('resa', res.a.toString())
-        console.log('res.b', res.b as BigNumber)
+        console.log('res.b', res.b.toString())
 
-        const ratio = res.a.div(res.b)
+        const ratio = res.b.div(res.a)
         console.log('ratio', ratio.toString())
 
         totalRatio = totalRatio.mul(ratio)
