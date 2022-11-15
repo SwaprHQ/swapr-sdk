@@ -4,7 +4,7 @@ import { BaseProvider } from '@ethersproject/providers'
 import { parseUnits } from '@ethersproject/units'
 
 import debug from 'debug'
-import { Contract, UnsignedTransaction } from 'ethers'
+import { BigNumber, Contract, UnsignedTransaction } from 'ethers'
 
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
@@ -23,7 +23,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { toHex, ZERO_HEX } from '../uniswap-v2/utilts'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { LIBRARY_ABI, ROUTER_ABI } from './abi'
-import { getVelodromeRoutes, routerAddress } from './contracts'
+import { routerAddress } from './contracts'
 
 export interface VelodromeQuoteTypes {
   amount: CurrencyAmount
@@ -47,7 +47,15 @@ const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
  * UniswapTrade uses the AutoRouter to find best trade across V2 and V3 pools
  */
 export class VelodromeTrade extends Trade {
-  public constructor({ maximumSlippage, currencyAmountIn, currencyAmountOut, tradeType, chainId }: any) {
+  public constructor({
+    maximumSlippage,
+    currencyAmountIn,
+    currencyAmountOut,
+    tradeType,
+    chainId,
+    routes,
+    priceImpact,
+  }: any) {
     super({
       details: undefined,
       type: tradeType,
@@ -62,7 +70,8 @@ export class VelodromeTrade extends Trade {
         denominator: currencyAmountIn.raw,
         numerator: currencyAmountOut.raw,
       }),
-      priceImpact: new Percent('0', '10000000000'),
+      routes,
+      priceImpact: priceImpact,
       fee: new Percent('2', '10000000000'),
       // Uniswap V3 Router v2 address
       approveAddress: routerAddress,
@@ -82,6 +91,7 @@ export class VelodromeTrade extends Trade {
     maximumSlippage = maximumSlippage || defaultMaximumSlippage
 
     provider = provider || getProvider(chainId)
+    console.log('provider', provider)
 
     // Must match the currencies provided
     invariant(
@@ -91,6 +101,9 @@ export class VelodromeTrade extends Trade {
 
     const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
     const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
+
+    const wrappedCurrencyIn = wrappedCurrency(currencyIn, chainId)
+    const wrappedCurrencyOut = wrappedCurrency(currencyOut, chainId)
 
     debugVelodromeGetQuote({
       amount,
@@ -102,13 +115,13 @@ export class VelodromeTrade extends Trade {
       maximumSlippage,
     })
 
-    const { amountOut, stable } = await getVelodromeRoutes({
-      amount,
-      currencyIn: currencyIn.address,
-      currencyOut: currencyOut.address,
-      chainId,
-    })
-    console.log('amountOut', amountOut.toString())
+    // const { amountOut, stable } = await getVelodromeRoutes({
+    //   amount,
+    //   currencyIn: wrappedCurrencyIn.address,
+    //   currencyOut: wrappedCurrencyOut.address,
+    //   chainId,
+    // })
+    // console.log('amountOut', amountOut.toString())
 
     //handle if quote cant be directly fetched through router ie quoteSwap function
 
@@ -121,8 +134,8 @@ export class VelodromeTrade extends Trade {
       if (!routeAssetsResponse.ok) throw new Error('response not ok')
       const routeAssets = (await routeAssetsResponse.json()).data as VelodromAssetApi[]
       console.log('routeasset', routeAssets)
-      const fromAsset = currencyIn
-      const toAsset = currencyOut
+      const fromAsset = wrappedCurrencyIn
+      const toAsset = wrappedCurrencyOut
       const fromAmount = amount.raw.toString()
 
       const sendFromAmount = toHex(amount)
@@ -215,12 +228,12 @@ export class VelodromeTrade extends Trade {
       }
 
       amountOuts.push({
-        routes: [[addy0, addy1, true]],
+        routes: [{ from: addy0, to: addy1, stable: true }],
         routeAsset: null,
       })
 
       amountOuts.push({
-        routes: [[addy0, addy1, false]],
+        routes: [{ from: addy0, to: addy1, stable: false }],
         routeAsset: null,
       })
 
@@ -276,23 +289,33 @@ export class VelodromeTrade extends Trade {
       console.log('bestAmountOut', bestAmountOut)
 
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
+        console.log('Iterator', bestAmountOut.routes[i])
         let amountIn = bestAmountOut.receiveAmounts[i]
+        console.log('AmountInItergarot', amountIn.toString())
         // let amountOut = bestAmountOut.receiveAmounts[i + 1]
-
+        console.log('libraryContract', libraryContract['getTradeDiff(uint256,address,address,bool)'])
         const res = await libraryContract['getTradeDiff(uint256,address,address,bool)'](
           amountIn,
           bestAmountOut.routes[i].from,
           bestAmountOut.routes[i].to,
           bestAmountOut.routes[i].stable
         )
+        console.log('res', res)
+        console.log('resa', res.a.toString())
+        console.log('res.b', res.b as BigNumber)
 
-        const ratio = res.b.div(res.a)
+        const ratio = res.a.div(res.b)
+        console.log('ratio', ratio.toString())
 
         totalRatio = totalRatio.mul(ratio)
+        console.log('ttotalRatio', totalRatio)
       }
+      console.log('totalRatio', totalRatio.toString())
 
-      const priceImpact = parseUnits('1').sub(totalRatio).mul(100).toString()
+      const priceImpact = new Percent(parseUnits('1').toString(), totalRatio.toString())
+
       console.log('rpiceimpact', priceImpact.toString())
+      console.log('other', priceImpact)
       const returnValue = {
         inputs: {
           fromAmount: fromAmount,
@@ -302,28 +325,38 @@ export class VelodromeTrade extends Trade {
         output: bestAmountOut,
         priceImpact: priceImpact,
       }
+
+      const wrappedQuote = wrappedCurrency(quoteCurrency, chainId)
+      const currencyAmountIn =
+        tradeType === TradeType.EXACT_INPUT ? amount : new TokenAmount(wrappedQuote, bestAmountOut.finalValue)
+      const currencyAmountOut =
+        tradeType === TradeType.EXACT_INPUT ? new TokenAmount(wrappedQuote, bestAmountOut.finalValue) : amount
       console.log('return Value', returnValue)
+      return new VelodromeTrade({
+        maximumSlippage,
+        currencyAmountIn,
+        currencyAmountOut,
+        tradeType,
+        chainId,
+        routes: bestAmountOut.routes,
+        priceImpact,
+      })
       // return returnValue
     } catch (ex) {
       console.log('Non zero error', ex)
       console.error(ex)
+      return null
     }
 
-    const wrappedQuote = wrappedCurrency(quoteCurrency, chainId)
-    console.log('WORKIN?', amountOut)
-    // const parsedAmount = parseUnits(amountOut.toString(), quoteCurrency.decimals).toString()
-    const parsedAmount = amountOut.toString()
-    console.log('parsedAmount', parsedAmount)
-    const currencyAmountIn = tradeType === TradeType.EXACT_INPUT ? amount : new TokenAmount(wrappedQuote, parsedAmount)
-    const currencyAmountOut = tradeType === TradeType.EXACT_INPUT ? new TokenAmount(wrappedQuote, parsedAmount) : amount
-    console.log('currencyAmountIn', currencyAmountIn)
-    console.log('currencyOut', currencyAmountOut)
-    return new VelodromeTrade({ maximumSlippage, currencyAmountIn, currencyAmountOut, tradeType, chainId, stable })
+    // console.log('WORKIN?', amountOut)
+    // // const parsedAmount = parseUnits(amountOut.toString(), quoteCurrency.decimals).toString()
+    // const parsedAmount = amountOut.toString()
+    // console.log('parsedAmount', parsedAmount)
 
-    // Debug
-    debugVelodromeGetQuote(amountOut, stable)
+    // console.log('currencyAmountIn', currencyAmountIn)
+    // console.log('currencyOut', currencyAmountOut)
 
-    return null
+    // return null
   }
 
   public minimumAmountOut(): CurrencyAmount {
@@ -361,6 +394,7 @@ export class VelodromeTrade extends Trade {
     const etherIn = this.inputAmount.currency === nativeCurrency
     const etherOut = this.outputAmount.currency === nativeCurrency
     // the router does not support both ether in and out
+    invariant(this.routes, 'No Avaliable routes')
     invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     invariant(options.ttl && options.ttl > 0, 'TTL')
     invariant(this.inputAmount.currency.address && this.outputAmount.currency.address, 'No currency')
@@ -368,28 +402,28 @@ export class VelodromeTrade extends Trade {
     const to: string = validateAndParseAddress(options.recipient)
     const amountIn: string = toHex(this.maximumAmountIn())
     const amountOut: string = toHex(this.minimumAmountOut())
-    const route: string[][] = [[this.inputAmount.currency.address, this.outputAmount.currency.address]]
+
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
 
     let methodName: string
-    let args: (string | string[][])[]
+    let args: any
     let value: string = ZERO_HEX
     switch (this.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
           methodName = 'swapExactETHForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, route, to, deadline]
+          args = [amountOut, this.routes, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = 'swapExactTokensForETH'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, route, to, deadline]
+          args = [amountIn, amountOut, this.routes, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, route, to, deadline]
+          args = [amountIn, amountOut, this.routes, to, deadline]
           value = ZERO_HEX
         }
         break
@@ -397,17 +431,17 @@ export class VelodromeTrade extends Trade {
         if (etherIn) {
           methodName = 'swapETHForExactTokens'
           // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, route, to, deadline]
+          args = [amountOut, this.routes, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, route, to, deadline]
+          args = [amountOut, amountIn, this.routes, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, route, to, deadline]
+          args = [amountOut, amountIn, this.routes, to, deadline]
           value = ZERO_HEX
         }
         break
