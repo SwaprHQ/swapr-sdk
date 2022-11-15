@@ -61,7 +61,7 @@ export class VelodromeTrade extends Trade {
       }),
       routes,
       priceImpact: priceImpact,
-      fee: new Percent('2', '10000000000'),
+      fee: new Percent('2', '10000'),
       // Uniswap V3 Router v2 address
       approveAddress: routerAddress,
     })
@@ -142,11 +142,11 @@ export class VelodromeTrade extends Trade {
         console.log('ratio', ratio.toString())
 
         totalRatio = totalRatio.mul(ratio)
-        console.log('ttotalRatio', totalRatio)
+        console.log('ttotalRatio', totalRatio.toString())
       }
       console.log('totalRatio', totalRatio.toString())
 
-      const priceImpact = new Percent(parseUnits('1').toString(), totalRatio.toString())
+      const priceImpact = new Percent(parseUnits('1').sub(totalRatio).toString())
 
       console.log('rpiceimpact', priceImpact.toString())
       console.log('other', priceImpact)
