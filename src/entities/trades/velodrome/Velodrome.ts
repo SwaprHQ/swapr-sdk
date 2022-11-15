@@ -1,4 +1,3 @@
-import { Interface } from '@ethersproject/abi'
 import { AddressZero } from '@ethersproject/constants'
 import { BaseProvider } from '@ethersproject/providers'
 import { parseUnits } from '@ethersproject/units'
@@ -6,12 +5,9 @@ import { parseUnits } from '@ethersproject/units'
 import debug from 'debug'
 import { BigNumber, Contract, UnsignedTransaction } from 'ethers'
 
-import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
-import { MULTICALL2_ABI } from '../../../abis'
-
-import { MULTICALL2_ADDRESS, ONE, TradeType } from '../../../constants'
+import { ONE, TradeType } from '../../../constants'
 import { validateAndParseAddress } from '../../../utils'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
@@ -23,7 +19,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { toHex, ZERO_HEX } from '../uniswap-v2/utilts'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { LIBRARY_ABI, ROUTER_ABI } from './abi'
-import { routerAddress } from './contracts'
+import { getBestRoute, routerAddress } from './contracts'
 
 export interface VelodromeQuoteTypes {
   amount: CurrencyAmount
@@ -32,14 +28,7 @@ export interface VelodromeQuoteTypes {
   maximumSlippage?: Percent
   recipient?: string
 }
-interface VelodromAssetApi {
-  price: number
-  address: string
-  name: string
-  symbol: string
-  decimals: number
-  logoURI: string
-}
+
 // Debuging logger. See documentation to enable logging.
 const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
 
@@ -115,169 +104,14 @@ export class VelodromeTrade extends Trade {
       maximumSlippage,
     })
 
-    // const { amountOut, stable } = await getVelodromeRoutes({
-    //   amount,
-    //   currencyIn: wrappedCurrencyIn.address,
-    //   currencyOut: wrappedCurrencyOut.address,
-    //   chainId,
-    // })
-    // console.log('amountOut', amountOut.toString())
-
-    //handle if quote cant be directly fetched through router ie quoteSwap function
-
     try {
-      // if (!provider || chainId) return null
-
-      // some path logic. Have a base asset (FTM) swap from start asset to FTM, swap from FTM back to out asset. Don't know.
-      const routeAssetsResponse = await fetch('https://api.velodrome.finance/api/v1/routeAssets')
-
-      if (!routeAssetsResponse.ok) throw new Error('response not ok')
-      const routeAssets = (await routeAssetsResponse.json()).data as VelodromAssetApi[]
-      console.log('routeasset', routeAssets)
-      const fromAsset = wrappedCurrencyIn
-      const toAsset = wrappedCurrencyOut
-      const fromAmount = amount.raw.toString()
-
-      const sendFromAmount = toHex(amount)
-      console.log('sendFromAmount', sendFromAmount)
-      console.log('fromAmoutn', fromAmount)
-
-      if (!fromAsset || !toAsset || !fromAmount || !fromAsset.address || !toAsset.address || fromAmount === '') {
-        return null
-      }
-
-      let addy0 = fromAsset.address
-      let addy1 = toAsset.address
-      console.log('addy0', addy0)
-      console.log('add1', addy1)
-
-      const includesRouteAddress = routeAssets.filter((asset) => {
-        return asset.address.toLowerCase() == addy0.toLowerCase() || asset.address.toLowerCase() == addy1.toLowerCase()
+      const bestAmountOut = await getBestRoute({
+        currencyIn: wrappedCurrencyIn,
+        currencyOut: wrappedCurrencyOut,
+        amount,
+        provider,
+        chainId,
       })
-
-      let amountOuts: any[] = []
-      console.log('includes route asset', includesRouteAddress)
-      if (includesRouteAddress.length === 0) {
-        console.log('passes')
-        amountOuts = routeAssets
-          .map((routeAsset) => {
-            return [
-              {
-                routes: [
-                  {
-                    from: addy0,
-                    to: routeAsset.address,
-                    stable: true,
-                  },
-                  {
-                    from: routeAsset.address,
-                    to: addy1,
-                    stable: true,
-                  },
-                ],
-                routeAsset: routeAsset,
-              },
-              {
-                routes: [
-                  {
-                    from: addy0,
-                    to: routeAsset.address,
-                    stable: false,
-                  },
-                  {
-                    from: routeAsset.address,
-                    to: addy1,
-                    stable: false,
-                  },
-                ],
-                routeAsset: routeAsset,
-              },
-              {
-                routes: [
-                  {
-                    from: addy0,
-                    to: routeAsset.address,
-                    stable: true,
-                  },
-                  {
-                    from: routeAsset.address,
-                    to: addy1,
-                    stable: false,
-                  },
-                ],
-                routeAsset: routeAsset,
-              },
-              {
-                routes: [
-                  {
-                    from: addy0,
-                    to: routeAsset.address,
-                    stable: false,
-                  },
-                  {
-                    from: routeAsset.address,
-                    to: addy1,
-                    stable: true,
-                  },
-                ],
-                routeAsset: routeAsset,
-              },
-            ]
-          })
-          .flat()
-      }
-
-      amountOuts.push({
-        routes: [{ from: addy0, to: addy1, stable: true }],
-        routeAsset: null,
-      })
-
-      amountOuts.push({
-        routes: [{ from: addy0, to: addy1, stable: false }],
-        routeAsset: null,
-      })
-
-      const velodromRouterInterface = new Interface(ROUTER_ABI)
-
-      console.log('multiCall', amountOuts)
-      const multicall2CallData = amountOuts.map((route) => {
-        return {
-          target: routerAddress,
-          callData: velodromRouterInterface.encodeFunctionData('getAmountsOut', [sendFromAmount, route.routes]),
-        }
-      })
-      console.log('multicallData', multicall2CallData)
-
-      const multicallContract = new Contract(MULTICALL2_ADDRESS[chainId], MULTICALL2_ABI, provider)
-      const receiveAmounts = await multicallContract.callStatic.tryAggregate(false, multicall2CallData)
-      console.log('recieveAmoutns', receiveAmounts)
-
-      for (let i = 0; i < receiveAmounts.length; i++) {
-        if (receiveAmounts[i].success) {
-          const { amounts } = velodromRouterInterface.decodeFunctionResult(
-            'getAmountsOut',
-            receiveAmounts[i].returnData
-          )
-          console.log('amounts', amounts)
-          amountOuts[i].receiveAmounts = amounts
-          amountOuts[i].finalValue = amounts[amounts.length - 1]
-        }
-      }
-
-      console.log('amountsOutFormatted', amountOuts)
-
-      const bestAmountOut = amountOuts
-        .filter((ret) => {
-          return ret != null
-        })
-        .reduce((best, current) => {
-          if (!best || !current.finalValue || !best.finalValue) {
-            return current
-          }
-
-          return best.finalValue.gt(current.finalValue) ? best : current
-        }, 0)
-
       console.log('out of loop')
       if (!bestAmountOut) {
         return null
@@ -316,22 +150,17 @@ export class VelodromeTrade extends Trade {
 
       console.log('rpiceimpact', priceImpact.toString())
       console.log('other', priceImpact)
-      const returnValue = {
-        inputs: {
-          fromAmount: fromAmount,
-          fromAsset: fromAsset,
-          toAsset: toAsset,
-        },
-        output: bestAmountOut,
-        priceImpact: priceImpact,
-      }
 
       const wrappedQuote = wrappedCurrency(quoteCurrency, chainId)
       const currencyAmountIn =
-        tradeType === TradeType.EXACT_INPUT ? amount : new TokenAmount(wrappedQuote, bestAmountOut.finalValue)
+        tradeType === TradeType.EXACT_INPUT
+          ? amount
+          : new TokenAmount(wrappedQuote, bestAmountOut.finalValue.toString())
       const currencyAmountOut =
-        tradeType === TradeType.EXACT_INPUT ? new TokenAmount(wrappedQuote, bestAmountOut.finalValue) : amount
-      console.log('return Value', returnValue)
+        tradeType === TradeType.EXACT_INPUT
+          ? new TokenAmount(wrappedQuote, bestAmountOut.finalValue.toString())
+          : amount
+
       return new VelodromeTrade({
         maximumSlippage,
         currencyAmountIn,
@@ -347,16 +176,6 @@ export class VelodromeTrade extends Trade {
       console.error(ex)
       return null
     }
-
-    // console.log('WORKIN?', amountOut)
-    // // const parsedAmount = parseUnits(amountOut.toString(), quoteCurrency.decimals).toString()
-    // const parsedAmount = amountOut.toString()
-    // console.log('parsedAmount', parsedAmount)
-
-    // console.log('currencyAmountIn', currencyAmountIn)
-    // console.log('currencyOut', currencyAmountOut)
-
-    // return null
   }
 
   public minimumAmountOut(): CurrencyAmount {
