@@ -19,7 +19,8 @@ import { RoutablePlatform } from '../routable-platform'
 import { toHex, ZERO_HEX } from '../uniswap-v2/utilts'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { LIBRARY_ABI, ROUTER_ABI } from './abi'
-import { getBestRoute, routerAddress } from './contracts'
+import { LIBRARY_ADDRESS, ROUTER_ADDRESS } from './contants'
+import { getBestRoute } from './utils'
 
 export interface VelodromeQuoteTypes {
   amount: CurrencyAmount
@@ -28,6 +29,19 @@ export interface VelodromeQuoteTypes {
   maximumSlippage?: Percent
   recipient?: string
 }
+
+// interface VelodromeTradeExactInParams {
+//   currencyAmountIn: CurrencyAmount
+//   currencyOut: Currency
+//   maximumSlippage: Percent
+//   receiver?: string
+// }
+// interface VelodromeTradeExactOutParams {
+//   currencyIn: Currency
+//   currencyAmountOut: CurrencyAmount
+//   maximumSlippage: Percent
+//   receiver?: string
+// }
 
 // Debuging logger. See documentation to enable logging.
 const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
@@ -62,8 +76,7 @@ export class VelodromeTrade extends Trade {
       routes,
       priceImpact: priceImpact,
       fee: new Percent('2', '10000'),
-      // Uniswap V3 Router v2 address
-      approveAddress: routerAddress,
+      approveAddress: ROUTER_ADDRESS,
     })
   }
 
@@ -71,7 +84,6 @@ export class VelodromeTrade extends Trade {
     { amount, quoteCurrency, tradeType, maximumSlippage, recipient }: VelodromeQuoteTypes,
     provider?: BaseProvider
   ): Promise<VelodromeTrade | null> {
-    console.log('getQuoteVelodrome')
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'VelodromeQuote.getQuote: chainId is required')
 
@@ -80,7 +92,6 @@ export class VelodromeTrade extends Trade {
     maximumSlippage = maximumSlippage || defaultMaximumSlippage
 
     provider = provider || getProvider(chainId)
-    console.log('provider', provider)
 
     // Must match the currencies provided
     invariant(
@@ -88,8 +99,10 @@ export class VelodromeTrade extends Trade {
       `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`
     )
 
-    const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
-    const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
+    const currencyIn = amount.currency
+    const currencyOut = quoteCurrency
+    console.log('CUrrencyIn', currencyIn.name)
+    console.log('currenctout', currencyOut.name)
 
     const wrappedCurrencyIn = wrappedCurrency(currencyIn, chainId)
     const wrappedCurrencyOut = wrappedCurrency(currencyOut, chainId)
@@ -104,20 +117,37 @@ export class VelodromeTrade extends Trade {
       maximumSlippage,
     })
     console.log('amount', amount.toSignificant(18))
+
+    let bestAmountOut
+    let finalValue
     try {
-      const bestAmountOut = await getBestRoute({
+      const bestAmount = await getBestRoute({
         currencyIn: wrappedCurrencyIn,
         currencyOut: wrappedCurrencyOut,
         amount,
         provider,
         chainId,
       })
-
-      if (!bestAmountOut) {
+      bestAmountOut = bestAmount
+      finalValue = bestAmount?.finalValue.toString()
+      if (!bestAmount) {
+        return null
+      }
+      if (tradeType === TradeType.EXACT_OUTPUT) {
+        const bestAmountForOutput = await getBestRoute({
+          currencyIn: wrappedCurrencyOut,
+          currencyOut: wrappedCurrencyIn,
+          amount: new TokenAmount(wrappedCurrencyOut, bestAmount.finalValue.toString()),
+          provider,
+          chainId,
+        })
+        bestAmountOut = bestAmountForOutput
+      }
+      if (!bestAmountOut || !finalValue) {
         return null
       }
 
-      const libraryContract = new Contract('0xfb1Fc21D2937bF5a49D480189e7FEd42bF8282aD', LIBRARY_ABI, provider)
+      const libraryContract = new Contract(LIBRARY_ADDRESS, LIBRARY_ABI, provider)
       let totalRatio = parseUnits('1')
       console.log('totalRationInitial', totalRatio.toString())
       console.log('bestAmountOut', bestAmountOut)
@@ -125,7 +155,6 @@ export class VelodromeTrade extends Trade {
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
         let amountIn = bestAmountOut.receiveAmounts[i]
         console.log('AmountInItergarot', amountIn.toString())
-        // let amountOut = bestAmountOut.receiveAmounts[i + 1]
 
         const res = await libraryContract['getTradeDiff(uint256,address,address,bool)'](
           amountIn,
@@ -135,30 +164,36 @@ export class VelodromeTrade extends Trade {
         )
         console.log('res', res)
         console.log('resa', res.a.toString())
-        console.log('res.b', res.b.toString())
+        console.log('resb', res.b.toString())
 
         const ratio = res.b.div(res.a)
         console.log('ratio', ratio.toString())
+        if (!ratio.isZero()) {
+          totalRatio = totalRatio.mul(ratio)
+        }
 
-        totalRatio = totalRatio.mul(ratio)
         console.log('ttotalRatio', totalRatio.toString())
       }
       console.log('totalRatio', totalRatio.toString())
 
       const priceImpact = new Percent(parseUnits('1').sub(totalRatio).toString())
 
-      console.log('rpiceimpact', priceImpact.toString())
-      console.log('other', priceImpact)
+      console.log('rpiceimpact', priceImpact.toFixed(5))
+      console.log('other', priceImpact.toFixed(3) === '0.000')
+      console.log('bestOut', bestAmountOut.finalValue.toString())
 
       const wrappedQuote = wrappedCurrency(quoteCurrency, chainId)
-      const currencyAmountIn =
-        tradeType === TradeType.EXACT_INPUT
-          ? amount
-          : new TokenAmount(wrappedQuote, bestAmountOut.finalValue.toString())
+
+      const currencyAmountIn = TradeType.EXACT_INPUT === tradeType ? amount : new TokenAmount(wrappedQuote, finalValue)
       const currencyAmountOut =
-        tradeType === TradeType.EXACT_INPUT
-          ? new TokenAmount(wrappedQuote, bestAmountOut.finalValue.toString())
-          : amount
+        TradeType.EXACT_INPUT === tradeType
+          ? new TokenAmount(wrappedCurrencyOut, bestAmountOut.finalValue.toString())
+          : new TokenAmount(wrappedCurrencyIn, bestAmountOut.finalValue.toString())
+
+      // console.log('currencyAmountIn', currencyAmountIn.currency.name)
+      // console.log('currencyAmountOut', currencyAmountOut.currency.name)
+
+      console.log('EXITT')
 
       return new VelodromeTrade({
         maximumSlippage,
@@ -169,7 +204,6 @@ export class VelodromeTrade extends Trade {
         routes: bestAmountOut.routes,
         priceImpact,
       })
-      // return returnValue
     } catch (ex) {
       console.log('Non zero error', ex)
       console.error(ex)
@@ -178,6 +212,9 @@ export class VelodromeTrade extends Trade {
   }
 
   public minimumAmountOut(): CurrencyAmount {
+    console.log('MInAmount')
+    console.log('OUTPUT', this.outputAmount.currency.name)
+    console.log('INPUT', this.inputAmount.currency.name)
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return this.outputAmount
     } else {
@@ -203,6 +240,131 @@ export class VelodromeTrade extends Trade {
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
     }
   }
+
+  // /**
+  //  * Computes and returns the best trade from Curve pools
+  //  * by comparing all the Curve pools on target chain
+  //  * @param {object} obj options
+  //  * @param {CurrencyAmount} obj.currencyAmountIn the amount of curreny in - sell token
+  //  * @param {Currency} obj.currencyOut the currency out - buy token
+  //  * @param {Percent} obj.maximumSlippage Maximum slippage
+  //  * @param {Provider} provider an optional provider, the router defaults public providers
+  //  * @returns the best trade if found
+  //  */
+  // public static async bestTradeExactIn(
+  //   { currencyAmountIn, currencyOut, maximumSlippage, receiver }: VelodromeTradeExactInParams,
+  //   provider?: Provider
+  // ): Promise<VelodromeTrade | undefined> {
+  //   // Try to extract the chain ID from the tokens
+  //   const chainId = tryGetChainId(currencyAmountIn, currencyOut)
+  //   // Require the chain ID
+  //   invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
+
+  //   try {
+  //     const quote = await VelodromeTrade.getQuote(
+  //       {
+  //         currencyAmountIn,
+  //         currencyOut,
+  //         maximumSlippage,
+  //         receiver,
+  //       },
+  //       provider
+  //     )
+
+  //     if (quote) {
+  //       const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
+  //       // Return the CurveTrade
+  //       return new VelodromeTrade({
+  //         fee,
+  //         maximumSlippage,
+  //         tradeType: TradeType.EXACT_INPUT,
+  //         chainId,
+  //         transactionRequest: populatedTransaction,
+  //         inputAmount: currencyAmountIn,
+  //         outputAmount: estimatedAmountOut,
+  //         approveAddress: to,
+  //         contract,
+  //       })
+  //     }
+  //   } catch (error) {
+  //     console.error('could not fetch Curve trade', error)
+  //   }
+
+  //   return
+  // }
+
+  // /**
+  //  * Computes and returns the best trade from Curve pools using output as target.
+  //  * Avoid usig this method. It uses some optimistic math estimate right input.
+  //  * @param {object} obj options
+  //  * @param {CurrencyAmount} obj.currencyAmountOut the amount of curreny in - buy token
+  //  * @param {Currency} obj.currencyIn the currency in - sell token
+  //  * @param {Percent} obj.maximumSlippage Maximum slippage
+  //  * @param {Provider} provider an optional provider, the router defaults public providers
+  //  * @returns the best trade if found
+  //  */
+  // public static async bestTradeExactOut(
+  //   { currencyAmountOut, currencyIn, maximumSlippage, receiver }: VelodromeTradeExactOutParams,
+  //   provider?: Provider
+  // ): Promise<VelodromeTrade | undefined> {
+  //   // Try to extract the chain ID from the tokens
+  //   const chainId = tryGetChainId(currencyAmountOut, currencyIn)
+  //   // Require the chain ID
+  //   invariant(chainId !== undefined && RoutablePlatform.CURVE.supportsChain(chainId), 'CHAIN_ID')
+
+  //   try {
+  //     // Get quote for original amounts in
+  //     const baseQuote = (await VelodromeTrade.getQuote(
+  //       {
+  //         currencyAmountIn: currencyAmountOut,
+  //         currencyOut: currencyIn,
+  //         maximumSlippage,
+  //         receiver,
+  //       },
+  //       provider
+  //     )) as CurveTradeQuote
+
+  //     const currencyOut = currencyAmountOut.currency
+  //     const rawInputToOutputExchangeRate = new Decimal(baseQuote.exchangeRate).pow(-currencyOut.decimals)
+  //     const outputToInputExchangeRate = new Decimal(rawInputToOutputExchangeRate).pow(-1)
+  //     const amountOut = new Decimal(currencyAmountOut.toFixed(currencyOut.decimals))
+  //     const estimatedAmountIn = amountOut.times(outputToInputExchangeRate).dividedBy('0.9996')
+  //     const currencyAmountIn = new TokenAmount(
+  //       currencyIn as Token,
+  //       parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
+  //     )
+
+  //     const quote = await CurveTrade.getQuote(
+  //       {
+  //         currencyAmountIn,
+  //         currencyOut,
+  //         maximumSlippage,
+  //         receiver,
+  //       },
+  //       provider
+  //     )
+
+  //     if (quote) {
+  //       const { currencyAmountIn, estimatedAmountOut, fee, maximumSlippage, populatedTransaction, to, contract } = quote
+  //       // Return the CurveTrade
+  //       return new CurveTrade({
+  //         fee,
+  //         maximumSlippage,
+  //         tradeType: TradeType.EXACT_OUTPUT,
+  //         chainId,
+  //         transactionRequest: populatedTransaction,
+  //         inputAmount: currencyAmountIn,
+  //         outputAmount: estimatedAmountOut,
+  //         approveAddress: to,
+  //         contract,
+  //       })
+  //     }
+  //   } catch (error) {
+  //     console.error('could not fetch Curve trade', error)
+  //   }
+
+  //   return
+  // }
   /**
    * Returns unsigned transaction for the trade
    * @returns the unsigned transaction
@@ -269,6 +431,6 @@ export class VelodromeTrade extends Trade {
     console.log('value', value)
     console.log('to', to)
 
-    return new Contract(routerAddress, ROUTER_ABI).populateTransaction[methodName](...args, { value })
+    return new Contract(ROUTER_ADDRESS, ROUTER_ABI).populateTransaction[methodName](...args, { value })
   }
 }
