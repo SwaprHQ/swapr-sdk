@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+
 import { ChainId } from '../../../constants'
 import { Token } from '../../token'
 import { CURVE_POOL_ABI_MAP } from './abi'
