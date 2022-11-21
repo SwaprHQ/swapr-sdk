@@ -1,5 +1,3 @@
-import type { ContractInterface } from '@ethersproject/contracts'
-
 import { ChainId } from '../../../../constants'
 import {
   CURVE_3POOL_ABI,
@@ -8,25 +6,12 @@ import {
   CURVE_ETHXERC20_256_ABI,
   CURVE_ETHXERC20_ABI,
   CURVE_EURSPOOL_ABI,
+  CURVE_METAUSD_ABI,
+  CURVE_TRICRYPTO_ABI,
   CURVE_WETH_ERC20_POOL_ABI,
 } from '../abi'
 import { poolMethods } from '../abi/common'
-import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
-import { CurveToken } from '../tokens/types'
-
-export interface CurvePool {
-  id: string
-  name: string
-  address: string
-  abi: ContractInterface
-  approveAddress?: string
-  tokens: CurveToken[]
-  underlyingTokens?: CurveToken[]
-  metaTokens?: CurveToken[]
-  riskLevel?: number
-  isMeta?: boolean
-  allowsTradingETH?: boolean
-}
+import { CurvePool, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../tokens'
 
 /**
  * xDAI pools
@@ -56,7 +41,7 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
   {
     id: 'tricrypto',
     name: 'Tricrypto',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_TRICRYPTO_ABI,
     isMeta: false,
     address: '0x960ea3e3C7FB317332d990873d354E18d7645590',
     tokens: [TOKENS_ARBITRUM_ONE.usdt, TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.weth],
@@ -83,12 +68,15 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     ],
   },
 ]
+const tricrvMetaTokensMainnet = TOKENS_MAINNET.tricrv.poolTokens ? TOKENS_MAINNET.tricrv.poolTokens() : undefined
+
+const sbtccrvMetaTokens = TOKENS_MAINNET.sbtccrv.poolTokens ? TOKENS_MAINNET.sbtccrv.poolTokens() : undefined
 
 export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'compound',
     name: 'Compound',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_3POOL_UNDERLYING_ABI,
     tokens: [TOKENS_MAINNET.cdai, TOKENS_MAINNET.cusdc],
     underlyingTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc],
     address: '0xA2B47E3D5c44877cca798226B7B8118F9BFb7A56',
@@ -164,53 +152,53 @@ export const POOLS_MAINNET: CurvePool[] = [
     id: 'gusd',
     name: 'Gemini USD',
     isMeta: true,
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.gusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956',
   },
   {
     id: 'husd',
     name: 'Houbi USD',
     isMeta: true,
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.husd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604',
   },
   {
     id: 'usdk',
     name: 'usdk',
     isMeta: true,
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.usdk, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x3E01dD8a5E1fb3481F0F589056b428Fc308AF0Fb',
   },
   {
     id: 'usdn',
     name: 'usdn',
     isMeta: true,
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.usdn, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x0f9cb53Ebe405d49A0bbdBD291A65Ff571bC83e1',
   },
   {
     id: 'musd',
     name: 'mStable USD',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.musd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6',
   },
   {
     id: 'rsv',
     name: 'rsv',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.rsv, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xC18cC39da8b11dA8c3541C598eE022258F9744da',
   },
   {
@@ -218,7 +206,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'tbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.tbtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    underlyingTokens: sbtccrvMetaTokens,
     address: '0xC25099792E9349C7DD09759744ea681C7de2cb66',
   },
   {
@@ -226,7 +214,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'dusd',
     tokens: [TOKENS_MAINNET.dusd, TOKENS_MAINNET.tricrv],
     abi: CURVE_3POOL_ABI,
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x8038C01A0390a8c547446a0b2c18fc9aEFEcc10c',
   },
   {
@@ -234,7 +222,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'pbtc',
     tokens: [TOKENS_MAINNET.pbtc, TOKENS_MAINNET.sbtccrv],
     abi: CURVE_3POOL_ABI,
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    underlyingTokens: sbtccrvMetaTokens,
     address: '0x7F55DDe206dbAD629C080068923b36fe9D6bDBeF',
   },
   {
@@ -242,7 +230,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'bbtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.bbtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    underlyingTokens: sbtccrvMetaTokens,
     address: '0x071c661B4DeefB59E2a3DdB20Db036821eeE8F4b',
   },
   {
@@ -250,7 +238,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'obtc',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.obtc, TOKENS_MAINNET.sbtccrv],
-    metaTokens: [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc],
+    underlyingTokens: sbtccrvMetaTokens,
     address: '0xd81dA8D904b52208541Bade1bD6595D8a251F8dd',
   },
   {
@@ -258,7 +246,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     name: 'ust',
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.ust, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x890f4e345B1dAED0367A877a1612f86A1f86985f',
   },
   {
@@ -279,10 +267,10 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'usdp',
     name: 'usdp',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.usdp, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x42d7025938bEc20B69cBae5A77421082407f053A',
   },
   {
@@ -295,55 +283,56 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'tusd',
     name: 'tusd',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.tusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xecd5e75afb02efa118af914515d6521aabd189f1',
   },
   {
     id: 'frax',
     name: 'Frax',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.frax, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
   },
   {
     id: 'lusd',
     name: 'lusd',
-    abi: CURVE_3POOL_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.lusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    isMeta: true,
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA',
   },
   {
     id: 'busdv2',
     name: 'busdv2',
     isMeta: true,
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     tokens: [TOKENS_MAINNET.busd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x4807862AA8b2bF68830e4C8dc86D0e9A998e085a',
   },
 
   {
     id: 'alusd',
     name: 'alUSD',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.alusd, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c',
   },
   {
     id: 'mim',
     name: 'Magic Internet Money',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.mim, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
   },
   {
@@ -374,7 +363,7 @@ export const POOLS_MAINNET: CurvePool[] = [
     isMeta: true,
     abi: CURVE_3POOL_ABI,
     tokens: [TOKENS_MAINNET.eurt, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x9838eCcC42659FA8AA7daF2aD134b53984c9427b',
   },
   {
@@ -387,10 +376,10 @@ export const POOLS_MAINNET: CurvePool[] = [
   {
     id: 'rai',
     name: 'Rai',
-    abi: CURVE_CRYPTO_SWAP_ABI,
+    abi: CURVE_METAUSD_ABI,
     isMeta: true,
     tokens: [TOKENS_MAINNET.rai, TOKENS_MAINNET.tricrv],
-    metaTokens: [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt],
+    metaTokens: tricrvMetaTokensMainnet,
     address: '0x618788357D0EBd8A37e763ADab3bc575D54c2C7d',
   },
   {
@@ -500,6 +489,20 @@ export const POOLS_MAINNET: CurvePool[] = [
   },
   */
 ]
+export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: 'ethereum',
+  [ChainId.XDAI]: 'xdai',
+  [ChainId.ARBITRUM_ONE]: 'arbitrum',
+  [ChainId.POLYGON]: 'polygon',
+  [ChainId.RINKEBY]: '',
+  [ChainId.ARBITRUM_RINKEBY]: '',
+  [ChainId.GOERLI]: '',
+  [ChainId.OPTIMISM_MAINNET]: '',
+  [ChainId.OPTIMISM_GOERLI]: '',
+  [ChainId.ARBITRUM_GOERLI]: '',
+  [ChainId.BSC_MAINNET]: '',
+  [ChainId.BSC_TESTNET]: '',
+}
 
 export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.MAINNET]: POOLS_MAINNET,

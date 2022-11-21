@@ -9,6 +9,7 @@ export const CURVE_3POOL_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(int128,int128,uint256)'],
   poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256)'],
   poolMethods['nonpayable']['exchange_underlying(uint256,uint256,uint256,uint256,address)'],
 ]
 
@@ -50,6 +51,13 @@ export const CURVE_ETHXERC20_ABI: ContractInterface = [
   poolMethods['payable']['exchange(int128,int128,uint256,uint256)'],
 ]
 
+export const CURVE_TRICRYPTO_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(uint256,uint256,uint256)'],
+  poolMethods['payable']['exchange(uint256,uint256,uint256,uint256)'],
+  poolMethods['payable']['exchange(uint256,uint256,uint256,uint256,bool)'],
+]
+
 export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
   poolMethods['view']['fee'],
   poolMethods['view']['get_dy(uint256,uint256,uint256)'],
@@ -58,6 +66,59 @@ export const CURVE_ETHXERC20_256_ABI: ContractInterface = [
   poolMethods['payable']['exchange_underlying(uint256,uint256,uint256,uint256)'],
 ]
 
+export const CURVE_METAUSD_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy_underlying(int128,int128,uint256)'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256,address)'],
+]
+
+export const CURVE_PLAIN_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],
+]
+
+export const CURVE_PLAIN_ETH_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['payable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['payable']['exchange(int128,int128,uint256,uint256,address)'],
+]
+
+export const CURVE_METABTC_ABI: ContractInterface = [
+  poolMethods['view']['fee'],
+  poolMethods['view']['get_dy(int128,int128,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange(int128,int128,int256,int256,address)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256)'],
+  poolMethods['nonpayable']['exchange_underlying(int128,int128,uint256,uint256,address)'],
+]
+
+export const CURVE_POOL_ABI_MAP: Record<string, ContractInterface> = {
+  ['metabtc']: CURVE_METABTC_ABI,
+  ['metabtcbalances']: CURVE_METABTC_ABI,
+  ['metausd']: CURVE_METAUSD_ABI,
+  ['v1metausd']: CURVE_METAUSD_ABI,
+  ['metausd-fraxusdc']: CURVE_METAUSD_ABI,
+  ['metausdbalances']: CURVE_METAUSD_ABI,
+  ['plain2balances']: CURVE_PLAIN_ABI,
+  ['plain2basic']: CURVE_PLAIN_ABI,
+  ['plain2eth']: CURVE_PLAIN_ETH_ABI,
+  ['plain2optimized']: CURVE_PLAIN_ABI,
+  ['plain3balances']: CURVE_PLAIN_ABI,
+  ['plain3basic']: CURVE_PLAIN_ABI,
+  ['plain3eth']: CURVE_PLAIN_ETH_ABI,
+  ['plain3optimized']: CURVE_PLAIN_ABI,
+  ['plain4balances']: CURVE_PLAIN_ABI,
+  ['plain4basic']: CURVE_PLAIN_ABI,
+  ['plain4eth']: CURVE_PLAIN_ETH_ABI,
+  ['plain4optimized']: CURVE_PLAIN_ABI,
+}
 /**
  * A custom contract to trade on the Curve between xDAI (native token on Gnosis Chain) and USDT and USDC
  */

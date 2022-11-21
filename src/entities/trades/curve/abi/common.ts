@@ -49,6 +49,17 @@ export const poolMethods = {
       ],
       outputs: [{ type: 'uint256', name: '' }],
     },
+    'get_dy_underlying(int128,int128,uint256)': {
+      stateMutability: 'view',
+      type: 'function',
+      name: 'get_dy_underlying',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'uint256', name: 'dx' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+    },
     'get_dy_underlying(uint256,uint256,uint256)': {
       stateMutability: 'view',
       type: 'function',
@@ -76,10 +87,36 @@ export const poolMethods = {
       outputs: [{ type: 'uint256', name: '' }],
       gas: '5499133',
     },
+    'exchange(uint256,uint256,uint256,uint256)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { type: 'uint256', name: 'i' },
+        { type: 'uint256', name: 'j' },
+        { type: 'uint256', name: '_dx' },
+        { type: 'uint256', name: '_min_dy' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+    },
 
     /**
      * Exchange methods
      */
+    'exchange(int128,int128,int256,int256,address)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'int256', name: '_dx' },
+        { type: 'uint256', name: '_min_dy' },
+        { type: 'address', name: '_receiver' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+      // there was no gas in the  in the metaUSD ABI
+    },
     'exchange_underlying(uint256,uint256,uint256,uint256,address)': {
       stateMutability: 'nonpayable',
       type: 'function',
@@ -120,6 +157,20 @@ export const poolMethods = {
       outputs: [{ type: 'uint256', name: '' }],
       gas: '6125699',
     },
+    'exchange_underlying(int128,int128,uint256,uint256,address)': {
+      stateMutability: 'nonpayable',
+      type: 'function',
+      name: 'exchange_underlying',
+      inputs: [
+        { type: 'int128', name: 'i' },
+        { type: 'int128', name: 'j' },
+        { type: 'uint256', name: 'dx' },
+        { type: 'uint256', name: 'min_dy' },
+        { type: 'address', name: '_receiver' },
+      ],
+      outputs: [{ type: 'uint256', name: '' }],
+      // there was no gas in the metaUSD ABI
+    },
   },
   payable: {
     'exchange(int128,int128,uint256,uint256)': {
@@ -134,6 +185,19 @@ export const poolMethods = {
       ],
       outputs: [{ type: 'uint256', name: '' }],
       gas: '2810134',
+    },
+    'exchange(int128,int128,uint256,uint256,address)': {
+      stateMutability: 'payable',
+      type: 'function',
+      name: 'exchange',
+      inputs: [
+        { name: 'i', type: 'int128' },
+        { name: 'j', type: 'int128' },
+        { name: '_dx', type: 'uint256' },
+        { name: '_min_dy', type: 'uint256' },
+        { name: '_receiver', type: 'address' },
+      ],
+      outputs: [{ name: '', type: 'uint256' }],
     },
     'exchange(uint256,uint256,uint256,uint256)': {
       stateMutability: 'payable',

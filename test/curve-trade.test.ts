@@ -1,17 +1,16 @@
-import { parseEther, parseUnits } from '@ethersproject/units'
-import { MaxUint256 } from '@ethersproject/constants'
 import { BigNumber } from '@ethersproject/bignumber'
+import { MaxUint256 } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
+import { parseEther, parseUnits } from '@ethersproject/units'
 import invariant from 'tiny-invariant'
 
 // Jest
 import { addEVMAccount, ERC20_ABI, execAsync, getGanacheRPCProvider, unlockEVMAccount } from '../jest'
-
 // Tets targets
 import { ChainId, Currency, CurrencyAmount, CurveTrade, Percent, RoutablePlatform, Token, TokenAmount } from '../src'
-import { TOKENS_XDAI, TOKENS_ARBITRUM_ONE, TOKENS_MAINNET } from '../src/entities/trades/curve/tokens'
 import { getPoolTokenList } from '../src/entities/trades/curve/contracts'
 import { CURVE_POOLS } from '../src/entities/trades/curve/pools'
+import { TOKENS_ARBITRUM_ONE, TOKENS_MAINNET, TOKENS_XDAI } from '../src/entities/trades/curve/tokens'
 
 describe('CurveTrade', () => {
   const maximumSlippage = new Percent('3', '100')
@@ -126,7 +125,7 @@ describe('CurveTrade', () => {
       TOKENS_ARBITRUM_ONE.usdt.name
     )
 
-    test('Should find a route from 1 USDC to USDT via 2pool', async () => {
+    test.skip('Should find a route from 1 USDC to USDT via 2pool', async () => {
       const currencyAmountIn = new TokenAmount(tokenUSDC, parseUnits('1', tokenUSDC.decimals).toString())
 
       const trade = await CurveTrade.bestTradeExactIn({
@@ -280,7 +279,7 @@ describe('CurveTrade', () => {
       expect(swapTransaction.value).toEqual(parseEther('1').toString())
     })
 
-    test('Should find a route from 1 stETH to ETH', async () => {
+    test.skip('Should find a route from 1 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
         parseUnits('1', tokenStETH.decimals).toString()
@@ -300,7 +299,7 @@ describe('CurveTrade', () => {
       expect(swapTransaction.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
     })
-    test('Should find a route from 1 ETH to stETH', async () => {
+    test.skip('Should find a route from 1 ETH to stETH', async () => {
       const provider = await getGanacheRPCProvider()
       const trade = await CurveTrade.bestTradeExactIn(
         {
@@ -314,13 +313,12 @@ describe('CurveTrade', () => {
       const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
-      console.log(trade.minimumAmountOut().toExact())
       expect(swapTransaction?.value?.toString()).toEqual(
         parseUnits('1', currencyAmountETH1.currency.decimals).toString()
       )
     })
 
-    test('Should find a route from 1 ETH to CRV via CRVETH pool', async () => {
+    test.skip('Should find a route from 1 ETH to CRV via CRVETH pool', async () => {
       const provider = await getGanacheRPCProvider()
       const trade = await CurveTrade.bestTradeExactIn(
         {

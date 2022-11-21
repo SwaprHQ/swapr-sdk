@@ -26,12 +26,34 @@ export const TOKENS_XDAI: Record<string, CurveToken> = {
     decimals: 6,
     type: TokenType.USD,
   },
+  x3crv: {
+    name: 'x3CRV',
+    symbol: 'x3CRV',
+    decimals: 18,
+    address: '0x1337BedC9D22ecbe766dF105c9623922A27963EC',
+    isLPToken: true,
+    type: TokenType.USD,
+    poolTokens() {
+      return [TOKENS_XDAI.wxdai, TOKENS_XDAI.usdc, TOKENS_XDAI.usdt]
+    },
+  },
 }
 
 /**
  * Arbitrum
  */
 export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
+  '2crv': {
+    name: '2pool',
+    symbol: '2CRV',
+    decimals: 18,
+    address: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
+    isLPToken: true,
+    type: TokenType.USD,
+    poolTokens() {
+      return [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
+    },
+  },
   usdc: {
     symbol: 'USDC',
     name: 'USDC',
@@ -321,11 +343,25 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     decimals: 6,
     type: TokenType.USD,
   },
+  crvfrax: {
+    address: '0x3175Df0976dFA876431C2E9eE6Bc45b65d3473CC',
+    name: 'crvFRAX',
+    symbol: 'crvFRAX',
+    decimals: 18,
+    isLPToken: true,
+    poolTokens() {
+      return [TOKENS_MAINNET.frax, TOKENS_MAINNET.usdc]
+    },
+    type: TokenType.USD,
+  },
   '3crv': {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     name: 'Curve.fi DAI/USDC/USDT',
     symbol: '3Crv',
     decimals: 18,
+    poolTokens() {
+      return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
+    },
     type: TokenType.USD,
   },
   usdk: {
@@ -546,6 +582,9 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490',
     isLPToken: true,
     type: TokenType.USD,
+    poolTokens() {
+      return [TOKENS_MAINNET.dai, TOKENS_MAINNET.usdc, TOKENS_MAINNET.usdt]
+    },
   },
   sbtccrv: {
     symbol: 'sbtcCrv',
@@ -554,6 +593,9 @@ export const TOKENS_MAINNET: Record<string, CurveToken> = {
     address: '0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3',
     isLPToken: true,
     type: TokenType.BTC,
+    poolTokens() {
+      return [TOKENS_MAINNET.renbtc, TOKENS_MAINNET.wbtc, TOKENS_MAINNET.sbtc]
+    },
   },
   rai: {
     name: ' Rai Reflex Index',

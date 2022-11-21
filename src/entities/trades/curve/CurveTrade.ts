@@ -6,6 +6,7 @@ import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { parseUnits } from '@ethersproject/units'
 import debug from 'debug'
 import Decimal from 'decimal.js-light'
+import memoize from 'memoizee'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType } from '../../../constants'
@@ -22,8 +23,8 @@ import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
 // Curve imports
 import { getBestCurvePoolAndOutput, getCurveDAIExchangeContract, getExchangeRoutingInfo, getRouter } from './contracts'
-import { CURVE_POOLS, CurvePool } from './pools'
-import type { CurveToken } from './tokens/types'
+import { CURVE_POOLS } from './pools'
+import type { CurvePool } from './tokens/types'
 import {
   CurveTradeBestTradeExactInParams,
   CurveTradeBestTradeExactOutParams,
@@ -31,7 +32,7 @@ import {
   CurveTradeGetQuoteParams,
   CurveTradeQuote,
 } from './types'
-import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
+import { fetchCurveFactoryPools, getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 
 interface QuoteFromPool {
   estimatedAmountOut: BigNumber
@@ -166,17 +167,15 @@ export class CurveTrade extends Trade {
 
     const wrappedTokenIn = wrappedCurrency(currencyAmountIn.currency, chainId)
     const wrappedtokenOut = wrappedCurrency(currencyOut, chainId)
-
     // Get the token's data from Curve
-    const tokenIn = getCurveToken(wrappedTokenIn.address, chainId)
-    const tokenOut = getCurveToken(wrappedtokenOut.address, chainId)
-
+    const tokenIn = getCurveToken(wrappedTokenIn, chainId)
+    const tokenOut = getCurveToken(wrappedtokenOut, chainId)
     // Get the native address
     const nativeCurrency = Currency.getNative(chainId)
 
-    // Determine if the currency sent is ETH
+    // Determine if the currency sent is native
     // First using address
-    // then, using symbol
+    // then, using symbol/name
     const isNativeAssetIn =
       currencyAmountIn.currency?.address?.toLocaleLowerCase() === nativeCurrency.address?.toLowerCase()
         ? true
@@ -194,8 +193,7 @@ export class CurveTrade extends Trade {
     invariant(tokenOut != undefined, 'NO_TOKEN_OUT')
     invariant(tokenIn.address.toLowerCase() != tokenOut.address.toLowerCase(), 'SAME_TOKEN')
 
-    // const etherOut = this.outputAmount.currency === nativeCurrency
-    // // the router does not support both ether in and out
+    console.info({ provider, newProvider: getProvider(chainId) })
     provider = provider || getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
@@ -203,13 +201,11 @@ export class CurveTrade extends Trade {
     // Get all Curve pools for the chain
     const curvePools = CURVE_POOLS[chainId]
 
-    // Baisc trade information
+    // Basic trade information
     const amountInBN = parseUnits(currencyAmountIn.toSignificant(), tokenIn.decimals)
-
     if (isNativeAssetIn) {
       value = amountInBN.toString()
     }
-
     // Majority of Curve pools
     // have 4bps fee of which 50% goes to Curve
     const FEE_DECIMAL = 0.0004
@@ -235,7 +231,6 @@ export class CurveTrade extends Trade {
 
       const estimatedAmountOutParams = [tokenInAddress, tokenOutAddress, amountInBN.toString()]
 
-      // Fetch estiamted out
       const estimatedAmountOut = await poolContract.getEstimatedAmountOut(...estimatedAmountOutParams)
 
       // Prepapre signature and params for Curve3PoolExchange
@@ -278,9 +273,14 @@ export class CurveTrade extends Trade {
     // a potential that Curve Smart Router can handle the trade
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
-    // Find all pools that the trade can go through
-    // Manually find all routable pools
-    let routablePools = getRoutablePools(curvePools, tokenIn as CurveToken, tokenOut as CurveToken, chainId)
+    const factoryPoolsMemoized = memoize(fetchCurveFactoryPools)
+
+    const factoryPools = await factoryPoolsMemoized(chainId)
+
+    const allPools = curvePools.concat(factoryPools)
+
+    // Find all pools that the trade can go through from both factory and regular pools
+    let routablePools = await getRoutablePools(allPools, tokenIn, tokenOut, chainId)
 
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
@@ -297,9 +297,10 @@ export class CurveTrade extends Trade {
     // Ignore the manual off-chain search
     if (bestPoolAndOutputRes) {
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
-      routablePools = curvePools.filter(
+      const bestPool = routablePools.filter(
         (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
       )
+      if (bestPool.length !== 0) routablePools = bestPool
     }
 
     debugCurveGetQuote('Routeable pools: ', routablePools)
@@ -366,12 +367,10 @@ export class CurveTrade extends Trade {
         // Map token address to index
         const tokenInIndex = getTokenIndex(pool, tokenIn.address)
         const tokenOutIndex = getTokenIndex(pool, tokenOut.address)
-
         // Skip pool that return -1
         if (tokenInIndex < 0 || tokenOutIndex < 0) {
-          throw new Error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
+          console.error(`Curve: pool does not have one of tokens: ${tokenIn.symbol}, ${tokenOut.symbol}`)
         }
-
         // Get expected output from the pool
         // Use underylying signature if the pool is a meta pool
         // A meta pool is a pool composed of an ERC20 pair with the Curve base 3Pool (DAI+USDC+USDT)
@@ -409,7 +408,6 @@ export class CurveTrade extends Trade {
         }
       })
     )
-
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
       .filter((pool) => {
@@ -462,8 +460,8 @@ export class CurveTrade extends Trade {
         if (!(exchangeSignature in poolContract.functions)) {
           // Exit the search
           console.error(`CurveTrade: could not find a signature. Target: ${exchangeSignature}`)
+          return
         }
-        return
       }
     }
 
