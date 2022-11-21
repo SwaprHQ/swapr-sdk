@@ -83,7 +83,7 @@ describe('ZeroXTrade', () => {
       await execAsync('npm run docker:clean')
     })
 
-    test('Should find a route from 1.5 stETH to ETH', async () => {
+    test.skip('Should find a route from 1.5 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
         parseUnits('1.5', tokenStETH.decimals).toString()
@@ -95,7 +95,7 @@ describe('ZeroXTrade', () => {
       expect(swapTransaction.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
     })
-    test('Should find a route from 1 ETH to stETH', async () => {
+    test.skip('Should find a route from 1 ETH to stETH', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountETH1, tokenStETH, maximumSlippage)
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
