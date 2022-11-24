@@ -51,10 +51,6 @@ export async function getBestRoute({
 
   const fromAsset = currencyIn
   const toAsset = currencyOut
-  console.log('GET ROUTES')
-  console.log('currencyIn', currencyIn.name)
-  console.log('currencyOut', currencyOut.name)
-  console.log('----------------')
 
   const fromAmountRaw = amount.raw.toString()
   const fromAmountHex = toHex(amount)
@@ -71,6 +67,7 @@ export async function getBestRoute({
   amountOuts = routeAssets
     .map((routeAsset) => {
       return [
+        //pairs with one hop
         {
           routes: [
             {
@@ -130,20 +127,19 @@ export async function getBestRoute({
             },
           ],
           routeAsset: routeAsset,
+        },
+        //direct pairs
+        {
+          routes: [{ from: fromAddress, to: toAddress, stable: true }],
+          routeAsset: null,
+        },
+        {
+          routes: [{ from: fromAddress, to: toAddress, stable: false }],
+          routeAsset: null,
         },
       ]
     })
     .flat()
-
-  amountOuts.push({
-    routes: [{ from: fromAddress, to: toAddress, stable: true }],
-    routeAsset: null,
-  })
-
-  amountOuts.push({
-    routes: [{ from: fromAddress, to: toAddress, stable: false }],
-    routeAsset: null,
-  })
 
   const velodromRouterInterface = new Interface(ROUTER_ABI)
 
@@ -162,7 +158,7 @@ export async function getBestRoute({
   for (let i = 0; i < receiveAmounts.length; i++) {
     if (receiveAmounts[i].success) {
       const { amounts } = velodromRouterInterface.decodeFunctionResult('getAmountsOut', receiveAmounts[i].returnData)
-      console.log('amounts', amounts)
+
       amountOuts[i].receiveAmounts = amounts
       amountOuts[i].finalValue = amounts[amounts.length - 1]
     }

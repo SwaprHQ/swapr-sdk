@@ -101,8 +101,6 @@ export class VelodromeTrade extends Trade {
 
     const currencyIn = amount.currency
     const currencyOut = quoteCurrency
-    console.log('CUrrencyIn', currencyIn.name)
-    console.log('currenctout', currencyOut.name)
 
     const wrappedCurrencyIn = wrappedCurrency(currencyIn, chainId)
     const wrappedCurrencyOut = wrappedCurrency(currencyOut, chainId)
@@ -143,7 +141,7 @@ export class VelodromeTrade extends Trade {
         })
         bestAmountOut = bestAmountForOutput
       }
-      if (!bestAmountOut || !finalValue) {
+      if (!finalValue || !bestAmountOut) {
         return null
       }
 
@@ -182,9 +180,8 @@ export class VelodromeTrade extends Trade {
       console.log('other', priceImpact.toFixed(3) === '0.000')
       console.log('bestOut', bestAmountOut.finalValue.toString())
 
-      const wrappedQuote = wrappedCurrency(quoteCurrency, chainId)
-
-      const currencyAmountIn = TradeType.EXACT_INPUT === tradeType ? amount : new TokenAmount(wrappedQuote, finalValue)
+      const currencyAmountIn =
+        TradeType.EXACT_INPUT === tradeType ? amount : new TokenAmount(wrappedCurrencyOut, finalValue)
       const currencyAmountOut =
         TradeType.EXACT_INPUT === tradeType
           ? new TokenAmount(wrappedCurrencyOut, bestAmountOut.finalValue.toString())
@@ -193,7 +190,7 @@ export class VelodromeTrade extends Trade {
       // console.log('currencyAmountIn', currencyAmountIn.currency.name)
       // console.log('currencyAmountOut', currencyAmountOut.currency.name)
 
-      console.log('EXITT')
+      console.log('EXITTeeeeessssss')
 
       return new VelodromeTrade({
         maximumSlippage,
