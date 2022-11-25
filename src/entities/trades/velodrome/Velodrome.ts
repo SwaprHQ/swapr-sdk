@@ -1,6 +1,6 @@
 import { AddressZero } from '@ethersproject/constants'
 import { BaseProvider } from '@ethersproject/providers'
-import { parseUnits } from '@ethersproject/units'
+import { formatUnits } from '@ethersproject/units'
 
 import debug from 'debug'
 import { Contract, UnsignedTransaction } from 'ethers'
@@ -29,19 +29,6 @@ export interface VelodromeQuoteTypes {
   maximumSlippage?: Percent
   recipient?: string
 }
-
-// interface VelodromeTradeExactInParams {
-//   currencyAmountIn: CurrencyAmount
-//   currencyOut: Currency
-//   maximumSlippage: Percent
-//   receiver?: string
-// }
-// interface VelodromeTradeExactOutParams {
-//   currencyIn: Currency
-//   currencyAmountOut: CurrencyAmount
-//   maximumSlippage: Percent
-//   receiver?: string
-// }
 
 // Debuging logger. See documentation to enable logging.
 const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
@@ -114,7 +101,6 @@ export class VelodromeTrade extends Trade {
       recipient,
       maximumSlippage,
     })
-    console.log('amount', amount.toSignificant(18))
 
     let bestAmountOut
     let finalValue
@@ -146,9 +132,7 @@ export class VelodromeTrade extends Trade {
       }
 
       const libraryContract = new Contract(LIBRARY_ADDRESS, LIBRARY_ABI, provider)
-      let totalRatio = parseUnits('1')
-      console.log('totalRationInitial', totalRatio.toString())
-      console.log('bestAmountOut', bestAmountOut)
+      let totalRatio = 1
 
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
         let amountIn = bestAmountOut.receiveAmounts[i]
@@ -160,37 +144,31 @@ export class VelodromeTrade extends Trade {
           bestAmountOut.routes[i].to,
           bestAmountOut.routes[i].stable
         )
-        console.log('res', res)
-        console.log('resa', res.a.toString())
-        console.log('resb', res.b.toString())
 
-        const ratio = res.b.div(res.a)
-        console.log('ratio', ratio.toString())
-        if (!ratio.isZero()) {
-          totalRatio = totalRatio.mul(ratio)
-        }
+        const decimals = tradeType === TradeType.EXACT_INPUT ? quoteCurrency.decimals : amount.currency.decimals
+        const numberA = formatUnits(res.a, decimals)
+        const numberB = formatUnits(res.b, decimals)
 
-        console.log('ttotalRatio', totalRatio.toString())
+        const ratio = parseFloat(numberB) / parseFloat(numberA)
+
+        totalRatio = totalRatio * ratio
       }
-      console.log('totalRatio', totalRatio.toString())
 
-      const priceImpact = new Percent(parseUnits('1').sub(totalRatio).toString())
+      const calculation = Math.round((1 - totalRatio) * 1000)
 
-      console.log('rpiceimpact', priceImpact.toFixed(5))
-      console.log('other', priceImpact.toFixed(3) === '0.000')
-      console.log('bestOut', bestAmountOut.finalValue.toString())
+      const priceImpact = new Percent(calculation.toString(), '1000')
+
+      const convertToNative = (amount: string, currency: Currency, chainId: number) => {
+        if (Currency.isNative(currency)) return CurrencyAmount.nativeCurrency(amount, chainId)
+        return new TokenAmount(wrappedCurrency(currency, chainId), amount)
+      }
 
       const currencyAmountIn =
-        TradeType.EXACT_INPUT === tradeType ? amount : new TokenAmount(wrappedCurrencyOut, finalValue)
+        TradeType.EXACT_INPUT === tradeType ? amount : convertToNative(finalValue.toString(), currencyOut, chainId)
       const currencyAmountOut =
         TradeType.EXACT_INPUT === tradeType
-          ? new TokenAmount(wrappedCurrencyOut, bestAmountOut.finalValue.toString())
-          : new TokenAmount(wrappedCurrencyIn, bestAmountOut.finalValue.toString())
-
-      // console.log('currencyAmountIn', currencyAmountIn.currency.name)
-      // console.log('currencyAmountOut', currencyAmountOut.currency.name)
-
-      console.log('EXITTeeeeessssss')
+          ? convertToNative(bestAmountOut.finalValue.toString(), currencyOut, chainId)
+          : convertToNative(bestAmountOut.finalValue.toString(), currencyIn, chainId)
 
       return new VelodromeTrade({
         maximumSlippage,
@@ -209,9 +187,6 @@ export class VelodromeTrade extends Trade {
   }
 
   public minimumAmountOut(): CurrencyAmount {
-    console.log('MInAmount')
-    console.log('OUTPUT', this.outputAmount.currency.name)
-    console.log('INPUT', this.inputAmount.currency.name)
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
       return this.outputAmount
     } else {
