@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi'
 import { Contract } from '@ethersproject/contracts'
-import { BigNumber } from 'ethers'
+import { BigNumber } from '@ethersproject/bignumber'
 
 import { MULTICALL2_ABI } from '../../../abis'
 import { ChainId, MULTICALL2_ADDRESS } from '../../../constants'
@@ -59,8 +59,8 @@ export async function getBestRoute({
     return null
   }
 
-  let fromAddress = fromAsset.address
-  let toAddress = toAsset.address
+  const fromAddress = fromAsset.address
+  const toAddress = toAsset.address
 
   let amountOuts: any[] = []
 
@@ -81,7 +81,7 @@ export async function getBestRoute({
               stable: true,
             },
           ],
-          routeAsset: routeAsset,
+          routeAsset,
         },
         {
           routes: [
@@ -96,7 +96,7 @@ export async function getBestRoute({
               stable: false,
             },
           ],
-          routeAsset: routeAsset,
+          routeAsset,
         },
         {
           routes: [
@@ -111,7 +111,7 @@ export async function getBestRoute({
               stable: false,
             },
           ],
-          routeAsset: routeAsset,
+          routeAsset,
         },
         {
           routes: [
@@ -126,7 +126,7 @@ export async function getBestRoute({
               stable: true,
             },
           ],
-          routeAsset: routeAsset,
+          routeAsset,
         },
         //direct pairs
         {

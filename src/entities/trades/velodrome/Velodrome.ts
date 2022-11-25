@@ -3,8 +3,8 @@ import { BaseProvider } from '@ethersproject/providers'
 import { formatUnits } from '@ethersproject/units'
 
 import debug from 'debug'
-import { Contract, UnsignedTransaction } from 'ethers'
-
+import { Contract } from '@ethersproject/contracts'
+import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
 import { ONE, TradeType } from '../../../constants'
@@ -61,7 +61,7 @@ export class VelodromeTrade extends Trade {
         numerator: currencyAmountOut.raw,
       }),
       routes,
-      priceImpact: priceImpact,
+      priceImpact,
       fee: new Percent('2', '10000'),
       approveAddress: ROUTER_ADDRESS,
     })
@@ -135,7 +135,7 @@ export class VelodromeTrade extends Trade {
       let totalRatio = 1
 
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
-        let amountIn = bestAmountOut.receiveAmounts[i]
+        const amountIn = bestAmountOut.receiveAmounts[i]
 
         const res = await libraryContract['getTradeDiff(uint256,address,address,bool)'](
           amountIn,
