@@ -1,17 +1,15 @@
 import { AddressZero } from '@ethersproject/constants'
-import { BaseProvider } from '@ethersproject/providers'
-import { formatUnits } from '@ethersproject/units'
-
-import debug from 'debug'
 import { Contract } from '@ethersproject/contracts'
+import { BaseProvider } from '@ethersproject/providers'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
+import { formatUnits } from '@ethersproject/units'
+import debug from 'debug'
 import invariant from 'tiny-invariant'
 
 import { ONE, TradeType } from '../../../constants'
 import { validateAndParseAddress } from '../../../utils'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
-
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'

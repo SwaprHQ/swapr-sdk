@@ -1,14 +1,12 @@
 import { Interface } from '@ethersproject/abi'
-import { Contract } from '@ethersproject/contracts'
 import { BigNumber } from '@ethersproject/bignumber'
+import { Contract } from '@ethersproject/contracts'
 
 import { MULTICALL2_ABI } from '../../../abis'
 import { ChainId, MULTICALL2_ADDRESS } from '../../../constants'
-
 import { CurrencyAmount } from '../../fractions'
 import { Token } from '../../token'
 import { toHex } from '../uniswap-v2/utilts'
-
 import { ROUTER_ABI } from './abi'
 import { ROUTER_ADDRESS } from './contants'
 
