@@ -4,7 +4,6 @@ import { getDefaultProvider } from '@ethersproject/providers'
 import IDXswapFactory from '@swapr/core/build/IDXswapFactory.json'
 import IDXswapPair from '@swapr/core/build/IDXswapPair.json'
 import JSBI from 'jsbi'
-import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
 import { MULTICALL2_ABI } from './abis'
@@ -12,34 +11,7 @@ import { BigintIsh, ChainId, FACTORY_ADDRESS, MULTICALL2_ADDRESS } from './const
 import { TokenAmount } from './entities/fractions/tokenAmount'
 import { Pair } from './entities/pair'
 import { Token } from './entities/token'
-import { CURVE_POOL_ABI_MAP } from './entities/trades/curve/abi'
-import { CURVE_FACTORY_SUPPORTED_APIS } from './entities/trades/curve/pools'
-import { CURVE_TOKENS, CurvePool, CurveToken } from './entities/trades/curve/tokens'
-import { determineTokeType } from './entities/trades/curve/utils'
 import { UniswapV2RoutablePlatform } from './entities/trades/routable-platform'
-interface FactoryPoolsApiResponse {
-  data: {
-    poolData: {
-      address: string
-      assetTypeName: string
-      coins: {
-        name: string
-        address: string
-        decimals: string
-        symbol: string
-      }[]
-      coinsAddresses: string[]
-      decimals: string[]
-      id: string
-      usdTotal: number
-      isMetaPool: boolean
-      implementation: string
-      implementationAddress: string
-      name: string
-      symbol: string
-    }[]
-  }
-}
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
@@ -242,63 +214,5 @@ export abstract class Fetcher {
     const feeDenominator = await factoryContract.protocolFeeDenominator()
     const feeReceiver = await factoryContract.feeTo()
     return { feeDenominator, feeReceiver }
-  }
-  /**
-   * Fetches user created factory pools for curve protocol
-   */
-
-  public static async fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePool[]> {
-    if (CURVE_FACTORY_SUPPORTED_APIS[chainId] === '') return []
-
-    const response = await fetch(`https://api.curve.fi/api/getPools/${CURVE_FACTORY_SUPPORTED_APIS[chainId]}/factory`)
-
-    if (!response.ok) throw new Error('response not ok')
-    const allPoolsArray = (await response.json()) as FactoryPoolsApiResponse
-    //filter for low liquidty pool
-    const filteredLowLiquidityPools = allPoolsArray.data.poolData.filter((item) => item.usdTotal > 100000)
-    //restructures pools so they fit into curvePool type
-    const pooList: CurvePool[] = filteredLowLiquidityPools.map(
-      ({ symbol, name, coins, address, implementation, isMetaPool }) => {
-        const tokens: CurveToken[] = coins.map((token) => {
-          let currentToken = new Token(chainId, token.address, parseInt(token.decimals), token.symbol, token.name)
-
-          //wraps token if its Native so that it can be matched
-          if (token.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE')
-            currentToken = Token.getNativeWrapper(chainId)
-
-          const symbol = currentToken.symbol ? currentToken.symbol : token.symbol
-
-          return {
-            symbol,
-            name: symbol,
-            address: currentToken.address,
-            decimals: currentToken.decimals,
-            type: determineTokeType(symbol),
-          }
-        })
-
-        const isMeta = isMetaPool || implementation.includes('meta')
-
-        const curvePoolObject: CurvePool = {
-          id: symbol,
-          name,
-          address,
-          abi: CURVE_POOL_ABI_MAP[implementation],
-          isMeta,
-          tokens,
-        }
-
-        //tries to find meta pool tokens
-        const findPoolTokens = tokens[1] && CURVE_TOKENS[chainId][tokens[1].symbol.toLocaleLowerCase()]?.poolTokens?.()
-        //if its meta pool puts token under metaTokens else under underlying tokens
-        if (findPoolTokens) {
-          if (isMeta) curvePoolObject.metaTokens = findPoolTokens
-          else curvePoolObject.underlyingTokens = findPoolTokens
-        }
-
-        return curvePoolObject
-      }
-    )
-    return pooList
   }
 }

@@ -52,3 +52,28 @@ export interface CurveTradeBestTradeExactOutParams extends CurveGetTradeCommonPa
   currencyIn: Currency
   currencyAmountOut: CurrencyAmount
 }
+
+export interface FactoryPoolsApiResponse {
+  data: {
+    poolData: {
+      address: string
+      assetTypeName: string
+      coins: {
+        name: string
+        address: string
+        decimals: string
+        symbol: string
+        isBasePoolLpToken: boolean
+      }[]
+      coinsAddresses: string[]
+      decimals: string[]
+      id: string
+      usdTotal: number
+      isMetaPool: boolean
+      implementation: string
+      implementationAddress: string
+      name: string
+      symbol: string
+    }[]
+  }
+}

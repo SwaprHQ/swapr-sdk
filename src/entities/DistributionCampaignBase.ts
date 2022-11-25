@@ -49,6 +49,14 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
     parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_GOERLI).decimals).toString(),
     ChainId.OPTIMISM_GOERLI
   ),
+  [ChainId.BSC_MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.BSC_MAINNET).decimals).toString(),
+    ChainId.BSC_MAINNET
+  ),
+  [ChainId.BSC_TESTNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.BSC_TESTNET).decimals).toString(),
+    ChainId.BSC_TESTNET
+  ),
 }
 
 export interface DistributionCampaignBaseConstructoParams {

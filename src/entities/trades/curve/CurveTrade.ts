@@ -6,6 +6,7 @@ import type { UnsignedTransaction } from '@ethersproject/transactions'
 import { parseUnits } from '@ethersproject/units'
 import debug from 'debug'
 import Decimal from 'decimal.js-light'
+import memoize from 'memoizee'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType } from '../../../constants'
@@ -31,7 +32,7 @@ import {
   CurveTradeGetQuoteParams,
   CurveTradeQuote,
 } from './types'
-import { getCurveToken, getRoutablePools, getTokenIndex } from './utils'
+import { fetchCurveFactoryPools, getCurveToken, getRoutablePools, getTokenIndex } from './utils'
 
 interface QuoteFromPool {
   estimatedAmountOut: BigNumber
@@ -193,7 +194,7 @@ export class CurveTrade extends Trade {
     invariant(tokenIn.address.toLowerCase() != tokenOut.address.toLowerCase(), 'SAME_TOKEN')
 
     console.info({ provider, newProvider: getProvider(chainId) })
-    provider = getProvider(chainId)
+    provider = provider || getProvider(chainId)
 
     let value = '0x0' // With Curve, most value exchanged is ERC20
     // Get the Router contract to populate the unsigned transaction
@@ -272,8 +273,15 @@ export class CurveTrade extends Trade {
     // a potential that Curve Smart Router can handle the trade
     const isCryptoSwap = tokenIn.type !== tokenOut.type
 
+    const factoryPoolsMemoized = memoize(fetchCurveFactoryPools)
+
+    const factoryPools = await factoryPoolsMemoized(chainId)
+
+    const allPools = curvePools.concat(factoryPools)
+
     // Find all pools that the trade can go through from both factory and regular pools
-    let routablePools = await getRoutablePools(curvePools, tokenIn, tokenOut, chainId)
+    let routablePools = await getRoutablePools(allPools, tokenIn, tokenOut, chainId)
+
     // On mainnet, use the exchange info to get the best pool
     const bestPoolAndOutputRes =
       chainId === ChainId.MAINNET
@@ -326,7 +334,7 @@ export class CurveTrade extends Trade {
         })
 
         // Add 30% gas buffer
-        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(13).div(10)
+        populatedTransaction.gasLimit = populatedTransaction.gasLimit?.mul(130).div(100)
 
         return {
           fee,

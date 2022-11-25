@@ -1,5 +1,5 @@
 import { ChainId } from '../../../constants'
-import { DXD, Token, WETH, WMATIC, WXDAI } from '../../token'
+import { DXD, Token, WBNB, WETH, WMATIC, WXDAI } from '../../token'
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -14,6 +14,20 @@ export const DAI: Record<number, Token> = {
     'DAI',
     'Dai Stablecoin'
   ),
+  [ChainId.POLYGON]: new Token(
+    ChainId.POLYGON,
+    '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
+  [ChainId.ARBITRUM_ONE]: new Token(
+    ChainId.ARBITRUM_ONE,
+    '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+    18,
+    'DAI',
+    'Dai Stablecoin'
+  ),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
     '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
@@ -21,7 +35,22 @@ export const DAI: Record<number, Token> = {
     'DAI',
     'Dai Stablecoin'
   ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+    18,
+    'DAI',
+    'Binance-Peg Dai Stablecoin'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867',
+    18,
+    'DAI',
+    'Dai Token'
+  ),
 }
+
 export const USDC: Record<number, Token> = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C'),
   [ChainId.ARBITRUM_ONE]: new Token(
@@ -52,6 +81,20 @@ export const USDC: Record<number, Token> = {
     'USDC',
     'USD Coin'
   ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+    18,
+    'USDC',
+    'Binance-Peg USD Coin'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0x64544969ed7EBf5f083679233325356EbE738930',
+    6,
+    'USDC',
+    'USDC Token'
+  ),
 }
 
 export const USDT: Record<number, Token> = {
@@ -77,6 +120,20 @@ export const USDT: Record<number, Token> = {
     6,
     'USDT',
     'Tether USD'
+  ),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x55d398326f99059fF775485246999027B3197955',
+    18,
+    'USDT',
+    'Binance-Peg BSC-USD'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    6,
+    'USDT',
+    'USDT Token'
   ),
 }
 
@@ -177,4 +234,11 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     DAI[ChainId.OPTIMISM_MAINNET],
   ],
   [ChainId.OPTIMISM_GOERLI]: [WETH[ChainId.OPTIMISM_GOERLI]],
+  [ChainId.BSC_MAINNET]: [
+    WBNB[ChainId.BSC_MAINNET],
+    DAI[ChainId.BSC_MAINNET],
+    USDT[ChainId.BSC_MAINNET],
+    USDC[ChainId.BSC_MAINNET],
+  ],
+  [ChainId.BSC_TESTNET]: [DAI[ChainId.BSC_TESTNET], USDT[ChainId.BSC_TESTNET], USDC[ChainId.BSC_TESTNET]],
 }
