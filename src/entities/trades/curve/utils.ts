@@ -85,7 +85,6 @@ export async function getRoutablePools(
 
     // For mainnet, account for ETH/WETH
     if (chainId === ChainId.MAINNET) {
-      console.log('mainnet', tokenInAddress)
       const isTokenInEther = tokenIn.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
       const isTokenOutEther = tokenOut.address.toLowerCase() === TOKENS_MAINNET.eth.address.toLowerCase()
 

@@ -136,7 +136,6 @@ export class VelodromeTrade extends Trade {
 
       for (let i = 0; i < bestAmountOut.routes.length; i++) {
         let amountIn = bestAmountOut.receiveAmounts[i]
-        console.log('AmountInItergarot', amountIn.toString())
 
         const res = await libraryContract['getTradeDiff(uint256,address,address,bool)'](
           amountIn,
@@ -180,7 +179,6 @@ export class VelodromeTrade extends Trade {
         priceImpact,
       })
     } catch (ex) {
-      console.log('Non zero error', ex)
       console.error(ex)
       return null
     }
@@ -398,10 +396,6 @@ export class VelodromeTrade extends Trade {
         }
         break
     }
-    console.log('methodName', methodName)
-    console.log('args', args)
-    console.log('value', value)
-    console.log('to', to)
 
     return new Contract(ROUTER_ADDRESS, ROUTER_ABI).populateTransaction[methodName](...args, { value })
   }
