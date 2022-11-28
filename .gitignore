@@ -10,7 +10,6 @@
 
 # production
 /build
-/dist
 
 # misc
 .DS_Store
@@ -28,5 +27,3 @@ src/generated/
 
 # Disable yarn
 yarn.lock
-
-/dist
