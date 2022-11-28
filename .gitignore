@@ -29,4 +29,3 @@ src/generated/
 # Disable yarn
 yarn.lock
 
-/dist
