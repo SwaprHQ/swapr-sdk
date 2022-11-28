@@ -1,4 +1,5 @@
 export * from './0x'
+export * from './api'
 export * from './curve'
 export * from './gnosis-protocol'
 export * from './interfaces/trade'
