@@ -78,7 +78,7 @@ export declare class CoWTrade extends Trade {
      * @returns The current instance
      * @throws {CoWTradeError} If the order is missing a receiver
      */
-    signOrder(signer: Signer): Promise<this>;
+    signOrder(signer: Signer, recipient: string): Promise<this>;
     /**
      * Cancels the current instance order, if submitted
      * @param signer The signer

@@ -239,12 +239,14 @@ class CoWTrade extends trade_1.Trade {
      * @returns The current instance
      * @throws {CoWTradeError} If the order is missing a receiver
      */
-    signOrder(signer) {
+    signOrder(signer, recipient) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const { receiver } = this.quote.quote;
-            if (!receiver) {
+            if (!recipient && !this.order.receiver) {
                 throw new CoWTradeError_1.CoWTradeError('Missing order receiver');
             }
+            if (recipient)
+                this.order.receiver = recipient;
+            console.log('orderCheck', this.order);
             const signOrderResults = yield CoWTrade.getCowSdk(this.chainId, {
                 signer,
             }).signOrder(this.order);
