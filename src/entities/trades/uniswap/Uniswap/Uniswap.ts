@@ -1,4 +1,3 @@
-import { Interface } from '@ethersproject/abi'
 import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import type { BaseProvider } from '@ethersproject/providers'
@@ -14,7 +13,6 @@ import { AlphaRouter, SwapRoute } from '@uniswap/smart-order-router'
 import { Pair as UniswapV2Pair } from '@uniswap/v2-sdk'
 import dayjs from 'dayjs'
 import debug from 'debug'
-import { ethers } from 'ethers'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 
@@ -27,9 +25,8 @@ import { TradeWithSwapTransaction } from '../../interfaces/trade'
 import { TradeOptions } from '../../interfaces/trade-options'
 import { RoutablePlatform } from '../../routable-platform'
 import { getProvider, tryGetChainId } from '../../utils'
-import { UNISWAP_ROUTER_ABI } from '../abi'
 import { UniswapTradeGetQuoteParams, UniswapTradeParams } from '../types/UniswapV3.types'
-import { getUniswapNativeCurrency } from '../utils'
+import { encodeRecipient, getUniswapNativeCurrency } from '../utils'
 
 // Debuging logger. See documentation to enable logging.
 const debugUniswapTradeGetQuote = debug('ecoRouter:uniswap:getQuote')
@@ -205,44 +202,13 @@ export class UniswapTrade extends TradeWithSwapTransaction {
   }
 
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
-    console.log('options', options.recipient)
-    let callData
-    //dissection of the callData to change the recipient!
-    if (this.swapRoute.methodParameters?.calldata) {
-      const routerFunction = this.tradeType === TradeType.EXACT_INPUT ? 'exactInputSingle' : 'exactOutputSingle'
-      const routerInterface = new Interface(UNISWAP_ROUTER_ABI)
-      const data = routerInterface.decodeFunctionData(
-        'multicall(uint256,bytes[])',
-        this.swapRoute.methodParameters?.calldata
-      )
-      const { params } = routerInterface.decodeFunctionData(routerFunction, data.data[0])
-      const routerFunctionCallData = routerInterface.encodeFunctionData(routerFunction, [
-        [
-          params.tokenIn,
-          params.tokenOut,
-          params.fee,
-          options.recipient,
-          params.amountIn.toString(),
-          params.amountOutMinimum.toString(),
-          params.sqrtPriceLimitX96.toString(),
-        ],
-      ])
-      const dataFormatted = ethers.utils.arrayify(routerFunctionCallData)
-      const newEncodedCallData = routerInterface.encodeFunctionData('multicall(uint256,bytes[])', [
-        data.deadline.toString(),
-        [dataFormatted],
-      ])
-      callData = newEncodedCallData
-    }
-    console.log('callData', callData)
-    console.log('initialCallData', this.swapRoute.methodParameters?.calldata)
-    console.log('WORKS?', callData === this.swapRoute.methodParameters?.calldata)
+    const callData = encodeRecipient(this.tradeType, options.recipient, this.swapRoute.methodParameters?.calldata)
 
     return {
       value: this.swapRoute.methodParameters?.value
         ? BigNumber.from(this.swapRoute.methodParameters?.value)
         : undefined,
-      data: callData ? callData : this.swapRoute.methodParameters?.calldata,
+      data: callData,
       to: this.approveAddress,
     }
   }
