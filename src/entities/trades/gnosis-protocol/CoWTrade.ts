@@ -316,7 +316,6 @@ export class CoWTrade extends Trade {
       throw new CoWTradeError('Missing order receiver')
     }
     if (recipient) this.order.receiver = recipient
-    console.log('orderCheck', this.order)
 
     const signOrderResults = await CoWTrade.getCowSdk(this.chainId, {
       signer,

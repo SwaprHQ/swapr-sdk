@@ -218,8 +218,6 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
   }
 
   public async swapTransaction(): Promise<UnsignedTransaction> {
-    console.log('OXTRADE CALL DATA', this.callData)
-    console.log('to', this.to)
     return {
       to: this.to,
       data: this.callData,

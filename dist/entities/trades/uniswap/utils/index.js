@@ -13,15 +13,21 @@ function encodeRecipient(tradeType, recipient, callData) {
     const routerFunction = tradeType === constants_1.TradeType.EXACT_INPUT ? 'exactInputSingle' : 'exactOutputSingle';
     const routerInterface = new abi_1.Interface(abi_2.UNISWAP_ROUTER_ABI);
     const data = routerInterface.decodeFunctionData('multicall(uint256,bytes[])', callData);
-    const { params } = routerInterface.decodeFunctionData(routerFunction, data.data[0]);
+    const decodedData = routerInterface.decodeFunctionData(routerFunction, data.data[0]);
+    const { params } = decodedData;
+    console.log('params', params);
+    console.log('decodedData', decodedData[0]);
+    console.log('pure', decodedData);
     const routerFunctionCallData = routerInterface.encodeFunctionData(routerFunction, [
         [
             params.tokenIn,
             params.tokenOut,
             params.fee,
             recipient,
-            params.amountIn.toString(),
-            params.amountOutMinimum.toString(),
+            //amountIn or amountOut
+            decodedData[0][4].toString(),
+            //amountInMaximum or amountOutMaximum
+            decodedData[0][5].toString(),
             params.sqrtPriceLimitX96.toString(),
         ],
     ]);

@@ -170,8 +170,6 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
     }
     swapTransaction() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            console.log('OXTRADE CALL DATA', this.callData);
-            console.log('to', this.to);
             return {
                 to: this.to,
                 data: this.callData,

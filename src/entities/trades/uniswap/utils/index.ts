@@ -11,7 +11,11 @@ export function encodeRecipient(tradeType: TradeType, recipient: string, callDat
   const routerInterface = new Interface(UNISWAP_ROUTER_ABI)
   const data = routerInterface.decodeFunctionData('multicall(uint256,bytes[])', callData)
 
-  const { params } = routerInterface.decodeFunctionData(routerFunction, data.data[0])
+  const decodedData = routerInterface.decodeFunctionData(routerFunction, data.data[0])
+  const { params } = decodedData
+  console.log('params', params)
+  console.log('decodedData', decodedData[0])
+  console.log('pure', decodedData)
 
   const routerFunctionCallData = routerInterface.encodeFunctionData(routerFunction, [
     [
@@ -19,8 +23,10 @@ export function encodeRecipient(tradeType: TradeType, recipient: string, callDat
       params.tokenOut,
       params.fee,
       recipient,
-      params.amountIn.toString(),
-      params.amountOutMinimum.toString(),
+      //amountIn or amountOut
+      decodedData[0][4].toString(),
+      //amountInMaximum or amountOutMaximum
+      decodedData[0][5].toString(),
       params.sqrtPriceLimitX96.toString(),
     ],
   ])

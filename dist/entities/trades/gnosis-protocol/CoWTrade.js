@@ -246,7 +246,6 @@ class CoWTrade extends trade_1.Trade {
             }
             if (recipient)
                 this.order.receiver = recipient;
-            console.log('orderCheck', this.order);
             const signOrderResults = yield CoWTrade.getCowSdk(this.chainId, {
                 signer,
             }).signOrder(this.order);
