@@ -73,8 +73,6 @@ export abstract class Trade {
    */
   public readonly fee: Percent
 
-  public readonly routes?: [string, string, boolean][]
-
   protected constructor({
     details,
     type,
@@ -87,7 +85,6 @@ export abstract class Trade {
     platform,
     fee = new Percent('0'),
     approveAddress,
-    routes,
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
@@ -100,7 +97,6 @@ export abstract class Trade {
     this.platform = platform
     this.fee = fee
     this.approveAddress = approveAddress
-    this.routes = routes
   }
 
   /**

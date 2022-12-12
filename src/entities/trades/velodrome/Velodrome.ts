@@ -35,6 +35,11 @@ const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
  * UniswapTrade uses the AutoRouter to find best trade across V2 and V3 pools
  */
 export class VelodromeTrade extends Trade {
+  /**
+   * @property Route for trade to go through
+   */
+  public readonly routes?: [string, string, boolean][]
+
   public constructor({
     maximumSlippage,
     currencyAmountIn,
@@ -81,7 +86,7 @@ export class VelodromeTrade extends Trade {
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`
+      `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`
     )
 
     const currencyIn = amount.currency
