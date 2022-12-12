@@ -23,7 +23,6 @@ export interface TradeConstructorParams {
   platform: RoutablePlatform
   fee?: Percent
   approveAddress: string
-  routes?: [string, string, boolean][]
 }
 
 /**
