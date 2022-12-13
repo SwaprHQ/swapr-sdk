@@ -40,11 +40,11 @@ class VelodromeTrade extends trade_1.Trade {
                 denominator: currencyAmountIn.raw,
                 numerator: currencyAmountOut.raw,
             }),
-            routes,
             priceImpact,
             fee: new fractions_1.Percent('2', '10000'),
             approveAddress: contants_1.ROUTER_ADDRESS,
         });
+        this.routes = routes;
     }
     static getQuote({ amount, quoteCurrency, tradeType, maximumSlippage, recipient }, provider) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -55,7 +55,7 @@ class VelodromeTrade extends trade_1.Trade {
             maximumSlippage = maximumSlippage || constants_3.maximumSlippage;
             provider = provider || (0, utils_2.getProvider)(chainId);
             // Must match the currencies provided
-            (0, tiny_invariant_1.default)((yield provider.getNetwork()).chainId == chainId, `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`);
+            (0, tiny_invariant_1.default)((yield provider.getNetwork()).chainId == chainId, `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`);
             const currencyIn = amount.currency;
             const currencyOut = quoteCurrency;
             const wrappedCurrencyIn = (0, utils_2.wrappedCurrency)(currencyIn, chainId);

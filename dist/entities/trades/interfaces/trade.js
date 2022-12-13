@@ -7,7 +7,7 @@ const percent_1 = require("../../fractions/percent");
  * Extend this class to create more trades to the Eco Router
  */
 class Trade {
-    constructor({ details, type, inputAmount, outputAmount, executionPrice, maximumSlippage, priceImpact, chainId, platform, fee = new percent_1.Percent('0'), approveAddress, routes, }) {
+    constructor({ details, type, inputAmount, outputAmount, executionPrice, maximumSlippage, priceImpact, chainId, platform, fee = new percent_1.Percent('0'), approveAddress, }) {
         this.details = details;
         this.tradeType = type;
         this.inputAmount = inputAmount;
@@ -19,7 +19,6 @@ class Trade {
         this.platform = platform;
         this.fee = fee;
         this.approveAddress = approveAddress;
-        this.routes = routes;
     }
 }
 exports.Trade = Trade;

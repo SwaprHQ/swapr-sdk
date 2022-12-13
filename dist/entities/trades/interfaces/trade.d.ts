@@ -20,7 +20,6 @@ export interface TradeConstructorParams {
     platform: RoutablePlatform;
     fee?: Percent;
     approveAddress: string;
-    routes?: [string, string, boolean][];
 }
 /**
  * Represents a base Trade class.
@@ -68,8 +67,7 @@ export declare abstract class Trade {
      * The trade fee
      */
     readonly fee: Percent;
-    readonly routes?: [string, string, boolean][];
-    protected constructor({ details, type, inputAmount, outputAmount, executionPrice, maximumSlippage, priceImpact, chainId, platform, fee, approveAddress, routes, }: TradeConstructorParams);
+    protected constructor({ details, type, inputAmount, outputAmount, executionPrice, maximumSlippage, priceImpact, chainId, platform, fee, approveAddress, }: TradeConstructorParams);
     /**
      * Get the minimum amount that must be received from this trade for the given slippage tolerance
      */
