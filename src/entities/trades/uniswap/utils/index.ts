@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import { utils } from 'ethers'
+import { arrayify } from 'ethers/lib/utils'
 
 import { TradeType } from '../../../../constants'
 import { UNISWAP_ROUTER_ABI } from '../abi'
@@ -28,7 +28,7 @@ export function encodeRecipient(tradeType: TradeType, recipient: string, callDat
       params.sqrtPriceLimitX96.toString(),
     ],
   ])
-  const dataFormatted = utils.arrayify(routerFunctionCallData)
+  const dataFormatted = arrayify(routerFunctionCallData)
   const newEncodedCallData = routerInterface.encodeFunctionData('multicall(uint256,bytes[])', [
     data.deadline.toString(),
     [dataFormatted],
