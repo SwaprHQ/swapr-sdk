@@ -648,10 +648,13 @@ export class CurveTrade extends Trade {
    * Returns unsigned transaction for the trade
    * @returns the unsigned transaction
    */
+  // @ts-ignore
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
-    // TODO: Implement recipent for Curve
+    /**
+     * @todo Implement recipent for Curve
+     */
+    // @ts-ignore
     const recipient = options.recipient
-    console.log('recipient', recipient)
     return {
       ...this.transactionRequest,
       gasLimit: this.transactionRequest.gasLimit ? BigNumber.from(this.transactionRequest.gasLimit) : undefined,

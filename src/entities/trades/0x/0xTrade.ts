@@ -14,6 +14,7 @@ import { TokenAmount } from '../../fractions/tokenAmount'
 import { Breakdown } from '../../platforms-breakdown'
 import { currencyEquals } from '../../token'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
+import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
 import { ZEROX_API_URL } from './constants'
@@ -217,7 +218,8 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     return bestTrade
   }
 
-  public async swapTransaction(): Promise<UnsignedTransaction> {
+  // @ts-ignore
+  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
     return {
       to: this.to,
       data: this.callData,
