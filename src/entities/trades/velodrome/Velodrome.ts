@@ -6,7 +6,7 @@ import { formatUnits } from '@ethersproject/units'
 import debug from 'debug'
 import invariant from 'tiny-invariant'
 
-import { ONE, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType } from '../../../constants'
 import { validateAndParseAddress } from '../../../utils'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
@@ -28,6 +28,16 @@ export interface VelodromeQuoteTypes {
   recipient?: string
 }
 
+interface VelodromConstructorParams {
+  maximumSlippage: Percent
+  currencyAmountIn: CurrencyAmount
+  currencyAmountOut: CurrencyAmount
+  tradeType: TradeType
+  chainId: ChainId
+  routes: { from: string; to: string; stable: boolean }[]
+  priceImpact: Percent
+}
+
 // Debuging logger. See documentation to enable logging.
 const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
 
@@ -35,6 +45,11 @@ const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
  * UniswapTrade uses the AutoRouter to find best trade across V2 and V3 pools
  */
 export class VelodromeTrade extends Trade {
+  /**
+   * @property Route for trade to go through
+   */
+  public readonly routes?: { from: string; to: string; stable: boolean }[]
+
   public constructor({
     maximumSlippage,
     currencyAmountIn,
@@ -43,7 +58,7 @@ export class VelodromeTrade extends Trade {
     chainId,
     routes,
     priceImpact,
-  }: any) {
+  }: VelodromConstructorParams) {
     super({
       details: undefined,
       type: tradeType,
@@ -58,11 +73,11 @@ export class VelodromeTrade extends Trade {
         denominator: currencyAmountIn.raw,
         numerator: currencyAmountOut.raw,
       }),
-      routes,
       priceImpact,
       fee: new Percent('2', '10000'),
       approveAddress: ROUTER_ADDRESS,
     })
+    this.routes = routes
   }
 
   static async getQuote(
@@ -81,7 +96,7 @@ export class VelodromeTrade extends Trade {
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`
+      `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`
     )
 
     const currencyIn = amount.currency
