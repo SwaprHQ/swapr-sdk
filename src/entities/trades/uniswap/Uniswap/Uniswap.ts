@@ -22,10 +22,11 @@ import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../../
 import { Token } from '../../../token'
 import { maximumSlippage as defaultMaximumSlippage } from '../../constants'
 import { TradeWithSwapTransaction } from '../../interfaces/trade'
+import { TradeOptions } from '../../interfaces/trade-options'
 import { RoutablePlatform } from '../../routable-platform'
 import { getProvider, tryGetChainId } from '../../utils'
 import { UniswapTradeGetQuoteParams, UniswapTradeParams } from '../types/UniswapV3.types'
-import { getUniswapNativeCurrency } from '../utils'
+import { encodeRecipient, getUniswapNativeCurrency } from '../utils'
 
 // Debuging logger. See documentation to enable logging.
 const debugUniswapTradeGetQuote = debug('ecoRouter:uniswap:getQuote')
@@ -200,12 +201,14 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     }
   }
 
-  public async swapTransaction(): Promise<UnsignedTransaction> {
+  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+    const callData = encodeRecipient(this.tradeType, options.recipient, this.swapRoute.methodParameters?.calldata)
+
     return {
       value: this.swapRoute.methodParameters?.value
         ? BigNumber.from(this.swapRoute.methodParameters?.value)
         : undefined,
-      data: this.swapRoute.methodParameters?.calldata,
+      data: callData,
       to: this.approveAddress,
     }
   }
