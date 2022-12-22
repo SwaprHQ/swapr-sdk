@@ -37,7 +37,7 @@ export const DAI: Record<number, Token> = {
   ),
   [ChainId.BSC_MAINNET]: new Token(
     ChainId.BSC_MAINNET,
-    '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+    '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
     18,
     'DAI',
     'Binance-Peg Dai Stablecoin'

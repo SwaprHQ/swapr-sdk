@@ -47,7 +47,7 @@ export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
     name: '2pool',
     symbol: '2CRV',
     decimals: 18,
-    address: '0x7f90122bf0700f9e7e1f688fe926940e8839f353',
+    address: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
     isLPToken: true,
     type: TokenType.USD,
     poolTokens() {
