@@ -90,7 +90,9 @@ describe('ZeroXTrade', () => {
       ) as CurrencyAmount
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountIn, tokenETH, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
@@ -98,7 +100,9 @@ describe('ZeroXTrade', () => {
     test.skip('Should find a route from 1 ETH to stETH', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountETH1, tokenStETH, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual(
@@ -109,7 +113,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 1 ETH to CRV', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountETH1, tokenCRV, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction.value).toEqual(parseUnits('1'))
@@ -118,7 +124,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 1000 CRV to ETH', async () => {
       const trade = await ZeroXTrade.bestTradeExactOut(tokenETH, currencyAmountCRV, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction.value).toEqual(parseUnits('0'))
@@ -127,7 +135,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 1 renBTC to WBTC', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountRenBTC1, tokenWBTC, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
 
@@ -136,7 +146,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 1 WBTC to renBTC ', async () => {
       const trade = await ZeroXTrade.bestTradeExactOut(tokenRenBTC, currencyAmountWBTC, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
 
@@ -222,7 +234,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 1.2 WMATIC to USDT', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountWMATIC, tokenUSDT, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
@@ -230,7 +244,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 0.2 USDT to WBTC', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountUSDT, tokenWBTC, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
@@ -238,7 +254,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 0.002 WBTC to WMATIC', async () => {
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountWBTC, tokenWMATIC, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')
@@ -246,7 +264,9 @@ describe('ZeroXTrade', () => {
     test('Should find a route from 0.002 WBTC to WMATIC', async () => {
       const trade = await ZeroXTrade.bestTradeExactOut(tokenWMATIC, currencyAmountWBTC, maximumSlippage)
       invariant(!!trade)
-      const swapTransaction = await trade.swapTransaction()
+      const swapTransaction = await trade.swapTransaction({
+        recipient: '0x0000000000000000000000000000000000000000',
+      })
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual('0')

@@ -650,7 +650,7 @@ export class CurveTrade extends Trade {
    * @param options options
    * @returns the unsigned transaction
    */
-  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+  public async swapTransaction(options?: TradeOptions): Promise<UnsignedTransaction> {
     debugCurve({ options })
     return {
       ...this.transactionRequest,
