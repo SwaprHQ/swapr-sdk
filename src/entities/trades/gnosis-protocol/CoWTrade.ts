@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-restricted-imports
 import contractNetworks from '@cowprotocol/contracts/networks.json'
-import { CowSdk, OrderKind, SimpleGetQuoteResponse, SupportedChainId } from '@cowprotocol/cow-sdk'
+import { CowSdk, OrderKind, SimpleGetQuoteResponse } from '@cowprotocol/cow-sdk'
 // eslint-disable-next-line no-restricted-imports
 import { CowContext } from '@cowprotocol/cow-sdk/dist/utils/context'
 // eslint-disable-next-line no-restricted-imports
@@ -195,13 +195,15 @@ export class CoWTrade extends Trade {
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
       const quoteResponse = await CoWTrade.getCowSdk(chainId).cowApi.getQuote({
-        kind: OrderKind.SELL,
-        amount: amountInBN.toString(),
-        sellToken: tokenIn.address,
+        appData: CoWTrade.getAppData(chainId).ipfsHashInfo.appDataHash, // App data hash,
         buyToken: tokenOut.address,
-        userAddress: user.toLowerCase(),
+        kind: OrderKind.SELL,
+        from: user,
         receiver,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
+        partiallyFillable: false,
+        sellAmountBeforeFee: amountInBN.toString(),
+        sellToken: tokenIn.address,
       })
 
       // Calculate the fee in terms of percentages
@@ -261,11 +263,13 @@ export class CoWTrade extends Trade {
       const cowSdk = CoWTrade.getCowSdk(chainId)
 
       const quoteResponse = await cowSdk.cowApi.getQuote({
-        kind: OrderKind.BUY,
-        amount: amountOutBN.toString(),
-        sellToken: tokenIn.address,
+        appData: CoWTrade.getAppData(chainId).ipfsHashInfo.appDataHash, // App data hash,
+        buyAmountAfterFee: amountOutBN.toString(),
         buyToken: tokenOut.address,
-        userAddress: user.toLowerCase(),
+        from: user,
+        kind: OrderKind.BUY,
+        sellToken: tokenIn.address,
+        partiallyFillable: false,
         receiver,
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
       })
@@ -358,18 +362,19 @@ export class CoWTrade extends Trade {
 
     const orderCancellationSignature = await cowSdk.signOrderCancellation(orderId)
 
-    const url = `${cowSdk.cowApi.API_BASE_URL[chainId as unknown as SupportedChainId]}/api/v1/orders/${orderId}`
-
-    const response = await fetch(url, {
-      method: 'delete',
-      body: JSON.stringify(orderCancellationSignature),
-    })
-
-    if (response.ok && response.status === 200) {
-      return true
+    if (!orderCancellationSignature.signature) {
+      throw new CoWTradeError('Order cancellation was not signed')
     }
 
-    throw new CoWTradeError(`CoWTrade: Failed to cancel order. API Status code: ${response.status}`)
+    return cowSdk.cowApi.sendSignedOrderCancellation({
+      cancellation: {
+        signature: orderCancellationSignature.signature,
+        signingScheme: orderCancellationSignature.signingScheme,
+        orderUid: orderId,
+      },
+      chainId: chainId as any,
+      owner: await signer.getAddress(),
+    })
   }
 
   /**
