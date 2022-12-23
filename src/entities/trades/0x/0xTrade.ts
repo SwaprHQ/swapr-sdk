@@ -1,5 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
+import createDebug from 'debug'
 import JSBI from 'jsbi'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
@@ -14,11 +15,15 @@ import { TokenAmount } from '../../fractions/tokenAmount'
 import { Breakdown } from '../../platforms-breakdown'
 import { currencyEquals } from '../../token'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
+import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
 import { ZEROX_API_URL } from './constants'
 import { ApiResponse, ZeroXTradeConstructorParams } from './types'
 import { decodeStringToPercent, platformsFromSources } from './utils'
+
+// Debuging logger. See documentation to enable logging.
+const debug0X = createDebug('ecoRouter:0x')
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -217,7 +222,13 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     return bestTrade
   }
 
-  public async swapTransaction(): Promise<UnsignedTransaction> {
+  /**
+   * Returns the transaction to execute the trade
+   * @param options The options to execute the trade with
+   * @returns
+   */
+  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+    debug0X({ options })
     return {
       to: this.to,
       data: this.callData,

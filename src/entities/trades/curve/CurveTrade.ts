@@ -18,6 +18,7 @@ import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
 import { currencyEquals, Token } from '../../token'
 import { Trade } from '../interfaces/trade'
+import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedCurrency } from '../utils'
 import { getProvider } from '../utils'
@@ -42,6 +43,7 @@ interface QuoteFromPool {
 }
 
 // Debuging logger. See documentation to enable logging.
+const debugCurve = debug('ecoRouter:curve')
 const debugCurveGetQuote = debug('ecoRouter:curve:getQuote')
 
 /**
@@ -645,9 +647,11 @@ export class CurveTrade extends Trade {
 
   /**
    * Returns unsigned transaction for the trade
+   * @param options options
    * @returns the unsigned transaction
    */
-  public async swapTransaction(): Promise<UnsignedTransaction> {
+  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+    debugCurve({ options })
     return {
       ...this.transactionRequest,
       gasLimit: this.transactionRequest.gasLimit ? BigNumber.from(this.transactionRequest.gasLimit) : undefined,
