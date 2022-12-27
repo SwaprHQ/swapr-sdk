@@ -31,7 +31,7 @@
     "codegen:cow": "./node_modules/.bin/ts-node --project tsconfig.json ./bin/cow-app-data.ts"
   },
   "dependencies": {
-    "@cowprotocol/cow-sdk": "^1.0.1-RC.8",
+    "@cowprotocol/cow-sdk": "^1.0.2-RC.0",
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.0",
