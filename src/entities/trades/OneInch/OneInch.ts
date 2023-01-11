@@ -68,52 +68,62 @@ export class OneInchTrade extends Trade {
   }
 
   static async getQuote(
-    { amount, quoteCurrency, tradeType, maximumSlippage, recipient }: OneInchQuoteTypes,
+    {
+      amount,
+      quoteCurrency,
+      tradeType,
+      maximumSlippage = defaultMaximumSlippage,
+      recipient = AddressZero,
+    }: OneInchQuoteTypes,
     provider?: BaseProvider
   ): Promise<OneInchTrade | null> {
+    // Validate that chainId is present
     const chainId = tryGetChainId(amount, quoteCurrency)
-    invariant(chainId, 'VelodromeQuote.getQuote: chainId is required')
-
-    // Defaults
-    recipient = recipient || AddressZero
+    if (!chainId) {
+      throw new Error('getQuote: chainId is required')
+    }
     console.log('recipient', recipient)
-    maximumSlippage = maximumSlippage || defaultMaximumSlippage
-
+    // Ensure the provider's chainId matches the provided currencies
     provider = provider || getProvider(chainId)
-
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`
+      `OneInch.getQuote: currencies chainId does not match provider's chainId`
     )
 
+    // Determine the input and output currencies based on the trade type
     const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
     const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
 
-    try {
-      if (currencyIn.address && currencyOut.address) {
-        const queryParams = {
-          fromTokenAddress: currencyIn.address,
-          toTokenAddress: currencyOut.address,
-          amount: amount.raw.toString(),
-        }
-        const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-        const quote = await getQuote.json()
-        console.log('json', quote)
-        const amountIn = new TokenAmount(quote.fromToken as Token, quote.fromTokenAmount)
-        const amountOut = new TokenAmount(quote.toToken as Token, quote.toTokenAmount)
+    // Ensure that the currencies are valid
+    invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
 
-        return new OneInchTrade({
-          maximumSlippage,
-          currencyAmountIn: amountIn,
-          currencyAmountOut: amountOut,
-          tradeType,
-          chainId,
-          priceImpact: new Percent('2', '10000'),
-        })
-      } else return null
+    try {
+      // Prepare the query parameters for the API request
+      const queryParams = {
+        fromTokenAddress: currencyIn.address,
+        toTokenAddress: currencyOut.address,
+        amount: amount.raw.toString(),
+      }
+
+      // Fetch the quote from the API
+      const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
+      const quote = await getQuote.json()
+
+      // Create the OneInchTrade object
+      const amountIn = new TokenAmount(quote.fromToken as Token, quote.fromTokenAmount)
+      const amountOut = new TokenAmount(quote.toToken as Token, quote.toTokenAmount)
+
+      return new OneInchTrade({
+        maximumSlippage,
+        currencyAmountIn: amountIn,
+        currencyAmountOut: amountOut,
+        tradeType,
+        chainId,
+        priceImpact: new Percent('2', '10000'),
+      })
     } catch (ex) {
-      console.error(ex)
+      console.error('OneInch.getQuote: Error fetching the quote:', ex.message)
       return null
     }
   }
