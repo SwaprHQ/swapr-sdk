@@ -3,7 +3,7 @@ import { BaseProvider } from '@ethersproject/providers'
 import debug from 'debug'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, ROUTER_ADDRESS, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
@@ -12,7 +12,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { apiRequestUrl, RequestType } from './api'
 
-export interface VelodromeQuoteTypes {
+export interface OneInchQuoteTypes {
   amount: CurrencyAmount
   quoteCurrency: Currency
   tradeType: TradeType
@@ -20,13 +20,12 @@ export interface VelodromeQuoteTypes {
   recipient?: string
 }
 
-interface VelodromConstructorParams {
+interface OneInchConstructorParams {
   maximumSlippage: Percent
   currencyAmountIn: CurrencyAmount
   currencyAmountOut: CurrencyAmount
   tradeType: TradeType
   chainId: ChainId
-  routes: { from: string; to: string; stable: boolean }[]
   priceImpact: Percent
 }
 
@@ -34,9 +33,9 @@ interface VelodromConstructorParams {
 const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
 
 /**
- * UniswapTrade uses the AutoRouter to find best trade across V2 and V3 pools
+ * One inch mofos
  */
-export class InchTrade extends Trade {
+export class OneInchTrade extends Trade {
   public constructor({
     maximumSlippage,
     currencyAmountIn,
@@ -44,14 +43,14 @@ export class InchTrade extends Trade {
     tradeType,
     chainId,
     priceImpact,
-  }: VelodromConstructorParams) {
+  }: OneInchConstructorParams) {
     super({
       details: undefined,
       type: tradeType,
       inputAmount: currencyAmountIn,
       outputAmount: currencyAmountOut,
       maximumSlippage,
-      platform: RoutablePlatform.VELODROME,
+      platform: RoutablePlatform.ONE_INCH,
       chainId,
       executionPrice: new Price({
         baseCurrency: currencyAmountIn.currency,
@@ -61,14 +60,14 @@ export class InchTrade extends Trade {
       }),
       priceImpact,
       fee: new Percent('2', '10000'),
-      approveAddress: ROUTER_ADDRESS,
+      approveAddress: 'some s',
     })
   }
 
   static async getQuote(
-    { amount, quoteCurrency, tradeType, maximumSlippage, recipient }: VelodromeQuoteTypes,
+    { amount, quoteCurrency, tradeType, maximumSlippage, recipient }: OneInchQuoteTypes,
     provider?: BaseProvider
-  ): Promise<InchTrade | null> {
+  ): Promise<OneInchTrade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'VelodromeQuote.getQuote: chainId is required')
 
@@ -97,14 +96,14 @@ export class InchTrade extends Trade {
         amount: amount.raw.toString(),
       }
       const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-
-      return new InchTrade({
+      console.log('getQuote', getQuote)
+      return new OneInchTrade({
         maximumSlippage,
-        currencyAmountIn,
-        currencyAmountOut,
+        currencyAmountIn: amount,
+        currencyAmountOut: amount,
         tradeType,
         chainId,
-        priceImpact,
+        priceImpact: new Percent('2', '10000'),
       })
     } catch (ex) {
       console.error(ex)
