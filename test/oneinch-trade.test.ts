@@ -35,13 +35,6 @@ describe('OneInchTrade', () => {
         console.log('swapr', swapr)
         expect(trade?.platform.name).toEqual(RoutablePlatform.ONE_INCH.name)
       })
-      //   test('deducts fees from sell token', async () => {
-      //     const trade = await tradePromise
-      //     expect(trade?.feeAmount.currency?.address?.toLowerCase()).toEqual(tokenWETH.address.toLowerCase())
-      //     expect(trade?.order.sellToken.toLowerCase()).toEqual(tokenWETH.address.toLowerCase())
-      //     console.log(trade?.feeAmount.toSignificant(2))
-      //     console.log(trade?.fee.toSignificant(2))
-      //   })
 
       test('accepts native tokens', async () => {
         const currencyAmountIn = CurrencyAmount.nativeCurrency(
@@ -60,52 +53,5 @@ describe('OneInchTrade', () => {
         expect(trade).toBeDefined() // It is enough that the constructor does not throw errors
       })
     })
-
-    // describe('bestTradeExactOut', () => {
-    //   const currencyAmountOut = new TokenAmount(tokenUSDC, parseUnits('100', tokenUSDC.decimals).toBigInt())
-    //   const tradePromise = CoWTrade.bestTradeExactOut({
-    //     currencyAmountOut,
-    //     maximumSlippage,
-    //     currencyIn: tokenWETH,
-    //     receiver,
-    //     user,
-    //   })
-
-    //   test('returns a trade', async () => {
-    //     const trade = await tradePromise
-    //     expect(trade).toBeDefined()
-    //   })
-    //   test('returns the right platform', async () => {
-    //     const trade = await tradePromise
-    //     expect(trade?.platform.name).toEqual(RoutablePlatform.COW.name)
-    //   })
-    //   test('deducts fees from sell token', async () => {
-    //     const trade = await tradePromise
-    //     expect(trade?.feeAmount.currency?.address?.toLowerCase()).toEqual(tokenWETH.address.toLowerCase())
-    //     expect(trade?.order.sellToken.toLowerCase()).toEqual(tokenWETH.address.toLowerCase())
-    //     console.log(trade?.feeAmount.toSignificant(2))
-    //     console.log(trade?.fee.toSignificant(2))
-    //   })
-    //   test('quote output matches exact output', async () => {
-    //     const trade = await tradePromise
-    //     expect(trade?.quote.quote.buyAmount.toString()).toBe(parseUnits('100', tokenUSDC.decimals).toString())
-    //   })
-
-    //   test('accepts native tokens', async () => {
-    //     const currencyAmountOut = CurrencyAmount.nativeCurrency(
-    //       parseUnits('1', tokenWETH.decimals).toBigInt(),
-    //       ChainId.GNOSIS
-    //     )
-
-    //     const trade = await CoWTrade.bestTradeExactOut({
-    //       currencyAmountOut,
-    //       currencyIn: tokenUSDC,
-    //       maximumSlippage,
-    //       user,
-    //       receiver,
-    //     })
-    //     expect(trade).toBeDefined() // It is enough that the constructor does not throw errors
-    //   })
-    // })
   })
 })
