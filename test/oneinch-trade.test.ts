@@ -25,8 +25,14 @@ describe('OneInchTrade', () => {
         const trade = await tradePromise
         expect(trade).toBeDefined()
       })
-      test('returns the right platform', async () => {
+      test('swap transaction works', async () => {
         const trade = await tradePromise
+        const options = {
+          recipient: user,
+          account: user,
+        }
+        const swapr = await trade?.swapTransaction(options)
+        console.log('swapr', swapr)
         expect(trade?.platform.name).toEqual(RoutablePlatform.ONE_INCH.name)
       })
       //   test('deducts fees from sell token', async () => {

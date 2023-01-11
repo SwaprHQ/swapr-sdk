@@ -1,5 +1,6 @@
 import { AddressZero } from '@ethersproject/constants'
 import { BaseProvider } from '@ethersproject/providers'
+import { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType } from '../../../constants'
@@ -8,6 +9,7 @@ import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fra
 import { Token } from '../../token'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 import { Trade } from '../interfaces/trade'
+import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId } from '../utils'
 import { apiRequestUrl, RequestType } from './api'
@@ -18,6 +20,10 @@ export interface OneInchQuoteTypes {
   tradeType: TradeType
   maximumSlippage?: Percent
   recipient?: string
+}
+
+interface ExtentendedTradeOptions extends TradeOptions {
+  account: string
 }
 
 interface OneInchConstructorParams {
@@ -81,8 +87,8 @@ export class OneInchTrade extends Trade {
       `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`
     )
 
-    const currencyIn = amount.currency
-    const currencyOut = quoteCurrency
+    const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
+    const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
 
     try {
       if (currencyIn.address && currencyOut.address) {
@@ -96,8 +102,6 @@ export class OneInchTrade extends Trade {
         console.log('json', quote)
         const amountIn = new TokenAmount(quote.fromToken as Token, quote.fromTokenAmount)
         const amountOut = new TokenAmount(quote.toToken as Token, quote.toTokenAmount)
-        console.log('amountIn', amountIn)
-        console.log('amountOut', amountOut)
 
         return new OneInchTrade({
           maximumSlippage,
@@ -140,12 +144,34 @@ export class OneInchTrade extends Trade {
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
     }
   }
-  //TODO
-  //   /**
-  //    * Returns unsigned transaction for the trade
-  //    * @returns the unsigned transaction
-  //    */
-  //   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
 
-  //   }
+  /**
+   * Returns unsigned transaction for the trade
+   * @returns the unsigned transaction
+   */
+  public async swapTransaction(options: ExtentendedTradeOptions): Promise<UnsignedTransaction | null> {
+    if (!this.inputAmount.currency.address || !this.outputAmount.currency.address) {
+      return null
+    }
+    console.log('maximumSlippage', this.maximumSlippage.toSignificant(2))
+
+    const queryParams = {
+      fromTokenAddress: this.inputAmount.currency.address,
+      toTokenAddress: this.outputAmount.currency.address,
+      amount: this.inputAmount.raw.toString(),
+      fromAddress: options.account,
+      slippage: this.maximumSlippage.toSignificant(2),
+      destReciever: options.recipient,
+    }
+    try {
+      const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
+      const swap = await swapData.json()
+      return {
+        ...swap.tx,
+      }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
 }

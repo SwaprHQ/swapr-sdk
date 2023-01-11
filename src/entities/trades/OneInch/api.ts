@@ -1,3 +1,5 @@
+import { ChainId } from '../../../constants'
+
 // const broadcastApiUrl = 'https://tx-gateway.1inch.io/v1.1/' + chainId + '/broadcast'
 const apiBaseUrl = (chainId: number) => 'https://api.1inch.io/v4.0/' + chainId
 
@@ -9,7 +11,7 @@ export enum RequestType {
 interface ApiRequestUrlParams {
   methodName: RequestType
   queryParams: Record<string, string>
-  chainId: number
+  chainId: ChainId
 }
 
 export function apiRequestUrl({ methodName, queryParams, chainId }: ApiRequestUrlParams) {
