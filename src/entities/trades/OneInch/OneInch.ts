@@ -83,9 +83,9 @@ export class OneInchTrade extends Trade {
       throw new Error('getQuote: chainId is required')
     }
     console.log('recipient', recipient)
-    // Ensure the provider's chainId matches the provided currencies
+
     provider = provider || getProvider(chainId)
-    // Must match the currencies provided
+    // Ensure the provider's chainId matches the provided currencies
     invariant(
       (await provider.getNetwork()).chainId == chainId,
       `OneInch.getQuote: currencies chainId does not match provider's chainId`
@@ -122,8 +122,8 @@ export class OneInchTrade extends Trade {
         chainId,
         priceImpact: new Percent('2', '10000'),
       })
-    } catch (ex) {
-      console.error('OneInch.getQuote: Error fetching the quote:', ex.message)
+    } catch (error) {
+      console.error('OneInch.getQuote: Error fetching the quote:', error.message)
       return null
     }
   }
@@ -160,9 +160,11 @@ export class OneInchTrade extends Trade {
    * @returns the unsigned transaction
    */
   public async swapTransaction(options: ExtentendedTradeOptions): Promise<UnsignedTransaction | null> {
-    if (!this.inputAmount.currency.address || !this.outputAmount.currency.address) {
-      return null
-    }
+    invariant(
+      this.inputAmount.currency.address && this.outputAmount.currency.address,
+      'OneInchTrade: Currency address is required'
+    )
+
     console.log('maximumSlippage', this.maximumSlippage.toSignificant(2))
 
     const queryParams = {
@@ -173,14 +175,14 @@ export class OneInchTrade extends Trade {
       slippage: this.maximumSlippage.toSignificant(2),
       destReciever: options.recipient,
     }
+
     try {
+      // Fetch the unsigned transaction from the API
       const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
       const swap = await swapData.json()
-      return {
-        ...swap.tx,
-      }
+      return swap.tx
     } catch (e) {
-      console.error(e)
+      console.error('OneInch.swapTransaction: Error fetching the swap data:', e.message)
       return null
     }
   }
