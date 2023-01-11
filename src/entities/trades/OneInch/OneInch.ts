@@ -1,15 +1,15 @@
 import { AddressZero } from '@ethersproject/constants'
 import { BaseProvider } from '@ethersproject/providers'
-import debug from 'debug'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
+import { Token } from '../../token'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 import { Trade } from '../interfaces/trade'
 import { RoutablePlatform } from '../routable-platform'
-import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
+import { getProvider, tryGetChainId } from '../utils'
 import { apiRequestUrl, RequestType } from './api'
 
 export interface OneInchQuoteTypes {
@@ -28,9 +28,6 @@ interface OneInchConstructorParams {
   chainId: ChainId
   priceImpact: Percent
 }
-
-// Debuging logger. See documentation to enable logging.
-const debugVelodromeGetQuote = debug('ecoRouter:velodrome:getQuote')
 
 /**
  * One inch mofos
@@ -73,6 +70,7 @@ export class OneInchTrade extends Trade {
 
     // Defaults
     recipient = recipient || AddressZero
+    console.log('recipient', recipient)
     maximumSlippage = maximumSlippage || defaultMaximumSlippage
 
     provider = provider || getProvider(chainId)
@@ -86,25 +84,30 @@ export class OneInchTrade extends Trade {
     const currencyIn = amount.currency
     const currencyOut = quoteCurrency
 
-    const wrappedCurrencyIn = wrappedCurrency(currencyIn, chainId)
-    const wrappedCurrencyOut = wrappedCurrency(currencyOut, chainId)
-
     try {
-      const queryParams = {
-        fromTokenAddress: wrappedCurrencyIn.address,
-        toTokenAddress: wrappedCurrencyOut.address,
-        amount: amount.raw.toString(),
-      }
-      const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-      console.log('getQuote', getQuote)
-      return new OneInchTrade({
-        maximumSlippage,
-        currencyAmountIn: amount,
-        currencyAmountOut: amount,
-        tradeType,
-        chainId,
-        priceImpact: new Percent('2', '10000'),
-      })
+      if (currencyIn.address && currencyOut.address) {
+        const queryParams = {
+          fromTokenAddress: currencyIn.address,
+          toTokenAddress: currencyOut.address,
+          amount: amount.raw.toString(),
+        }
+        const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
+        const quote = await getQuote.json()
+        console.log('json', quote)
+        const amountIn = new TokenAmount(quote.fromToken as Token, quote.fromTokenAmount)
+        const amountOut = new TokenAmount(quote.toToken as Token, quote.toTokenAmount)
+        console.log('amountIn', amountIn)
+        console.log('amountOut', amountOut)
+
+        return new OneInchTrade({
+          maximumSlippage,
+          currencyAmountIn: amountIn,
+          currencyAmountOut: amountOut,
+          tradeType,
+          chainId,
+          priceImpact: new Percent('2', '10000'),
+        })
+      } else return null
     } catch (ex) {
       console.error(ex)
       return null
