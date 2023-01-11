@@ -18,7 +18,14 @@ export class RoutablePlatform extends BaseRoutablePlatform {
     'Uniswap'
   )
   public static readonly ONE_INCH = new RoutablePlatform(
-    [ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.POLYGON, ChainId.OPTIMISM_MAINNET],
+    [
+      ChainId.MAINNET,
+      ChainId.ARBITRUM_ONE,
+      ChainId.POLYGON,
+      ChainId.OPTIMISM_MAINNET,
+      ChainId.GNOSIS,
+      ChainId.BSC_MAINNET,
+    ],
     'OneInch'
   )
 }

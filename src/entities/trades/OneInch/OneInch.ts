@@ -175,10 +175,11 @@ export class OneInchTrade extends Trade {
       slippage: this.maximumSlippage.toSignificant(2),
       destReciever: options.recipient,
     }
-
+    console.log('queryParams', queryParams)
     try {
       // Fetch the unsigned transaction from the API
       const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
+      console.log('swapData', swapData)
       const swap = await swapData.json()
       return swap.tx
     } catch (e) {
