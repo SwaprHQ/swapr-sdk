@@ -32,7 +32,7 @@ interface OneInchConstructorParams {
   currencyAmountOut: CurrencyAmount
   tradeType: TradeType
   chainId: ChainId
-  priceImpact: Percent
+  approveAddress: string
 }
 
 /**
@@ -45,7 +45,7 @@ export class OneInchTrade extends Trade {
     currencyAmountOut,
     tradeType,
     chainId,
-    priceImpact,
+    approveAddress,
   }: OneInchConstructorParams) {
     super({
       details: undefined,
@@ -61,9 +61,9 @@ export class OneInchTrade extends Trade {
         denominator: currencyAmountIn.raw,
         numerator: currencyAmountOut.raw,
       }),
-      priceImpact,
+      priceImpact: new Percent('0', '100'),
       fee: new Percent('2', '10000'),
-      approveAddress: 'some s',
+      approveAddress,
     })
   }
 
@@ -99,6 +99,11 @@ export class OneInchTrade extends Trade {
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
 
     try {
+      //Fetch approve address
+      const getApproveAddress = await fetch('https://api.1inch.io/v5.0/56/approve/spender')
+      const { address } = await getApproveAddress.json()
+
+      console.log('approve address', address)
       // Prepare the query parameters for the API request
       const queryParams = {
         fromTokenAddress: currencyIn.address,
@@ -120,7 +125,7 @@ export class OneInchTrade extends Trade {
         currencyAmountOut: amountOut,
         tradeType,
         chainId,
-        priceImpact: new Percent('2', '10000'),
+        approveAddress: address,
       })
     } catch (error) {
       console.error('OneInch.getQuote: Error fetching the quote:', error.message)
