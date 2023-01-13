@@ -62,7 +62,7 @@ export class OneInchTrade extends Trade {
         numerator: currencyAmountOut.raw,
       }),
       priceImpact: new Percent('0', '100'),
-      fee: new Percent('2', '10000'),
+      fee: new Percent('0', '10000'),
       approveAddress,
     })
   }
@@ -79,9 +79,11 @@ export class OneInchTrade extends Trade {
   ): Promise<OneInchTrade | null> {
     // Validate that chainId is present
     const chainId = tryGetChainId(amount, quoteCurrency)
+
     if (!chainId) {
       throw new Error('getQuote: chainId is required')
     }
+
     console.log('recipient', recipient)
 
     provider = provider || getProvider(chainId)
@@ -164,7 +166,7 @@ export class OneInchTrade extends Trade {
    * Returns unsigned transaction for the trade
    * @returns the unsigned transaction
    */
-  public async swapTransaction(options: ExtentendedTradeOptions): Promise<UnsignedTransaction | null> {
+  public async swapTransaction(options: ExtentendedTradeOptions): Promise<UnsignedTransaction> {
     invariant(
       this.inputAmount.currency.address && this.outputAmount.currency.address,
       'OneInchTrade: Currency address is required'
@@ -186,10 +188,15 @@ export class OneInchTrade extends Trade {
       const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
       console.log('swapData', swapData)
       const swap = await swapData.json()
-      return swap.tx
+      console.log('swap', swap.tx)
+      return {
+        data: swap.tx.data,
+        to: swap.tx.to,
+        value: swap.tx.value,
+      }
     } catch (e) {
-      console.error('OneInch.swapTransaction: Error fetching the swap data:', e.message)
-      return null
+      console.log('ERROR MOFO')
+      throw new Error('OneInch.swapTransaction: Error fetching the swap data:')
     }
   }
 }
