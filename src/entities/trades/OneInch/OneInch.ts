@@ -115,11 +115,13 @@ export class OneInchTrade extends Trade {
 
       // Fetch the quote from the API
       const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-      const quote = await getQuote.json()
-
+      const { fromToken: fromQuote, toToken: toQuote, fromTokenAmount, toTokenAmount } = await getQuote.json()
+      //extract tokens from quote
+      const fromToken = new Token(chainId, fromQuote.address, fromQuote.decimals, fromQuote.symbol, fromQuote.name)
+      const toToken = new Token(chainId, toQuote.address, toQuote.decimals, toQuote.symbol, toQuote.name)
       // Create the OneInchTrade object
-      const amountIn = new TokenAmount(quote.fromToken as Token, quote.fromTokenAmount)
-      const amountOut = new TokenAmount(quote.toToken as Token, quote.toTokenAmount)
+      const amountIn = new TokenAmount(fromToken, fromTokenAmount)
+      const amountOut = new TokenAmount(toToken, toTokenAmount)
 
       return new OneInchTrade({
         maximumSlippage,

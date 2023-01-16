@@ -26,6 +26,6 @@ export class RoutablePlatform extends BaseRoutablePlatform {
       ChainId.GNOSIS,
       ChainId.BSC_MAINNET,
     ],
-    'OneInch'
+    '1Inch'
   )
 }
