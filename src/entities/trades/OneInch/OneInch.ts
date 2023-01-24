@@ -1,4 +1,3 @@
-import { AddressZero } from '@ethersproject/constants'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
@@ -12,7 +11,7 @@ import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId } from '../utils'
-import { apiRequestUrl, RequestType } from './api'
+import { apiRequestUrl, approveAddressUrl, RequestType } from './api'
 
 export interface OneInchQuoteTypes {
   amount: CurrencyAmount
@@ -68,25 +67,17 @@ export class OneInchTrade extends Trade {
   }
 
   static async getQuote(
-    {
-      amount,
-      quoteCurrency,
-      tradeType,
-      maximumSlippage = defaultMaximumSlippage,
-      recipient = AddressZero,
-    }: OneInchQuoteTypes,
+    { amount, quoteCurrency, tradeType, maximumSlippage = defaultMaximumSlippage }: OneInchQuoteTypes,
     provider?: BaseProvider
   ): Promise<OneInchTrade | null> {
-    // Validate that chainId is present
     const chainId = tryGetChainId(amount, quoteCurrency)
 
     if (!chainId) {
       throw new Error('getQuote: chainId is required')
     }
 
-    console.log('recipient', recipient)
-
     provider = provider || getProvider(chainId)
+
     // Ensure the provider's chainId matches the provided currencies
     invariant(
       (await provider.getNetwork()).chainId == chainId,
@@ -97,15 +88,14 @@ export class OneInchTrade extends Trade {
     const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
     const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
 
-    // Ensure that the currencies are valid
+    // Ensure that the currencies are present
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
 
     try {
       //Fetch approve address
-      const getApproveAddress = await fetch('https://api.1inch.io/v5.0/56/approve/spender')
-      const { address } = await getApproveAddress.json()
+      const getApproveAddress = await fetch(approveAddressUrl(chainId))
+      const { address: approveAddress } = await getApproveAddress.json()
 
-      console.log('approve address', address)
       // Prepare the query parameters for the API request
       const queryParams = {
         fromTokenAddress: currencyIn.address,
@@ -129,7 +119,7 @@ export class OneInchTrade extends Trade {
         currencyAmountOut: amountOut,
         tradeType,
         chainId,
-        approveAddress: address,
+        approveAddress,
       })
     } catch (error) {
       console.error('OneInch.getQuote: Error fetching the quote:', error.message)
@@ -174,8 +164,6 @@ export class OneInchTrade extends Trade {
       'OneInchTrade: Currency address is required'
     )
 
-    console.log('maximumSlippage', this.maximumSlippage.toSignificant(2))
-
     const queryParams = {
       fromTokenAddress: this.inputAmount.currency.address,
       toTokenAddress: this.outputAmount.currency.address,
@@ -184,21 +172,20 @@ export class OneInchTrade extends Trade {
       slippage: this.maximumSlippage.toSignificant(2),
       destReciever: options.recipient,
     }
-    console.log('queryParams', queryParams)
+
     try {
       // Fetch the unsigned transaction from the API
       const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
-      console.log('swapData', swapData)
-      const swap = await swapData.json()
-      console.log('swap', swap.tx)
+
+      const { tx } = await swapData.json()
+
       return {
-        data: swap.tx.data,
-        to: swap.tx.to,
-        value: swap.tx.value,
+        data: tx.data,
+        to: tx.to,
+        value: tx.value,
       }
     } catch (e) {
-      console.log('ERROR MOFO')
-      throw new Error('OneInch.swapTransaction: Error fetching the swap data:')
+      throw new Error(`OneInch.swapTransaction: Error fetching the swap data: ${e.message}`)
     }
   }
 }
