@@ -14,7 +14,7 @@ interface ApiRequestUrlParams {
   chainId: ChainId
 }
 
-export function apiRequestUrl({ methodName, queryParams, chainId }: ApiRequestUrlParams) {
+export function generateApiRequestUrl({ methodName, queryParams, chainId }: ApiRequestUrlParams) {
   return apiBaseUrl(chainId) + methodName + '?' + new URLSearchParams(queryParams).toString()
 }
 

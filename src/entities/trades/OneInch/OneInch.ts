@@ -5,13 +5,12 @@ import invariant from 'tiny-invariant'
 import { ChainId, ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
-import { Token } from '../../token'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
-import { getProvider, tryGetChainId } from '../utils'
-import { apiRequestUrl, approveAddressUrl, RequestType } from './api'
+import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
+import { approveAddressUrl, generateApiRequestUrl, RequestType } from './api'
 
 export interface OneInchQuoteTypes {
   amount: CurrencyAmount
@@ -85,16 +84,16 @@ export class OneInchTrade extends Trade {
     )
 
     // Determine the input and output currencies based on the trade type
-    const currencyIn = tradeType === TradeType.EXACT_INPUT ? amount.currency : quoteCurrency
-    const currencyOut = tradeType === TradeType.EXACT_INPUT ? quoteCurrency : amount.currency
+    const [currencyIn, currencyOut] = [amount.currency, quoteCurrency].map((currency) =>
+      wrappedCurrency(currency, chainId)
+    )
 
     // Ensure that the currencies are present
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
 
     try {
       //Fetch approve address
-      const getApproveAddress = await fetch(approveAddressUrl(chainId))
-      const { address: approveAddress } = await getApproveAddress.json()
+      const { address: approveAddress } = await (await fetch(approveAddressUrl(chainId))).json()
 
       // Prepare the query parameters for the API request
       const queryParams = {
@@ -104,19 +103,43 @@ export class OneInchTrade extends Trade {
       }
 
       // Fetch the quote from the API
-      const getQuote = await fetch(apiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-      const { fromToken: fromQuote, toToken: toQuote, fromTokenAmount, toTokenAmount } = await getQuote.json()
-      //extract tokens from quote
-      const fromToken = new Token(chainId, fromQuote.address, fromQuote.decimals, fromQuote.symbol, fromQuote.name)
-      const toToken = new Token(chainId, toQuote.address, toQuote.decimals, toQuote.symbol, toQuote.name)
-      // Create the OneInchTrade object
-      const amountIn = new TokenAmount(fromToken, fromTokenAmount)
-      const amountOut = new TokenAmount(toToken, toTokenAmount)
+      const { fromTokenAmount, toTokenAmount } = await (
+        await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
+      ).json()
+
+      let fromTokenAmountApi = fromTokenAmount
+      let toTokenAmountApi = toTokenAmount
+
+      if (tradeType === TradeType.EXACT_OUTPUT) {
+        // Prepare the query parameters for the API request
+
+        const queryParams = {
+          fromTokenAddress: currencyOut.address,
+          toTokenAddress: currencyIn.address,
+          amount: toTokenAmount.toString(),
+        }
+
+        const { toTokenAmount: toTokenAmountOutput, fromTokenAmount } = await (
+          await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
+        ).json()
+
+        fromTokenAmountApi = fromTokenAmount
+        toTokenAmountApi = toTokenAmountOutput
+      }
+
+      const currencyAmountIn = new TokenAmount(
+        tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut,
+        fromTokenAmountApi
+      )
+      const currencyAmountOut = new TokenAmount(
+        tradeType === TradeType.EXACT_INPUT ? currencyOut : currencyIn,
+        toTokenAmountApi
+      )
 
       return new OneInchTrade({
         maximumSlippage,
-        currencyAmountIn: amountIn,
-        currencyAmountOut: amountOut,
+        currencyAmountIn,
+        currencyAmountOut,
         tradeType,
         chainId,
         approveAddress,
@@ -175,9 +198,9 @@ export class OneInchTrade extends Trade {
 
     try {
       // Fetch the unsigned transaction from the API
-      const swapData = await fetch(apiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
-
-      const { tx } = await swapData.json()
+      const { tx } = await (
+        await fetch(generateApiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
+      ).json()
 
       return {
         data: tx.data,

@@ -53,6 +53,22 @@ describe('OneInchTrade', () => {
 
         expect(trade).toBeDefined() // It is enough that the constructor does not throw errors
       })
+      test('exact output test', async () => {
+        const currencyAmountIn = CurrencyAmount.nativeCurrency(
+          parseUnits('1', tokenWETH.decimals).toBigInt(),
+          ChainId.GNOSIS
+        )
+
+        const trade = await OneInchTrade.getQuote({
+          amount: currencyAmountIn,
+          quoteCurrency: tokenUSDC,
+          maximumSlippage,
+          tradeType: TradeType.EXACT_OUTPUT,
+          recipient: user,
+        })
+
+        expect(trade).toBeDefined() // It is enough that the constructor does not throw errors
+      })
     })
   })
 })
