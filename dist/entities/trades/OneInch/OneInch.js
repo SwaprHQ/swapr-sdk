@@ -4,6 +4,7 @@ exports.OneInchTrade = void 0;
 const tslib_1 = require("tslib");
 const tiny_invariant_1 = tslib_1.__importDefault(require("tiny-invariant"));
 const constants_1 = require("../../../constants");
+const currency_1 = require("../../currency");
 const fractions_1 = require("../../fractions");
 const constants_2 = require("../constants");
 const trade_1 = require("../interfaces/trade");
@@ -11,7 +12,7 @@ const routable_platform_1 = require("../routable-platform");
 const utils_1 = require("../utils");
 const api_1 = require("./api");
 /**
- * One inch mofos
+ * 1Inch trade
  */
 class OneInchTrade extends trade_1.Trade {
     constructor({ maximumSlippage, currencyAmountIn, currencyAmountOut, tradeType, chainId, approveAddress, }) {
@@ -43,8 +44,8 @@ class OneInchTrade extends trade_1.Trade {
             provider = provider || (0, utils_1.getProvider)(chainId);
             // Ensure the provider's chainId matches the provided currencies
             (0, tiny_invariant_1.default)((yield provider.getNetwork()).chainId == chainId, `OneInch.getQuote: currencies chainId does not match provider's chainId`);
-            // Determine the input and output currencies based on the trade type
-            const [currencyIn, currencyOut] = [amount.currency, quoteCurrency].map((currency) => (0, utils_1.wrappedCurrency)(currency, chainId));
+            const currencyIn = amount.currency;
+            const currencyOut = quoteCurrency;
             // Ensure that the currencies are present
             (0, tiny_invariant_1.default)(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`);
             try {
@@ -71,8 +72,14 @@ class OneInchTrade extends trade_1.Trade {
                     fromTokenAmountApi = fromTokenAmount;
                     toTokenAmountApi = toTokenAmountOutput;
                 }
-                const currencyAmountIn = new fractions_1.TokenAmount(tradeType === constants_1.TradeType.EXACT_INPUT ? currencyIn : currencyOut, fromTokenAmountApi);
-                const currencyAmountOut = new fractions_1.TokenAmount(tradeType === constants_1.TradeType.EXACT_INPUT ? currencyOut : currencyIn, toTokenAmountApi);
+                const currencyInType = tradeType === constants_1.TradeType.EXACT_INPUT ? currencyIn : currencyOut;
+                const currencyOutType = tradeType === constants_1.TradeType.EXACT_INPUT ? currencyOut : currencyIn;
+                const currencyAmountIn = currency_1.Currency.isNative(currencyInType)
+                    ? fractions_1.CurrencyAmount.nativeCurrency(fromTokenAmountApi, chainId)
+                    : new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyInType, chainId), fromTokenAmountApi);
+                const currencyAmountOut = currency_1.Currency.isNative(currencyOutType)
+                    ? fractions_1.CurrencyAmount.nativeCurrency(toTokenAmountApi, chainId)
+                    : new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyOutType, chainId), toTokenAmountApi);
                 return new OneInchTrade({
                     maximumSlippage,
                     currencyAmountIn,

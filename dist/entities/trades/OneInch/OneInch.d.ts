@@ -24,7 +24,7 @@ interface OneInchConstructorParams {
     approveAddress: string;
 }
 /**
- * One inch mofos
+ * 1Inch trade
  */
 export declare class OneInchTrade extends Trade {
     constructor({ maximumSlippage, currencyAmountIn, currencyAmountOut, tradeType, chainId, approveAddress, }: OneInchConstructorParams);

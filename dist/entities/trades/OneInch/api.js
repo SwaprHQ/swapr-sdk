@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.approveAddressUrl = exports.generateApiRequestUrl = exports.RequestType = void 0;
-// const broadcastApiUrl = 'https://tx-gateway.1inch.io/v1.1/' + chainId + '/broadcast'
 const apiBaseUrl = (chainId) => 'https://api.1inch.io/v5.0/' + chainId;
 var RequestType;
 (function (RequestType) {
