@@ -34,7 +34,7 @@ interface OneInchConstructorParams {
 }
 
 /**
- * One inch mofos
+ * 1Inch trade
  */
 export class OneInchTrade extends Trade {
   public constructor({
@@ -83,10 +83,8 @@ export class OneInchTrade extends Trade {
       `OneInch.getQuote: currencies chainId does not match provider's chainId`
     )
 
-    // Determine the input and output currencies based on the trade type
-    const [currencyIn, currencyOut] = [amount.currency, quoteCurrency].map((currency) =>
-      wrappedCurrency(currency, chainId)
-    )
+    const currencyIn = amount.currency
+    const currencyOut = quoteCurrency
 
     // Ensure that the currencies are present
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
@@ -127,14 +125,15 @@ export class OneInchTrade extends Trade {
         toTokenAmountApi = toTokenAmountOutput
       }
 
-      const currencyAmountIn = new TokenAmount(
-        tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut,
-        fromTokenAmountApi
-      )
-      const currencyAmountOut = new TokenAmount(
-        tradeType === TradeType.EXACT_INPUT ? currencyOut : currencyIn,
-        toTokenAmountApi
-      )
+      const currencyInType = tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut
+      const currencyOutType = tradeType === TradeType.EXACT_INPUT ? currencyOut : currencyIn
+      const currencyAmountIn = Currency.isNative(currencyInType)
+        ? CurrencyAmount.nativeCurrency(fromTokenAmountApi, chainId)
+        : new TokenAmount(wrappedCurrency(currencyInType, chainId), fromTokenAmountApi)
+
+      const currencyAmountOut = Currency.isNative(currencyOutType)
+        ? CurrencyAmount.nativeCurrency(toTokenAmountApi, chainId)
+        : new TokenAmount(wrappedCurrency(currencyOutType, chainId), toTokenAmountApi)
 
       return new OneInchTrade({
         maximumSlippage,

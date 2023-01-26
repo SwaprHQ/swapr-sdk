@@ -4,7 +4,6 @@ import { ChainId, CurrencyAmount, OneInchTrade, Percent, Token, TradeType } from
 
 describe('OneInchTrade', () => {
   const user = '0x26358E62C2eDEd350e311bfde51588b8383A9315'
-  //   const receiver = '0x26358E62C2eDEd350e311bfde51588b8383A9315'
   const maximumSlippage = new Percent('3', '100')
   const tokenUSDC = new Token(ChainId.XDAI, '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83', 6, 'USDC', 'USDC')
   const tokenWETH = new Token(ChainId.XDAI, '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1', 18, 'WETH', 'WETH')
@@ -12,8 +11,6 @@ describe('OneInchTrade', () => {
 
   describe('Gnosis Chain', () => {
     describe('getQuote', () => {
-      //   const currencyAmountIn2 = new TokenAmount(tokenWETH, parseUnits('1', tokenWETH.decimals).toBigInt())
-
       const tradePromise = OneInchTrade.getQuote({
         amount: currencyAmountIn,
         quoteCurrency: tokenUSDC,

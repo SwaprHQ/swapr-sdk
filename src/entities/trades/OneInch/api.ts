@@ -1,6 +1,5 @@
 import { ChainId } from '../../../constants'
 
-// const broadcastApiUrl = 'https://tx-gateway.1inch.io/v1.1/' + chainId + '/broadcast'
 const apiBaseUrl = (chainId: number) => 'https://api.1inch.io/v5.0/' + chainId
 
 export enum RequestType {
