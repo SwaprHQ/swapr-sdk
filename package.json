@@ -53,7 +53,7 @@
     "jsbi": "^3.1.1",
     "lodash.flatmap": "^4.5.0",
     "memoizee": "^0.4.15",
-    "node-fetch": "2",
+    "node-fetch": "3",
     "tiny-invariant": "^1.2.0",
     "tiny-warning": "^1.0.3",
     "toformat": "^2.0.0",
