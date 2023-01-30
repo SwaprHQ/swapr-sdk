@@ -5,7 +5,10 @@ import { BaseRoutablePlatform } from './BaseRoutablePlatform'
  * A platform to which Swapr can route through.
  */
 export class RoutablePlatform extends BaseRoutablePlatform {
-  public static readonly ZEROX = new RoutablePlatform([ChainId.MAINNET, ChainId.POLYGON], '0x')
+  public static readonly ZEROX = new RoutablePlatform(
+    [ChainId.MAINNET, ChainId.POLYGON, ChainId.ARBITRUM_ONE, ChainId.BSC_MAINNET, ChainId.OPTIMISM_MAINNET],
+    '0x'
+  )
   public static readonly CURVE = new RoutablePlatform([ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.XDAI], 'Curve')
   public static readonly VELODROME = new RoutablePlatform([ChainId.OPTIMISM_MAINNET], 'Velodrome')
   /**

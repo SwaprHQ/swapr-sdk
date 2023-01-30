@@ -2,10 +2,9 @@ import Decimal from 'decimal.js-light'
 
 import { Percent } from '../../fractions/percent'
 import { Platform } from '../../platforms-breakdown'
-import { CODE_TO_PLATFORM_NAME } from './constants'
 import { ApiSource, DecodeStringFractionReturn } from './types'
 
-export const decodePlatformName = (apiName: string): string => CODE_TO_PLATFORM_NAME[apiName] || apiName
+export const decodePlatformName = (apiName: string): string => apiName.replace(/_/g, ' ')
 
 export const decodeStringFraction = (value: string): DecodeStringFractionReturn => {
   const proportion = new Decimal(value)
