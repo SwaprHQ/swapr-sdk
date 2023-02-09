@@ -1,6 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
-import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
 import ROUTER_ABI from '../../../abis/source/router.json'
@@ -29,6 +28,7 @@ import {
 import { computePriceImpact, inputOutputComparator, toHex, ZERO_HEX } from './utilts'
 
 const DFYN_GAS_LIMIT = 166004
+// const GAS_ESTIMATION_LIMIT = 1000000000000000
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -363,7 +363,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     return bestTrades
   }
 
-  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+  public async swapTransaction(options: TradeOptions) {
     const nativeCurrency = Currency.getNative(this.chainId)
     const etherIn = this.inputAmount.currency === nativeCurrency
     const etherOut = this.outputAmount.currency === nativeCurrency

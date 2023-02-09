@@ -93,6 +93,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       fee: new Percent(JSBI.BigInt(fee), '10000'),
       // Uniswap V3 Router v2 address
       approveAddress: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+      gasEstimated: swapRoute.estimatedGasUsed,
     })
     this.swapRoute = swapRoute
   }
@@ -166,6 +167,8 @@ export class UniswapTrade extends TradeWithSwapTransaction {
 
     // Debug
     debugUniswapTradeGetQuote(routeResponse)
+
+    console.log('routeResponseGAs', routeResponse?.estimatedGasUsed)
 
     if (routeResponse) {
       return new UniswapTrade({ maximumSlippage, swapRoute: routeResponse })
