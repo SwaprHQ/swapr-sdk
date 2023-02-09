@@ -65,7 +65,7 @@ export class OneInchTrade extends Trade {
       priceImpact: new Percent('0', '100'),
       fee: new Percent('0', '10000'),
       approveAddress,
-      gasEstimated: estimatedGas,
+      estimatedGas,
     })
   }
 

@@ -24,7 +24,7 @@ export interface TradeConstructorParams {
   platform: RoutablePlatform
   fee?: Percent
   approveAddress: string
-  gasEstimated?: BigNumber
+  estimatedGas?: BigNumber
 }
 
 /**
@@ -76,7 +76,7 @@ export abstract class Trade {
   /**
    * Estimated gas cost of the trade
    */
-  public readonly gasEstimated?: BigNumber
+  public readonly estimatedGas?: BigNumber
 
   protected constructor({
     details,
@@ -90,7 +90,7 @@ export abstract class Trade {
     platform,
     fee = new Percent('0'),
     approveAddress,
-    gasEstimated,
+    estimatedGas,
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
@@ -103,7 +103,7 @@ export abstract class Trade {
     this.platform = platform
     this.fee = fee
     this.approveAddress = approveAddress
-    this.gasEstimated = gasEstimated
+    this.estimatedGas = estimatedGas
   }
 
   /**

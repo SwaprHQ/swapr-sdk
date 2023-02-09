@@ -44,6 +44,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     callData,
     value,
     priceImpact,
+    estimatedGas,
   }: ZeroXTradeConstructorParams) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
     const chainId = breakdown.chainId
@@ -63,6 +64,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       chainId,
       platform: RoutablePlatform.ZEROX,
       approveAddress: to,
+      estimatedGas,
     })
     this.to = to
     this.callData = callData
@@ -155,7 +157,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         callData: json.data,
         value: json.value,
         priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
-        estimatedGas: BigNumber.from(json.estimatedGas),
+        estimatedGas: BigNumber.from(+json.estimatedGas),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
