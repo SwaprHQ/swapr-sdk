@@ -73,7 +73,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node-fetch": "^2.6.1",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.30.5",
+    "@typescript-eslint/parser": "^5.51.0",
     "@uniswap/sdk-core": "^3.0.1",
     "@uniswap/v3-sdk": "^3.8.3",
     "babel-plugin-transform-jsbi-to-bigint": "^1.4.0",
