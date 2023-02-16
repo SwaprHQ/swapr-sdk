@@ -174,14 +174,14 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
     let bestTrade
     try {
-      const buyToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
-      const sellToken = Currency.isNative(currencyAmountOut.currency)
+      const sellToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
+      const buyToken = Currency.isNative(currencyAmountOut.currency)
         ? currencyAmountOut.currency.symbol
         : tokenOut.address
 
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
       const response = await fetch(
-        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
+        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&buyAmount=${
           amountOut.raw
         }&slippagePercentage=${new Percent(
           maximumSlippage.numerator,
@@ -199,14 +199,14 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           baseCurrency: tokenOut,
           quoteCurrency: tokenIn,
           denominator: amountOut.raw,
-          numerator: json.buyAmount,
+          numerator: json.sellAmount,
         })
       )
       bestTrade = new ZeroXTrade({
         breakdown,
         input: Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(json.buyAmount, chainId)
-          : new TokenAmount(tokenIn, json.buyAmount),
+          ? CurrencyAmount.nativeCurrency(json.sellAmount, chainId)
+          : new TokenAmount(tokenIn, json.sellAmount),
         output: currencyAmountOut,
         maximumSlippage,
         tradeType: TradeType.EXACT_OUTPUT,
