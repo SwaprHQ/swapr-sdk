@@ -14,11 +14,12 @@ import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
 import { Breakdown } from '../../platforms-breakdown'
 import { currencyEquals } from '../../token'
+import { REFFERER_ADDRESS_CHAIN_MAPPING } from '../constants'
 import { TradeWithSwapTransaction } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
-import { ZEROX_API_URL } from './constants'
+import { fee, ZEROX_API_URL } from './constants'
 import { ApiResponse, ZeroXTradeConstructorParams } from './types'
 import { decodeStringToPercent, platformsFromSources } from './utils'
 
@@ -186,7 +187,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         }&slippagePercentage=${new Percent(
           maximumSlippage.numerator,
           JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(3)}`
+        ).toFixed(3)}&feeRecipient=${REFFERER_ADDRESS_CHAIN_MAPPING[chainId]}&buyTokenPercentageFee=${fee}`
       )
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
