@@ -124,7 +124,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         }&slippagePercentage=${new Percent(
           maximumSlippage.numerator,
           JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(4)}`
+        ).toFixed(4)}&feeRecipient=${REFFERER_ADDRESS_CHAIN_MAPPING[chainId]}&buyTokenPercentageFee=${fee}`
       )
 
       if (!response.ok) throw new Error('response not ok')
