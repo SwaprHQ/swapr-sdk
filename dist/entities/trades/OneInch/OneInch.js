@@ -146,6 +146,9 @@ class OneInchTrade extends trade_1.Trade {
             try {
                 // Fetch the unsigned transaction from the API
                 const { tx } = yield (yield fetch((0, api_1.generateApiRequestUrl)({ methodName: api_1.RequestType.SWAP, queryParams, chainId: this.chainId }))).json();
+                if (!tx) {
+                    throw new Error('OneInch.swapTransaction: Error fetching the swap data');
+                }
                 return {
                     data: tx.data,
                     to: tx.to,
