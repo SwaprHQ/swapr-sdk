@@ -127,12 +127,10 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
         ).toFixed(4)}`
       )
-      console.log('0xTrade-response', response)
+
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
-      console.log('0xTrade-gas', json.gas)
-      console.log('0xTrade-esitmatedGas', json.estimatedGas)
-      console.log('0xTrade-gasPric', json.gasPrice)
+
       const breakdown = new Breakdown(
         chainId,
         platformsFromSources(json.sources),
@@ -194,12 +192,10 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
         ).toFixed(3)}`
       )
-      console.log('0xTrade-response', response)
+
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
-      console.log('0xTrade-gas', json.gas)
-      console.log('0xTrade-esitmatedGas', json.estimatedGas)
-      console.log('0xTrade-gasPric', json.gasPrice)
+
       const breakdown = new Breakdown(
         chainId,
         platformsFromSources(json.sources),

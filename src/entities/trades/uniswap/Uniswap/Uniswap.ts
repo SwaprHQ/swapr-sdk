@@ -168,8 +168,6 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     // Debug
     debugUniswapTradeGetQuote(routeResponse)
 
-    console.log('routeResponseGAs', routeResponse?.estimatedGasUsed)
-
     if (routeResponse) {
       return new UniswapTrade({ maximumSlippage, swapRoute: routeResponse })
     }

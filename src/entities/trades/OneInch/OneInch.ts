@@ -132,7 +132,6 @@ export class OneInchTrade extends Trade {
         toTokenAmountApi = toTokenAmountOutput
         gas = estimatedGas
       }
-      console.log('oneInchGas', gas)
 
       const currencyInType = tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut
       const currencyOutType = tradeType === TradeType.EXACT_INPUT ? currencyOut : currencyIn
@@ -204,7 +203,6 @@ export class OneInchTrade extends Trade {
       slippage: this.maximumSlippage.toSignificant(2),
       destReciever: options.recipient,
     }
-    console.log('queryParams1inch', queryParams)
 
     try {
       // Fetch the unsigned transaction from the API
