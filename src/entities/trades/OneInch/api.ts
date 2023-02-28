@@ -16,12 +16,12 @@ interface ApiRequestUrlParams {
 
 //0.1% fee here is link to api https://docs.1inch.io/docs/aggregation-protocol/api/swap-params
 
-const fee = '0' //MIN-> 0 MAX-> 3
+const ONE_INCH_REFFERER_FEE = '0.1' //MIN-> 0 MAX-> 3
 
 export function generateApiRequestUrl({ methodName, queryParams, chainId }: ApiRequestUrlParams) {
-  queryParams.referrerAddress = REFFERER_ADDRESS_CHAIN_MAPPING[chainId] ?? ''
   if (REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) {
-    queryParams.fee = fee
+    queryParams.referrerAddress = REFFERER_ADDRESS_CHAIN_MAPPING[chainId] ?? ''
+    queryParams.fee = ONE_INCH_REFFERER_FEE
   }
 
   return apiBaseUrl(chainId) + methodName + '?' + new URLSearchParams(queryParams).toString()
