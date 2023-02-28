@@ -4,23 +4,20 @@ exports.ZeroXTrade = void 0;
 const tslib_1 = require("tslib");
 const bignumber_1 = require("@ethersproject/bignumber");
 const debug_1 = tslib_1.__importDefault(require("debug"));
-const jsbi_1 = tslib_1.__importDefault(require("jsbi"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const tiny_invariant_1 = tslib_1.__importDefault(require("tiny-invariant"));
 const constants_1 = require("../../../constants");
 const currency_1 = require("../../currency");
 const currencyAmount_1 = require("../../fractions/currencyAmount");
 const fraction_1 = require("../../fractions/fraction");
-const percent_1 = require("../../fractions/percent");
 const price_1 = require("../../fractions/price");
 const tokenAmount_1 = require("../../fractions/tokenAmount");
 const platforms_breakdown_1 = require("../../platforms-breakdown");
 const token_1 = require("../../token");
-const constants_2 = require("../constants");
 const trade_1 = require("../interfaces/trade");
 const routable_platform_1 = require("../routable-platform");
 const utils_1 = require("../utils");
-const constants_3 = require("./constants");
+const constants_2 = require("./constants");
 const utils_2 = require("./utils");
 // Debuging logger. See documentation to enable logging.
 const debug0X = (0, debug_1.default)('ecoRouter:0x');
@@ -83,7 +80,7 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
     static bestTradeExactIn(currencyAmountIn, currencyOut, maximumSlippage) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const chainId = (0, utils_1.tryGetChainId)(currencyAmountIn, currencyOut);
-            const apiUrl = chainId && constants_3.ZEROX_API_URL[chainId];
+            const apiUrl = chainId && constants_2.ZEROX_API_URL[chainId];
             (0, tiny_invariant_1.default)(chainId !== undefined && apiUrl !== undefined && apiUrl.length > 0, 'CHAIN_ID');
             const amountIn = (0, utils_1.wrappedAmount)(currencyAmountIn, chainId);
             const tokenIn = (0, utils_1.wrappedCurrency)(currencyAmountIn.currency, chainId);
@@ -95,8 +92,16 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
                 const sellToken = currency_1.Currency.isNative(currencyAmountIn.currency)
                     ? currencyAmountIn.currency.symbol
                     : tokenIn.address;
+                const apiUrlParams = (0, utils_2.build0xApiUrl)({
+                    apiUrl,
+                    amount: amountIn,
+                    maximumSlippage,
+                    chainId,
+                    buyToken,
+                    sellToken,
+                });
                 // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-                const response = yield (0, node_fetch_1.default)(`${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${amountIn.raw}&slippagePercentage=${new percent_1.Percent(maximumSlippage.numerator, jsbi_1.default.multiply(maximumSlippage.denominator, jsbi_1.default.BigInt(100))).toFixed(4)}&feeRecipient=${constants_2.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]}&buyTokenPercentageFee=${constants_3.fee}`);
+                const response = yield (0, node_fetch_1.default)(apiUrlParams);
                 if (!response.ok)
                     throw new Error('response not ok');
                 const json = (yield response.json());
@@ -129,7 +134,7 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
     static bestTradeExactOut(currencyIn, currencyAmountOut, maximumSlippage) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const chainId = (0, utils_1.tryGetChainId)(currencyAmountOut, currencyIn);
-            const apiUrl = chainId && constants_3.ZEROX_API_URL[chainId];
+            const apiUrl = chainId && constants_2.ZEROX_API_URL[chainId];
             (0, tiny_invariant_1.default)(chainId !== undefined && apiUrl !== undefined && apiUrl.length > 0, 'CHAIN_ID');
             const tokenIn = (0, utils_1.wrappedCurrency)(currencyIn, chainId);
             const amountOut = (0, utils_1.wrappedAmount)(currencyAmountOut, chainId);
@@ -141,8 +146,16 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
                 const sellToken = currency_1.Currency.isNative(currencyAmountOut.currency)
                     ? currencyAmountOut.currency.symbol
                     : tokenOut.address;
+                const apiUrlParams = (0, utils_2.build0xApiUrl)({
+                    apiUrl,
+                    amount: amountOut,
+                    maximumSlippage,
+                    chainId,
+                    buyToken,
+                    sellToken,
+                });
                 // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-                const response = yield (0, node_fetch_1.default)(`${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${amountOut.raw}&slippagePercentage=${new percent_1.Percent(maximumSlippage.numerator, jsbi_1.default.multiply(maximumSlippage.denominator, jsbi_1.default.BigInt(100))).toFixed(3)}&feeRecipient=${constants_2.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]}&buyTokenPercentageFee=${constants_3.fee}`);
+                const response = yield (0, node_fetch_1.default)(apiUrlParams);
                 if (!response.ok)
                     throw new Error('response not ok');
                 const json = (yield response.json());

@@ -9,12 +9,12 @@ var RequestType;
     RequestType["SWAP"] = "/swap";
 })(RequestType = exports.RequestType || (exports.RequestType = {}));
 //0.1% fee here is link to api https://docs.1inch.io/docs/aggregation-protocol/api/swap-params
-const fee = '0'; //MIN-> 0 MAX-> 3
+const ONE_INCH_REFFERER_FEE = '0.1'; //MIN-> 0 MAX-> 3
 function generateApiRequestUrl({ methodName, queryParams, chainId }) {
     var _a;
-    queryParams.referrerAddress = (_a = constants_1.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) !== null && _a !== void 0 ? _a : '';
     if (constants_1.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) {
-        queryParams.fee = fee;
+        queryParams.referrerAddress = (_a = constants_1.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) !== null && _a !== void 0 ? _a : '';
+        queryParams.fee = ONE_INCH_REFFERER_FEE;
     }
     return apiBaseUrl(chainId) + methodName + '?' + new URLSearchParams(queryParams).toString();
 }
