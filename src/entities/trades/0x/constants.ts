@@ -16,4 +16,4 @@ export const ZEROX_API_URL: Record<ChainId, string> = {
 }
 //API DOCS TO REFRENCE THIS https://docs.0x.org/0x-api-swap/api-references/get-swap-v1-quote
 //buyTOkenPercetageFee value
-export const fee = '0' //MIN-> 0. MAX-> 1 percent
+export const ZERO_OX_REFFERER_FEE = '0' //MIN-> 0. MAX-> 1 percent
