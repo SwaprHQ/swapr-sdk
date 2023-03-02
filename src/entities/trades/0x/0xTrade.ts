@@ -155,7 +155,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         callData: json.data,
         value: json.value,
         priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
-        estimatedGas: BigNumber.from(+json.estimatedGas),
+        estimatedGas: BigNumber.from(json.estimatedGas),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)

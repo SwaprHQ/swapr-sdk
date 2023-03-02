@@ -28,7 +28,6 @@ import {
 import { computePriceImpact, inputOutputComparator, toHex, ZERO_HEX } from './utilts'
 
 const DFYN_GAS_LIMIT = 166004
-// const GAS_ESTIMATION_LIMIT = 1000000000000000
 
 /**
  * Represents a trade executed against a list of pairs.
