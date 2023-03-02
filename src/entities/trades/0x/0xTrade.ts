@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import createDebug from 'debug'
-import JSBI from 'jsbi'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
@@ -20,7 +19,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
 import { ZEROX_API_URL } from './constants'
 import { ApiResponse, ZeroXTradeConstructorParams } from './types'
-import { decodeStringToPercent, platformsFromSources } from './utils'
+import { build0xApiUrl, decodeStringToPercent, platformsFromSources } from './utils'
 
 // Debuging logger. See documentation to enable logging.
 const debug0X = createDebug('ecoRouter:0x')
@@ -116,15 +115,16 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         ? currencyAmountIn.currency.symbol
         : tokenIn.address
 
+      const apiUrlParams = build0xApiUrl({
+        apiUrl,
+        amount: amountIn,
+        maximumSlippage,
+        chainId,
+        buyToken,
+        sellToken,
+      })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(
-        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
-          amountIn.raw
-        }&slippagePercentage=${new Percent(
-          maximumSlippage.numerator,
-          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(4)}`
-      )
+      const response = await fetch(apiUrlParams)
 
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
@@ -178,16 +178,16 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       const sellToken = Currency.isNative(currencyAmountOut.currency)
         ? currencyAmountOut.currency.symbol
         : tokenOut.address
-
+      const apiUrlParams = build0xApiUrl({
+        apiUrl,
+        amount: amountOut,
+        maximumSlippage,
+        chainId,
+        buyToken,
+        sellToken,
+      })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(
-        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
-          amountOut.raw
-        }&slippagePercentage=${new Percent(
-          maximumSlippage.numerator,
-          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(3)}`
-      )
+      const response = await fetch(apiUrlParams)
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
       const breakdown = new Breakdown(
