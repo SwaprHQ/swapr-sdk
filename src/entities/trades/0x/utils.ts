@@ -49,7 +49,7 @@ export function build0xApiUrl({ apiUrl, amount, maximumSlippage, chainId, buyTok
   const slippagePercentage = new Percent(
     maximumSlippage.numerator,
     JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-  ).toFixed(4)
+  ).toFixed(3)
 
   let apiUrlWithParams = `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${amount.raw}&slippagePercentage=${slippagePercentage}`
 
