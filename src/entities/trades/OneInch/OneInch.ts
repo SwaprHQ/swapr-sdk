@@ -209,7 +209,9 @@ export class OneInchTrade extends Trade {
       const { tx } = await (
         await fetch(generateApiRequestUrl({ methodName: RequestType.SWAP, queryParams, chainId: this.chainId }))
       ).json()
-
+      if (!tx) {
+        throw new Error('OneInch.swapTransaction: Error fetching the swap data')
+      }
       return {
         data: tx.data,
         to: tx.to,
