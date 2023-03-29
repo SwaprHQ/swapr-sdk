@@ -38,20 +38,33 @@ export const platformsFromSources = (sources: ApiSource[]): Platform[] => {
 
 interface ApiParams {
   apiUrl: string
-  amount: TokenAmount
+  sellAmount?: TokenAmount
+  buyAmount?: TokenAmount
   maximumSlippage: Percent
   chainId: ChainId
   buyToken?: string
   sellToken?: string
 }
 
-export function build0xApiUrl({ apiUrl, amount, maximumSlippage, chainId, buyToken, sellToken }: ApiParams) {
+export function build0xApiUrl({
+  apiUrl,
+  sellAmount,
+  buyAmount,
+  maximumSlippage,
+  chainId,
+  buyToken,
+  sellToken,
+}: ApiParams) {
   const slippagePercentage = new Percent(
     maximumSlippage.numerator,
     JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
   ).toFixed(3)
 
-  let apiUrlWithParams = `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${amount.raw}&slippagePercentage=${slippagePercentage}`
+  let amountParam = ''
+  if (!!sellAmount) amountParam = `sellAmount=${sellAmount.raw}`
+  else if (!!buyAmount) amountParam = `buyAmount=${buyAmount.raw}`
+
+  let apiUrlWithParams = `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&${amountParam}&slippagePercentage=${slippagePercentage}`
 
   if (REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) {
     const feeRecipient = REFFERER_ADDRESS_CHAIN_MAPPING[chainId]
