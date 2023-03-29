@@ -34,9 +34,14 @@ const platformsFromSources = (sources) => {
         .sort((a, b) => (a.percentage.greaterThan(b.percentage) ? -1 : a.percentage.equalTo(b.percentage) ? 0 : 1));
 };
 exports.platformsFromSources = platformsFromSources;
-function build0xApiUrl({ apiUrl, amount, maximumSlippage, chainId, buyToken, sellToken }) {
+function build0xApiUrl({ apiUrl, sellAmount, buyAmount, maximumSlippage, chainId, buyToken, sellToken, }) {
     const slippagePercentage = new percent_1.Percent(maximumSlippage.numerator, jsbi_1.default.multiply(maximumSlippage.denominator, jsbi_1.default.BigInt(100))).toFixed(3);
-    let apiUrlWithParams = `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${amount.raw}&slippagePercentage=${slippagePercentage}`;
+    let amountParam = '';
+    if (!!sellAmount)
+        amountParam = `sellAmount=${sellAmount.raw}`;
+    else if (!!buyAmount)
+        amountParam = `buyAmount=${buyAmount.raw}`;
+    let apiUrlWithParams = `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&${amountParam}&slippagePercentage=${slippagePercentage}`;
     if (constants_1.REFFERER_ADDRESS_CHAIN_MAPPING[chainId]) {
         const feeRecipient = constants_1.REFFERER_ADDRESS_CHAIN_MAPPING[chainId];
         apiUrlWithParams += `&feeRecipient=${feeRecipient}&buyTokenPercentageFee=${constants_2.ZERO_OX_REFFERER_FEE}`;

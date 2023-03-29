@@ -9,11 +9,12 @@ export declare const decodeStringToPercent: (value: string, isStringPercent?: bo
 export declare const platformsFromSources: (sources: ApiSource[]) => Platform[];
 interface ApiParams {
     apiUrl: string;
-    amount: TokenAmount;
+    sellAmount?: TokenAmount;
+    buyAmount?: TokenAmount;
     maximumSlippage: Percent;
     chainId: ChainId;
     buyToken?: string;
     sellToken?: string;
 }
-export declare function build0xApiUrl({ apiUrl, amount, maximumSlippage, chainId, buyToken, sellToken }: ApiParams): string;
+export declare function build0xApiUrl({ apiUrl, sellAmount, buyAmount, maximumSlippage, chainId, buyToken, sellToken, }: ApiParams): string;
 export {};

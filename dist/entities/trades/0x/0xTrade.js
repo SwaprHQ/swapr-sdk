@@ -95,7 +95,7 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
                     : tokenIn.address;
                 const apiUrlParams = (0, utils_2.build0xApiUrl)({
                     apiUrl,
-                    amount: amountIn,
+                    sellAmount: amountIn,
                     maximumSlippage,
                     chainId,
                     buyToken,
@@ -150,7 +150,7 @@ class ZeroXTrade extends trade_1.TradeWithSwapTransaction {
                     : tokenOut.address;
                 const apiUrlParams = (0, utils_2.build0xApiUrl)({
                     apiUrl,
-                    amount: amountOut,
+                    buyAmount: amountOut,
                     maximumSlippage,
                     chainId,
                     buyToken,
