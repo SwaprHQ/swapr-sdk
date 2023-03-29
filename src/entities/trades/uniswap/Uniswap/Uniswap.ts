@@ -93,6 +93,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       fee: new Percent(JSBI.BigInt(fee), '10000'),
       // Uniswap V3 Router v2 address
       approveAddress: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+      estimatedGas: swapRoute.estimatedGasUsed,
     })
     this.swapRoute = swapRoute
   }

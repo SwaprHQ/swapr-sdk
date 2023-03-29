@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
@@ -31,6 +32,7 @@ interface OneInchConstructorParams {
   tradeType: TradeType
   chainId: ChainId
   approveAddress: string
+  estimatedGas: BigNumber
 }
 
 /**
@@ -44,6 +46,7 @@ export class OneInchTrade extends Trade {
     tradeType,
     chainId,
     approveAddress,
+    estimatedGas,
   }: OneInchConstructorParams) {
     super({
       details: undefined,
@@ -62,6 +65,7 @@ export class OneInchTrade extends Trade {
       priceImpact: new Percent('0', '100'),
       fee: new Percent('0', '10000'),
       approveAddress,
+      estimatedGas,
     })
   }
 
@@ -88,6 +92,7 @@ export class OneInchTrade extends Trade {
 
     // Ensure that the currencies are present
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
+    let gas
 
     try {
       //Fetch approve address
@@ -101,10 +106,10 @@ export class OneInchTrade extends Trade {
       }
 
       // Fetch the quote from the API
-      const { fromTokenAmount, toTokenAmount } = await (
+      const { fromTokenAmount, toTokenAmount, estimatedGas } = await (
         await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
       ).json()
-
+      gas = estimatedGas
       let fromTokenAmountApi = fromTokenAmount
       let toTokenAmountApi = toTokenAmount
 
@@ -117,12 +122,15 @@ export class OneInchTrade extends Trade {
           amount: toTokenAmount.toString(),
         }
 
-        const { toTokenAmount: toTokenAmountOutput, fromTokenAmount } = await (
-          await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
-        ).json()
+        const {
+          toTokenAmount: toTokenAmountOutput,
+          fromTokenAmount,
+          estimatedGas,
+        } = await (await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))).json()
 
         fromTokenAmountApi = fromTokenAmount
         toTokenAmountApi = toTokenAmountOutput
+        gas = estimatedGas
       }
 
       const currencyInType = tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut
@@ -142,6 +150,7 @@ export class OneInchTrade extends Trade {
         tradeType,
         chainId,
         approveAddress,
+        estimatedGas: BigNumber.from(gas),
       })
     } catch (error) {
       console.error('OneInch.getQuote: Error fetching the quote:', error.message)
