@@ -119,7 +119,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
       const apiUrlParams = build0xApiUrl({
         apiUrl,
-        amount: amountIn,
+        sellAmount: amountIn,
         maximumSlippage,
         chainId,
         buyToken,
@@ -178,13 +178,13 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
     let bestTrade
     try {
-      const buyToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
-      const sellToken = Currency.isNative(currencyAmountOut.currency)
+      const sellToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
+      const buyToken = Currency.isNative(currencyAmountOut.currency)
         ? currencyAmountOut.currency.symbol
         : tokenOut.address
       const apiUrlParams = build0xApiUrl({
         apiUrl,
-        amount: amountOut,
+        buyAmount: amountOut,
         maximumSlippage,
         chainId,
         buyToken,
@@ -204,14 +204,14 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           baseCurrency: tokenOut,
           quoteCurrency: tokenIn,
           denominator: amountOut.raw,
-          numerator: json.buyAmount,
+          numerator: json.sellAmount,
         })
       )
       bestTrade = new ZeroXTrade({
         breakdown,
         input: Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(json.buyAmount, chainId)
-          : new TokenAmount(tokenIn, json.buyAmount),
+          ? CurrencyAmount.nativeCurrency(json.sellAmount, chainId)
+          : new TokenAmount(tokenIn, json.sellAmount),
         output: currencyAmountOut,
         maximumSlippage,
         tradeType: TradeType.EXACT_OUTPUT,
