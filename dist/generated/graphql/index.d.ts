@@ -5066,9 +5066,9 @@ export type TokenDetailsFragment = {
     symbol: string;
     decimals: any;
 };
-export declare const TokenDetailsFragmentDoc: import("graphql").DocumentNode;
-export declare const PairDetailsFragmentDoc: import("graphql").DocumentNode;
-export declare const GetAllCommonPairsBetweenTokenAAndTokenBDocument: import("graphql").DocumentNode;
+export declare const TokenDetailsFragmentDoc: import("graphql/language/ast").DocumentNode;
+export declare const PairDetailsFragmentDoc: import("graphql/language/ast").DocumentNode;
+export declare const GetAllCommonPairsBetweenTokenAAndTokenBDocument: import("graphql/language/ast").DocumentNode;
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?: Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
 export declare function getSdk(client: GraphQLClient, withWrapper?: SdkFunctionWrapper): {
     GetAllCommonPairsBetweenTokenAAndTokenB(variables: GetAllCommonPairsBetweenTokenAAndTokenBQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetAllCommonPairsBetweenTokenAAndTokenBQuery>;

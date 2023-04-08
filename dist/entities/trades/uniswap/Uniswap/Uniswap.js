@@ -102,6 +102,7 @@ class UniswapTrade extends trade_1.TradeWithSwapTransaction {
                 alphaRouter,
             });
             const routeResponse = yield alphaRouter.route(amountV3, quoteCurrencyV3, tradeType, {
+                type: smart_order_router_1.SwapType.SWAP_ROUTER_02,
                 recipient,
                 slippageTolerance: new sdk_core_1.Percent(maximumSlippage.numerator, maximumSlippage.denominator),
                 deadline: (0, dayjs_1.default)().add(30, 'm').unix(),
