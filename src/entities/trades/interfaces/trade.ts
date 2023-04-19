@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 
 import type { ChainId, TradeType } from '../../../constants'
@@ -23,6 +24,7 @@ export interface TradeConstructorParams {
   platform: RoutablePlatform
   fee?: Percent
   approveAddress: string
+  estimatedGas?: BigNumber
 }
 
 /**
@@ -71,6 +73,10 @@ export abstract class Trade {
    * The trade fee
    */
   public readonly fee: Percent
+  /**
+   * Estimated gas cost of the trade
+   */
+  public readonly estimatedGas?: BigNumber
 
   protected constructor({
     details,
@@ -84,6 +90,7 @@ export abstract class Trade {
     platform,
     fee = new Percent('0'),
     approveAddress,
+    estimatedGas,
   }: TradeConstructorParams) {
     this.details = details
     this.tradeType = type
@@ -96,6 +103,7 @@ export abstract class Trade {
     this.platform = platform
     this.fee = fee
     this.approveAddress = approveAddress
+    this.estimatedGas = estimatedGas
   }
 
   /**

@@ -1,6 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
-import type { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
 
 import ROUTER_ABI from '../../../abis/source/router.json'
@@ -363,7 +362,7 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
     return bestTrades
   }
 
-  public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
+  public async swapTransaction(options: TradeOptions) {
     const nativeCurrency = Currency.getNative(this.chainId)
     const etherIn = this.inputAmount.currency === nativeCurrency
     const etherOut = this.outputAmount.currency === nativeCurrency

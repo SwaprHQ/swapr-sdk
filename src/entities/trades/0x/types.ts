@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import Decimal from 'decimal.js-light'
 
 import { TradeType } from '../../../constants'
@@ -40,6 +41,7 @@ export interface ZeroXTradeConstructorParams {
   callData: string
   value: string
   priceImpact: Percent
+  estimatedGas: BigNumber
 }
 
 export interface DecodeStringFractionReturn {

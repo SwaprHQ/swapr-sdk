@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { UnsignedTransaction } from '@ethersproject/transactions'
 import createDebug from 'debug'
-import JSBI from 'jsbi'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
@@ -20,7 +19,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { tryGetChainId, wrappedAmount, wrappedCurrency } from '../utils'
 import { ZEROX_API_URL } from './constants'
 import { ApiResponse, ZeroXTradeConstructorParams } from './types'
-import { decodeStringToPercent, platformsFromSources } from './utils'
+import { build0xApiUrl, decodeStringToPercent, platformsFromSources } from './utils'
 
 // Debuging logger. See documentation to enable logging.
 const debug0X = createDebug('ecoRouter:0x')
@@ -44,6 +43,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
     callData,
     value,
     priceImpact,
+    estimatedGas,
   }: ZeroXTradeConstructorParams) {
     invariant(!currencyEquals(input.currency, output.currency), 'CURRENCY')
     const chainId = breakdown.chainId
@@ -63,6 +63,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
       chainId,
       platform: RoutablePlatform.ZEROX,
       approveAddress: to,
+      estimatedGas,
     })
     this.to = to
     this.callData = callData
@@ -116,18 +117,20 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         ? currencyAmountIn.currency.symbol
         : tokenIn.address
 
+      const apiUrlParams = build0xApiUrl({
+        apiUrl,
+        sellAmount: amountIn,
+        maximumSlippage,
+        chainId,
+        buyToken,
+        sellToken,
+      })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(
-        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
-          amountIn.raw
-        }&slippagePercentage=${new Percent(
-          maximumSlippage.numerator,
-          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(4)}`
-      )
+      const response = await fetch(apiUrlParams)
 
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
+
       const breakdown = new Breakdown(
         chainId,
         platformsFromSources(json.sources),
@@ -152,6 +155,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         callData: json.data,
         value: json.value,
         priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
+        estimatedGas: BigNumber.from(json.estimatedGas),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
@@ -174,22 +178,23 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
 
     let bestTrade
     try {
-      const buyToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
-      const sellToken = Currency.isNative(currencyAmountOut.currency)
+      const sellToken = Currency.isNative(currencyIn) ? currencyIn.symbol : tokenIn.address
+      const buyToken = Currency.isNative(currencyAmountOut.currency)
         ? currencyAmountOut.currency.symbol
         : tokenOut.address
-
+      const apiUrlParams = build0xApiUrl({
+        apiUrl,
+        buyAmount: amountOut,
+        maximumSlippage,
+        chainId,
+        buyToken,
+        sellToken,
+      })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(
-        `${apiUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${
-          amountOut.raw
-        }&slippagePercentage=${new Percent(
-          maximumSlippage.numerator,
-          JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
-        ).toFixed(3)}`
-      )
+      const response = await fetch(apiUrlParams)
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
+
       const breakdown = new Breakdown(
         chainId,
         platformsFromSources(json.sources),
@@ -199,14 +204,14 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           baseCurrency: tokenOut,
           quoteCurrency: tokenIn,
           denominator: amountOut.raw,
-          numerator: json.buyAmount,
+          numerator: json.sellAmount,
         })
       )
       bestTrade = new ZeroXTrade({
         breakdown,
         input: Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(json.buyAmount, chainId)
-          : new TokenAmount(tokenIn, json.buyAmount),
+          ? CurrencyAmount.nativeCurrency(json.sellAmount, chainId)
+          : new TokenAmount(tokenIn, json.sellAmount),
         output: currencyAmountOut,
         maximumSlippage,
         tradeType: TradeType.EXACT_OUTPUT,
@@ -214,6 +219,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         callData: json.data,
         value: json.value,
         priceImpact: decodeStringToPercent(json.estimatedPriceImpact, true),
+        estimatedGas: BigNumber.from(json.estimatedGas),
       })
     } catch (error) {
       console.error('could not fetch 0x trade', error)
