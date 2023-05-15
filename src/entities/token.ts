@@ -11,6 +11,27 @@ export class Token extends Currency {
   public readonly chainId: ChainId
   public readonly address: string
 
+  public static readonly ARB: Record<number, Token> = {
+    /**
+     * @see https://docs.arbitrum.foundation/deployment-addresses for token info
+     */
+    [ChainId.ARBITRUM_GOERLI]: new Token(
+      ChainId.ARBITRUM_GOERLI,
+      '0xF861378B543525ae0C47d33C90C954Dc774Ac1F9',
+      18,
+      'ARB',
+      'DXdao'
+    ),
+    [ChainId.ARBITRUM_ONE]: new Token(
+      ChainId.ARBITRUM_ONE,
+      '0x912CE59144191C1204E64559FE8253a0e49E6548',
+      18,
+      'ARB',
+      'DXdao'
+    ),
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1', 18, 'ARB', 'DXdao'),
+  }
+
   public static readonly BUSD: Record<number, Token> = {
     [ChainId.BSC_MAINNET]: new Token(
       ChainId.BSC_MAINNET,
@@ -259,6 +280,9 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
 }
 
 // reexport for convenience
+export const ARB = Token.ARB
+export const BUSD = Token.BUSD
+export const CAKE = Token.CAKE
 export const DXD = Token.DXD
 export const SWPR = Token.SWPR
 export const WBNB = Token.WBNB
