@@ -20,16 +20,16 @@ export class Token extends Currency {
       '0xF861378B543525ae0C47d33C90C954Dc774Ac1F9',
       18,
       'ARB',
-      'DXdao'
+      'Arbitrum'
     ),
     [ChainId.ARBITRUM_ONE]: new Token(
       ChainId.ARBITRUM_ONE,
       '0x912CE59144191C1204E64559FE8253a0e49E6548',
       18,
       'ARB',
-      'DXdao'
+      'Arbitrum'
     ),
-    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1', 18, 'ARB', 'DXdao'),
+    [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1', 18, 'ARB', 'Arbitrum'),
   }
 
   public static readonly BUSD: Record<number, Token> = {
