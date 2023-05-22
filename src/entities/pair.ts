@@ -68,6 +68,9 @@ let PAIR_ADDRESS_CACHE: {
   [UniswapV2RoutablePlatform.DFYN.name]: {
     ...INITIAL_CACHE_STATE,
   },
+  [UniswapV2RoutablePlatform.BISWAP.name]: {
+    ...INITIAL_CACHE_STATE,
+  },
 }
 
 export class Pair {
