@@ -57,6 +57,14 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
     parseUnits('0.05', Token.getNative(ChainId.BSC_TESTNET).decimals).toString(),
     ChainId.BSC_TESTNET
   ),
+  [ChainId.ZK_SYNC_ERA_MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0', Token.getNative(ChainId.ZK_SYNC_ERA_MAINNET).decimals).toString(),
+    ChainId.ZK_SYNC_ERA_MAINNET
+  ),
+  [ChainId.ZK_SYNC_ERA_TESTNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0', Token.getNative(ChainId.ZK_SYNC_ERA_TESTNET).decimals).toString(),
+    ChainId.ZK_SYNC_ERA_TESTNET
+  ),
 }
 
 export interface DistributionCampaignBaseConstructoParams {

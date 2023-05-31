@@ -50,6 +50,11 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
 
 /**
  * List of RPC provider URLs for different chains.
+ * @see https://chainlist.org/ lookup Chain info
+ */
+/**
+ * @TODO in https://linear.app/swaprdev/issue/SWA-65/provide-a-single-source-of-truth-for-chain-rpcs-from-the-sdk
+ * Make `RPC_PROVIDER_LIST` exportable from this repo
  */
 export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
@@ -64,6 +69,8 @@ export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.OPTIMISM_GOERLI]: 'https://goerli.optimism.io',
   [ChainId.BSC_MAINNET]: 'https://bsc-dataseed1.binance.org/',
   [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [ChainId.ZK_SYNC_ERA_MAINNET]: 'https://mainnet.era.zksync.io',
+  [ChainId.ZK_SYNC_ERA_TESTNET]: 'https://testnet.era.zksync.dev',
 }
 
 /**

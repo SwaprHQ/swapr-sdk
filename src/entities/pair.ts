@@ -34,6 +34,8 @@ const INITIAL_CACHE_STATE: Record<ChainId, any> = {
   [ChainId.OPTIMISM_GOERLI]: {},
   [ChainId.BSC_MAINNET]: {},
   [ChainId.BSC_TESTNET]: {},
+  [ChainId.ZK_SYNC_ERA_MAINNET]: {},
+  [ChainId.ZK_SYNC_ERA_TESTNET]: {},
 }
 
 let PAIR_ADDRESS_CACHE: {
