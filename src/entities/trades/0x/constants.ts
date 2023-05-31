@@ -1,7 +1,8 @@
 import { ChainId } from '../../../constants/chains'
 
 /**
- * For API endpoints reference, @see https://0x.org/docs/introduction/0x-cheat-sheet
+ * For API endpoints reference,
+ * @see https://0x.org/docs/introduction/0x-cheat-sheet
  */
 export const ZEROX_API_URL: Record<ChainId, string> = {
   [ChainId.MAINNET]: 'https://api.0x.org/',
