@@ -497,13 +497,19 @@ export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
   [ChainId.RINKEBY]: '',
   [ChainId.ARBITRUM_RINKEBY]: '',
   [ChainId.GOERLI]: '',
-  [ChainId.OPTIMISM_MAINNET]: '',
+  [ChainId.OPTIMISM_MAINNET]: 'optimism',
   [ChainId.OPTIMISM_GOERLI]: '',
   [ChainId.ARBITRUM_GOERLI]: '',
   [ChainId.BSC_MAINNET]: '',
   [ChainId.BSC_TESTNET]: '',
+  [ChainId.ZK_SYNC_ERA_MAINNET]: '',
+  [ChainId.ZK_SYNC_ERA_TESTNET]: '',
 }
 
+/**
+ * @TODO add missing Optimisn and Polygon pools.
+ * TBD in https://linear.app/swaprdev/issue/SWA-61/add-curve-pools-and-tokens-for-polygon-and-optimism-in-the-sdk
+ */
 export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.MAINNET]: POOLS_MAINNET,
   [ChainId.XDAI]: POOLS_XDAI,
@@ -518,4 +524,6 @@ export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
   [ChainId.OPTIMISM_GOERLI]: [],
   [ChainId.BSC_MAINNET]: [],
   [ChainId.BSC_TESTNET]: [],
+  [ChainId.ZK_SYNC_ERA_MAINNET]: [],
+  [ChainId.ZK_SYNC_ERA_TESTNET]: [],
 }

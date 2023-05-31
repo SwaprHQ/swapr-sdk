@@ -2,6 +2,10 @@ import { ChainId } from '../../../constants'
 import { DXD, Token, WBNB, WETH, WMATIC, WXDAI } from '../../token'
 
 // a list of tokens by chain
+/**
+ * @TODO check why we have 2 different token lists here and
+ * src/entities/token.ts
+ */
 type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
 }
@@ -94,6 +98,20 @@ export const USDC: Record<number, Token> = {
     6,
     'USDC',
     'USDC Token'
+  ),
+  [ChainId.ZK_SYNC_ERA_MAINNET]: new Token(
+    ChainId.ZK_SYNC_ERA_MAINNET,
+    '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4',
+    6,
+    'USDC',
+    'USD Coin on zkSync Era'
+  ),
+  [ChainId.ZK_SYNC_ERA_TESTNET]: new Token(
+    ChainId.ZK_SYNC_ERA_TESTNET,
+    '0x0faF6df7054946141266420b43783387A78d82A9',
+    6,
+    'USDC',
+    'USD Coin on zkSync Era Tesnet'
   ),
 }
 
@@ -241,4 +259,6 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     USDC[ChainId.BSC_MAINNET],
   ],
   [ChainId.BSC_TESTNET]: [DAI[ChainId.BSC_TESTNET], USDT[ChainId.BSC_TESTNET], USDC[ChainId.BSC_TESTNET]],
+  [ChainId.ZK_SYNC_ERA_MAINNET]: [USDC[ChainId.ZK_SYNC_ERA_MAINNET], WETH[ChainId.ZK_SYNC_ERA_MAINNET]],
+  [ChainId.ZK_SYNC_ERA_TESTNET]: [USDC[ChainId.ZK_SYNC_ERA_TESTNET], WETH[ChainId.ZK_SYNC_ERA_TESTNET]],
 }
