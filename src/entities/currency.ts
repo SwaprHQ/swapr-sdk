@@ -28,12 +28,6 @@ export class Currency {
     'Ether',
     '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000'
   )
-  public static readonly ZK_SYNC_ERA_ETHER: Currency = new Currency(
-    18,
-    'ETH',
-    'Ether',
-    '0x0000000000000000000000000000000000000000'
-  )
   /**
    * Gnosis Chain native currency
    */
@@ -62,8 +56,8 @@ export class Currency {
     [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
     [ChainId.BSC_MAINNET]: Currency.BNB,
     [ChainId.BSC_TESTNET]: Currency.BNB,
-    [ChainId.ZK_SYNC_ERA_MAINNET]: Currency.ZK_SYNC_ERA_ETHER,
-    [ChainId.ZK_SYNC_ERA_TESTNET]: Currency.ZK_SYNC_ERA_ETHER,
+    [ChainId.ZK_SYNC_ERA_MAINNET]: Currency.ETHER,
+    [ChainId.ZK_SYNC_ERA_TESTNET]: Currency.ETHER,
   }
 
   /**
