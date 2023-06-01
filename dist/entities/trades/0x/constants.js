@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZERO_OX_REFFERER_FEE = exports.ZEROX_API_URL = void 0;
 const chains_1 = require("../../../constants/chains");
 /**
- * For API endpoints reference, @see https://0x.org/docs/introduction/0x-cheat-sheet
+ * For API endpoints reference,
+ * @see https://0x.org/docs/introduction/0x-cheat-sheet
  */
 exports.ZEROX_API_URL = {
     [chains_1.ChainId.MAINNET]: 'https://api.0x.org/',
