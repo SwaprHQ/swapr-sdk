@@ -40,7 +40,6 @@ Currency.USD = new Currency(18, 'USD', 'US dollar');
  */
 Currency.ETHER = new Currency(18, 'ETH', 'Ether', NULL_ADDRESS);
 Currency.OPTIMISM_ETHER = new Currency(18, 'ETH', 'Ether', '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000');
-Currency.ZK_SYNC_ERA_ETHER = new Currency(18, 'ETH', 'Ether', '0x0000000000000000000000000000000000000000');
 /**
  * Gnosis Chain native currency
  */
@@ -66,8 +65,8 @@ Currency.NATIVE_CURRENCY = {
     [constants_1.ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
     [constants_1.ChainId.BSC_MAINNET]: Currency.BNB,
     [constants_1.ChainId.BSC_TESTNET]: Currency.BNB,
-    [constants_1.ChainId.ZK_SYNC_ERA_MAINNET]: Currency.ZK_SYNC_ERA_ETHER,
-    [constants_1.ChainId.ZK_SYNC_ERA_TESTNET]: Currency.ZK_SYNC_ERA_ETHER,
+    [constants_1.ChainId.ZK_SYNC_ERA_MAINNET]: Currency.ETHER,
+    [constants_1.ChainId.ZK_SYNC_ERA_TESTNET]: Currency.ETHER,
 };
 exports.USD = Currency.USD;
 exports.ETHER = Currency.ETHER;

@@ -25,5 +25,6 @@ RoutablePlatform.ONE_INCH = new RoutablePlatform([
     constants_1.ChainId.OPTIMISM_MAINNET,
     constants_1.ChainId.GNOSIS,
     constants_1.ChainId.BSC_MAINNET,
+    constants_1.ChainId.ZK_SYNC_ERA_MAINNET,
 ], '1Inch');
 //# sourceMappingURL=RoutablePlatform.js.map
