@@ -9,7 +9,7 @@ import {
   Percent as UniswapPercent,
   Token as UniswapToken,
 } from '@uniswap/sdk-core'
-import { AlphaRouter, SwapRoute } from '@uniswap/smart-order-router'
+import { AlphaRouter, SwapRoute, SwapType } from '@uniswap/smart-order-router'
 import { Pair as UniswapV2Pair } from '@uniswap/v2-sdk'
 import dayjs from 'dayjs'
 import debug from 'debug'
@@ -156,6 +156,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       quoteCurrencyV3,
       tradeType,
       {
+        type: SwapType.SWAP_ROUTER_02,
         recipient,
         slippageTolerance: new UniswapPercent(maximumSlippage.numerator, maximumSlippage.denominator),
         deadline: dayjs().add(30, 'm').unix(),

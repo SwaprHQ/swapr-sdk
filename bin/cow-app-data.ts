@@ -1,11 +1,11 @@
-import { CowSdk, AppDataDoc, IpfsHashInfo } from '@cowprotocol/cow-sdk'
+import { CowSdk, IpfsHashInfo, LatestAppDataDocVersion } from '@cowprotocol/cow-sdk'
 import { writeFile } from 'fs/promises'
-import { hideBin } from 'yargs/helpers'
 import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 export interface GnosisProtocolMetadata {
   ipfsHashInfo: IpfsHashInfo
-  content: AppDataDoc
+  content: LatestAppDataDocVersion
 }
 
 const argv = yargs(hideBin(process.argv))
@@ -50,17 +50,16 @@ export async function getOrderMetadata({
     },
   })
 
-  const content = await cowSdkInstance.metadataApi.generateAppDataDoc(
-    {
-      referrer: {
+  const content = await cowSdkInstance.metadataApi.generateAppDataDoc({
+    metadataParams: {
+      referrerParams: {
         address: dxdaoTreasuryAddress[chainId],
-        version: '0.1.0',
       },
     },
-    {
+    appDataParams: {
       appCode,
-    }
-  )
+    },
+  })
   const ipfsHashInfo = (await cowSdkInstance.metadataApi.calculateAppDataHash(content)) as IpfsHashInfo
   await cowSdkInstance.metadataApi.uploadMetadataDocToIpfs(content)
 

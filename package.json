@@ -31,7 +31,7 @@
     "codegen:cow": "./node_modules/.bin/ts-node --project tsconfig.json ./bin/cow-app-data.ts"
   },
   "dependencies": {
-    "@cowprotocol/cow-sdk": "^1.0.2-RC.0",
+    "@cowprotocol/cow-sdk": "^1.0.2-RC.7",
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.0",
@@ -44,7 +44,7 @@
     "@ethersproject/units": "^5.4.0",
     "@swapr/core": "^0.3.20",
     "@swapr/periphery": "^0.3.23",
-    "@uniswap/smart-order-router": "^2.9.3",
+    "@uniswap/smart-order-router": "^3.10.2",
     "big.js": "^5.2.2",
     "dayjs": "^1.11.0",
     "debug": "^4.3.4",
