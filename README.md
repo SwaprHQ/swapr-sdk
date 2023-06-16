@@ -34,23 +34,23 @@ npm run test
 
 Swapr uses multiple trades to find best protocol and route for traders. Currently supported DEXs are
 
-| Protocol     | Ethereum | Arbitrum One | Gnosis Chain | Polygon | BNB Chain | Optimism |
-| ------------ | -------- | ------------ | ------------ | ------- | --------- | -------- |
-| 0x           | ✅       | ✅           | ❌           | ✅      | ✅        | ✅       |
-| 1Inch        | ✅       | ✅           | ✅           | ✅      | ✅        | ✅       |
-| Baoswap      | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       |
-| BiSwap       | ❌       | ❌           | ❌           | ❌      | ✅        | ❌       |
-| CoW Protocol | ✅       | ❌           | ✅           | ❌      | ❌        | ❌       |
-| Curve        | ✅       | ✅           | ✅           | ❌      | ❌        | ❌       |
-| DFYN         | ❌       | ❌           | ❌           | ✅      | ❌        | ❌       |
-| Honeyswap    | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       |
-| Levinswap    | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       |
-| Pancakeswap  | ❌       | ❌           | ❌           | ❌      | ✅        | ❌       |
-| Quickswap    | ❌       | ❌           | ❌           | ✅      | ❌        | ❌       |
-| SushiSwap    | ✅       | ✅           | ✅           | ✅      | ✅        | ❌       |
-| Swapr        | ✅       | ✅           | ✅           | ❌      | ❌        | ❌       |
-| Uniswap v2   | ✅       | ✅           | ✅           | ✅      | ❌        | ✅       |
-| Velodrome    | ❌       | ❌           | ❌           | ❌      | ❌        | ✅       |
+| Protocol     | Ethereum | Arbitrum One | Gnosis Chain | Polygon | BNB Chain | Optimism | ZkSync Era |
+| ------------ | -------- | ------------ | ------------ | ------- | --------- | -------- | ---------- |
+| 0x           | ✅       | ✅           | ❌           | ✅      | ✅        | ✅       | ❌         |
+| 1Inch        | ✅       | ✅           | ✅           | ✅      | ✅        | ✅       | ✅         |
+| Baoswap      | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| BiSwap       | ❌       | ❌           | ❌           | ❌      | ✅        | ❌       | ❌         |
+| CoW Protocol | ✅       | ❌           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| Curve        | ✅       | ✅           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| DFYN         | ❌       | ❌           | ❌           | ✅      | ❌        | ❌       | ❌         |
+| Honeyswap    | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| Levinswap    | ❌       | ❌           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| Pancakeswap  | ❌       | ❌           | ❌           | ❌      | ✅        | ❌       | ❌         |
+| Quickswap    | ❌       | ❌           | ❌           | ✅      | ❌        | ❌       | ❌         |
+| SushiSwap    | ✅       | ✅           | ✅           | ✅      | ✅        | ❌       | ❌         |
+| Swapr        | ✅       | ✅           | ✅           | ❌      | ❌        | ❌       | ❌         |
+| Uniswap v2   | ✅       | ✅           | ✅           | ✅      | ❌        | ✅       | ❌         |
+| Velodrome    | ❌       | ❌           | ❌           | ❌      | ❌        | ✅       | ❌         |
 
 The `Trade` class is extendable. New DEXs can be added to the SDK by extending the `Trade` and adding required methods.
 
