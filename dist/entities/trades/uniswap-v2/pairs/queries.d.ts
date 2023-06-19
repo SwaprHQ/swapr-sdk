@@ -1,1 +1,0 @@
-export declare const GET_ALL_COMMON_PAIRS_BETWEEN_TOKEN_A_AND_TOKEN_B: string;
