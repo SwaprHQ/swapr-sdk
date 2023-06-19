@@ -15,6 +15,7 @@ export declare class Currency {
      */
     static readonly ETHER: Currency;
     static readonly OPTIMISM_ETHER: Currency;
+    static readonly ZK_SYNC_ERA_ETHER: Currency;
     /**
      * Gnosis Chain native currency
      */
