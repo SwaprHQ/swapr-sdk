@@ -17,6 +17,7 @@ export class RoutablePlatform extends BaseRoutablePlatform {
       ChainId.OPTIMISM_MAINNET,
       ChainId.GNOSIS,
       ChainId.BSC_MAINNET,
+      ChainId.ZK_SYNC_ERA_MAINNET,
     ],
     '1Inch'
   )

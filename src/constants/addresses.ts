@@ -33,6 +33,8 @@ const emptyAddressList: Record<ChainId, string> = {
   [ChainId.OPTIMISM_GOERLI]: AddressZero,
   [ChainId.BSC_MAINNET]: AddressZero,
   [ChainId.BSC_TESTNET]: AddressZero,
+  [ChainId.ZK_SYNC_ERA_MAINNET]: AddressZero,
+  [ChainId.ZK_SYNC_ERA_TESTNET]: AddressZero,
 }
 
 /**
@@ -96,6 +98,9 @@ export const SWPR_CONVERTER_ADDRESS: Record<ChainId, string> = {
 
 /**
  * Multicall2 contract address
+ * NOTE: this is an external repository not maintained by any entity funded or directed by MakerDAO governance.
+ * @see https://github.com/mds1/multicall/blob/main/deployments.json to check
+ * MakerDAO's fork from https://github.com/makerdao/multicall
  */
 export const MULTICALL2_ADDRESS: Record<ChainId, string> = {
   [ChainId.MAINNET]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
@@ -110,4 +115,6 @@ export const MULTICALL2_ADDRESS: Record<ChainId, string> = {
   [ChainId.OPTIMISM_GOERLI]: '0xca11bde05977b3631167028862be2a173976ca11',
   [ChainId.BSC_MAINNET]: '0xca11bde05977b3631167028862be2a173976ca11',
   [ChainId.BSC_TESTNET]: '0xca11bde05977b3631167028862be2a173976ca11',
+  [ChainId.ZK_SYNC_ERA_MAINNET]: '0xF9cda624FBC7e059355ce98a31693d299FACd963',
+  [ChainId.ZK_SYNC_ERA_TESTNET]: '0xF9cda624FBC7e059355ce98a31693d299FACd963',
 }

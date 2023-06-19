@@ -624,6 +624,10 @@ type CurveTokenList = {
   [chainId in ChainId]: Record<string, CurveToken>
 }
 
+/**
+ * @TODO add missing Optimisn and Polygon tokens.
+ * TBD in https://linear.app/swaprdev/issue/SWA-61/add-curve-pools-and-tokens-for-polygon-and-optimism-in-the-sdk
+ */
 export const CURVE_TOKENS: CurveTokenList = {
   [ChainId.MAINNET]: TOKENS_MAINNET,
   [ChainId.XDAI]: TOKENS_XDAI,
@@ -637,4 +641,6 @@ export const CURVE_TOKENS: CurveTokenList = {
   [ChainId.OPTIMISM_GOERLI]: {},
   [ChainId.BSC_MAINNET]: {},
   [ChainId.BSC_TESTNET]: {},
+  [ChainId.ZK_SYNC_ERA_MAINNET]: {},
+  [ChainId.ZK_SYNC_ERA_TESTNET]: {},
 }

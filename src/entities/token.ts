@@ -7,6 +7,10 @@ import { Currency } from './currency'
 /**
  * Represents an ERC20 token with a unique address and some metadata.
  */
+/**
+ * @TODO check why we have 2 different token lists here and
+ * src/entities/trades/uniswap-v2/constants.ts
+ */
 export class Token extends Currency {
   public readonly chainId: ChainId
   public readonly address: string
@@ -194,6 +198,26 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether on xDai'
     ),
+    [ChainId.ZK_SYNC_ERA_MAINNET]: new Token(
+      ChainId.ZK_SYNC_ERA_MAINNET,
+      '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
+      18,
+      'WETH',
+      'Wrapped Ether on zkSync'
+    ),
+    /**
+     * NOTE: Note the address of zkSync testnet contracts is subject
+     * to change without notice.
+     * @see https://era.zksync.io/docs/dev/building-on-zksync/useful-address.html
+     * @see https://syncswap.gitbook.io/api-documentation/resources/smart-contract
+     */
+    [ChainId.ZK_SYNC_ERA_TESTNET]: new Token(
+      ChainId.ZK_SYNC_ERA_TESTNET,
+      '0x20b28b1e4665fff290650586ad76e977eab90c5d',
+      18,
+      'WETH',
+      'Wrapped Ether on zkSync Testnet'
+    ),
   }
 
   public static readonly WMATIC: Record<number, Token> = {
@@ -223,6 +247,8 @@ export class Token extends Currency {
     [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
+    [ChainId.ZK_SYNC_ERA_MAINNET]: Token.WETH[ChainId.ZK_SYNC_ERA_MAINNET],
+    [ChainId.ZK_SYNC_ERA_TESTNET]: Token.WETH[ChainId.ZK_SYNC_ERA_TESTNET],
   }
 
   public constructor(chainId: ChainId, address: string, decimals: number, symbol?: string, name?: string) {
