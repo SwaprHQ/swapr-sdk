@@ -51,12 +51,12 @@ export const TOKENS_ARBITRUM_ONE: Record<string, CurveToken> = {
     isLPToken: true,
     type: TokenType.USD,
     poolTokens() {
-      return [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt]
+      return [TOKENS_ARBITRUM_ONE.usdc_e, TOKENS_ARBITRUM_ONE.usdt]
     },
   },
-  usdc: {
-    symbol: 'USDC',
-    name: 'USDC',
+  usdc_e: {
+    symbol: 'USDC.e',
+    name: 'Bridged USDC',
     decimals: 6,
     address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
     type: TokenType.USD,
