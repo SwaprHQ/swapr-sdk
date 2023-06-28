@@ -61,8 +61,8 @@ export const USDC: Record<number, Token> = {
     ChainId.ARBITRUM_ONE,
     '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
     6,
-    'USDC',
-    'USD//C'
+    'USDC.e',
+    'Bridged USDC'
   ),
   [ChainId.XDAI]: new Token(
     ChainId.XDAI,
