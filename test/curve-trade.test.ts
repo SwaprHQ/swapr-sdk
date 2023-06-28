@@ -111,10 +111,10 @@ describe('CurveTrade', () => {
     )
     const tokenUSDC = new Token(
       ChainId.ARBITRUM_ONE,
-      TOKENS_ARBITRUM_ONE.usdc.address,
-      TOKENS_ARBITRUM_ONE.usdc.decimals,
-      TOKENS_ARBITRUM_ONE.usdc.symbol,
-      TOKENS_ARBITRUM_ONE.usdc.name
+      TOKENS_ARBITRUM_ONE.usdc_e.address,
+      TOKENS_ARBITRUM_ONE.usdc_e.decimals,
+      TOKENS_ARBITRUM_ONE.usdc_e.symbol,
+      TOKENS_ARBITRUM_ONE.usdc_e.name
     )
 
     const tokenUSDT = new Token(

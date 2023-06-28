@@ -35,7 +35,7 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     address: '0x7f90122BF0700F9E7e1F688fe926940E8839F353',
     abi: CURVE_3POOL_ABI,
     isMeta: false,
-    tokens: [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt],
+    tokens: [TOKENS_ARBITRUM_ONE.usdc_e, TOKENS_ARBITRUM_ONE.usdt],
     // underlyingTokens: [TOKENS_ARBITRUM_ONE.usdc, TOKENS_ARBITRUM_ONE.usdt],
   },
   {
@@ -55,6 +55,11 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     isMeta: false,
     tokens: [TOKENS_ARBITRUM_ONE.wbtc, TOKENS_ARBITRUM_ONE.renbtc],
   },
+  /**
+   * @TODO update eursusd crypto v2 pool with correct data, TBD in SWAP-67
+   * @see https://curve.fi/#/arbitrum/pools/eursusd/deposit
+   * @see https://linear.app/swaprdev/issue/SWA-67/update-usdc-token-in-arbitrum
+   */
   {
     id: 'eursusd',
     name: 'EURs USD',
@@ -63,7 +68,7 @@ export const POOLS_ARBITRUM_ONE: CurvePool[] = [
     isMeta: true,
     tokens: [
       TOKENS_ARBITRUM_ONE.eurs, // EURs
-      TOKENS_ARBITRUM_ONE.usdc, // USDC
+      TOKENS_ARBITRUM_ONE.usdc_e, // USDC
       TOKENS_ARBITRUM_ONE.usdt, // USDT
     ],
   },
