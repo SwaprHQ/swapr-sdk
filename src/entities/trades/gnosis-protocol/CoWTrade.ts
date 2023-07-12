@@ -10,10 +10,10 @@ import { parseUnits } from '@ethersproject/units'
 import dayjs from 'dayjs'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType, ZERO } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
-import { Fraction } from '../../fractions/fraction'
+//import { Fraction } from '../../fractions/fraction'
 import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
@@ -109,31 +109,11 @@ export class CoWTrade extends Trade {
   }
 
   public minimumAmountOut(): CurrencyAmount {
-    if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.outputAmount
-    } else {
-      const slippageAdjustedAmountOut = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .invert()
-        .multiply(this.outputAmount.raw).quotient
-
-      return this.outputAmount instanceof TokenAmount
-        ? new TokenAmount(this.outputAmount.token, slippageAdjustedAmountOut)
-        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountOut, this.chainId)
-    }
+    return this.outputAmount
   }
 
   public maximumAmountIn(): CurrencyAmount {
-    if (this.tradeType === TradeType.EXACT_INPUT) {
-      return this.inputAmount
-    } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .multiply(this.inputAmount.raw).quotient
-      return this.inputAmount instanceof TokenAmount
-        ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
-        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
-    }
+    return this.inputAmount
   }
 
   /**
@@ -207,11 +187,13 @@ export class CoWTrade extends Trade {
       })
 
       // Calculate the fee in terms of percentages
-      const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
-        .div(quoteResponse.quote.sellAmount.toString())
-        .mul(100)
-      const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
-      const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
+      // const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
+      //   .div(quoteResponse.quote.sellAmount.toString())
+      //   .mul(100)
+      // const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
+
+      // CoW takes 0% fee apart from gas fees
+      const fee = new Percent(ZERO, ONE)
 
       const feeAmount = Currency.isNative(currencyAmountIn.currency)
         ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
