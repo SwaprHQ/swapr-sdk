@@ -1,0 +1,1 @@
+{"version":3,"file":"CoWTradeError.js","sourceRoot":"","sources":["../../../../src/entities/trades/gnosis-protocol/CoWTradeError.ts"],"names":[],"mappings":";;;AAAA;;GAEG;AACH,MAAa,aAAc,SAAQ,KAAK;IACtC,YAAY,OAAe;QACzB,KAAK,CAAC,OAAO,CAAC,CAAA;QACd,IAAI,CAAC,IAAI,GAAG,eAAe,CAAA;IAC7B,CAAC;CACF;AALD,sCAKC"}
