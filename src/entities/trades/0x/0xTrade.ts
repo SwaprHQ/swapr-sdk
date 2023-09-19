@@ -23,6 +23,7 @@ import { build0xApiUrl, decodeStringToPercent, platformsFromSources } from './ut
 
 // Debuging logger. See documentation to enable logging.
 const debug0X = createDebug('ecoRouter:0x')
+const headers = { '0x-api-key': `${process.env.REACT_APP_ZEROX_PROTOCOL_API_KEY}` }
 
 /**
  * Represents a trade executed against a list of pairs.
@@ -126,7 +127,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         sellToken,
       })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(apiUrlParams)
+      const response = await fetch(apiUrlParams, { headers })
 
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
@@ -191,7 +192,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
         sellToken,
       })
       // slippagePercentage for the 0X API needs to be a value between 0 and 1, others have between 0 and 100
-      const response = await fetch(apiUrlParams)
+      const response = await fetch(apiUrlParams, { headers })
       if (!response.ok) throw new Error('response not ok')
       const json = (await response.json()) as ApiResponse
 
