@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import invariant from 'tiny-invariant'
@@ -32,7 +31,6 @@ interface OneInchConstructorParams {
   tradeType: TradeType
   chainId: ChainId
   approveAddress: string
-  estimatedGas: BigNumber
 }
 
 /**
@@ -46,7 +44,6 @@ export class OneInchTrade extends Trade {
     tradeType,
     chainId,
     approveAddress,
-    estimatedGas,
   }: OneInchConstructorParams) {
     super({
       details: undefined,
@@ -65,13 +62,12 @@ export class OneInchTrade extends Trade {
       priceImpact: new Percent('0', '100'),
       fee: new Percent('0', '10000'),
       approveAddress,
-      estimatedGas,
     })
   }
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, maximumSlippage = defaultMaximumSlippage }: OneInchQuoteTypes,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<OneInchTrade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
 
@@ -84,7 +80,7 @@ export class OneInchTrade extends Trade {
     // Ensure the provider's chainId matches the provided currencies
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `OneInch.getQuote: currencies chainId does not match provider's chainId`
+      `OneInch.getQuote: currencies chainId does not match provider's chainId`,
     )
 
     const currencyIn = amount.currency
@@ -92,7 +88,6 @@ export class OneInchTrade extends Trade {
 
     // Ensure that the currencies are present
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
-    let gas
 
     try {
       //Fetch approve address
@@ -105,32 +100,24 @@ export class OneInchTrade extends Trade {
         amount: amount.raw.toString(),
       }
 
-      // Fetch the quote from the API
-      const { fromTokenAmount, toTokenAmount, estimatedGas } = await (
+      const { toAmount } = await (
         await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
       ).json()
-      gas = estimatedGas
-      let fromTokenAmountApi = fromTokenAmount
-      let toTokenAmountApi = toTokenAmount
-
+      let toTokenAmountApi = toAmount
+      let fromTokenAmountApi = amount.raw.toString()
       if (tradeType === TradeType.EXACT_OUTPUT) {
         // Prepare the query parameters for the API request
-
         const queryParams = {
           fromTokenAddress: currencyOut.address,
           toTokenAddress: currencyIn.address,
-          amount: toTokenAmount.toString(),
+          amount: toAmount.toString(),
         }
 
-        const {
-          toTokenAmount: toTokenAmountOutput,
-          fromTokenAmount,
-          estimatedGas,
-        } = await (await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))).json()
+        const { toAmount: toTokenAmountOutput } = await (
+          await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
+        ).json()
 
-        fromTokenAmountApi = fromTokenAmount
         toTokenAmountApi = toTokenAmountOutput
-        gas = estimatedGas
       }
 
       const currencyInType = tradeType === TradeType.EXACT_INPUT ? currencyIn : currencyOut
@@ -150,7 +137,6 @@ export class OneInchTrade extends Trade {
         tradeType,
         chainId,
         approveAddress,
-        estimatedGas: BigNumber.from(gas),
       })
     } catch (error) {
       console.error('OneInch.getQuote: Error fetching the quote:', error.message)
@@ -192,7 +178,7 @@ export class OneInchTrade extends Trade {
   public async swapTransaction(options: ExtentendedTradeOptions): Promise<UnsignedTransaction> {
     invariant(
       this.inputAmount.currency.address && this.outputAmount.currency.address,
-      'OneInchTrade: Currency address is required'
+      'OneInchTrade: Currency address is required',
     )
 
     const queryParams = {
