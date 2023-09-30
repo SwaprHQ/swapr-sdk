@@ -82,8 +82,8 @@ export const USDC: Record<number, Token> = {
     ChainId.OPTIMISM_MAINNET,
     '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
     6,
-    'USDC',
-    'USD Coin'
+    'USDC.e',
+    'Bridged USDC'
   ),
   [ChainId.BSC_MAINNET]: new Token(
     ChainId.BSC_MAINNET,
