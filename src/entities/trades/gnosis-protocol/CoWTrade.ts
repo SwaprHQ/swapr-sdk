@@ -10,7 +10,7 @@ import { parseUnits } from '@ethersproject/units'
 import dayjs from 'dayjs'
 import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType, ZERO } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
 import { Fraction } from '../../fractions/fraction'
@@ -206,16 +206,12 @@ export class CoWTrade extends Trade {
         sellToken: tokenIn.address,
       })
 
-      // Calculate the fee in terms of percentages
-      const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
-        .div(quoteResponse.quote.sellAmount.toString())
-        .mul(100)
-      const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
-      const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
+      // CoW Swap doesn't charge any fee
+      const fee = new Percent(ZERO, ONE)
 
       const feeAmount = Currency.isNative(currencyAmountIn.currency)
-        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
-        : new TokenAmount(currencyAmountIn.currency as Token, quoteResponse.quote.feeAmount.toString())
+        ? CurrencyAmount.nativeCurrency('0', chainId)
+        : new TokenAmount(currencyAmountIn.currency as Token, '0')
 
       return new CoWTrade({
         chainId,
@@ -274,13 +270,6 @@ export class CoWTrade extends Trade {
         validTo: dayjs().add(1, 'h').unix(), // Order expires in 1 hour
       })
 
-      // Calculate the fee in terms of percentages
-      const feeAmountBN = parseUnits(quoteResponse.quote.feeAmount.toString(), tokenIn.decimals)
-        .div(quoteResponse.quote.sellAmount.toString())
-        .mul(100)
-      const tokenInDenominator = parseUnits('100', tokenIn.decimals).toBigInt()
-      const fee = new Percent(feeAmountBN.toBigInt(), tokenInDenominator)
-
       const inputAmount = Currency.isNative(tokenIn)
         ? CurrencyAmount.nativeCurrency(quoteResponse.quote.sellAmount.toString(), chainId)
         : new TokenAmount(tokenIn, quoteResponse.quote.sellAmount.toString())
@@ -289,9 +278,12 @@ export class CoWTrade extends Trade {
         ? CurrencyAmount.nativeCurrency(quoteResponse.quote.buyAmount.toString(), chainId)
         : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString())
 
+      // CoW Swap doesn't charge any fee
+      const fee = new Percent(ZERO, ONE)
+
       const feeAmount = Currency.isNative(currencyIn)
-        ? CurrencyAmount.nativeCurrency(quoteResponse.quote.feeAmount.toString(), chainId)
-        : new TokenAmount(currencyIn as Token, quoteResponse.quote.feeAmount.toString())
+        ? CurrencyAmount.nativeCurrency('0', chainId)
+        : new TokenAmount(currencyIn as Token, '0')
 
       return new CoWTrade({
         chainId,
