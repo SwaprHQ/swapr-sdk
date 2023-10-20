@@ -13,7 +13,6 @@ import invariant from 'tiny-invariant'
 import { ChainId, ONE, TradeType, ZERO } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount } from '../../fractions/currencyAmount'
-import { Fraction } from '../../fractions/fraction'
 import { Percent } from '../../fractions/percent'
 import { Price } from '../../fractions/price'
 import { TokenAmount } from '../../fractions/tokenAmount'
@@ -24,6 +23,8 @@ import { tryGetChainId, wrappedCurrency } from '../utils'
 import cowAppData from './app-data.json'
 import { CoWTradeError } from './CoWTradeError'
 import { CoWTradeGetBestTradeExactInParams, CoWTradeGetBestTradeExactOutParams, CoWTradeParams } from './types'
+
+const ZERO_PERCENT = new Percent(ZERO, ONE)
 
 /**
  * CoWTrade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
@@ -109,31 +110,11 @@ export class CoWTrade extends Trade {
   }
 
   public minimumAmountOut(): CurrencyAmount {
-    if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.outputAmount
-    } else {
-      const slippageAdjustedAmountOut = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .invert()
-        .multiply(this.outputAmount.raw).quotient
-
-      return this.outputAmount instanceof TokenAmount
-        ? new TokenAmount(this.outputAmount.token, slippageAdjustedAmountOut)
-        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountOut, this.chainId)
-    }
+    return this.outputAmount
   }
 
   public maximumAmountIn(): CurrencyAmount {
-    if (this.tradeType === TradeType.EXACT_INPUT) {
-      return this.inputAmount
-    } else {
-      const slippageAdjustedAmountIn = new Fraction(ONE)
-        .add(this.maximumSlippage)
-        .multiply(this.inputAmount.raw).quotient
-      return this.inputAmount instanceof TokenAmount
-        ? new TokenAmount(this.inputAmount.token, slippageAdjustedAmountIn)
-        : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
-    }
+    return this.inputAmount
   }
 
   /**
@@ -207,11 +188,11 @@ export class CoWTrade extends Trade {
       })
 
       // CoW Swap doesn't charge any fee
-      const fee = new Percent(ZERO, ONE)
+      const fee = ZERO_PERCENT
 
       const feeAmount = Currency.isNative(currencyAmountIn.currency)
-        ? CurrencyAmount.nativeCurrency('0', chainId)
-        : new TokenAmount(currencyAmountIn.currency as Token, '0')
+        ? CurrencyAmount.nativeCurrency(ZERO, chainId)
+        : new TokenAmount(currencyAmountIn.currency as Token, ZERO)
 
       return new CoWTrade({
         chainId,
@@ -279,11 +260,11 @@ export class CoWTrade extends Trade {
         : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString())
 
       // CoW Swap doesn't charge any fee
-      const fee = new Percent(ZERO, ONE)
+      const fee = ZERO_PERCENT
 
       const feeAmount = Currency.isNative(currencyIn)
-        ? CurrencyAmount.nativeCurrency('0', chainId)
-        : new TokenAmount(currencyIn as Token, '0')
+        ? CurrencyAmount.nativeCurrency(ZERO, chainId)
+        : new TokenAmount(currencyIn as Token, ZERO)
 
       return new CoWTrade({
         chainId,
