@@ -1,5 +1,6 @@
 export * from './0x'
 export * from './curve'
+export * from './ecoRouterTrades'
 export * from './gnosis-protocol'
 export * from './interfaces/trade'
 export * from './interfaces/trade-options'
