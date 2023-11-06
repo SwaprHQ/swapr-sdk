@@ -2,10 +2,6 @@
 
 ## Getting Started
 
-### Running tests
-
-To run the tests, follow these steps. You must have at least node v16 installed.
-
 First clone the repository:
 
 ```sh
@@ -21,13 +17,36 @@ cd swapr-sdk
 Install dependencies
 
 ```sh
-npm install
+yarn install
 ```
+
+ Generate GraphQL
+```sh
+yarn codegen
+```
+
+Build
+```sh
+yarn build
+```
+
+Connect package an app to sdk locally
+```sh
+yarn link
+```
+And on the app repo
+```sh
+yarn link "../swapr-sdk/" #e.g. path to sdk
+```
+
+### Running tests
+
+To run the tests, follow these steps. You must have at least node v16 installed.
 
 Run tests
 
 ```sh
-npm run test
+yarn test
 ```
 
 ## Eco Router Trades
