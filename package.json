@@ -8,7 +8,7 @@
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/levelkdev/swapr-sdk.git",
+  "repository": "https://github.com/SwaprHQ/swapr-sdk",
   "keywords": [
     "swapr",
     "ethereum",
