@@ -172,7 +172,7 @@ export class CoWTrade extends Trade {
     invariant(!tokenIn.equals(tokenOut), 'CURRENCY')
 
     // const etherOut = this.outputAmount.currency === nativeCurrency
-    // // the router does not support both ether in and out
+    // the router does not support both ether in and out
     // invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     try {
       const quoteResponse = await CoWTrade.getCowSdk(chainId).cowApi.getQuote({
