@@ -1,8 +1,7 @@
-// @ts-nocheck
 import type { BaseProvider } from '@ethersproject/providers'
+import dayjs from 'dayjs'
 
-import { Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
-// import debug from 'debug'
+import { Currency, Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 
 import { CurrencyAmount, Percent, Price, TokenAmount } from '../../fractions'
@@ -12,15 +11,26 @@ import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId } from '../utils'
 import { ONE, TradeType } from '../../../constants'
 
-import { SWAPR_ALGEBRA_ROUTER_ABI, SWAPR_ALGEBRA_QUOTER_ABI } from './abi'
+import { SWAPR_ALGEBRA_ROUTER_ABI, SWAPR_ALGEBRA_QUOTER_ABI, SWAPR_ALGEBRA_POOL_ABI } from './abi'
 import { Contract, UnsignedTransaction } from 'ethers'
 import { AddressZero } from '@ethersproject/constants'
 import { TradeOptions } from '../interfaces/trade-options'
+import { formatUnits, parseUnits } from '@ethersproject/units'
+import { getRoutes } from './routes'
+import { Route } from './route'
+
+// const quoterInterface = new Interface(SWAPR_ALGEBRA_QUOTER_ABI)
+
+// import { getBestV3TradeExactIn } from './algebra/getBestV3Trades'
 
 // Constants
 export const GNOSIS_CONTRACTS = {
   quoter: '0xcBaD9FDf0D2814659Eb26f600EFDeAF005Eda0F7',
   router: '0xfFB643E73f280B97809A8b41f7232AB401a04ee1',
+}
+
+export function getPoolsContract(pool_address: string) {
+  return new Contract(pool_address, SWAPR_ALGEBRA_POOL_ABI, getProvider(100))
 }
 
 export function getRouterContract() {
@@ -64,55 +74,104 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
         numerator: outputAmount.raw,
       }),
       priceImpact,
-      fee: new Percent('2', '10000'), // todo: change fee
+      fee: new Percent('0', '100'),
       approveAddress: GNOSIS_CONTRACTS['router'],
     })
   }
 
+  // SwaprV3Trade.getQuote({
+  //   quoteCurrency: currencyOut,
+  //   amount: currencyAmountIn,
+  //   maximumSlippage,
+  //   recipient: receiver,
+  //   tradeType: TradeType.EXACT_INPUT,
+  // })
+
   static async getQuote(
     { amount, quoteCurrency, tradeType, recipient, maximumSlippage }: any,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<SwaprV3Trade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
     // Defaults
+
     recipient = recipient || AddressZero
     maximumSlippage = maximumSlippage || 0
     provider = provider || getProvider(chainId)
 
+    const tokenIn = amount.currency
+    const tokenOut = quoteCurrency
+
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`
+      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`,
     )
 
-    // const formatedAmount = formatUnits(amount.numerator[0], amount.currency.decimals)
-    // console.log('formatedAmount:', formatedAmount)
-
-    let quotedAmountOut
-
     if (tradeType === TradeType.EXACT_INPUT) {
-      quotedAmountOut = await getQuoterContract()
-        .callStatic.quoteExactInputSingle(amount.currency.address, quoteCurrency.address, amount.numerator[0], 0)
+      const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
+      console.log('routes:', routes)
+
+      console.log('tokenIn:', tokenIn)
+      console.log('tokenOut:', tokenOut)
+
+      const quotedAmountOut = await getQuoterContract()
+        .callStatic.quoteExactInputSingle(
+          tokenIn.address,
+          tokenOut.address,
+          parseUnits(amount.toSignificant(), amount.currency.decimals),
+          0,
+        )
         .catch((error) => {
           console.error(`Error sending quoteExactInputSingle transaction: ${error}`)
         })
+
+      const amountInReadable = amount.toSignificant()
+      console.log('amountIn :', amountInReadable)
+      const amountOutReadable = formatUnits(quotedAmountOut, tokenOut.decimals)
+      console.log('amountOut:', amountOutReadable)
+
+      if (quotedAmountOut) {
+        return new SwaprV3Trade({
+          maximumSlippage,
+          inputAmount: amount,
+          outputAmount: new TokenAmount(quoteCurrency, quotedAmountOut),
+          tradeType: tradeType,
+          chainId: chainId,
+          priceImpact: new Percent('0', '1000'),
+        })
+      }
     } else {
-      quotedAmountOut = await getQuoterContract()
-        .callStatic.quoteExactOutputSingle(amount.currency.address, quoteCurrency.address, amount.numerator[0], 0)
+      const quotedAmountIn = await getQuoterContract()
+        .callStatic.quoteExactOutputSingle(
+          amount.currency.address,
+          quoteCurrency.address,
+          parseUnits(amount.toSignificant(), amount.currency.decimals),
+          0,
+        )
         .catch((error) => {
           console.error(`Error sending quoteExactOutputSingle transaction: ${error}`)
         })
-    }
 
-    if (quotedAmountOut) {
-      return new SwaprV3Trade({
-        maximumSlippage,
-        inputAmount: amount,
-        outputAmount: new TokenAmount(quoteCurrency, quotedAmountOut),
-        tradeType: tradeType,
-        chainId: chainId,
-        priceImpact: new Percent('0', '1000'),
-      })
+      console.log('====== SDK -> EXACT_OUTPUT ========')
+      console.log('quoteCurrency', quoteCurrency)
+      console.log('amount', amount)
+      console.log('amount.toSignificant()', amount.toSignificant())
+      console.log('amount.currency.decimals', amount.currency.decimals)
+      console.log('quotedAmountIn:', quotedAmountIn.toString())
+
+      // const amountIn: string = toHex(trade.maximumAmountIn(options.slippageTolerance, inputAmount).quotient)
+      // const amountOut: string = toHex(trade.minimumAmountOut(options.slippageTolerance, outputAmount).quotient)
+
+      if (quotedAmountIn) {
+        return new SwaprV3Trade({
+          maximumSlippage,
+          inputAmount: new TokenAmount(quoteCurrency, quotedAmountIn),
+          outputAmount: amount,
+          tradeType: tradeType,
+          chainId: chainId,
+          priceImpact: new Percent('0', '1000'),
+        })
+      }
     }
 
     return null
@@ -159,27 +218,33 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     const to: string = validateAndParseAddress(options.recipient)
     const amountIn: string = toHex(this.maximumAmountIn())
     const amountOut: string = toHex(this.minimumAmountOut())
-    const methodName = this.tradeType === TradeType.EXACT_INPUT ? 'exactInputSingle' : 'exactOutputSingle'
-
-    const exactInputSingleParams = {
-      amountIn: amountIn,
-      recipient: to,
-      amountOutMinimum: amountOut,
-      tokenIn: this.inputAmount.currency.address,
-      tokenOut: this.outputAmount.currency.address,
-      deadline: 1,
-      sqrtPriceLimitX96: 0,
-    }
-
+    const isTradeExactInput = this.tradeType === TradeType.EXACT_INPUT
     const routerContract = getRouterContract()
 
-    // const encodedData = routerContract.interface.encodeFunctionData(methodName, [exactInputSingleParams])
-    // console.log('=====================================')
-    // console.log('encodedData:', encodedData)
-    // console.log('=====================================')
+    const baseParams = {
+      tokenIn: this.inputAmount.currency.address,
+      tokenOut: this.outputAmount.currency.address,
+      recipient: to,
+      deadline: dayjs().add(30, 'm').unix(),
+      sqrtPriceLimitX96: 0,
+      // fee: this.fee --> route.pools[0].fee,
+    }
 
-    // Populate the transaction
-    const populatedTransaction = await routerContract.populateTransaction[methodName](exactInputSingleParams)
+    const exactInputSingleParams = {
+      ...baseParams,
+      amountIn: amountIn,
+      amountOutMinimum: amountOut,
+    }
+
+    const exactOutputSingleParams = {
+      ...baseParams,
+      amountOut: amountOut,
+      amountInMaximum: amountIn,
+    }
+
+    const methodName = isTradeExactInput ? 'exactInputSingle' : 'exactOutputSingle'
+    const params = isTradeExactInput ? exactInputSingleParams : exactOutputSingleParams
+    const populatedTransaction = await routerContract.populateTransaction[methodName](params)
 
     return populatedTransaction
   }
