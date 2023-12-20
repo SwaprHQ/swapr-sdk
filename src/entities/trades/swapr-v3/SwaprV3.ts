@@ -48,6 +48,7 @@ interface SwaprV3ConstructorParams {
   tradeType: TradeType
   chainId: number
   priceImpact: Percent
+  fee: Percent
 }
 
 export class SwaprV3Trade extends TradeWithSwapTransaction {
@@ -58,6 +59,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     priceImpact,
     tradeType,
     chainId,
+    fee,
   }: SwaprV3ConstructorParams) {
     super({
       details: undefined,
@@ -74,7 +76,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
         numerator: outputAmount.raw,
       }),
       priceImpact,
-      fee: new Percent('0', '100'),
+      fee,
       approveAddress: GNOSIS_CONTRACTS['router'],
     })
   }
@@ -109,10 +111,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     if (tradeType === TradeType.EXACT_INPUT) {
       const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
-      console.log('routes:', routes)
-
-      console.log('tokenIn:', tokenIn)
-      console.log('tokenOut:', tokenOut)
+      console.log('routes[0]', routes[0])
 
       const quotedAmountOut = await getQuoterContract()
         .callStatic.quoteExactInputSingle(
@@ -126,9 +125,12 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
         })
 
       const amountInReadable = amount.toSignificant()
-      console.log('amountIn :', amountInReadable)
       const amountOutReadable = formatUnits(quotedAmountOut, tokenOut.decimals)
+      const fee = new Percent(routes[0].pools[0].fee.toString(), '1000000')
+
+      console.log('amountIn :', amountInReadable)
       console.log('amountOut:', amountOutReadable)
+      console.log('fee', fee.toSignificant())
 
       if (quotedAmountOut) {
         return new SwaprV3Trade({
@@ -138,6 +140,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           tradeType: tradeType,
           chainId: chainId,
           priceImpact: new Percent('0', '1000'),
+          fee,
         })
       }
     } else {
@@ -170,6 +173,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           tradeType: tradeType,
           chainId: chainId,
           priceImpact: new Percent('0', '1000'),
+          fee: new Percent('0', '100'),
         })
       }
     }
@@ -227,7 +231,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
       recipient: to,
       deadline: dayjs().add(30, 'm').unix(),
       sqrtPriceLimitX96: 0,
-      // fee: this.fee --> route.pools[0].fee,
+      fee: this.fee,
     }
 
     const exactInputSingleParams = {
