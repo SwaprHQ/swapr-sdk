@@ -343,6 +343,7 @@ export class CoWTrade extends Trade {
       cancellation: {
         signature: orderCancellationSignature.signature,
         signingScheme: orderCancellationSignature.signingScheme,
+        orderUid: '',
       },
       chainId: chainId as any,
       owner: await signer.getAddress(),
