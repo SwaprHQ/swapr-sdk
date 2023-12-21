@@ -15,7 +15,7 @@ import { SWAPR_ALGEBRA_ROUTER_ABI, SWAPR_ALGEBRA_QUOTER_ABI, SWAPR_ALGEBRA_POOL_
 import { Contract, UnsignedTransaction } from 'ethers'
 import { AddressZero } from '@ethersproject/constants'
 import { TradeOptions } from '../interfaces/trade-options'
-import { formatUnits, parseUnits } from '@ethersproject/units'
+import { parseUnits } from '@ethersproject/units'
 import { getRoutes } from './routes'
 import { Route } from './route'
 
@@ -95,7 +95,6 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
   ): Promise<SwaprV3Trade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
-    // Defaults
 
     recipient = recipient || AddressZero
     maximumSlippage = maximumSlippage || 0
@@ -122,15 +121,10 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
         )
         .catch((error) => {
           console.error(`Error sending quoteExactInputSingle transaction: ${error}`)
+          return null
         })
 
-      const amountInReadable = amount.toSignificant()
-      const amountOutReadable = formatUnits(quotedAmountOut, tokenOut.decimals)
       const fee = new Percent(routes[0].pools[0].fee.toString(), '1000000')
-
-      console.log('amountIn :', amountInReadable)
-      console.log('amountOut:', amountOutReadable)
-      console.log('fee', fee.toSignificant())
 
       if (quotedAmountOut) {
         return new SwaprV3Trade({
@@ -139,31 +133,26 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           outputAmount: new TokenAmount(quoteCurrency, quotedAmountOut),
           tradeType: tradeType,
           chainId: chainId,
-          priceImpact: new Percent('0', '1000'),
+          priceImpact: new Percent('0', '1000'), // todo: fix this
           fee,
         })
       }
     } else {
+      const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
+
+      const fee = new Percent(routes[0].pools[0].fee.toString(), '1000000')
+
       const quotedAmountIn = await getQuoterContract()
         .callStatic.quoteExactOutputSingle(
-          amount.currency.address,
           quoteCurrency.address,
+          amount.currency.address,
           parseUnits(amount.toSignificant(), amount.currency.decimals),
           0,
         )
         .catch((error) => {
           console.error(`Error sending quoteExactOutputSingle transaction: ${error}`)
+          return null
         })
-
-      console.log('====== SDK -> EXACT_OUTPUT ========')
-      console.log('quoteCurrency', quoteCurrency)
-      console.log('amount', amount)
-      console.log('amount.toSignificant()', amount.toSignificant())
-      console.log('amount.currency.decimals', amount.currency.decimals)
-      console.log('quotedAmountIn:', quotedAmountIn.toString())
-
-      // const amountIn: string = toHex(trade.maximumAmountIn(options.slippageTolerance, inputAmount).quotient)
-      // const amountOut: string = toHex(trade.minimumAmountOut(options.slippageTolerance, outputAmount).quotient)
 
       if (quotedAmountIn) {
         return new SwaprV3Trade({
@@ -172,8 +161,8 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           outputAmount: amount,
           tradeType: tradeType,
           chainId: chainId,
-          priceImpact: new Percent('0', '1000'),
-          fee: new Percent('0', '100'),
+          priceImpact: new Percent('0', '1000'), // todo: fix this
+          fee: fee,
         })
       }
     }
