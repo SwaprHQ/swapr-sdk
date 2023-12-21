@@ -19,10 +19,6 @@ import { parseUnits } from '@ethersproject/units'
 import { getRoutes } from './routes'
 import { Route } from './route'
 
-// const quoterInterface = new Interface(SWAPR_ALGEBRA_QUOTER_ABI)
-
-// import { getBestV3TradeExactIn } from './algebra/getBestV3Trades'
-
 // Constants
 export const GNOSIS_CONTRACTS = {
   quoter: '0xcBaD9FDf0D2814659Eb26f600EFDeAF005Eda0F7',
