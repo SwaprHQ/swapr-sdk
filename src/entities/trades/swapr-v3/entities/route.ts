@@ -77,7 +77,7 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         : {
             nextInput: this.pools[0].token0,
             price: this.pools[0].token1Price,
-          },
+          }
     ).price
 
     return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))

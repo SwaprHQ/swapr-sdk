@@ -16,8 +16,8 @@ import { Contract, UnsignedTransaction } from 'ethers'
 import { AddressZero } from '@ethersproject/constants'
 import { TradeOptions } from '../interfaces/trade-options'
 import { parseUnits } from '@ethersproject/units'
-import { getRoutes } from './routes'
-import { Route } from './route'
+import { getRoutes } from './getRoutes'
+import { Route } from './entities/route'
 
 // Constants
 export const GNOSIS_CONTRACTS = {
@@ -87,7 +87,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, recipient, maximumSlippage }: any,
-    provider?: BaseProvider,
+    provider?: BaseProvider
   ): Promise<SwaprV3Trade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
@@ -101,19 +101,18 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`,
+      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`
     )
 
     if (tradeType === TradeType.EXACT_INPUT) {
       const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
-      console.log('routes[0]', routes[0])
 
       const quotedAmountOut = await getQuoterContract()
         .callStatic.quoteExactInputSingle(
           tokenIn.address,
           tokenOut.address,
           parseUnits(amount.toSignificant(), amount.currency.decimals),
-          0,
+          0
         )
         .catch((error) => {
           console.error(`Error sending quoteExactInputSingle transaction: ${error}`)
@@ -143,7 +142,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           quoteCurrency.address,
           amount.currency.address,
           parseUnits(amount.toSignificant(), amount.currency.decimals),
-          0,
+          0
         )
         .catch((error) => {
           console.error(`Error sending quoteExactOutputSingle transaction: ${error}`)

@@ -17,7 +17,7 @@ const recipient = NULL_ADDRESS
 
 describe('SwaprV3', () => {
   describe('getQuote', () => {
-    test('should return a EXACT INPUT  quote on Gnosis for USDC - WXDAI', async () => {
+    test('should return a EXACT INPUT quote on Gnosis for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2.59', 6).toString())
       const trade = await SwaprV3Trade.getQuote({
         amount: currencyAmount,

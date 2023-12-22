@@ -1,14 +1,14 @@
 // @ts-nocheck
 import { Token } from '@uniswap/sdk-core'
 import { POOL_DEPLOYER_ADDRESS, baseTokens } from './constants'
-import { computePoolAddress } from './computePoolAddress'
+import { computePoolAddress } from './utils/computePoolAddress'
 import { getPoolsContract } from './SwaprV3'
-import { Pool } from './pool'
+import { Pool } from './entities/pool'
 
 const GNOSIS_CHAIN_ID = 100
 
 const getBaseTokens: Token[] = baseTokens.map(
-  ({ address, decimals, symbol, name }) => new Token(GNOSIS_CHAIN_ID, address, decimals, symbol, name),
+  ({ address, decimals, symbol, name }) => new Token(GNOSIS_CHAIN_ID, address, decimals, symbol, name)
 )
 
 export const setupTokens = (currencyIn: Token, currencyOut: Token) => {
@@ -17,7 +17,7 @@ export const setupTokens = (currencyIn: Token, currencyOut: Token) => {
     currencyIn.address,
     currencyIn.decimals,
     currencyIn.symbol,
-    currencyIn.name,
+    currencyIn.name
   )
 
   const tokenOut = new Token(
@@ -25,7 +25,7 @@ export const setupTokens = (currencyIn: Token, currencyOut: Token) => {
     currencyOut.address,
     currencyOut.decimals,
     currencyOut.symbol,
-    currencyOut.name,
+    currencyOut.name
   )
 
   const [tokenA, tokenB] = [tokenIn?.wrapped, tokenOut?.wrapped]
@@ -78,8 +78,6 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
       tokenB: value[1],
     })
   })
-  // console.log('poolAddresses:', poolAddresses)
-  console.log('poolAddresses lenght:', poolAddresses.length)
 
   const poolsGlobalSpace = () =>
     Promise.allSettled(poolAddresses.map((poolAddress) => fetchPoolGlobalState(poolAddress))).then((results) =>
@@ -89,7 +87,7 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
             return { value: result.value, poolAddress: poolAddresses[index] }
           }
         })
-        .filter((result) => result),
+        .filter((result) => result)
     )
 
   const poolsLiquidity = () =>
@@ -100,7 +98,7 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
             return { value: result.value, poolAddress: poolAddresses[index] }
           }
         })
-        .filter((result) => result),
+        .filter((result) => result)
     )
 
   const getPoolsGlobalSpaceResults = async () => {
@@ -125,19 +123,14 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
     await getPoolsLiquiditiesResults(),
     await getPoolsGlobalSpaceResults(),
   ])
-  console.log('globalSpaceResults:', globalSpaceResults)
-  console.log('liquidityResults:', liquidityResults)
-
-  console.log('globalSpaceResults length:', globalSpaceResults.length)
-  console.log('liquidityResults length:', liquidityResults.length)
 
   const combinedResults = poolAddresses.flatMap((poolAddress) => {
     const liquidityResult = liquidityResults.find(
-      ({ poolAddress: liquidityPoolAddress }) => liquidityPoolAddress === poolAddress,
+      ({ poolAddress: liquidityPoolAddress }) => liquidityPoolAddress === poolAddress
     )
 
     const globalSpaceResult = globalSpaceResults.find(
-      ({ poolAddress: globalSpacePoolAddress }) => globalSpacePoolAddress === poolAddress,
+      ({ poolAddress: globalSpacePoolAddress }) => globalSpacePoolAddress === poolAddress
     )
 
     if (globalSpaceResult && liquidityResult) {
@@ -147,7 +140,7 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
         globalSpaceResult.value.fee,
         globalSpaceResult.value.price,
         liquidityResult ? liquidityResult.value : null,
-        globalSpaceResult.value.tick,
+        globalSpaceResult.value.tick
       )
     }
 
