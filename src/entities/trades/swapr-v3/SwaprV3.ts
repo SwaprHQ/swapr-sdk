@@ -11,31 +11,14 @@ import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId } from '../utils'
 import { ONE, TradeType } from '../../../constants'
 
-import { SWAPR_ALGEBRA_ROUTER_ABI, SWAPR_ALGEBRA_QUOTER_ABI, SWAPR_ALGEBRA_POOL_ABI } from './abi'
-import { Contract, UnsignedTransaction } from 'ethers'
+import { UnsignedTransaction } from 'ethers'
 import { AddressZero } from '@ethersproject/constants'
 import { TradeOptions } from '../interfaces/trade-options'
 import { parseUnits } from '@ethersproject/units'
 import { getRoutes } from './getRoutes'
 import { Route } from './entities/route'
-
-// Constants
-export const GNOSIS_CONTRACTS = {
-  quoter: '0xcBaD9FDf0D2814659Eb26f600EFDeAF005Eda0F7',
-  router: '0xfFB643E73f280B97809A8b41f7232AB401a04ee1',
-}
-
-export function getPoolsContract(pool_address: string) {
-  return new Contract(pool_address, SWAPR_ALGEBRA_POOL_ABI, getProvider(100))
-}
-
-export function getRouterContract() {
-  return new Contract(GNOSIS_CONTRACTS.router, SWAPR_ALGEBRA_ROUTER_ABI, getProvider(100))
-}
-
-export function getQuoterContract() {
-  return new Contract(GNOSIS_CONTRACTS.quoter, SWAPR_ALGEBRA_QUOTER_ABI, getProvider(100))
-}
+import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
+import { getQuoterContract, getRouterContract } from './contracts'
 
 interface SwaprV3ConstructorParams {
   maximumSlippage: Percent
@@ -73,7 +56,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
       }),
       priceImpact,
       fee,
-      approveAddress: GNOSIS_CONTRACTS['router'],
+      approveAddress: SWAPR_ALGEBRA_CONTRACTS['router'],
     })
   }
 
