@@ -16,7 +16,7 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 const recipient = NULL_ADDRESS
 
 describe('SwaprV3', () => {
-  describe('getQuote', () => {
+  describe('Quote', () => {
     test('should return a EXACT INPUT quote on Gnosis for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2.59', 6).toString())
       const trade = await SwaprV3Trade.getQuote({
