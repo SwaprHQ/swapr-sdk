@@ -26,7 +26,7 @@ describe('SwaprV3', () => {
         recipient,
         tradeType: TradeType.EXACT_INPUT,
       })
-      // console.log('trade', trade)
+
       expect(trade).toBeDefined()
       expect(trade?.chainId).toEqual(ChainId.GNOSIS)
       expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
@@ -65,6 +65,21 @@ describe('SwaprV3', () => {
       expect(trade?.outputAmount.currency.address).toBe(tokenSWPR.address)
     })
 
+    test('should return a exact output quote on Gnosis for WXDAI - USDC', async () => {
+      const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('2', 18).toString())
+      const trade = await SwaprV3Trade.getQuote({
+        quoteCurrency: tokenUSDC,
+        amount: currencyAmount,
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_OUTPUT,
+      })
+      expect(trade).toBeDefined()
+      expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+      expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
+      expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
+    })
+
     // test('should return a EXACT INPUT quote on Gnosis for GNO - WETH', async () => {
     //   const currencyAmount = new TokenAmount(tokenGNO, parseUnits('1', 18).toString())
     //   const trade = await SwaprV3Trade.getQuote({
@@ -79,22 +94,6 @@ describe('SwaprV3', () => {
     //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
     //   expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
     //   expect(trade?.outputAmount.currency.address).toBe(tokenWETH.address)
-    // })
-
-    // test('should return a exact output quote on Gnosis for WXDAI - USDC', async () => {
-    //   const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('2', 18).toString())
-    //   const trade = await SwaprV3Trade.getQuote({
-    //     quoteCurrency: tokenUSDC,
-    //     amount: currencyAmount,
-    //     maximumSlippage,
-    //     recipient,
-    //     tradeType: TradeType.EXACT_OUTPUT,
-    //   })
-    //   console.log('trade', trade)
-    //   expect(trade).toBeDefined()
-    //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
-    //   expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
-    //   expect(trade?.outputAmount.currency.address).toBe(tokenUSDC.address)
     // })
   })
 
@@ -116,8 +115,6 @@ describe('SwaprV3', () => {
       }
 
       const swap = await trade?.swapTransaction(swapOptions)
-
-      console.log('swap', swap)
       expect(swap !== undefined)
     })
   })
