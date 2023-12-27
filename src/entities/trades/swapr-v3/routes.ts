@@ -1,7 +1,7 @@
 import { Currency, Token } from '@uniswap/sdk-core'
 import { Pool } from './entities/pool'
 import { Route } from './entities/route'
-import { getPools } from './getPools'
+import { getPools } from './pools'
 
 /**
  * Returns true if poolA is equivalent to poolB

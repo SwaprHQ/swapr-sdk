@@ -12,13 +12,12 @@ import { getProvider, tryGetChainId } from '../utils'
 import { ONE, TradeType } from '../../../constants'
 
 import { UnsignedTransaction } from 'ethers'
-import { AddressZero } from '@ethersproject/constants'
 import { TradeOptions } from '../interfaces/trade-options'
 import { parseUnits } from '@ethersproject/units'
-import { getRoutes } from './getRoutes'
 import { Route } from './entities/route'
 import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
 import { getQuoterContract, getRouterContract } from './contracts'
+import { getRoutes } from './routes'
 
 interface SwaprV3ConstructorParams {
   maximumSlippage: Percent
@@ -69,13 +68,12 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
   // })
 
   static async getQuote(
-    { amount, quoteCurrency, tradeType, recipient, maximumSlippage }: any,
+    { amount, quoteCurrency, tradeType, maximumSlippage }: any,
     provider?: BaseProvider
   ): Promise<SwaprV3Trade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
 
-    recipient = recipient || AddressZero
     maximumSlippage = maximumSlippage || 0
     provider = provider || getProvider(chainId)
 

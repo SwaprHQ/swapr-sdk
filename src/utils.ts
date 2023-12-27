@@ -1,7 +1,6 @@
 import { getAddress } from '@ethersproject/address'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
-import warning from 'tiny-warning'
 
 import { BigintIsh, ONE, SOLIDITY_TYPE_MAXIMA, SolidityType, THREE, TWO, ZERO } from './constants'
 
@@ -14,7 +13,6 @@ export function validateSolidityTypeInstance(value: JSBI, solidityType: Solidity
 export function validateAndParseAddress(address: string): string {
   try {
     const checksummedAddress = getAddress(address)
-    warning(address === checksummedAddress, `${address} is not checksummed.`)
     return checksummedAddress
   } catch (error) {
     invariant(false, `${address} is not a valid address.`)
@@ -25,8 +23,8 @@ export function parseBigintIsh(bigintIsh: BigintIsh): JSBI {
   return bigintIsh instanceof JSBI
     ? bigintIsh
     : typeof bigintIsh === 'bigint'
-    ? JSBI.BigInt(bigintIsh.toString())
-    : JSBI.BigInt(bigintIsh)
+      ? JSBI.BigInt(bigintIsh.toString())
+      : JSBI.BigInt(bigintIsh)
 }
 
 // mock the on-chain sqrt function
