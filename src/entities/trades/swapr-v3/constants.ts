@@ -1,6 +1,10 @@
-export const ROUTER_ADDRESS = '0xfFB643E73f280B97809A8b41f7232AB401a04ee1'
 export const POOL_DEPLOYER_ADDRESS = '0xC1b576AC6Ec749d5Ace1787bF9Ec6340908ddB47'
 export const POOL_INIT_CODE_HASH = '0xbce37a54eab2fcd71913a0d40723e04238970e7fc1159bfd58ad5b79531697e7'
+
+export const SWAPR_ALGEBRA_CONTRACTS = {
+  quoter: '0xcBaD9FDf0D2814659Eb26f600EFDeAF005Eda0F7',
+  router: '0xfFB643E73f280B97809A8b41f7232AB401a04ee1',
+}
 
 export type BaseToken = {
   chainId: number
@@ -49,13 +53,4 @@ export const baseTokens: BaseToken[] = [
     isToken: true,
     address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb',
   },
-  // {
-  //   chainId: 100,
-  //   decimals: 18,
-  //   symbol: 'SWPR',
-  //   name: 'SWAPR Token on Gnosis chain',
-  //   isNative: false,
-  //   isToken: true,
-  //   address: '0x532801ED6f82FFfD2DAB70A19fC2d7B2772C4f4b',
-  // },
 ]
