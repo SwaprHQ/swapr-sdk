@@ -2,8 +2,8 @@
 import { Token } from '@uniswap/sdk-core'
 import { POOL_DEPLOYER_ADDRESS, baseTokens } from './constants'
 import { computePoolAddress } from './utils/computePoolAddress'
-import { getPoolsContract } from './SwaprV3'
 import { Pool } from './entities/pool'
+import { getPoolsContract } from './contracts'
 
 const GNOSIS_CHAIN_ID = 100
 
