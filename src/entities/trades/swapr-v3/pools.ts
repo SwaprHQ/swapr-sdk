@@ -78,7 +78,6 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
           if (result.status === 'fulfilled') {
             return { value: result.value, poolAddress: poolAddresses[index] }
           } else {
-            console.warn(`Failed fetching pool global state for ${poolAddresses[index]}`)
             return { value: null, poolAddress: poolAddresses[index] }
           }
         })
@@ -92,7 +91,6 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
           if (result.status === 'fulfilled') {
             return { value: result.value, poolAddress: poolAddresses[index] }
           } else {
-            console.warn(`Failed fetching pool liquidity for ${poolAddresses[index]}`)
             return { value: null, poolAddress: poolAddresses[index] }
           }
         })
