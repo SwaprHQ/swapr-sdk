@@ -3,24 +3,17 @@ import { POOL_DEPLOYER_ADDRESS, baseTokens } from './constants'
 import { computePoolAddress } from './utils/computePoolAddress'
 import { Pool } from './entities/pool'
 import { getPoolsContract } from './contracts'
-
-const GNOSIS_CHAIN_ID = 100
+import { ChainId } from '../../../constants'
 
 const getBaseTokens: Token[] = baseTokens.map(
-  ({ address, decimals, symbol, name }) => new Token(GNOSIS_CHAIN_ID, address, decimals, symbol, name)
+  ({ address, decimals, symbol, name }) => new Token(ChainId.GNOSIS, address, decimals, symbol, name)
 )
 
 export const setupTokens = (currencyIn: Token, currencyOut: Token) => {
-  const tokenIn = new Token(
-    GNOSIS_CHAIN_ID,
-    currencyIn.address,
-    currencyIn.decimals,
-    currencyIn.symbol,
-    currencyIn.name
-  )
+  const tokenIn = new Token(ChainId.GNOSIS, currencyIn.address, currencyIn.decimals, currencyIn.symbol, currencyIn.name)
 
   const tokenOut = new Token(
-    GNOSIS_CHAIN_ID,
+    ChainId.GNOSIS,
     currencyOut.address,
     currencyOut.decimals,
     currencyOut.symbol,
