@@ -59,14 +59,6 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     })
   }
 
-  // SwaprV3Trade.getQuote({
-  //   quoteCurrency: currencyOut,
-  //   amount: currencyAmountIn,
-  //   maximumSlippage,
-  //   recipient: receiver,
-  //   tradeType: TradeType.EXACT_INPUT,
-  // })
-
   static async getQuote(
     { amount, quoteCurrency, tradeType, maximumSlippage }: any,
     provider?: BaseProvider
@@ -75,7 +67,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
 
     maximumSlippage = maximumSlippage || 0
-    provider = provider || getProvider(chainId)
+    provider = provider ?? getProvider(chainId)
 
     const tokenIn = amount.currency
     const tokenOut = quoteCurrency
@@ -100,7 +92,10 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           return null
         })
 
-      const fee = new Percent(routes[0].pools[0].fee.toString(), '1000000')
+      const fee =
+        routes?.length > 0 && routes[0].pools.length > 0
+          ? new Percent(routes[0].pools[0].fee.toString(), '1000000')
+          : new Percent('0', '0')
 
       if (quotedAmountOut) {
         return new SwaprV3Trade({
@@ -172,16 +167,6 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
         : CurrencyAmount.nativeCurrency(slippageAdjustedAmountIn, this.chainId)
     }
   }
-
-  //   struct ExactInputSingleParams {
-  //     uint256 amountIn;           // Amount of the input token to be swapped
-  //     address recipient;          // Address that will receive the output tokens
-  //     uint160 limitSqrtPrice;     // Limit on the square root price of the swap
-  //     uint256 amountOutMinimum;   // Minimum amount of output tokens expected
-  //     uint256 deadline;           // Timestamp by which the transaction must be mined
-  //     address tokenIn;            // Address of the input token
-  //     address tokenOut;           // Address of the output token
-  // }
 
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
     const to: string = validateAndParseAddress(options.recipient)
