@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Token } from '@uniswap/sdk-core'
 import { POOL_DEPLOYER_ADDRESS, baseTokens } from './constants'
 import { computePoolAddress } from './utils/computePoolAddress'
@@ -85,9 +84,12 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
         .map((result, index) => {
           if (result.status === 'fulfilled') {
             return { value: result.value, poolAddress: poolAddresses[index] }
+          } else {
+            console.warn(`Error fetching pool global state for ${poolAddresses[index]}`)
+            return { value: null, poolAddress: poolAddresses[index] }
           }
         })
-        .filter((result) => result)
+        .filter((result) => result.value)
     )
 
   const poolsLiquidity = () =>
@@ -96,17 +98,20 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
         .map((result, index) => {
           if (result.status === 'fulfilled') {
             return { value: result.value, poolAddress: poolAddresses[index] }
+          } else {
+            console.warn(`Error fetching pool liquidity for ${poolAddresses[index]}`)
+            return { value: null, poolAddress: poolAddresses[index] }
           }
         })
-        .filter((result) => result)
+        .filter((result) => result.value)
     )
-
   const getPoolsGlobalSpaceResults = async () => {
     try {
       const results = await poolsGlobalSpace()
       return results
     } catch (error) {
       console.error('Error fetching pool globalSpace results:', error)
+      return null
     }
   }
 
@@ -116,6 +121,7 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
       return results
     } catch (error) {
       console.error('Error fetching pool liquidity results:', error)
+      return null
     }
   }
 
@@ -125,11 +131,11 @@ export const getPools = async (currencyIn: Token, currencyOut: Token) => {
   ])
 
   const combinedResults = poolAddresses.flatMap((poolAddress) => {
-    const liquidityResult = liquidityResults.find(
+    const liquidityResult = liquidityResults?.find(
       ({ poolAddress: liquidityPoolAddress }) => liquidityPoolAddress === poolAddress
     )
 
-    const globalSpaceResult = globalSpaceResults.find(
+    const globalSpaceResult = globalSpaceResults?.find(
       ({ poolAddress: globalSpacePoolAddress }) => globalSpacePoolAddress === poolAddress
     )
 
