@@ -59,7 +59,6 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
 export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
   [ChainId.XDAI]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
-  // [ChainId.GNOSIS]: 'https://gnosis.public-rpc.com',
   [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
   [ChainId.ARBITRUM_ONE]: 'https://arb1.arbitrum.io/rpc',
   [ChainId.ARBITRUM_RINKEBY]: 'https://rinkeby.arbitrum.io/rpc',
