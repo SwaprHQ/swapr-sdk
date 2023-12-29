@@ -18,6 +18,7 @@ import { Route } from './entities/route'
 import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
 import { getQuoterContract, getRouterContract } from './contracts'
 import { getRoutes } from './routes'
+import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 
 interface SwaprV3ConstructorParams {
   maximumSlippage: Percent
@@ -66,7 +67,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
 
-    maximumSlippage = maximumSlippage || 0
+    maximumSlippage = maximumSlippage || defaultMaximumSlippage
     provider = provider ?? getProvider(chainId)
 
     const tokenIn = amount.currency
@@ -77,9 +78,14 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
       `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`
     )
 
-    if (tradeType === TradeType.EXACT_INPUT) {
-      const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
+    const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
 
+    const fee =
+      routes?.length > 0 && routes[0].pools.length > 0
+        ? new Percent(routes[0].pools[0].fee.toString(), '1000000')
+        : new Percent('0', '0')
+
+    if (tradeType === TradeType.EXACT_INPUT) {
       const quotedAmountOut = await getQuoterContract()
         .callStatic.quoteExactInputSingle(
           tokenIn.address,
@@ -92,11 +98,6 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           return null
         })
 
-      const fee =
-        routes?.length > 0 && routes[0].pools.length > 0
-          ? new Percent(routes[0].pools[0].fee.toString(), '1000000')
-          : new Percent('0', '0')
-
       if (quotedAmountOut) {
         return new SwaprV3Trade({
           maximumSlippage,
@@ -104,15 +105,11 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           outputAmount: new TokenAmount(quoteCurrency, quotedAmountOut),
           tradeType: tradeType,
           chainId: chainId,
-          priceImpact: new Percent('0', '1000'), // todo: fix this
+          priceImpact: new Percent('0', '1000'),
           fee,
         })
       }
     } else {
-      const routes: Route<Currency, Currency>[] = await getRoutes(tokenIn, tokenOut, chainId)
-
-      const fee = new Percent(routes[0].pools[0].fee.toString(), '1000000')
-
       const quotedAmountIn = await getQuoterContract()
         .callStatic.quoteExactOutputSingle(
           quoteCurrency.address,
@@ -132,7 +129,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           outputAmount: amount,
           tradeType: tradeType,
           chainId: chainId,
-          priceImpact: new Percent('0', '1000'), // todo: fix this
+          priceImpact: new Percent('0', '1000'),
           fee: fee,
         })
       }
