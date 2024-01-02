@@ -1,4 +1,4 @@
-import { Currency, Token } from '@uniswap/sdk-core'
+import { Currency } from '@uniswap/sdk-core'
 import { Pool } from './entities/pool'
 import { Route } from './entities/route'
 import { getPools } from './pools'
@@ -37,8 +37,8 @@ export function computeAllRoutes(
 }
 
 export async function getRoutes(
-  currencyIn: Token,
-  currencyOut: Token,
+  currencyIn: any,
+  currencyOut: any,
   chainId: number
 ): Promise<Route<Currency, Currency>[]> {
   const pools = await getPools(currencyIn, currencyOut)

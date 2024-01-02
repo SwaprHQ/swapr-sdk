@@ -1,4 +1,4 @@
-import { Token } from '@uniswap/sdk-core'
+import { Currency, Token } from '@uniswap/sdk-core'
 import { POOL_DEPLOYER_ADDRESS, baseTokens } from './constants'
 import { computePoolAddress } from './utils/computePoolAddress'
 import { Pool } from './entities/pool'
@@ -9,12 +9,24 @@ const getBaseTokens: Token[] = baseTokens.map(
   ({ address, decimals, symbol, name }) => new Token(ChainId.GNOSIS, address, decimals, symbol, name)
 )
 
-export const setupTokens = (currencyIn: Token, currencyOut: Token) => {
-  const tokenIn = new Token(ChainId.GNOSIS, currencyIn.address, currencyIn.decimals, currencyIn.symbol, currencyIn.name)
+const WXDAI_ADDRESS = '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+
+const currencyAddress = (currency: Currency) => {
+  return currency.isNative ? WXDAI_ADDRESS : currency.address
+}
+
+export const setupTokens = (currencyIn: Currency, currencyOut: Currency) => {
+  const tokenIn = new Token(
+    ChainId.GNOSIS,
+    currencyAddress(currencyIn),
+    currencyIn.decimals,
+    currencyIn.symbol,
+    currencyIn.name
+  )
 
   const tokenOut = new Token(
     ChainId.GNOSIS,
-    currencyOut.address,
+    currencyAddress(currencyOut),
     currencyOut.decimals,
     currencyOut.symbol,
     currencyOut.name
@@ -54,7 +66,7 @@ const pairsDiffCombinations = (tokenA: Token, tokenB: Token) => {
   )
 }
 
-export const getPools = async (currencyIn: Token, currencyOut: Token) => {
+export const getPools = async (currencyIn: Currency, currencyOut: Currency) => {
   const { tokenA, tokenB } = setupTokens(currencyIn, currencyOut)
   const pairsCombinations = pairsDiffCombinations(tokenA, tokenB)
 
