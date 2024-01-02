@@ -15,7 +15,6 @@ import {
   computePoolAddress,
 } from '@uniswap/v3-sdk'
 
-// used in liquidity amount math
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96))
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2))
 

@@ -1,7 +1,7 @@
 import type { BaseProvider } from '@ethersproject/providers'
 import dayjs from 'dayjs'
 
-import { Currency, Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
+import { Currency, Fraction, Token, validateAndParseAddress } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 
 import { CurrencyAmount, Percent, Price, TokenAmount } from '../../fractions'
@@ -20,6 +20,28 @@ import { getQuoterContract, getRouterContract } from './contracts'
 import { getRoutes } from './routes'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
 
+const WXDAI_ADDRESS = '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+
+const currencyAddress = (currency: Currency) => {
+  return currency.isNative ? WXDAI_ADDRESS : currency.address
+}
+
+export const setupTokens = (currencyIn: Currency, currencyOut: Currency) => {
+  const tokenIn = new Token(100, currencyAddress(currencyIn), currencyIn.decimals, currencyIn.symbol, currencyIn.name)
+
+  const tokenOut = new Token(
+    100,
+    currencyAddress(currencyOut),
+    currencyOut.decimals,
+    currencyOut.symbol,
+    currencyOut.name
+  )
+
+  const [tokenA, tokenB] = [tokenIn?.wrapped, tokenOut?.wrapped]
+
+  return { tokenA, tokenB }
+}
+
 interface SwaprV3ConstructorParams {
   maximumSlippage: Percent
   inputAmount: CurrencyAmount
@@ -28,6 +50,14 @@ interface SwaprV3ConstructorParams {
   chainId: number
   priceImpact: Percent
   fee: Percent
+}
+
+export interface SwaprV3GetQuoteParams {
+  amount: CurrencyAmount
+  quoteCurrency: Currency
+  tradeType: TradeType
+  maximumSlippage?: Percent
+  recipient?: string
 }
 
 export class SwaprV3Trade extends TradeWithSwapTransaction {
@@ -67,7 +97,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
 
-    maximumSlippage = maximumSlippage || defaultMaximumSlippage
+    maximumSlippage = maximumSlippage ?? defaultMaximumSlippage
     provider = provider ?? getProvider(chainId)
 
     const tokenIn = amount.currency
