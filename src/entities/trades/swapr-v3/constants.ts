@@ -1,3 +1,5 @@
+import { ChainId } from '../../../constants'
+
 export const POOL_DEPLOYER_ADDRESS = '0xC1b576AC6Ec749d5Ace1787bF9Ec6340908ddB47'
 export const POOL_INIT_CODE_HASH = '0xbce37a54eab2fcd71913a0d40723e04238970e7fc1159bfd58ad5b79531697e7'
 
@@ -18,7 +20,7 @@ export type BaseToken = {
 
 export const baseTokens: BaseToken[] = [
   {
-    chainId: 100,
+    chainId: ChainId.GNOSIS,
     decimals: 18,
     symbol: 'WXDAI',
     name: 'Wrapped XDAI',
@@ -27,7 +29,7 @@ export const baseTokens: BaseToken[] = [
     address: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
   },
   {
-    chainId: 100,
+    chainId: ChainId.GNOSIS,
     decimals: 6,
     symbol: 'USDC',
     name: 'USD//C on Gnosis',
@@ -36,7 +38,7 @@ export const baseTokens: BaseToken[] = [
     address: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
   },
   {
-    chainId: 100,
+    chainId: ChainId.GNOSIS,
     decimals: 18,
     symbol: 'WETH',
     name: 'Wrapped Ether on Gnosis chain',
@@ -45,7 +47,7 @@ export const baseTokens: BaseToken[] = [
     address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
   },
   {
-    chainId: 100,
+    chainId: ChainId.GNOSIS,
     decimals: 18,
     symbol: 'GNO',
     name: 'Gnosis Token on Gnosis chain',
