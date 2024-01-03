@@ -34,7 +34,7 @@ interface SwaprV3ConstructorParams {
 
 export interface SwaprV3GetQuoteParams {
   amount: CurrencyAmount
-  quoteCurrency: Token
+  quoteCurrency: Currency
   tradeType: TradeType
   maximumSlippage?: Percent
   recipient?: string
@@ -95,7 +95,8 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
       ? WXDAI[ChainId.GNOSIS]
       : new Token(
           ChainId.GNOSIS,
-          quoteCurrency.address,
+          // @ts-expect-error
+          quoteCurrency?.address,
           quoteCurrency.decimals,
           quoteCurrency.symbol,
           quoteCurrency.name
