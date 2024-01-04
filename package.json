@@ -49,7 +49,7 @@
     "dayjs": "^1.11.0",
     "debug": "^4.3.4",
     "decimal.js-light": "^2.5.1",
-    "graphql-request": "^6.1.0",
+    "graphql-request": "^4.3.0",
     "jsbi": "^3.1.1",
     "lodash.flatmap": "^4.5.0",
     "memoizee": "^0.4.15",
