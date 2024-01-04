@@ -1,7 +1,7 @@
 import type { BaseProvider } from '@ethersproject/providers'
 import dayjs from 'dayjs'
 
-import { Currency as CurrencyType, Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
+import { Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 
 import { CurrencyAmount, Percent, Price, TokenAmount } from '../../fractions'
@@ -14,7 +14,6 @@ import { ChainId, ONE, TradeType } from '../../../constants'
 import { UnsignedTransaction } from 'ethers'
 import { TradeOptions } from '../interfaces/trade-options'
 import { parseUnits } from '@ethersproject/units'
-import { Route } from './entities/route'
 import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
 import { getQuoterContract, getRouterContract } from './contracts'
 import { getRoutes } from './routes'
@@ -80,23 +79,23 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     maximumSlippage = maximumSlippage ?? defaultMaximumSlippage
     provider = provider ?? getProvider(chainId)
 
+    invariant(amount.currency.address, `SwaprV3Trade.getQuote: amount.currency.address is required`)
     const tokenIn = Currency.isNative(amount.currency)
       ? WXDAI[ChainId.GNOSIS]
       : new Token(
           ChainId.GNOSIS,
-          // @ts-expect-error
           amount.currency.address,
           amount.currency.decimals,
           amount.currency.symbol,
           amount.currency.name
         )
 
+    invariant(quoteCurrency.address, `SwaprV3Trade.getQuote: quoteCurrency.address is required`)
     const tokenOut = Currency.isNative(quoteCurrency)
       ? WXDAI[ChainId.GNOSIS]
       : new Token(
           ChainId.GNOSIS,
-          // @ts-expect-error
-          quoteCurrency?.address,
+          quoteCurrency.address,
           quoteCurrency.decimals,
           quoteCurrency.symbol,
           quoteCurrency.name
@@ -107,6 +106,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
       `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`
     )
 
+    const routes = await getRoutes(tokenIn, tokenOut, chainId)
     const routes: Route<CurrencyType, CurrencyType>[] = await getRoutes(tokenIn, tokenOut, chainId)
 
     const fee =
