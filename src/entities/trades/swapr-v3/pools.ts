@@ -4,15 +4,14 @@ import { computePoolAddress } from './utils/computePoolAddress'
 import { Pool } from './entities/pool'
 import { getPoolsContract } from './contracts'
 import { ChainId } from '../../../constants'
+import { WXDAI } from '../../token'
 
 const getBaseTokens: Token[] = baseTokens.map(
   ({ address, decimals, symbol, name }) => new Token(ChainId.GNOSIS, address, decimals, symbol, name)
 )
 
-const WXDAI_ADDRESS = '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
-
 const currencyAddress = (currency: Currency) => {
-  return currency.isNative ? WXDAI_ADDRESS : currency.address
+  return currency.isNative ? WXDAI[ChainId.GNOSIS].address : currency.address
 }
 
 export const setupTokens = (currencyIn: Currency, currencyOut: Currency) => {
