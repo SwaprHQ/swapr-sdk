@@ -36,11 +36,7 @@ export function computeAllRoutes(
   return allPaths
 }
 
-export async function getRoutes(
-  currencyIn: any,
-  currencyOut: any,
-  chainId: number
-): Promise<Route<Currency, Currency>[]> {
+export async function getRoutes(currencyIn: any, currencyOut: any, chainId: number) {
   const pools = await getPools(currencyIn, currencyOut)
   return computeAllRoutes(pools, chainId, [], [], 3)
 }
