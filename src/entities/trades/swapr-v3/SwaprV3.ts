@@ -107,7 +107,6 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     )
 
     const routes = await getRoutes(tokenIn, tokenOut, chainId)
-    const routes: Route<CurrencyType, CurrencyType>[] = await getRoutes(tokenIn, tokenOut, chainId)
 
     const fee =
       routes?.length > 0 && routes[0].pools.length > 0
