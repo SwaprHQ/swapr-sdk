@@ -195,8 +195,8 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
     const to: string = validateAndParseAddress(options.recipient)
-    const amountIn: string = toHex(this.maximumAmountIn())
-    const amountOut: string = toHex(this.minimumAmountOut())
+    const amountIn: string = `0x${this.maximumAmountIn().raw.toString(16)}`
+    const amountOut: string = `0x${this.minimumAmountOut().raw.toString(16)}`
     const isTradeExactInput = this.tradeType === TradeType.EXACT_INPUT
     const routerContract = getRouterContract()
 
@@ -227,8 +227,4 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     return populatedTransaction
   }
-}
-
-function toHex(currencyAmount: CurrencyAmount) {
-  return `0x${currencyAmount.raw.toString(16)}`
 }
