@@ -8,3 +8,4 @@ export { BaseRoutablePlatform, RoutablePlatform, UniswapV2RoutablePlatform } fro
 export * from './uniswap'
 export * from './uniswap-v2'
 export * from './velodrome'
+export * from './swapr-v3'
