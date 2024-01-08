@@ -71,7 +71,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, maximumSlippage }: SwaprV3GetQuoteParams,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<SwaprV3Trade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'SwaprV3Trade.getQuote: chainId is required')
@@ -87,7 +87,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           amount.currency.address,
           amount.currency.decimals,
           amount.currency.symbol,
-          amount.currency.name
+          amount.currency.name,
         )
 
     invariant(quoteCurrency.address, `SwaprV3Trade.getQuote: quoteCurrency.address is required`)
@@ -98,12 +98,12 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           quoteCurrency.address,
           quoteCurrency.decimals,
           quoteCurrency.symbol,
-          quoteCurrency.name
+          quoteCurrency.name,
         )
 
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`
+      `SwaprV3Trade.getQuote: currencies chainId does not match provider's chainId`,
     )
 
     const routes = await getRoutes(tokenIn, tokenOut, chainId)
@@ -119,7 +119,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           tokenIn.address,
           tokenOut.address,
           parseUnits(amount.toSignificant(), amount.currency.decimals),
-          0
+          0,
         )
         .catch((error) => {
           console.error(`Error sending quoteExactInputSingle transaction: ${error}`)
@@ -143,7 +143,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           tokenOut.address,
           amount.currency.address,
           parseUnits(amount.toSignificant(), amount.currency.decimals),
-          0
+          0,
         )
         .catch((error) => {
           console.error(`Error sending quoteExactOutputSingle transaction: ${error}`)
@@ -194,20 +194,27 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
   }
 
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
-    const to: string = validateAndParseAddress(options.recipient)
-    const amountIn: string = `0x${this.maximumAmountIn().raw.toString(16)}`
-    const amountOut: string = `0x${this.minimumAmountOut().raw.toString(16)}`
+    const isNativeIn = Currency.isNative(this.inputAmount.currency)
+    const isNativeOut = Currency.isNative(this.outputAmount.currency)
+    invariant(!(isNativeIn && isNativeOut), 'the router does not support both native in and out')
+
+    const recipient = validateAndParseAddress(options.recipient)
+    const amountIn = `0x${this.maximumAmountIn().raw.toString(16)}`
+    const amountOut = `0x${this.minimumAmountOut().raw.toString(16)}`
+
     const isTradeExactInput = this.tradeType === TradeType.EXACT_INPUT
     const routerContract = getRouterContract()
 
     const baseParams = {
-      tokenIn: this.inputAmount.currency.address,
-      tokenOut: this.outputAmount.currency.address,
-      recipient: to,
+      tokenIn:  isNativeIn ? WXDAI[ChainId.GNOSIS].address : this.inputAmount.currency.address,
+      tokenOut: isNativeOut ? WXDAI[ChainId.GNOSIS].address : this.outputAmount.currency.address,
+      recipient,
       deadline: dayjs().add(30, 'm').unix(),
       sqrtPriceLimitX96: 0,
       fee: this.fee,
     }
+
+    const value = isNativeIn ? amountIn : undefined
 
     const exactInputSingleParams = {
       ...baseParams,
@@ -223,7 +230,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     const methodName = isTradeExactInput ? 'exactInputSingle' : 'exactOutputSingle'
     const params = isTradeExactInput ? exactInputSingleParams : exactOutputSingleParams
-    const populatedTransaction = await routerContract.populateTransaction[methodName](params)
+    const populatedTransaction = await routerContract.populateTransaction[methodName](params, { value })
 
     return populatedTransaction
   }
