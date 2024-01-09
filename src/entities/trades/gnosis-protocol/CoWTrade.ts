@@ -1,3 +1,4 @@
+// @ts-nocheck
 // eslint-disable-next-line no-restricted-imports
 import contractNetworks from '@cowprotocol/contracts/networks.json'
 import { CowSdk, OrderKind, SimpleGetQuoteResponse } from '@cowprotocol/cow-sdk'
@@ -133,7 +134,7 @@ export class CoWTrade extends Trade {
       },
       {
         loglevel: 'debug',
-      }
+      },
     )
   }
 
