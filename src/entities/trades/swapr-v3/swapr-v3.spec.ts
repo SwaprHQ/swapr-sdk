@@ -4,6 +4,7 @@ import { SwaprV3Trade } from './SwaprV3'
 import { ChainId, TradeType } from '../../../constants'
 import { Percent, TokenAmount } from '../../fractions'
 import { Token } from '../../token'
+import { Currency } from '../../currency'
 
 const maximumSlippage = new Percent('3', '100')
 const tokenWXDAI = new Token(ChainId.GNOSIS, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'WXDAI')
@@ -80,21 +81,37 @@ describe('SwaprV3', () => {
       expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
     })
 
-    // test('should return a EXACT INPUT quote on Gnosis for GNO - WETH', async () => {
-    //   const currencyAmount = new TokenAmount(tokenGNO, parseUnits('1', 18).toString())
-    //   const trade = await SwaprV3Trade.getQuote({
-    //     amount: currencyAmount,
-    //     quoteCurrency: tokenWETH,
-    //     maximumSlippage,
-    //     recipient,
-    //     tradeType: TradeType.EXACT_INPUT,
-    //   })
+  test('should return a exact input quote for a native token XDAI - USDC', async () => {
+    const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
+    const trade = await SwaprV3Trade.getQuote({
+      quoteCurrency: Currency.getNative(ChainId.GNOSIS),
+      amount: currencyAmount,
+      maximumSlippage,
+      recipient,
+      tradeType: TradeType.EXACT_OUTPUT,
+    })
 
-    //   expect(trade).toBeDefined()
-    //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
-    //   expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
-    //   expect(trade?.outputAmount.currency.address).toBe(tokenWETH.address)
-    // })
+    expect(trade).toBeDefined()
+    expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+    expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
+    expect(trade?.outputAmount.currency.address).toBe(tokenUSDC.address)
+  })
+
+  // test('should return a EXACT INPUT quote on Gnosis for GNO - WETH', async () => {
+  //   const currencyAmount = new TokenAmount(tokenGNO, parseUnits('1', 18).toString())
+  //   const trade = await SwaprV3Trade.getQuote({
+  //     amount: currencyAmount,
+  //     quoteCurrency: tokenWETH,
+  //     maximumSlippage,
+  //     recipient,
+  //     tradeType: TradeType.EXACT_INPUT,
+  //   })
+
+  //   expect(trade).toBeDefined()
+  //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+  //   expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
+  //   expect(trade?.outputAmount.currency.address).toBe(tokenWETH.address)
+  // })
   })
 
   describe('Swap', () => {
@@ -103,6 +120,25 @@ describe('SwaprV3', () => {
 
       const trade = await SwaprV3Trade.getQuote({
         quoteCurrency: tokenWXDAI,
+        amount: currencyAmount,
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_INPUT,
+      })
+
+      const swapOptions = {
+        recipient: recipient,
+        account: recipient,
+      }
+
+      const swap = await trade?.swapTransaction(swapOptions)
+      expect(swap !== undefined)
+    })
+    test('should return a swap on gnosis with native token XDAI - USDC', async () => {
+      const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
+
+      const trade = await SwaprV3Trade.getQuote({
+        quoteCurrency: Currency.getNative(ChainId.GNOSIS),
         amount: currencyAmount,
         maximumSlippage,
         recipient,
