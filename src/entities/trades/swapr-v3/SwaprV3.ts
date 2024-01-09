@@ -196,7 +196,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
     const isNativeIn = Currency.isNative(this.inputAmount.currency)
     const isNativeOut = Currency.isNative(this.outputAmount.currency)
-    invariant(!(isNativeIn && isNativeOut), 'the router does not support both native in and out')
+    invariant(!(isNativeIn && isNativeOut), 'SwaprV3Trade.swapTransaction: the router does not support both native in and out')
 
     const recipient = validateAndParseAddress(options.recipient)
     const amountIn = `0x${this.maximumAmountIn().raw.toString(16)}`
