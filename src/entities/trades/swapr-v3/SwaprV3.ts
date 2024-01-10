@@ -196,7 +196,10 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
   public async swapTransaction(options: TradeOptions): Promise<UnsignedTransaction> {
     const isNativeIn = Currency.isNative(this.inputAmount.currency)
     const isNativeOut = Currency.isNative(this.outputAmount.currency)
-    invariant(!(isNativeIn && isNativeOut), 'SwaprV3Trade.swapTransaction: the router does not support both native in and out')
+    invariant(
+      !(isNativeIn && isNativeOut),
+      'SwaprV3Trade.swapTransaction: the router does not support both native in and out',
+    )
 
     const recipient = validateAndParseAddress(options.recipient)
     const amountIn = `0x${this.maximumAmountIn().raw.toString(16)}`
@@ -206,7 +209,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     const routerContract = getRouterContract()
 
     const baseParams = {
-      tokenIn:  isNativeIn ? WXDAI[ChainId.GNOSIS].address : this.inputAmount.currency.address,
+      tokenIn: isNativeIn ? WXDAI[ChainId.GNOSIS].address : this.inputAmount.currency.address,
       tokenOut: isNativeOut ? WXDAI[ChainId.GNOSIS].address : this.outputAmount.currency.address,
       recipient,
       deadline: dayjs().add(30, 'm').unix(),
@@ -230,6 +233,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     const methodName = isTradeExactInput ? 'exactInputSingle' : 'exactOutputSingle'
     const params = isTradeExactInput ? exactInputSingleParams : exactOutputSingleParams
+    console.log('params:', params)
     const populatedTransaction = await routerContract.populateTransaction[methodName](params, { value })
 
     return populatedTransaction
