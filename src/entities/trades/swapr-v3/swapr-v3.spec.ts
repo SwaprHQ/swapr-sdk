@@ -18,7 +18,7 @@ const recipient = NULL_ADDRESS
 
 describe('SwaprV3', () => {
   describe('Quote', () => {
-    test('should return a EXACT INPUT quote on Gnosis for USDC - WXDAI', async () => {
+    test('should return a EXACT INPUT quote for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2.59', 6).toString())
       const trade = await SwaprV3Trade.getQuote({
         amount: currencyAmount,
@@ -34,7 +34,7 @@ describe('SwaprV3', () => {
       expect(trade?.outputAmount.currency.address).toBe(tokenWXDAI.address)
     })
 
-    test('should return a EXACT INPUT quote on Gnosis for WETH - WXDAI', async () => {
+    test('should return a EXACT INPUT quote for WETH - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenWETH, parseUnits('1', 18).toString())
       const trade = await SwaprV3Trade.getQuote({
         amount: currencyAmount,
@@ -50,7 +50,7 @@ describe('SwaprV3', () => {
       expect(trade?.outputAmount.currency.address).toBe(tokenWXDAI.address)
     })
 
-    test('should return a EXACT INPUT quote on Gnosis for SWPR - WXDAI', async () => {
+    test('should return a EXACT INPUT quote for SWPR - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('1', 18).toString())
       const trade = await SwaprV3Trade.getQuote({
         amount: currencyAmount,
@@ -66,7 +66,7 @@ describe('SwaprV3', () => {
       expect(trade?.outputAmount.currency.address).toBe(tokenSWPR.address)
     })
 
-    test('should return a exact output quote on Gnosis for WXDAI - USDC', async () => {
+    test('should return a exact output quote for WXDAI - USDC', async () => {
       const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('2', 18).toString())
       const trade = await SwaprV3Trade.getQuote({
         quoteCurrency: tokenUSDC,
@@ -81,41 +81,41 @@ describe('SwaprV3', () => {
       expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
     })
 
-  test('should return a exact input quote for a native token XDAI - USDC', async () => {
-    const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
-    const trade = await SwaprV3Trade.getQuote({
-      quoteCurrency: Currency.getNative(ChainId.GNOSIS),
-      amount: currencyAmount,
-      maximumSlippage,
-      recipient,
-      tradeType: TradeType.EXACT_OUTPUT,
+    test('should return a exact input quote for a native token XDAI - USDC', async () => {
+      const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
+      const trade = await SwaprV3Trade.getQuote({
+        quoteCurrency: Currency.getNative(ChainId.GNOSIS),
+        amount: currencyAmount,
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_OUTPUT,
+      })
+
+      expect(trade).toBeDefined()
+      expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+      expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
+      expect(trade?.outputAmount.currency.address).toBe(tokenUSDC.address)
     })
 
-    expect(trade).toBeDefined()
-    expect(trade?.chainId).toEqual(ChainId.GNOSIS)
-    expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
-    expect(trade?.outputAmount.currency.address).toBe(tokenUSDC.address)
-  })
+    // test('should return a EXACT INPUT quote on Gnosis for GNO - WETH', async () => {
+    //   const currencyAmount = new TokenAmount(tokenGNO, parseUnits('1', 18).toString())
+    //   const trade = await SwaprV3Trade.getQuote({
+    //     amount: currencyAmount,
+    //     quoteCurrency: tokenWETH,
+    //     maximumSlippage,
+    //     recipient,
+    //     tradeType: TradeType.EXACT_INPUT,
+    //   })
 
-  // test('should return a EXACT INPUT quote on Gnosis for GNO - WETH', async () => {
-  //   const currencyAmount = new TokenAmount(tokenGNO, parseUnits('1', 18).toString())
-  //   const trade = await SwaprV3Trade.getQuote({
-  //     amount: currencyAmount,
-  //     quoteCurrency: tokenWETH,
-  //     maximumSlippage,
-  //     recipient,
-  //     tradeType: TradeType.EXACT_INPUT,
-  //   })
-
-  //   expect(trade).toBeDefined()
-  //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
-  //   expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
-  //   expect(trade?.outputAmount.currency.address).toBe(tokenWETH.address)
-  // })
+    //   expect(trade).toBeDefined()
+    //   expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+    //   expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
+    //   expect(trade?.outputAmount.currency.address).toBe(tokenWETH.address)
+    // })
   })
 
   describe('Swap', () => {
-    test('should return a swap for Gnosis for USDC - WXDAI', async () => {
+    test('should return a swap EXACT INPUT for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
 
       const trade = await SwaprV3Trade.getQuote({
@@ -134,7 +134,30 @@ describe('SwaprV3', () => {
       const swap = await trade?.swapTransaction(swapOptions)
       expect(swap !== undefined)
     })
-    test('should return a swap on gnosis with native token XDAI - USDC', async () => {
+    test('should return a swap EXACT OUTPUT for USDC - WXDAI', async () => {
+      const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('2', 18).toString())
+      const trade = await SwaprV3Trade.getQuote({
+        quoteCurrency: tokenUSDC,
+        amount: currencyAmount,
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_OUTPUT,
+      })
+
+      expect(trade).toBeDefined()
+      expect(trade?.chainId).toEqual(ChainId.GNOSIS)
+      expect(trade?.tradeType).toEqual(TradeType.EXACT_OUTPUT)
+      expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
+
+      const swapOptions = {
+        recipient: recipient,
+        account: recipient,
+      }
+
+      const swap = await trade?.swapTransaction(swapOptions)
+      expect(swap !== undefined)
+    })
+    test('should return a swap EXACT INPUT for XDAI - USDC', async () => {
       const currencyAmount = new TokenAmount(tokenUSDC, parseUnits('2', 6).toString())
 
       const trade = await SwaprV3Trade.getQuote({
