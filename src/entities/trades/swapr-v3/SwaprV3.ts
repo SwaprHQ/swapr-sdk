@@ -39,6 +39,7 @@ export interface SwaprV3GetQuoteParams {
   maximumSlippage?: Percent
   recipient?: string
 }
+const ALGEBRA_FEE_PARTS_PER_MILLION = JSBI.BigInt(1_000_000)
 
 export class SwaprV3Trade extends TradeWithSwapTransaction {
   public constructor({
@@ -111,8 +112,8 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     const fee =
       routes?.length > 0 && routes[0].pools.length > 0
-        ? new Percent(routes[0].pools[0].fee.toString(), '1000000')
-        : new Percent('0', '0')
+        ? new Percent(routes[0].pools[0].fee.toString(), ALGEBRA_FEE_PARTS_PER_MILLION)
+        : new Percent('0', '1')
 
     const parsedAmount = parseUnits(amount.toSignificant(), amount.currency.decimals)
 
@@ -201,8 +202,7 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
     const isTradeExactInput = this.tradeType === TradeType.EXACT_INPUT
 
     // Swapr Algebra Contract fee param is uint24 type
-    const algebraFee = parseFloat(this.fee.multiply(JSBI.BigInt(1_000_000)).toFixed(1))
-
+    const algebraFee = this.fee.multiply(ALGEBRA_FEE_PARTS_PER_MILLION).toSignificant(1)
     const baseParams = {
       tokenIn: isNativeIn ? WXDAI[ChainId.GNOSIS].address : this.inputAmount.currency.address,
       tokenOut: isNativeOut ? WXDAI[ChainId.GNOSIS].address : this.outputAmount.currency.address,
