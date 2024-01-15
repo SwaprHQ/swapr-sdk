@@ -1,24 +1,21 @@
 import type { BaseProvider } from '@ethersproject/providers'
-import dayjs from 'dayjs'
-
+import { UnsignedTransaction } from '@ethersproject/transactions'
+import { parseUnits } from '@ethersproject/units'
 import { Fraction, validateAndParseAddress } from '@uniswap/sdk-core'
+import dayjs from 'dayjs'
 import invariant from 'tiny-invariant'
 
+import { ChainId, ONE, TradeType } from '../../../constants'
+import { Currency } from '../../currency'
 import { CurrencyAmount, Percent, Price, TokenAmount } from '../../fractions'
-
 import { TradeWithSwapTransaction } from '../interfaces/trade'
+import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId } from '../utils'
-import { ChainId, ONE, TradeType } from '../../../constants'
-
-import { UnsignedTransaction } from 'ethers'
-import { TradeOptions } from '../interfaces/trade-options'
-import { parseUnits } from '@ethersproject/units'
 import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
 import { getQuoterContract, getRouterContract } from './contracts'
 import { getRoutes } from './routes'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
-import { Currency } from '../../currency'
 import { Token, WXDAI } from '../../token'
 import JSBI from 'jsbi'
 
@@ -130,8 +127,8 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           maximumSlippage,
           inputAmount: amount,
           outputAmount: new TokenAmount(quoteToken, quotedAmountOut),
-          tradeType: tradeType,
-          chainId: chainId,
+          tradeType,
+          chainId,
           priceImpact: new Percent('0', '100'),
           fee,
         })
@@ -149,10 +146,10 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
           maximumSlippage,
           inputAmount: new TokenAmount(quoteToken, quotedAmountIn),
           outputAmount: amount,
-          tradeType: tradeType,
-          chainId: chainId,
+          tradeType,
+          chainId,
           priceImpact: new Percent('0', '100'),
-          fee: fee,
+          fee,
         })
       }
     }
@@ -216,13 +213,13 @@ export class SwaprV3Trade extends TradeWithSwapTransaction {
 
     const exactInputSingleParams = {
       ...baseParams,
-      amountIn: amountIn,
+      amountIn,
       amountOutMinimum: amountOut,
     }
 
     const exactOutputSingleParams = {
       ...baseParams,
-      amountOut: amountOut,
+      amountOut,
       amountInMaximum: amountIn,
     }
 
