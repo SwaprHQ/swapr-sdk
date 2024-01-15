@@ -57,7 +57,7 @@ export function build0xApiUrl({
 }: ApiParams) {
   const slippagePercentage = new Percent(
     maximumSlippage.numerator,
-    JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100))
+    JSBI.multiply(maximumSlippage.denominator, JSBI.BigInt(100)),
   ).toFixed(3)
 
   let amountParam = ''

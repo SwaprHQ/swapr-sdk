@@ -104,7 +104,7 @@ export class OneInchTrade extends Trade {
         await fetch(generateApiRequestUrl({ methodName: RequestType.QUOTE, queryParams, chainId }))
       ).json()
       let toTokenAmountApi = toAmount
-      let fromTokenAmountApi = amount.raw.toString()
+      const fromTokenAmountApi = amount.raw.toString()
       if (tradeType === TradeType.EXACT_OUTPUT) {
         // Prepare the query parameters for the API request
         const queryParams = {

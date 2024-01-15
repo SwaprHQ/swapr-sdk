@@ -101,7 +101,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
   public static async bestTradeExactIn(
     currencyAmountIn: CurrencyAmount,
     currencyOut: Currency,
-    maximumSlippage: Percent
+    maximumSlippage: Percent,
   ): Promise<ZeroXTrade | undefined> {
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
     const apiUrl = chainId && ZEROX_API_URL[chainId]
@@ -142,7 +142,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           quoteCurrency: tokenOut,
           denominator: amountIn.raw,
           numerator: json.buyAmount,
-        })
+        }),
       )
       bestTrade = new ZeroXTrade({
         breakdown,
@@ -167,7 +167,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
   public static async bestTradeExactOut(
     currencyIn: Currency,
     currencyAmountOut: CurrencyAmount,
-    maximumSlippage: Percent
+    maximumSlippage: Percent,
   ): Promise<ZeroXTrade | undefined> {
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
     const apiUrl = chainId && ZEROX_API_URL[chainId]
@@ -206,7 +206,7 @@ export class ZeroXTrade extends TradeWithSwapTransaction {
           quoteCurrency: tokenIn,
           denominator: amountOut.raw,
           numerator: json.sellAmount,
-        })
+        }),
       )
       bestTrade = new ZeroXTrade({
         breakdown,

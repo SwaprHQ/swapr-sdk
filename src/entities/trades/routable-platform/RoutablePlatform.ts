@@ -7,7 +7,7 @@ import { BaseRoutablePlatform } from './BaseRoutablePlatform'
 export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly ZEROX = new RoutablePlatform(
     [ChainId.MAINNET, ChainId.POLYGON, ChainId.ARBITRUM_ONE, ChainId.BSC_MAINNET, ChainId.OPTIMISM_MAINNET],
-    '0x'
+    '0x',
   )
   public static readonly ONE_INCH = new RoutablePlatform(
     [
@@ -19,7 +19,7 @@ export class RoutablePlatform extends BaseRoutablePlatform {
       ChainId.BSC_MAINNET,
       ChainId.ZK_SYNC_ERA_MAINNET,
     ],
-    '1Inch'
+    '1Inch',
   )
   public static readonly COW = new RoutablePlatform([ChainId.MAINNET, ChainId.GNOSIS], 'CoW')
   public static readonly CURVE = new RoutablePlatform([ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.GNOSIS], 'Curve')
@@ -29,7 +29,7 @@ export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly GNOSIS_PROTOCOL = new RoutablePlatform([ChainId.MAINNET, ChainId.GNOSIS], 'CoW')
   public static readonly UNISWAP = new RoutablePlatform(
     [ChainId.MAINNET, ChainId.ARBITRUM_ONE, ChainId.POLYGON, ChainId.OPTIMISM_MAINNET],
-    'Uniswap'
+    'Uniswap',
   )
 
   public static readonly VELODROME = new RoutablePlatform([ChainId.OPTIMISM_MAINNET], 'Velodrome')

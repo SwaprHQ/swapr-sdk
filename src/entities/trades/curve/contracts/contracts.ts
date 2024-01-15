@@ -42,7 +42,7 @@ export async function getBestCurvePoolAndOutput({
   const addressProviderContract = new Contract(
     MAINNET_CONTRACTS.addressProvider,
     ADDRESS_PROVIDER_ABI,
-    getProvider(chainId)
+    getProvider(chainId),
   )
 
   // Curve V2 pools
@@ -64,7 +64,7 @@ export async function getBestCurvePoolAndOutput({
   const [poolAddress, expectedAmountOut] = await registryExchangeContract.get_best_rate(
     tokenInAddress,
     tokenOutAddress,
-    amountIn.toString()
+    amountIn.toString(),
   )
 
   if (poolAddress === AddressZero) {

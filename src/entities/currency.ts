@@ -26,7 +26,7 @@ export class Currency {
     18,
     'ETH',
     'Ether',
-    '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000'
+    '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
   )
   /**
    * Gnosis Chain native currency
