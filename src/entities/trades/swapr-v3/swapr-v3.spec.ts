@@ -150,7 +150,7 @@ describe('SwaprV3', () => {
       expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 
