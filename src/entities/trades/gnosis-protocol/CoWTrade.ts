@@ -25,11 +25,11 @@ import { CoWTradeGetBestTradeExactInParams, CoWTradeGetBestTradeExactOutParams, 
 
 const ZERO_PERCENT = new Percent(ZERO, ONE)
 enum CowChainId {
-  MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
-  GNOSIS = 100,
-  SEPOLIA = 11155111,
+  MAINNET = ChainId.MAINNET,
+  RINKEBY = ChainId.RINKEBY,
+  GOERLI = ChainId.GOERLI,
+  GNOSIS = ChainId.GNOSIS,
+  SEPOLIA = ChainId.SEPOLIA,
 }
 
 /**
