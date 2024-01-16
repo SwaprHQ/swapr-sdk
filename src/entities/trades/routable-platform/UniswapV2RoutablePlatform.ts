@@ -195,7 +195,7 @@ export class UniswapV2RoutablePlatform extends BaseRoutablePlatform {
 
   public static readonly SUSHISWAP = new UniswapV2RoutablePlatform({
     chainIds: [ChainId.MAINNET, ChainId.RINKEBY, ChainId.ARBITRUM_ONE, ChainId.POLYGON, ChainId.BSC_MAINNET],
-    name: 'Sushiswap',
+    name: 'Sushiswap V2',
     factoryAddress: SUSHISWAP_FACTORY_ADDRESS,
     routerAddress: SUSHISWAP_ROUTER_ADDRESS,
     initCodeHash: '0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303',
