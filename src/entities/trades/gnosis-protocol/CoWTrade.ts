@@ -138,7 +138,7 @@ export class CoWTrade extends Trade {
       },
       {
         loglevel: 'debug',
-      },
+      }
     )
   }
 
