@@ -17,22 +17,22 @@ export class Route {
     invariant(pairs.length > 0, 'PAIRS')
     invariant(
       pairs.every((pair) => pair.chainId === pairs[0].chainId),
-      'CHAIN_IDS'
+      'CHAIN_IDS',
     )
     invariant(
       pairs.every((pair) => pair.platform === pairs[0].platform),
-      'PLATFORM'
+      'PLATFORM',
     )
     invariant(
       (input instanceof Token && pairs[0].involvesToken(input)) ||
         (Currency.isNative(input) && pairs[0].involvesToken(Token.getNativeWrapper(pairs[0].chainId))),
-      'INPUT'
+      'INPUT',
     )
     invariant(
       typeof output === 'undefined' ||
         (output instanceof Token && pairs[pairs.length - 1].involvesToken(output)) ||
         (Currency.isNative(output) && pairs[pairs.length - 1].involvesToken(Token.getNativeWrapper(pairs[0].chainId))),
-      'OUTPUT'
+      'OUTPUT',
     )
 
     const path: Token[] = [input instanceof Token ? input : Token.getNativeWrapper(pairs[0].chainId)]

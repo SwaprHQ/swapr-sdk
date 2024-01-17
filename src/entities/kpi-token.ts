@@ -20,7 +20,7 @@ export class KpiToken extends PricedToken {
     collateral: PricedTokenAmount,
     kpiId: string,
     symbol?: string,
-    name?: string
+    name?: string,
   ) {
     const collateralTokenNativeCurrency = collateral.nativeCurrencyAmount
     const kpiTokenPrice = new Decimal(collateralTokenNativeCurrency.raw.toString()).dividedBy(totalSupply.toString())
@@ -37,7 +37,7 @@ export class KpiToken extends PricedToken {
         numerator: parseUnits(kpiTokenPrice.toFixed(nativeCurrency.decimals), nativeCurrency.decimals).toString(),
       }),
       symbol,
-      name
+      name,
     ) // decimals are always 18 for kpi tokens
     invariant(collateral.token.chainId === chainId, 'inconsistent chain id in collateral')
     this.totalSupply = new TokenAmount(this, totalSupply)

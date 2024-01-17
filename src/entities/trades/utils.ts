@@ -44,8 +44,8 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
   return currencyAmount instanceof TokenAmount
     ? currencyAmount.token.chainId
     : currency instanceof Token
-    ? currency.chainId
-    : undefined
+      ? currency.chainId
+      : undefined
 }
 
 /**

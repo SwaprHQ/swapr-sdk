@@ -46,7 +46,7 @@ export async function getPoolTokenList({
   const poolContract = new Contract(
     poolAddress,
     [poolMethods['view']['coins'], poolMethods['view']['underlying_coins']],
-    provider
+    provider,
   )
 
   const indexList = [0, 1, 2, 3]
@@ -62,7 +62,7 @@ export async function getPoolTokenList({
       } catch (error) {}
 
       return
-    })
+    }),
   )
 
   const underlyingTokenResult: (PoolToken | undefined)[] = await Promise.all(
@@ -77,7 +77,7 @@ export async function getPoolTokenList({
       } catch (error) {}
 
       return
-    })
+    }),
   )
 
   const mainTokens = mainTokenResult.filter((token) => token !== undefined) as PoolToken[]

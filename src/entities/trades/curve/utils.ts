@@ -29,7 +29,7 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
   }
   // Search for WETH in the pool
   const poolHasWETH = tokenList.find(
-    ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase()
+    ({ address }) => CURVE_TOKENS[chainId]?.weth?.address?.toLowerCase() === address.toLowerCase(),
   )
   let tokenIndex
 
@@ -38,7 +38,7 @@ export function getTokenIndex(pool: CurvePool, tokenAddress: string, chainId: Ch
     tokenIndex = pool.tokens.findIndex(
       (item, index) =>
         item.address.toLowerCase() == tokenAddress.toLowerCase() ||
-        underlyingTokens[index].address.toLowerCase() == tokenAddress.toLowerCase()
+        underlyingTokens[index].address.toLowerCase() == tokenAddress.toLowerCase(),
     )
   } else {
     // Search for the main/underlying token
@@ -122,7 +122,7 @@ export async function fetchCurveFactoryPools(chainId: ChainId): Promise<CurvePoo
       }
 
       return curvePoolObject
-    }
+    },
   )
   return pooList
 }
@@ -138,7 +138,7 @@ export async function getRoutablePools(
   pools: CurvePool[],
   tokenIn: CurveToken,
   tokenOut: CurveToken,
-  chainId: ChainId
+  chainId: ChainId,
 ) {
   return pools.filter(({ tokens, metaTokens, underlyingTokens, allowsTradingETH }) => {
     let tokenInAddress = tokenIn.address
@@ -165,10 +165,10 @@ export async function getRoutablePools(
 
     // Underlying tokens, similar to meta tokens
     const hasUnderlyingTokenIn = underlyingTokens?.some(
-      (token) => token.address.toLowerCase() === tokenInAddress.toLowerCase()
+      (token) => token.address.toLowerCase() === tokenInAddress.toLowerCase(),
     )
     const hasUnderlyingTokenOut = underlyingTokens?.some(
-      (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase()
+      (token) => token.address.toLowerCase() === tokenOutAddress.toLowerCase(),
     )
 
     return (

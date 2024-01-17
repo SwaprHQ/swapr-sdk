@@ -62,7 +62,7 @@ export class CurrencyAmount extends Fraction {
   public toFixed(
     decimalPlaces: number = this.currency.decimals,
     format?: object,
-    rounding: Rounding = Rounding.ROUND_DOWN
+    rounding: Rounding = Rounding.ROUND_DOWN,
   ): string {
     invariant(decimalPlaces <= this.currency.decimals, 'DECIMALS')
     return super.toFixed(decimalPlaces, format, rounding)

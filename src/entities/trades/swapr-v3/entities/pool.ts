@@ -1,8 +1,6 @@
 import { BigintIsh, CurrencyAmount, Price, Token } from '@uniswap/sdk-core'
-import JSBI from 'jsbi'
-import invariant from 'tiny-invariant'
-import { POOL_DEPLOYER_ADDRESS } from '../constants'
 import {
+  computePoolAddress,
   FeeAmount,
   LiquidityMath,
   NoTickDataProvider,
@@ -12,8 +10,11 @@ import {
   TickDataProvider,
   TickListDataProvider,
   TickMath,
-  computePoolAddress,
 } from '@uniswap/v3-sdk'
+import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
+
+import { POOL_DEPLOYER_ADDRESS } from '../constants'
 
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96))
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2))
@@ -62,7 +63,7 @@ export class Pool {
     sqrtRatioX96: BigintIsh,
     liquidity: BigintIsh,
     tickCurrent: number,
-    ticks: TickDataProvider | (Tick | TickConstructorArgs)[] = NO_TICK_DATA_PROVIDER_DEFAULT
+    ticks: TickDataProvider | (Tick | TickConstructorArgs)[] = NO_TICK_DATA_PROVIDER_DEFAULT,
   ) {
     invariant(Number.isInteger(fee) && fee < 1_000_000, 'FEE')
 
@@ -71,7 +72,7 @@ export class Pool {
     invariant(
       JSBI.greaterThanOrEqual(JSBI.BigInt(sqrtRatioX96), tickCurrentSqrtRatioX96) &&
         JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX96), nextTickSqrtRatioX96),
-      'PRICE_BOUNDS'
+      'PRICE_BOUNDS',
     )
     // always create a copy of the list since we want the pool's tick list to be immutable
     ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
@@ -94,7 +95,7 @@ export class Pool {
         this.token0,
         this.token1,
         Q192,
-        JSBI.multiply(this.sqrtRatioX96, this.sqrtRatioX96)
+        JSBI.multiply(this.sqrtRatioX96, this.sqrtRatioX96),
       ))
     )
   }
@@ -111,7 +112,7 @@ export class Pool {
         this.token1,
         this.token0,
         JSBI.multiply(this.sqrtRatioX96, this.sqrtRatioX96),
-        Q192
+        Q192,
       ))
     )
   }
@@ -164,7 +165,7 @@ export class Pool {
    */
   public async getOutputAmount(
     inputAmount: CurrencyAmount<Token>,
-    sqrtPriceLimitX96?: JSBI
+    sqrtPriceLimitX96?: JSBI,
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
@@ -191,7 +192,7 @@ export class Pool {
    */
   public async getInputAmount(
     outputAmount: CurrencyAmount<Token>,
-    sqrtPriceLimitX96?: JSBI
+    sqrtPriceLimitX96?: JSBI,
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
 
@@ -223,7 +224,7 @@ export class Pool {
   private async swap(
     zeroForOne: boolean,
     amountSpecified: JSBI,
-    sqrtPriceLimitX96?: JSBI
+    sqrtPriceLimitX96?: JSBI,
   ): Promise<{ amountCalculated: JSBI; sqrtRatioX96: JSBI; liquidity: JSBI; tickCurrent: number }> {
     if (!sqrtPriceLimitX96)
       sqrtPriceLimitX96 = zeroForOne
@@ -261,7 +262,7 @@ export class Pool {
       ;[step.tickNext, step.initialized] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         state.tick,
         zeroForOne,
-        this.tickSpacing
+        this.tickSpacing,
       )
 
       if (step.tickNext < TickMath.MIN_TICK) {
@@ -282,13 +283,13 @@ export class Pool {
           : step.sqrtPriceNextX96,
         state.liquidity,
         state.amountSpecifiedRemaining,
-        this.fee
+        this.fee,
       )
 
       if (exactInput) {
         state.amountSpecifiedRemaining = JSBI.subtract(
           state.amountSpecifiedRemaining,
-          JSBI.add(step.amountIn, step.feeAmount)
+          JSBI.add(step.amountIn, step.feeAmount),
         )
         state.amountCalculated = JSBI.subtract(state.amountCalculated, step.amountOut)
       } else {

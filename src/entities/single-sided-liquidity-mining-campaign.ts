@@ -15,7 +15,7 @@ export class SingleSidedLiquidityMiningCampaign extends DistributionCampaignBase
     staked: PricedTokenAmount,
     locked: boolean,
     stakingCap: TokenAmount,
-    address?: string
+    address?: string,
   ) {
     invariant(staked.token.equals(stakeToken), 'STAKED_LP_TOKEN')
     super({
