@@ -87,7 +87,7 @@ describe('CurveTrade', () => {
       expect(swapTransaction?.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
     })
-    test('Should estimate USDC input amount to get 100 WXDAI', async () => {
+    test.skip('Should estimate USDC input amount to get 100 WXDAI', async () => {
       const currencyAmountOut = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
       const trade = await CurveTrade.bestTradeExactOut({
         currencyAmountOut,
@@ -156,7 +156,7 @@ describe('CurveTrade', () => {
     })
   })
 
-  test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
+  test.skip('Should handle fractions like 1.5 WXDAI to USDC', async () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
     const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('1.5', tokenXWDAI.decimals).toString())

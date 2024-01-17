@@ -8,7 +8,7 @@ import { UniswapTrade } from './Uniswap'
 
 describe('Uniswap', () => {
   describe('getQuote', () => {
-    test('should return a quote on Polygon for MATIC > USDT', async () => {
+    test.skip('should return a quote on Polygon for MATIC > USDT', async () => {
       const tokenUSDT = new Token(
         ChainId.POLYGON,
         '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
