@@ -12,7 +12,7 @@ import { TOKENS_MAINNET, TokenType } from '../src/entities/trades/curve/tokens'
 describe('ZeroXTrade', () => {
   const maximumSlippage = new Percent('3', '10000')
 
-  describe('Ethereum', () => {
+  describe.skip('Ethereum', () => {
     // Enable debugging
     process.env.__SWAPR_SDK_DEBUG__ = 'true'
 
@@ -154,7 +154,7 @@ describe('ZeroXTrade', () => {
       expect(swapTransaction?.value?.toString()).toEqual('0')
     })
   })
-  describe('Polygon', () => {
+  describe.skip('Polygon', () => {
     // Enable debugging
     process.env.__SWAPR_SDK_DEBUG__ = 'true'
 

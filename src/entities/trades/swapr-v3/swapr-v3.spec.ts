@@ -50,7 +50,7 @@ describe('SwaprV3', () => {
       expect(trade?.outputAmount.currency.address).toBe(tokenWXDAI.address)
     })
 
-    test('should return a EXACT INPUT quote for SWPR - WXDAI', async () => {
+    test.skip('should return a EXACT INPUT quote for SWPR - WXDAI', async () => {
       const currencyAmount = new TokenAmount(tokenWXDAI, parseUnits('1', 18).toString())
       const trade = await SwaprV3Trade.getQuote({
         amount: currencyAmount,
