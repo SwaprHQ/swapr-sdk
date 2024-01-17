@@ -45,7 +45,7 @@ export async function getAllCommonUniswapV2Pairs({
   const [tokenA, tokenB] = [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)]
 
   const basePairs: [Token, Token][] = flatMap(bases, (base): [Token, Token][] =>
-    bases.map((otherBase) => [base, otherBase])
+    bases.map((otherBase) => [base, otherBase]),
   ).filter(([t0, t1]) => t0.address !== t1.address)
 
   const allPairCombinations: [Token, Token][] = [
@@ -94,7 +94,7 @@ export async function getAllCommonUniswapV2Pairs({
 
   const getReservesAndSwapFeeCallResults = (await multicallContract.callStatic.tryAggregate(
     false,
-    multicall2CallData
+    multicall2CallData,
   )) as Multicall2TryAggregateResult[]
 
   for (let i = 0; i < getReservesAndSwapFeeCallResults.length; i += 2) {
@@ -112,7 +112,7 @@ export async function getAllCommonUniswapV2Pairs({
       // Decode reserves and swap fee from the results
       const { reserve0, reserve1 } = uniswapPairInterface.decodeFunctionResult(
         'getReserves',
-        getReservesResults.returnData
+        getReservesResults.returnData,
       )
 
       // Swap fee is only available in Swapr's extended UniswapV2Pair contract
@@ -129,8 +129,8 @@ export async function getAllCommonUniswapV2Pairs({
           new TokenAmount(token1, reserve1.toString()),
           swapFee.toString(),
           BigInt(0),
-          platform
-        )
+          platform,
+        ),
       )
     } catch (e) {
       getAllCommonUniswapV2PairsDebug(e)
@@ -186,7 +186,7 @@ export async function getAllCommonUniswapV2PairsFromSubgraph({
       new TokenAmount(token1, parseUnits(pair.reserve1, token1.decimals).toString()),
       swapFee.toString(),
       BigInt(0),
-      platform
+      platform,
     )
   })
 }

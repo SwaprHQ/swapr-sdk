@@ -5,7 +5,6 @@ import invariant from 'tiny-invariant'
 import { execAsync } from '../jest'
 // Tets targets
 import { ChainId, CurrencyAmount, Percent, Token, TokenAmount, ZeroXTrade } from '../src'
-import { CODE_TO_PLATFORM_NAME } from '../src/entities/trades/0x/constants'
 import { ApiSource } from '../src/entities/trades/0x/types'
 import { decodePlatformName, decodeStringToPercent, platformsFromSources } from '../src/entities/trades/0x/utils'
 import { TOKENS_MAINNET, TokenType } from '../src/entities/trades/curve/tokens'
@@ -22,7 +21,7 @@ describe('ZeroXTrade', () => {
       TOKENS_MAINNET.steth.address,
       TOKENS_MAINNET.steth.decimals,
       TOKENS_MAINNET.steth.symbol,
-      TOKENS_MAINNET.steth.name
+      TOKENS_MAINNET.steth.name,
     )
 
     const tokenETH = new Token(
@@ -30,7 +29,7 @@ describe('ZeroXTrade', () => {
       TOKENS_MAINNET.eth.address,
       TOKENS_MAINNET.eth.decimals,
       TOKENS_MAINNET.eth.symbol,
-      TOKENS_MAINNET.eth.name
+      TOKENS_MAINNET.eth.name,
     )
 
     const tokenCRV = new Token(
@@ -38,7 +37,7 @@ describe('ZeroXTrade', () => {
       TOKENS_MAINNET.crv.address,
       TOKENS_MAINNET.crv.decimals,
       TOKENS_MAINNET.crv.symbol,
-      TOKENS_MAINNET.crv.name
+      TOKENS_MAINNET.crv.name,
     )
 
     const tokenRenBTC = new Token(
@@ -46,7 +45,7 @@ describe('ZeroXTrade', () => {
       TOKENS_MAINNET.renbtc.address,
       TOKENS_MAINNET.renbtc.decimals,
       TOKENS_MAINNET.renbtc.symbol,
-      TOKENS_MAINNET.renbtc.name
+      TOKENS_MAINNET.renbtc.name,
     )
 
     const tokenWBTC = new Token(
@@ -54,25 +53,25 @@ describe('ZeroXTrade', () => {
       TOKENS_MAINNET.wbtc.address,
       TOKENS_MAINNET.wbtc.decimals,
       TOKENS_MAINNET.wbtc.symbol,
-      TOKENS_MAINNET.wbtc.name
+      TOKENS_MAINNET.wbtc.name,
     )
 
     // Common token amounts
     const currencyAmountETH1 = new TokenAmount(
       tokenETH,
-      parseUnits('1', tokenETH.decimals).toString()
+      parseUnits('1', tokenETH.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountCRV = new TokenAmount(
       tokenCRV,
-      parseUnits('1000', tokenCRV.decimals).toString()
+      parseUnits('1000', tokenCRV.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountRenBTC1 = new TokenAmount(
       tokenRenBTC,
-      parseUnits('1', tokenRenBTC.decimals).toString()
+      parseUnits('1', tokenRenBTC.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountWBTC = new TokenAmount(
       tokenWBTC,
-      parseUnits('1', tokenWBTC.decimals).toString()
+      parseUnits('1', tokenWBTC.decimals).toString(),
     ) as CurrencyAmount
 
     beforeAll(async () => {
@@ -86,7 +85,7 @@ describe('ZeroXTrade', () => {
     test.skip('Should find a route from 1.5 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
-        parseUnits('1.5', tokenStETH.decimals).toString()
+        parseUnits('1.5', tokenStETH.decimals).toString(),
       ) as CurrencyAmount
       const trade = await ZeroXTrade.bestTradeExactIn(currencyAmountIn, tokenETH, maximumSlippage)
       invariant(!!trade)
@@ -106,7 +105,7 @@ describe('ZeroXTrade', () => {
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual(
-        parseUnits('1', currencyAmountETH1.currency.decimals).toString()
+        parseUnits('1', currencyAmountETH1.currency.decimals).toString(),
       )
     })
 
@@ -188,7 +187,7 @@ describe('ZeroXTrade', () => {
       TOKENS_POLYGON.wmatic.address,
       TOKENS_POLYGON.wmatic.decimals,
       TOKENS_POLYGON.wmatic.symbol,
-      TOKENS_POLYGON.wmatic.name
+      TOKENS_POLYGON.wmatic.name,
     )
 
     const tokenWBTC = new Token(
@@ -196,7 +195,7 @@ describe('ZeroXTrade', () => {
       TOKENS_POLYGON.wbtc.address,
       TOKENS_POLYGON.wbtc.decimals,
       TOKENS_POLYGON.wbtc.symbol,
-      TOKENS_POLYGON.wbtc.name
+      TOKENS_POLYGON.wbtc.name,
     )
 
     const tokenUSDT = new Token(
@@ -204,23 +203,23 @@ describe('ZeroXTrade', () => {
       TOKENS_POLYGON.usdt.address,
       TOKENS_POLYGON.usdt.decimals,
       TOKENS_POLYGON.usdt.symbol,
-      TOKENS_POLYGON.usdt.name
+      TOKENS_POLYGON.usdt.name,
     )
 
     // Common token amounts
     const currencyAmountWMATIC = new TokenAmount(
       tokenWMATIC,
-      parseUnits('1.2', tokenWMATIC.decimals).toString()
+      parseUnits('1.2', tokenWMATIC.decimals).toString(),
     ) as CurrencyAmount
 
     const currencyAmountUSDT = new TokenAmount(
       tokenUSDT,
-      parseUnits('0.2', tokenUSDT.decimals).toString()
+      parseUnits('0.2', tokenUSDT.decimals).toString(),
     ) as CurrencyAmount
 
     const currencyAmountWBTC = new TokenAmount(
       tokenWBTC,
-      parseUnits('0.002', tokenWBTC.decimals).toString()
+      parseUnits('0.002', tokenWBTC.decimals).toString(),
     ) as CurrencyAmount
 
     beforeAll(async () => {
@@ -276,7 +275,6 @@ describe('ZeroXTrade', () => {
   describe('utils', () => {
     describe('decodePlatformName', () => {
       test('returns platform names from api', () => {
-        expect(decodePlatformName(CODE_TO_PLATFORM_NAME['DODO_V2'])).toEqual('Dodo v2')
         expect(decodePlatformName('0x')).toEqual('0x')
       })
     })

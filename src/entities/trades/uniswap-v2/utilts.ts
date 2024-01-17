@@ -21,7 +21,7 @@ export const ZERO_HEX = '0x0'
 export function computePriceImpact(
   midPrice: Price,
   inputAmount: CurrencyAmount,
-  outputAmount: CurrencyAmount
+  outputAmount: CurrencyAmount,
 ): Percent {
   const exactQuote = midPrice.raw.multiply(inputAmount.raw)
   // calculate slippage := (exactQuote - outputAmount) / exactQuote

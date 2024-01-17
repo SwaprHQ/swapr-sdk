@@ -82,7 +82,7 @@ export class VelodromeTrade extends Trade {
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, maximumSlippage, recipient }: VelodromeQuoteTypes,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<VelodromeTrade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'VelodromeQuote.getQuote: chainId is required')
@@ -96,7 +96,7 @@ export class VelodromeTrade extends Trade {
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`
+      `VelodromTrade.getQuote: currencies chainId does not match provider's chainId`,
     )
 
     const currencyIn = amount.currency
@@ -154,7 +154,7 @@ export class VelodromeTrade extends Trade {
           amountIn,
           bestAmountOut.routes[i].from,
           bestAmountOut.routes[i].to,
-          bestAmountOut.routes[i].stable
+          bestAmountOut.routes[i].stable,
         )
 
         const decimals = tradeType === TradeType.EXACT_INPUT ? quoteCurrency.decimals : amount.currency.decimals

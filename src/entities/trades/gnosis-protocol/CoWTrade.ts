@@ -1,5 +1,3 @@
-// @ts-nocheck
-// eslint-disable-next-line no-restricted-imports
 import contractNetworks from '@cowprotocol/contracts/networks.json'
 import { CowSdk, OrderKind, SimpleGetQuoteResponse } from '@cowprotocol/cow-sdk'
 // eslint-disable-next-line no-restricted-imports
@@ -26,6 +24,13 @@ import { CoWTradeError } from './CoWTradeError'
 import { CoWTradeGetBestTradeExactInParams, CoWTradeGetBestTradeExactOutParams, CoWTradeParams } from './types'
 
 const ZERO_PERCENT = new Percent(ZERO, ONE)
+enum CowChainId {
+  MAINNET = ChainId.MAINNET,
+  RINKEBY = ChainId.RINKEBY,
+  GOERLI = ChainId.GOERLI,
+  GNOSIS = ChainId.GNOSIS,
+  SEPOLIA = ChainId.SEPOLIA,
+}
 
 /**
  * CoWTrade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
@@ -401,11 +406,11 @@ export class CoWTrade extends Trade {
    * Returns the vault relayer contract address for the given chain.
    * ERC20 tokens must approve this address.
    * @param chainId The chain Id
-   * @returns The vault relayer address
+   * @returns The vault relayer address or undefined
    */
-  public static getVaultRelayerAddress(chainId: ChainId) {
+  public static getVaultRelayerAddress(chainId: ChainId | CowChainId) {
     const GPv2VaultRelayer = contractNetworks.GPv2VaultRelayer as Record<
-      ChainId,
+      ChainId | CowChainId,
       Record<'transactionHash' | 'address', string>
     >
 
@@ -415,11 +420,11 @@ export class CoWTrade extends Trade {
   /**
    * Returns the settlement contract address for the given chain
    * @param chainId The chain Id
-   * @returns The settlement address
+   * @returns The settlement address or undefined
    */
-  public static getSettlementAddress(chainId: ChainId) {
+  public static getSettlementAddress(chainId: ChainId | CowChainId) {
     const GPv2Settlement = contractNetworks.GPv2Settlement as Record<
-      ChainId,
+      ChainId | CowChainId,
       Record<'transactionHash' | 'address', string>
     >
 

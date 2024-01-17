@@ -156,7 +156,7 @@ export class CurveTrade extends Trade {
    */
   public static async getQuote(
     { currencyAmountIn, currencyOut, maximumSlippage, receiver = AddressZero }: CurveTradeGetQuoteParams,
-    provider?: Provider
+    provider?: Provider,
   ): Promise<CurveTradeQuote | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
@@ -187,8 +187,8 @@ export class CurveTrade extends Trade {
       tokenOut?.address.toLowerCase() == nativeCurrency.address?.toLowerCase()
         ? true
         : currencyOut.name?.toLowerCase() === nativeCurrency.name?.toLowerCase()
-        ? true
-        : currencyOut === nativeCurrency
+          ? true
+          : currencyOut === nativeCurrency
 
     // Validations
     invariant(tokenIn != undefined, 'NO_TOKEN_IN')
@@ -300,7 +300,7 @@ export class CurveTrade extends Trade {
     if (bestPoolAndOutputRes) {
       debugCurveGetQuote(`Found best pool from Curve registry`, bestPoolAndOutputRes)
       const bestPool = routablePools.filter(
-        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase()
+        (pool) => pool.address.toLowerCase() === bestPoolAndOutputRes.poolAddress.toLowerCase(),
       )
       if (bestPool.length !== 0) routablePools = bestPool
     }
@@ -408,7 +408,7 @@ export class CurveTrade extends Trade {
             error,
           }
         }
-      })
+      }),
     )
     // Sort the pool by best output
     const estimatedAmountOutPerPoolSorted = quoteFromPoolList
@@ -419,8 +419,8 @@ export class CurveTrade extends Trade {
         poolA.estimatedAmountOut.gt(poolB.estimatedAmountOut)
           ? -1
           : poolA.estimatedAmountOut.eq(poolB.estimatedAmountOut)
-          ? 0
-          : 1
+            ? 0
+            : 1,
       )
 
     if (estimatedAmountOutPerPoolSorted.length === 0) {
@@ -532,7 +532,7 @@ export class CurveTrade extends Trade {
    */
   public static async bestTradeExactIn(
     { currencyAmountIn, currencyOut, maximumSlippage, receiver }: CurveTradeBestTradeExactInParams,
-    provider?: Provider
+    provider?: Provider,
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountIn, currencyOut)
@@ -547,7 +547,7 @@ export class CurveTrade extends Trade {
           maximumSlippage,
           receiver,
         },
-        provider
+        provider,
       )
 
       if (quote) {
@@ -584,7 +584,7 @@ export class CurveTrade extends Trade {
    */
   public static async bestTradeExactOut(
     { currencyAmountOut, currencyIn, maximumSlippage, receiver }: CurveTradeBestTradeExactOutParams,
-    provider?: Provider
+    provider?: Provider,
   ): Promise<CurveTrade | undefined> {
     // Try to extract the chain ID from the tokens
     const chainId = tryGetChainId(currencyAmountOut, currencyIn)
@@ -600,7 +600,7 @@ export class CurveTrade extends Trade {
           maximumSlippage,
           receiver,
         },
-        provider
+        provider,
       )) as CurveTradeQuote
 
       const currencyOut = currencyAmountOut.currency
@@ -610,7 +610,7 @@ export class CurveTrade extends Trade {
       const estimatedAmountIn = amountOut.times(outputToInputExchangeRate).dividedBy('0.9996')
       const currencyAmountIn = new TokenAmount(
         currencyIn as Token,
-        parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString()
+        parseUnits(estimatedAmountIn.toFixed(currencyIn.decimals), currencyIn.decimals).toString(),
       )
 
       const quote = await CurveTrade.getQuote(
@@ -620,7 +620,7 @@ export class CurveTrade extends Trade {
           maximumSlippage,
           receiver,
         },
-        provider
+        provider,
       )
 
       if (quote) {

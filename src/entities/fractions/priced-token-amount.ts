@@ -19,8 +19,8 @@ export class PricedTokenAmount extends TokenAmount {
       this.token.price.quoteCurrency,
       parseUnits(
         this.multiply(this.token.price).toFixed(this.token.price.quoteCurrency.decimals),
-        this.token.price.quoteCurrency.decimals
-      ).toString()
+        this.token.price.quoteCurrency.decimals,
+      ).toString(),
     )
   }
 }

@@ -100,7 +100,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, recipient, maximumSlippage }: UniswapTradeGetQuoteParams,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<UniswapTrade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
     invariant(chainId, 'UniswapV3Trade.getQuote: chainId is required')
@@ -113,7 +113,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
     // Must match the currencies provided
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`
+      `UniswapTrade.getQuote: currencies chainId does not match provider's chainId`,
     )
 
     const alphaRouter = new AlphaRouter({ chainId: chainId as number, provider })
@@ -127,9 +127,9 @@ export class UniswapTrade extends TradeWithSwapTransaction {
             amount.currency.address as string,
             amount.currency.decimals,
             amount.currency.symbol,
-            amount.currency.name
+            amount.currency.name,
           ),
-      amount.raw
+      amount.raw,
     )
 
     const quoteCurrencyV3 = Currency.isNative(quoteCurrency)
@@ -139,7 +139,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
           quoteCurrency.address as string,
           quoteCurrency.decimals,
           quoteCurrency.symbol,
-          quoteCurrency.name
+          quoteCurrency.name,
         )
 
     debugUniswapTradeGetQuote({
@@ -162,7 +162,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       },
       {
         protocols: [Protocol.V2, Protocol.V3],
-      }
+      },
     )
 
     // Debug

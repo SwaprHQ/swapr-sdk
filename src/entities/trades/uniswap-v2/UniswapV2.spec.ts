@@ -19,7 +19,7 @@ describe('UniswapV2Trade', () => {
         '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
         6,
         'USDT',
-        'Tether USD'
+        'Tether USD',
       )
 
       const maximumSlippage = new Percent('5', '100')
@@ -59,7 +59,7 @@ describe('UniswapV2Trade', () => {
         '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
         6,
         'USDT',
-        'Tether USD'
+        'Tether USD',
       )
 
       const maximumSlippage = new Percent('5', '100')
@@ -97,7 +97,7 @@ describe('UniswapV2Trade', () => {
         '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
         6,
         'USDT',
-        'Tether USD'
+        'Tether USD',
       )
 
       const maximumSlippage = new Percent('5', '100')
@@ -136,7 +136,7 @@ describe('UniswapV2Trade', () => {
         '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
         6,
         'USDT',
-        'Tether USD'
+        'Tether USD',
       )
       const currencyOut = new Token(ChainId.POLYGON, '0x172370d5Cd63279eFa6d502DAB29171933a610AF', 18, 'CRV', 'Curve')
 

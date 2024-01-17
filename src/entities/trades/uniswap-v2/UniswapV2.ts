@@ -62,14 +62,14 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
       tradeType === TradeType.EXACT_INPUT
         ? amount
         : Currency.isNative(route.input)
-        ? CurrencyAmount.nativeCurrency(amounts[0].raw, chainId)
-        : amounts[0]
+          ? CurrencyAmount.nativeCurrency(amounts[0].raw, chainId)
+          : amounts[0]
     const outputAmount =
       tradeType === TradeType.EXACT_OUTPUT
         ? amount
         : Currency.isNative(route.output)
-        ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, chainId)
-        : amounts[amounts.length - 1]
+          ? CurrencyAmount.nativeCurrency(amounts[amounts.length - 1].raw, chainId)
+          : amounts[amounts.length - 1]
     super({
       details: route,
       type: tradeType,
@@ -248,10 +248,10 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
             new Route([...currentPairs, pair], originalAmountIn.currency, currencyOut),
             originalAmountIn,
             maximumSlippage,
-            TradeType.EXACT_INPUT
+            TradeType.EXACT_INPUT,
           ),
           maxNumResults,
-          UniswapV2Trade.tradeComparator
+          UniswapV2Trade.tradeComparator,
         )
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
@@ -334,10 +334,10 @@ export class UniswapV2Trade extends TradeWithSwapTransaction {
             new Route([pair, ...currentPairs], currencyIn, originalAmountOut.currency),
             originalAmountOut,
             maximumSlippage,
-            TradeType.EXACT_OUTPUT
+            TradeType.EXACT_OUTPUT,
           ),
           maxNumResults,
-          UniswapV2Trade.tradeComparator
+          UniswapV2Trade.tradeComparator,
         )
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length))
