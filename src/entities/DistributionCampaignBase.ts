@@ -11,59 +11,59 @@ import { Token } from './token'
 const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
   [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
-    ChainId.RINKEBY
+    ChainId.RINKEBY,
   ),
   [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
-    ChainId.MAINNET
+    ChainId.MAINNET,
   ),
   [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
     parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
-    ChainId.XDAI
+    ChainId.XDAI,
   ),
   [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
     parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
-    ChainId.ARBITRUM_ONE
+    ChainId.ARBITRUM_ONE,
   ),
   [ChainId.ARBITRUM_RINKEBY]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
-    ChainId.ARBITRUM_RINKEBY
+    ChainId.ARBITRUM_RINKEBY,
   ),
   [ChainId.ARBITRUM_GOERLI]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_GOERLI).decimals).toString(),
-    ChainId.ARBITRUM_GOERLI
+    ChainId.ARBITRUM_GOERLI,
   ),
   [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
-    ChainId.POLYGON
+    ChainId.POLYGON,
   ),
   [ChainId.GOERLI]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.GOERLI).decimals).toString(),
-    ChainId.GOERLI
+    ChainId.GOERLI,
   ),
   [ChainId.OPTIMISM_MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_MAINNET).decimals).toString(),
-    ChainId.OPTIMISM_MAINNET
+    ChainId.OPTIMISM_MAINNET,
   ),
   [ChainId.OPTIMISM_GOERLI]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_GOERLI).decimals).toString(),
-    ChainId.OPTIMISM_GOERLI
+    ChainId.OPTIMISM_GOERLI,
   ),
   [ChainId.BSC_MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.BSC_MAINNET).decimals).toString(),
-    ChainId.BSC_MAINNET
+    ChainId.BSC_MAINNET,
   ),
   [ChainId.BSC_TESTNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.BSC_TESTNET).decimals).toString(),
-    ChainId.BSC_TESTNET
+    ChainId.BSC_TESTNET,
   ),
   [ChainId.ZK_SYNC_ERA_MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.ZK_SYNC_ERA_MAINNET).decimals).toString(),
-    ChainId.ZK_SYNC_ERA_MAINNET
+    ChainId.ZK_SYNC_ERA_MAINNET,
   ),
   [ChainId.ZK_SYNC_ERA_TESTNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.ZK_SYNC_ERA_TESTNET).decimals).toString(),
-    ChainId.ZK_SYNC_ERA_TESTNET
+    ChainId.ZK_SYNC_ERA_TESTNET,
   ),
 }
 
@@ -152,7 +152,7 @@ export class DistributionCampaignBase {
       (accumulator, remainingRewardAmount) => {
         return accumulator.add(remainingRewardAmount.nativeCurrencyAmount)
       },
-      CurrencyAmount.nativeCurrency('0', this.chainId)
+      CurrencyAmount.nativeCurrency('0', this.chainId),
     )
 
     const yieldInPeriod = cumulativeRemainingRewardAmountNativeCurrency.divide(stakedValueNativeCurrency)

@@ -98,7 +98,7 @@ export class Pair {
   public static getAddress(
     tokenA: Token,
     tokenB: Token,
-    platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR
+    platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR,
   ): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
     const chainId = tokenA.chainId
@@ -115,7 +115,7 @@ export class Pair {
               [tokens[1].address]: getCreate2Address(
                 platform.factoryAddress[chainId] as string,
                 keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
-                platform.initCodeHash
+                platform.initCodeHash,
               ),
             },
           },
@@ -131,7 +131,7 @@ export class Pair {
     swapFee?: BigintIsh,
     protocolFeeDenominator?: BigintIsh,
     platform: UniswapV2RoutablePlatform = UniswapV2RoutablePlatform.SWAPR,
-    liquidityMiningCampaigns: LiquidityMiningCampaign[] = []
+    liquidityMiningCampaigns: LiquidityMiningCampaign[] = [],
   ) {
     invariant(tokenAmountA.token.chainId === tokenAmountB.token.chainId, 'CHAIN_ID')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
@@ -228,7 +228,7 @@ export class Pair {
     const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-      JSBI.divide(numerator, denominator)
+      JSBI.divide(numerator, denominator),
     )
     if (JSBI.equal(outputAmount.raw, ZERO)) {
       throw new InsufficientInputAmountError()
@@ -241,7 +241,7 @@ export class Pair {
         this.swapFee,
         this.protocolFeeDenominator,
         this.platform,
-        this.liquidityMiningCampaigns
+        this.liquidityMiningCampaigns,
       ),
     ]
   }
@@ -261,11 +261,11 @@ export class Pair {
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
     const denominator = JSBI.multiply(
       JSBI.subtract(outputReserve.raw, outputAmount.raw),
-      JSBI.subtract(_10000, parseBigintIsh(this.swapFee))
+      JSBI.subtract(_10000, parseBigintIsh(this.swapFee)),
     )
     const inputAmount = new TokenAmount(
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-      JSBI.add(JSBI.divide(numerator, denominator), ONE)
+      JSBI.add(JSBI.divide(numerator, denominator), ONE),
     )
     return [
       inputAmount,
@@ -275,7 +275,7 @@ export class Pair {
         this.swapFee,
         this.protocolFeeDenominator,
         this.platform,
-        this.liquidityMiningCampaigns
+        this.liquidityMiningCampaigns,
       ),
     ]
   }
@@ -283,7 +283,7 @@ export class Pair {
   public getLiquidityMinted(
     totalSupply: TokenAmount,
     tokenAmountA: TokenAmount,
-    tokenAmountB: TokenAmount
+    tokenAmountB: TokenAmount,
   ): TokenAmount {
     invariant(totalSupply.token.equals(this.liquidityToken), 'LIQUIDITY')
     const tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
@@ -310,7 +310,7 @@ export class Pair {
     totalSupply: TokenAmount,
     liquidity: TokenAmount,
     feeOn = false,
-    kLast?: BigintIsh
+    kLast?: BigintIsh,
   ): TokenAmount {
     invariant(this.involvesToken(token), 'TOKEN')
     invariant(totalSupply.token.equals(this.liquidityToken), 'TOTAL_SUPPLY')
@@ -341,7 +341,7 @@ export class Pair {
 
     return new TokenAmount(
       token,
-      JSBI.divide(JSBI.multiply(liquidity.raw, this.reserveOf(token).raw), totalSupplyAdjusted.raw)
+      JSBI.divide(JSBI.multiply(liquidity.raw, this.reserveOf(token).raw), totalSupplyAdjusted.raw),
     )
   }
 }

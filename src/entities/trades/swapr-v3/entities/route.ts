@@ -1,6 +1,6 @@
+import { Currency, Price, Token } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 
-import { Currency, Price, Token } from '@uniswap/sdk-core'
 import { Pool } from './pool'
 
 /**
@@ -77,7 +77,7 @@ export class Route<TInput extends Currency, TOutput extends Currency> {
         : {
             nextInput: this.pools[0].token0,
             price: this.pools[0].token1Price,
-          }
+          },
     ).price
 
     return (this._midPrice = new Price(this.input, this.output, price.denominator, price.numerator))

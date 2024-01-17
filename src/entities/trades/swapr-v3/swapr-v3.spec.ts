@@ -1,10 +1,10 @@
 import { parseUnits } from '@ethersproject/units'
-import { SwaprV3Trade } from './SwaprV3'
 
 import { ChainId, TradeType } from '../../../constants'
+import { Currency } from '../../currency'
 import { Percent, TokenAmount } from '../../fractions'
 import { Token } from '../../token'
-import { Currency } from '../../currency'
+import { SwaprV3Trade } from './SwaprV3'
 
 const maximumSlippage = new Percent('3', '100')
 const tokenWXDAI = new Token(ChainId.GNOSIS, '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d', 18, 'WXDAI', 'WXDAI')
@@ -127,7 +127,7 @@ describe('SwaprV3', () => {
       })
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 
@@ -150,7 +150,7 @@ describe('SwaprV3', () => {
       expect(trade?.inputAmount.currency.address).toBe(tokenUSDC.address)
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 
@@ -169,7 +169,7 @@ describe('SwaprV3', () => {
       })
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 

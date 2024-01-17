@@ -28,7 +28,7 @@ export async function getUniswapV2PairSwapFee({
 
   const swapFeeCallResults = (await multicallContract.callStatic.tryAggregate(
     false,
-    pairAddressList.map((target) => ({ target, callData }))
+    pairAddressList.map((target) => ({ target, callData })),
   )) as Multicall2TryAggregateResult[]
 
   // Map the call results to the pair addresses

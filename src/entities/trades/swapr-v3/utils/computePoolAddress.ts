@@ -2,6 +2,7 @@ import { defaultAbiCoder } from '@ethersproject/abi'
 import { getCreate2Address } from '@ethersproject/address'
 import { keccak256 } from '@ethersproject/solidity'
 import { Token } from '@uniswap/sdk-core'
+
 import { POOL_INIT_CODE_HASH } from '../constants'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
@@ -50,6 +51,6 @@ export function computePoolAddress({
   return getCreate2Address(
     poolDeployer,
     keccak256(['bytes'], [defaultAbiCoder.encode(['address', 'address'], [token0.address, token1.address])]),
-    initCodeHashManualOverride ?? POOL_INIT_CODE_HASH
+    initCodeHashManualOverride ?? POOL_INIT_CODE_HASH,
   )
 }

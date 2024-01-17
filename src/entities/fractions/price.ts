@@ -38,7 +38,7 @@ export class Price extends Fraction {
               quoteCurrency: pair.reserve0.currency,
               denominator: pair.reserve1.raw,
               numerator: pair.reserve0.raw,
-            })
+            }),
       )
     }
     return prices.slice(1).reduce((accumulator, currentValue) => accumulator.multiply(currentValue), prices[0])
@@ -52,7 +52,7 @@ export class Price extends Fraction {
     this.quoteCurrency = quoteCurrency
     this.scalar = new Fraction(
       JSBI.exponentiate(TEN, JSBI.BigInt(baseCurrency.decimals)),
-      JSBI.exponentiate(TEN, JSBI.BigInt(quoteCurrency.decimals))
+      JSBI.exponentiate(TEN, JSBI.BigInt(quoteCurrency.decimals)),
     )
   }
 
