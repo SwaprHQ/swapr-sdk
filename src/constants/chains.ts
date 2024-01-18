@@ -17,7 +17,6 @@ export enum ChainId {
    * @deprecated Use GOERLI instead
    */
   RINKEBY = 4,
-  SEPOLIA = 11155111,
   /**
    * @deprecated Use GNOSIS instead
    */
