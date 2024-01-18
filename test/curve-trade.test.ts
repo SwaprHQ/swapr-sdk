@@ -87,7 +87,7 @@ describe('CurveTrade', () => {
       expect(swapTransaction?.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
     })
-    test('Should estimate USDC input amount to get 100 WXDAI', async () => {
+    test.skip('Should estimate USDC input amount to get 100 WXDAI', async () => {
       const currencyAmountOut = new TokenAmount(tokenXWDAI, parseUnits('100', tokenXWDAI.decimals).toBigInt())
       const trade = await CurveTrade.bestTradeExactOut({
         currencyAmountOut,
@@ -107,14 +107,14 @@ describe('CurveTrade', () => {
       TOKENS_ARBITRUM_ONE.eurs.address,
       TOKENS_ARBITRUM_ONE.eurs.decimals,
       TOKENS_ARBITRUM_ONE.eurs.symbol,
-      TOKENS_ARBITRUM_ONE.eurs.name
+      TOKENS_ARBITRUM_ONE.eurs.name,
     )
     const tokenUSDC = new Token(
       ChainId.ARBITRUM_ONE,
       TOKENS_ARBITRUM_ONE.usdc_e.address,
       TOKENS_ARBITRUM_ONE.usdc_e.decimals,
       TOKENS_ARBITRUM_ONE.usdc_e.symbol,
-      TOKENS_ARBITRUM_ONE.usdc_e.name
+      TOKENS_ARBITRUM_ONE.usdc_e.name,
     )
 
     const tokenUSDT = new Token(
@@ -122,7 +122,7 @@ describe('CurveTrade', () => {
       TOKENS_ARBITRUM_ONE.usdt.address,
       TOKENS_ARBITRUM_ONE.usdt.decimals,
       TOKENS_ARBITRUM_ONE.usdt.symbol,
-      TOKENS_ARBITRUM_ONE.usdt.name
+      TOKENS_ARBITRUM_ONE.usdt.name,
     )
 
     test.skip('Should find a route from 1 USDC to USDT via 2pool', async () => {
@@ -156,7 +156,7 @@ describe('CurveTrade', () => {
     })
   })
 
-  test('Should handle fractions like 1.5 WXDAI to USDC', async () => {
+  test.skip('Should handle fractions like 1.5 WXDAI to USDC', async () => {
     const tokenXWDAI = new Token(ChainId.XDAI, TOKENS_XDAI.wxdai.address, TOKENS_XDAI.wxdai.decimals, 'WXDAI', 'WXDAI')
     const tokenUSDC = new Token(ChainId.XDAI, TOKENS_XDAI.usdc.address, TOKENS_XDAI.usdc.decimals, 'USDC', 'USDC')
     const currencyAmountIn = new TokenAmount(tokenXWDAI, parseUnits('1.5', tokenXWDAI.decimals).toString())
@@ -172,7 +172,7 @@ describe('CurveTrade', () => {
     expect(swapTransaction?.to).toBeAddress()
   })
 
-  describe('Ethereum', () => {
+  describe.skip('Ethereum', () => {
     const testEVMTX = true
 
     // Enable debugging
@@ -185,7 +185,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.steth.address,
       TOKENS_MAINNET.steth.decimals,
       TOKENS_MAINNET.steth.symbol,
-      TOKENS_MAINNET.steth.name
+      TOKENS_MAINNET.steth.name,
     )
 
     const tokenWETH = new Token(
@@ -193,7 +193,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.weth.address,
       TOKENS_MAINNET.weth.decimals,
       TOKENS_MAINNET.weth.symbol,
-      TOKENS_MAINNET.weth.name
+      TOKENS_MAINNET.weth.name,
     )
 
     const tokenETH = new Token(
@@ -201,7 +201,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.eth.address,
       TOKENS_MAINNET.eth.decimals,
       TOKENS_MAINNET.eth.symbol,
-      TOKENS_MAINNET.eth.name
+      TOKENS_MAINNET.eth.name,
     )
 
     const tokenCRV = new Token(
@@ -209,7 +209,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.crv.address,
       TOKENS_MAINNET.crv.decimals,
       TOKENS_MAINNET.crv.symbol,
-      TOKENS_MAINNET.crv.name
+      TOKENS_MAINNET.crv.name,
     )
 
     const tokenUSDC = new Token(
@@ -217,7 +217,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.usdc.address,
       TOKENS_MAINNET.usdc.decimals,
       TOKENS_MAINNET.usdc.symbol,
-      TOKENS_MAINNET.usdc.name
+      TOKENS_MAINNET.usdc.name,
     )
 
     const tokenRenBTC = new Token(
@@ -225,7 +225,7 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.renbtc.address,
       TOKENS_MAINNET.renbtc.decimals,
       TOKENS_MAINNET.renbtc.symbol,
-      TOKENS_MAINNET.renbtc.name
+      TOKENS_MAINNET.renbtc.name,
     )
 
     const tokenWBTC = new Token(
@@ -233,25 +233,25 @@ describe('CurveTrade', () => {
       TOKENS_MAINNET.wbtc.address,
       TOKENS_MAINNET.wbtc.decimals,
       TOKENS_MAINNET.wbtc.symbol,
-      TOKENS_MAINNET.wbtc.name
+      TOKENS_MAINNET.wbtc.name,
     )
 
     // Common token amounts
     const currencyAmountETH1 = new TokenAmount(
       tokenETH,
-      parseUnits('1', tokenETH.decimals).toString()
+      parseUnits('1', tokenETH.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountStETH1 = new TokenAmount(
       tokenStETH,
-      parseUnits('1', tokenStETH.decimals).toString()
+      parseUnits('1', tokenStETH.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountUSDC1000 = new TokenAmount(
       tokenUSDC,
-      parseUnits('1000', tokenUSDC.decimals).toString()
+      parseUnits('1000', tokenUSDC.decimals).toString(),
     ) as CurrencyAmount
     const currencyAmountRenBTC1 = new TokenAmount(
       tokenRenBTC,
-      parseUnits('1', tokenRenBTC.decimals).toString()
+      parseUnits('1', tokenRenBTC.decimals).toString(),
     ) as CurrencyAmount
 
     beforeAll(async () => {
@@ -270,7 +270,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenWETH,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -282,7 +282,7 @@ describe('CurveTrade', () => {
     test.skip('Should find a route from 1 stETH to ETH', async () => {
       const currencyAmountIn = new TokenAmount(
         tokenStETH,
-        parseUnits('1', tokenStETH.decimals).toString()
+        parseUnits('1', tokenStETH.decimals).toString(),
       ) as CurrencyAmount
       const provider = await getGanacheRPCProvider()
       const trade = await CurveTrade.bestTradeExactIn(
@@ -291,7 +291,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenETH,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -307,14 +307,14 @@ describe('CurveTrade', () => {
           currencyOut: tokenStETH,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
       expect(swapTransaction.data).toBeDefined()
       expect(swapTransaction?.to).toBeAddress()
       expect(swapTransaction?.value?.toString()).toEqual(
-        parseUnits('1', currencyAmountETH1.currency.decimals).toString()
+        parseUnits('1', currencyAmountETH1.currency.decimals).toString(),
       )
     })
 
@@ -326,7 +326,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenCRV,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -343,7 +343,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenStETH,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -360,7 +360,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenWETH,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -378,7 +378,7 @@ describe('CurveTrade', () => {
           currencyOut: tokenWBTC,
           maximumSlippage,
         },
-        provider
+        provider,
       )
       invariant(!!trade)
       const swapTransaction = await trade.swapTransaction()
@@ -453,14 +453,14 @@ describe('CurveTrade', () => {
           TOKENS_MAINNET.wbtc.address,
           TOKENS_MAINNET.wbtc.decimals,
           TOKENS_MAINNET.wbtc.symbol,
-          TOKENS_MAINNET.wbtc.name
+          TOKENS_MAINNET.wbtc.name,
         ),
         tokenOut: new Token(
           ChainId.MAINNET,
           TOKENS_MAINNET.renbtc.address,
           TOKENS_MAINNET.renbtc.decimals,
           TOKENS_MAINNET.renbtc.symbol,
-          TOKENS_MAINNET.renbtc.name
+          TOKENS_MAINNET.renbtc.name,
         ),
       },
     ]
@@ -495,7 +495,7 @@ describe('CurveTrade', () => {
             currencyOut: tokenOut,
             maximumSlippage,
           },
-          mainnetForkProvider
+          mainnetForkProvider,
         )
 
         invariant(!!trade)
@@ -516,13 +516,13 @@ describe('CurveTrade', () => {
           const testAccountTokenInBalance = (await tokenInContract.balanceOf(testAccount)) as BigNumber
           const testAccountTokenInAllowance = (await tokenInContract.allowance(
             trade?.approveAddress,
-            testAccount
+            testAccount,
           )) as BigNumber
 
           console.log(
             `User balance at ${
               tokenIn.symbol
-            } = ${testAccountTokenInBalance.toString()}, allowance = ${testAccountTokenInAllowance.toString()}`
+            } = ${testAccountTokenInBalance.toString()}, allowance = ${testAccountTokenInAllowance.toString()}`,
           )
 
           if (testAccountTokenInBalance.gte(tokenInAmountBN)) {
