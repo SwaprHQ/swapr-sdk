@@ -10,7 +10,7 @@ import {
   Token as UniswapToken,
 } from '@uniswap/sdk-core'
 import { AlphaRouter, SwapRoute } from '@uniswap/smart-order-router'
-import { Pair as UniswapV2Pair } from '@uniswap/v2-sdk'
+import { Pool } from '@uniswap/v3-sdk'
 import dayjs from 'dayjs'
 import debug from 'debug'
 import JSBI from 'jsbi'
@@ -75,7 +75,7 @@ export class UniswapTrade extends TradeWithSwapTransaction {
       swapRoute.trade.swaps.reduce((acc, { route: { pools } }) => {
         for (let i = 0; i < pools.length; i++) {
           const nextPool = pools[i]
-          acc = acc + (nextPool instanceof UniswapV2Pair ? 3000 : nextPool.fee) // default V2 fee is 0.3% while v3 can be 0.01% to 1%
+          acc = acc + (nextPool instanceof Pool ? nextPool.fee : 3000) // default V2 fee is 0.3% while v3 can be 0.01% to 1%
         }
         return acc
       }, 0) / 100

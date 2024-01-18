@@ -1,16 +1,17 @@
-import { AddressZero } from '@ethersproject/constants'
-import { ChainId, Fetcher, JSBI, Token } from '../src'
-import { rinkeby } from '@swapr/core/.contracts.json'
 import { getAddress } from '@ethersproject/address'
+import { AddressZero } from '@ethersproject/constants'
+import { rinkeby } from '@swapr/core/.contracts.json'
+
+import { ChainId, Fetcher, JSBI, Token } from '../src'
 import { TEST_TOKENS } from './commons'
 
-describe('fees', () => {
+describe.skip('fees', () => {
   // skip because uses old implementations, update tests with new local deployment
   describe('fetchSwapFee', () => {
     it.skip('Get WETH-WEENUS rinkeby fee', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.WEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.WEENUS[ChainId.RINKEBY],
       )
       const WETH_WEENUS_RINKEBY_FEE = await Fetcher.fetchSwapFee(WETH_WEENUS_RINKEBY.liquidityToken)
       expect(WETH_WEENUS_RINKEBY_FEE.fee).toEqual(JSBI.BigInt(10))
@@ -21,11 +22,11 @@ describe('fees', () => {
     it.skip('Get WETH-WEENUS rinkeby fee', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.WEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.WEENUS[ChainId.RINKEBY],
       )
       const WETH_XEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.XEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.XEENUS[ChainId.RINKEBY],
       )
       const fees = await Fetcher.fetchSwapFees([WETH_WEENUS_RINKEBY.liquidityToken, WETH_XEENUS_RINKEBY.liquidityToken])
       expect(fees[0].fee).toEqual(JSBI.BigInt(10))
@@ -37,15 +38,15 @@ describe('fees', () => {
     it.skip('Get all rinkeby fees', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.WEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.WEENUS[ChainId.RINKEBY],
       )
       const WETH_XEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.XEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.XEENUS[ChainId.RINKEBY],
       )
       const WEENUS_XEENUS_RINKEBY = await Fetcher.fetchPairData(
         TEST_TOKENS.WEENUS[ChainId.RINKEBY],
-        TEST_TOKENS.XEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.XEENUS[ChainId.RINKEBY],
       )
       const fees = await Fetcher.fetchAllSwapFees(ChainId.RINKEBY)
       expect(fees[WETH_WEENUS_RINKEBY.liquidityToken.address].fee).toEqual(JSBI.BigInt(10))
@@ -56,15 +57,15 @@ describe('fees', () => {
     it.skip('Get rinkeby fees with cache', async () => {
       const WETH_WEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.WEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.WEENUS[ChainId.RINKEBY],
       )
       const WETH_XEENUS_RINKEBY = await Fetcher.fetchPairData(
         Token.WETH[ChainId.RINKEBY],
-        TEST_TOKENS.XEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.XEENUS[ChainId.RINKEBY],
       )
       const WEENUS_XEENUS_RINKEBY = await Fetcher.fetchPairData(
         TEST_TOKENS.WEENUS[ChainId.RINKEBY],
-        TEST_TOKENS.XEENUS[ChainId.RINKEBY]
+        TEST_TOKENS.XEENUS[ChainId.RINKEBY],
       )
       const fees = await Fetcher.fetchAllSwapFees(ChainId.RINKEBY, {
         [WETH_WEENUS_RINKEBY.liquidityToken.address]: {
