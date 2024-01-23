@@ -25,11 +25,11 @@ import { CoWTradeGetBestTradeExactInParams, CoWTradeGetBestTradeExactOutParams, 
 
 const ZERO_PERCENT = new Percent(ZERO, ONE)
 
-enum CowChainId {
+enum CoWChainId {
   SEPOLIA = 11155111,
 }
 
-type GPV2SupportedChainId = ChainId | CowChainId
+export type GPv2SupportedChainId = ChainId | CoWChainId
 
 /**
  * CoWTrade uses CowFi API to find and route trades through the MEV-protected Gnosis Protocol v2
@@ -138,7 +138,7 @@ export class CoWTrade extends Trade {
       },
       {
         loglevel: 'debug',
-      }
+      },
     )
   }
 
@@ -407,9 +407,9 @@ export class CoWTrade extends Trade {
    * @param chainId The chain Id
    * @returns The vault relayer address or undefined
    */
-  public static getVaultRelayerAddress(chainId: GPV2SupportedChainId) {
+  public static getVaultRelayerAddress(chainId: GPv2SupportedChainId) {
     const GPv2VaultRelayer = contractNetworks.GPv2VaultRelayer as Record<
-      GPV2SupportedChainId,
+      GPv2SupportedChainId,
       Record<'transactionHash' | 'address', string>
     >
 
@@ -421,9 +421,9 @@ export class CoWTrade extends Trade {
    * @param chainId The chain Id
    * @returns The settlement address or undefined
    */
-  public static getSettlementAddress(chainId: GPV2SupportedChainId) {
+  public static getSettlementAddress(chainId: GPv2SupportedChainId) {
     const GPv2Settlement = contractNetworks.GPv2Settlement as Record<
-      GPV2SupportedChainId,
+      GPv2SupportedChainId,
       Record<'transactionHash' | 'address', string>
     >
 
