@@ -191,6 +191,13 @@ export class Token extends Currency {
       'WETH',
       'Wrapped Ether',
     ),
+    [ChainId.SCROLL_MAINNET]: new Token(
+      ChainId.SCROLL_MAINNET,
+      '0x5300000000000000000000000000000000000004',
+      18,
+      'WETH',
+      'Wrapped Ether on Scroll',
+    ),
     [ChainId.XDAI]: new Token(
       ChainId.XDAI,
       '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
@@ -247,6 +254,7 @@ export class Token extends Currency {
     [ChainId.POLYGON]: Token.WMATIC[ChainId.POLYGON],
     [ChainId.RINKEBY]: Token.WETH[ChainId.RINKEBY],
     [ChainId.XDAI]: Token.WXDAI[ChainId.XDAI],
+    [ChainId.SCROLL_MAINNET]: Token.WETH[ChainId.SCROLL_MAINNET],
     [ChainId.ZK_SYNC_ERA_MAINNET]: Token.WETH[ChainId.ZK_SYNC_ERA_MAINNET],
     [ChainId.ZK_SYNC_ERA_TESTNET]: Token.WETH[ChainId.ZK_SYNC_ERA_TESTNET],
   }
