@@ -35,12 +35,13 @@ export class RoutablePlatform extends BaseRoutablePlatform {
   public static readonly SWAPR_V3 = new RoutablePlatform([ChainId.GNOSIS], 'Swapr V3')
   public static readonly SUSHISWAP = new RoutablePlatform(
     [
-      ChainId.MAINNET,
       ChainId.ARBITRUM_ONE,
+      ChainId.BSC_MAINNET,
+      ChainId.GNOSIS,
+      ChainId.MAINNET,
       ChainId.POLYGON,
       ChainId.OPTIMISM_MAINNET,
-      ChainId.GNOSIS,
-      ChainId.BSC_MAINNET,
+      ChainId.SCROLL_MAINNET,
     ],
     'Sushiswap',
   )
