@@ -11,29 +11,8 @@ type ChainTokenList = {
 }
 
 export const DAI: Record<number, Token> = {
-  [ChainId.MAINNET]: new Token(
-    ChainId.MAINNET,
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-    18,
-    'DAI',
-    'Dai Stablecoin',
-  ),
-  [ChainId.POLYGON]: new Token(
-    ChainId.POLYGON,
-    '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
-    18,
-    'DAI',
-    'Dai Stablecoin',
-  ),
   [ChainId.ARBITRUM_ONE]: new Token(
     ChainId.ARBITRUM_ONE,
-    '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
-    18,
-    'DAI',
-    'Dai Stablecoin',
-  ),
-  [ChainId.OPTIMISM_MAINNET]: new Token(
-    ChainId.OPTIMISM_MAINNET,
     '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
     18,
     'DAI',
@@ -53,37 +32,43 @@ export const DAI: Record<number, Token> = {
     'DAI',
     'Dai Token',
   ),
+  [ChainId.MAINNET]: new Token(
+    ChainId.MAINNET,
+    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    18,
+    'DAI',
+    'Dai Stablecoin',
+  ),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+    18,
+    'DAI',
+    'Dai Stablecoin',
+  ),
+  [ChainId.POLYGON]: new Token(
+    ChainId.POLYGON,
+    '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    18,
+    'DAI',
+    'Dai Stablecoin',
+  ),
+  [ChainId.SCROLL_MAINNET]: new Token(
+    ChainId.SCROLL_MAINNET,
+    '0xcA77eB3fEFe3725Dc33bccB54eDEFc3D9f764f97',
+    18,
+    'DAI',
+    'Dai Token',
+  ),
 }
 
 export const USDC: Record<number, Token> = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C'),
   [ChainId.ARBITRUM_ONE]: new Token(
     ChainId.ARBITRUM_ONE,
     '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
     6,
     'USDC.e',
     'Bridged USDC',
-  ),
-  [ChainId.XDAI]: new Token(
-    ChainId.XDAI,
-    '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
-    6,
-    'USDC',
-    'USD//C from Ethereum',
-  ),
-  [ChainId.POLYGON]: new Token(
-    ChainId.POLYGON,
-    '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-    6,
-    'USDC',
-    'USD//C from Ethereum',
-  ),
-  [ChainId.OPTIMISM_MAINNET]: new Token(
-    ChainId.OPTIMISM_MAINNET,
-    '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-    6,
-    'USDC',
-    'USD Coin',
   ),
   [ChainId.BSC_MAINNET]: new Token(
     ChainId.BSC_MAINNET,
@@ -98,6 +83,35 @@ export const USDC: Record<number, Token> = {
     6,
     'USDC',
     'USDC Token',
+  ),
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C'),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+    6,
+    'USDC',
+    'USD Coin',
+  ),
+  [ChainId.POLYGON]: new Token(
+    ChainId.POLYGON,
+    '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+    6,
+    'USDC',
+    'USD//C from Ethereum',
+  ),
+  [ChainId.SCROLL_MAINNET]: new Token(
+    ChainId.SCROLL_MAINNET,
+    '0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4',
+    6,
+    'USDC',
+    'USD Coin on zkSync Era Tesnet',
+  ),
+  [ChainId.XDAI]: new Token(
+    ChainId.XDAI,
+    '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+    6,
+    'USDC',
+    'USD//C from Ethereum',
   ),
   [ChainId.ZK_SYNC_ERA_MAINNET]: new Token(
     ChainId.ZK_SYNC_ERA_MAINNET,
@@ -116,25 +130,9 @@ export const USDC: Record<number, Token> = {
 }
 
 export const USDT: Record<number, Token> = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD'),
-  [ChainId.XDAI]: new Token(
-    ChainId.XDAI,
-    '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
-    6,
-    'USDT',
-    'Tether USD from Ethereum',
-  ),
   [ChainId.ARBITRUM_ONE]: new Token(
     ChainId.ARBITRUM_ONE,
     '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-    6,
-    'USDT',
-    'Tether USD',
-  ),
-  [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 6, 'USDT', 'Tether USD'),
-  [ChainId.OPTIMISM_MAINNET]: new Token(
-    ChainId.OPTIMISM_MAINNET,
-    '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
     6,
     'USDT',
     'Tether USD',
@@ -153,10 +151,32 @@ export const USDT: Record<number, Token> = {
     'USDT',
     'USDT Token',
   ),
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD'),
+  [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 6, 'USDT', 'Tether USD'),
+  [ChainId.OPTIMISM_MAINNET]: new Token(
+    ChainId.OPTIMISM_MAINNET,
+    '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+    6,
+    'USDT',
+    'Tether USD',
+  ),
+  [ChainId.SCROLL_MAINNET]: new Token(
+    ChainId.SCROLL_MAINNET,
+    '0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df',
+    6,
+    'USDT',
+    'Tether USD',
+  ),
+  [ChainId.XDAI]: new Token(
+    ChainId.XDAI,
+    '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
+    6,
+    'USDT',
+    'Tether USD from Ethereum',
+  ),
 }
 
 export const WBTC: Record<number, Token> = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC'),
   [ChainId.ARBITRUM_ONE]: new Token(
     ChainId.ARBITRUM_ONE,
     '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
@@ -164,20 +184,7 @@ export const WBTC: Record<number, Token> = {
     'WBTC',
     'Wrapped BTC',
   ),
-  [ChainId.XDAI]: new Token(
-    ChainId.XDAI,
-    '0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252',
-    8,
-    'WBTC',
-    'Wrapped BTC from Ethereum',
-  ),
-  [ChainId.POLYGON]: new Token(
-    ChainId.POLYGON,
-    '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
-    8,
-    'WBTC',
-    'Wrapped BTC from Ethereum',
-  ),
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC'),
   [ChainId.OPTIMISM_MAINNET]: new Token(
     ChainId.OPTIMISM_MAINNET,
     '0x68f180fcCe6836688e9084f035309E29Bf0A2095',
@@ -185,6 +192,15 @@ export const WBTC: Record<number, Token> = {
     'WBTC',
     'Wrapped BTC',
   ),
+  [ChainId.POLYGON]: new Token(ChainId.POLYGON, '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6', 8, 'WBTC', 'Wrapped BTC'),
+  [ChainId.SCROLL_MAINNET]: new Token(
+    ChainId.SCROLL_MAINNET,
+    '0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1',
+    8,
+    'WBTC',
+    'Wrapped BTC',
+  ),
+  [ChainId.XDAI]: new Token(ChainId.XDAI, '0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252', 8, 'WBTC', 'Wrapped BTC'),
 }
 
 export const HONEY = new Token(ChainId.XDAI, '0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9', 18, 'HNY', 'Honey')
