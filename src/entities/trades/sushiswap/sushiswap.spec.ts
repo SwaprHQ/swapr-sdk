@@ -18,7 +18,7 @@ const tokenGNOGnosis = new Token(
 
 const recipient = '0x0000000000000000000000000000000000000000'
 
-describe('SwaprV3', () => {
+describe('Sushiswap', () => {
   describe('Quote', () => {
     test('should return a EXACT INPUT quote on Gnosis for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(
@@ -194,10 +194,29 @@ describe('SwaprV3', () => {
       expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
       expect(trade?.outputAmount.currency.address).toBe(currencyOut.address)
     })
+
+    test('should return a EXACT INPUT quote on Scroll for USDT - WETH', async () => {
+      const currencyAmount = new TokenAmount(
+        USDT[ChainId.SCROLL_MAINNET],
+        parseUnits('1000000000', USDT[ChainId.SCROLL_MAINNET].decimals).toString(),
+      )
+      const trade = await SushiswapTrade.getQuote({
+        amount: currencyAmount,
+        quoteCurrency: WETH[ChainId.SCROLL_MAINNET],
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_INPUT,
+      })
+
+      expect(trade).toBeDefined()
+      expect(trade?.chainId).toEqual(ChainId.SCROLL_MAINNET)
+      expect(trade?.tradeType).toEqual(TradeType.EXACT_INPUT)
+      expect(trade?.outputAmount.currency.address).toBe(WETH[ChainId.SCROLL_MAINNET].address)
+    })
   })
 
   describe('Swap', () => {
-    test('should return a swap for Gnosis for USDC - WXDAI', async () => {
+    test('should return a swap on Gnosis for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(USDC[ChainId.GNOSIS], parseUnits('2', 6).toString())
 
       const trade = await SushiswapTrade.getQuote({
@@ -216,11 +235,34 @@ describe('SwaprV3', () => {
       const swap = await trade?.swapTransaction(swapOptions)
       expect(swap !== undefined)
     })
-    test('should return a swap on gnosis with native token USDC - XDAI', async () => {
+
+    test('should return a swap on Gnosis with native token USDC - XDAI', async () => {
       const currencyAmount = new TokenAmount(USDC[ChainId.GNOSIS], parseUnits('2', 6).toString())
 
       const trade = await SushiswapTrade.getQuote({
         quoteCurrency: Currency.getNative(ChainId.GNOSIS),
+        amount: currencyAmount,
+        maximumSlippage,
+        recipient,
+        tradeType: TradeType.EXACT_INPUT,
+      })
+
+      const swapOptions = {
+        recipient,
+        account: recipient,
+      }
+
+      const swap = await trade?.swapTransaction(swapOptions)
+      expect(swap !== undefined)
+    })
+
+    test('should return a swap on Scroll for USDT - WETH', async () => {
+      const currencyAmount = new TokenAmount(
+        USDT[ChainId.SCROLL_MAINNET],
+        parseUnits('1000000000', USDT[ChainId.SCROLL_MAINNET].decimals).toString(),
+      )
+      const trade = await SushiswapTrade.getQuote({
+        quoteCurrency: WETH[ChainId.SCROLL_MAINNET],
         amount: currencyAmount,
         maximumSlippage,
         recipient,
