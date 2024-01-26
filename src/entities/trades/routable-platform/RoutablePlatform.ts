@@ -42,6 +42,6 @@ export class RoutablePlatform extends BaseRoutablePlatform {
       ChainId.GNOSIS,
       ChainId.BSC_MAINNET,
     ],
-    'Sushiswap'
+    'Sushiswap',
   )
 }

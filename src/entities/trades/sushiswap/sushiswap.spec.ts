@@ -1,11 +1,11 @@
 import { parseEther, parseUnits } from '@ethersproject/units'
-import { SushiswapTrade } from './Sushiswap'
 
 import { ChainId, TradeType } from '../../../constants'
-import { CurrencyAmount, Percent, TokenAmount } from '../../fractions'
-import { Token, CAKE, ARB, WETH, SWPR, WXDAI } from '../../token'
 import { Currency } from '../../currency'
+import { CurrencyAmount, Percent, TokenAmount } from '../../fractions'
+import { ARB, CAKE, SWPR, Token, WETH, WXDAI } from '../../token'
 import { DAI, USDC, USDT } from '../uniswap-v2'
+import { SushiswapTrade } from './Sushiswap'
 
 const maximumSlippage = new Percent('3', '100')
 const tokenGNOGnosis = new Token(
@@ -209,7 +209,7 @@ describe('SwaprV3', () => {
       })
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 
@@ -228,7 +228,7 @@ describe('SwaprV3', () => {
       })
 
       const swapOptions = {
-        recipient: recipient,
+        recipient,
         account: recipient,
       }
 
