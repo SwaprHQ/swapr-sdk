@@ -495,18 +495,19 @@ export const POOLS_MAINNET: CurvePool[] = [
   */
 ]
 export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
-  [ChainId.MAINNET]: 'ethereum',
-  [ChainId.XDAI]: 'xdai',
   [ChainId.ARBITRUM_ONE]: 'arbitrum',
-  [ChainId.POLYGON]: 'polygon',
-  [ChainId.RINKEBY]: '',
-  [ChainId.ARBITRUM_RINKEBY]: '',
-  [ChainId.GOERLI]: '',
-  [ChainId.OPTIMISM_MAINNET]: 'optimism',
-  [ChainId.OPTIMISM_GOERLI]: '',
   [ChainId.ARBITRUM_GOERLI]: '',
+  [ChainId.ARBITRUM_RINKEBY]: '',
   [ChainId.BSC_MAINNET]: '',
   [ChainId.BSC_TESTNET]: '',
+  [ChainId.GOERLI]: '',
+  [ChainId.MAINNET]: 'ethereum',
+  [ChainId.OPTIMISM_GOERLI]: '',
+  [ChainId.OPTIMISM_MAINNET]: 'optimism',
+  [ChainId.POLYGON]: 'polygon',
+  [ChainId.RINKEBY]: '',
+  [ChainId.SCROLL_MAINNET]: '',
+  [ChainId.XDAI]: 'xdai',
   [ChainId.ZK_SYNC_ERA_MAINNET]: '',
   [ChainId.ZK_SYNC_ERA_TESTNET]: '',
 }
@@ -516,19 +517,19 @@ export const CURVE_FACTORY_SUPPORTED_APIS: { [chainId in ChainId]: string } = {
  * TBD in https://linear.app/swaprdev/issue/SWA-61/add-curve-pools-and-tokens-for-polygon-and-optimism-in-the-sdk
  */
 export const CURVE_POOLS: Record<ChainId, CurvePool[]> = {
-  [ChainId.MAINNET]: POOLS_MAINNET,
-  [ChainId.XDAI]: POOLS_XDAI,
-  [ChainId.ARBITRUM_ONE]: POOLS_ARBITRUM_ONE,
-  // Empty
-  [ChainId.RINKEBY]: [],
-  [ChainId.ARBITRUM_RINKEBY]: [],
   [ChainId.ARBITRUM_GOERLI]: [],
-  [ChainId.POLYGON]: [],
-  [ChainId.GOERLI]: [],
-  [ChainId.OPTIMISM_MAINNET]: [],
-  [ChainId.OPTIMISM_GOERLI]: [],
+  [ChainId.ARBITRUM_ONE]: POOLS_ARBITRUM_ONE,
+  [ChainId.ARBITRUM_RINKEBY]: [],
   [ChainId.BSC_MAINNET]: [],
   [ChainId.BSC_TESTNET]: [],
+  [ChainId.GOERLI]: [],
+  [ChainId.MAINNET]: POOLS_MAINNET,
+  [ChainId.OPTIMISM_GOERLI]: [],
+  [ChainId.OPTIMISM_MAINNET]: [],
+  [ChainId.POLYGON]: [],
+  [ChainId.RINKEBY]: [],
+  [ChainId.SCROLL_MAINNET]: [],
+  [ChainId.XDAI]: POOLS_XDAI,
   [ChainId.ZK_SYNC_ERA_MAINNET]: [],
   [ChainId.ZK_SYNC_ERA_TESTNET]: [],
 }

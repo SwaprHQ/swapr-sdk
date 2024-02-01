@@ -629,18 +629,19 @@ type CurveTokenList = {
  * TBD in https://linear.app/swaprdev/issue/SWA-61/add-curve-pools-and-tokens-for-polygon-and-optimism-in-the-sdk
  */
 export const CURVE_TOKENS: CurveTokenList = {
-  [ChainId.MAINNET]: TOKENS_MAINNET,
-  [ChainId.XDAI]: TOKENS_XDAI,
+  [ChainId.ARBITRUM_GOERLI]: {},
   [ChainId.ARBITRUM_ONE]: TOKENS_ARBITRUM_ONE,
   [ChainId.ARBITRUM_RINKEBY]: {},
-  [ChainId.ARBITRUM_GOERLI]: {},
-  [ChainId.RINKEBY]: {},
-  [ChainId.POLYGON]: {},
-  [ChainId.GOERLI]: {},
-  [ChainId.OPTIMISM_MAINNET]: {},
-  [ChainId.OPTIMISM_GOERLI]: {},
   [ChainId.BSC_MAINNET]: {},
   [ChainId.BSC_TESTNET]: {},
+  [ChainId.MAINNET]: TOKENS_MAINNET,
+  [ChainId.POLYGON]: {},
+  [ChainId.GOERLI]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.RINKEBY]: {},
+  [ChainId.SCROLL_MAINNET]: {},
+  [ChainId.XDAI]: TOKENS_XDAI,
   [ChainId.ZK_SYNC_ERA_MAINNET]: {},
   [ChainId.ZK_SYNC_ERA_TESTNET]: {},
 }
