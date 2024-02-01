@@ -57,18 +57,19 @@ export function tryGetChainId(currencyAmount: CurrencyAmount, currency: Currency
  * Make `RPC_PROVIDER_LIST` exportable from this repo
  */
 export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
-  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
-  [ChainId.XDAI]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
-  [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.ARBITRUM_GOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
   [ChainId.ARBITRUM_ONE]: 'https://arb1.arbitrum.io/rpc',
   [ChainId.ARBITRUM_RINKEBY]: 'https://rinkeby.arbitrum.io/rpc',
-  [ChainId.ARBITRUM_GOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
-  [ChainId.POLYGON]: 'https://polygon-rpc.com',
-  [ChainId.GOERLI]: 'https://goerli.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
-  [ChainId.OPTIMISM_MAINNET]: 'https://opt-mainnet.g.alchemy.com/v2/6cRVjVO2uOTC9gWFCsBnquUwOM9zuWQZ',
-  [ChainId.OPTIMISM_GOERLI]: 'https://goerli.optimism.io',
   [ChainId.BSC_MAINNET]: 'https://bsc-dataseed1.binance.org/',
   [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [ChainId.GOERLI]: 'https://goerli.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.MAINNET]: 'https://mainnet.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.OPTIMISM_GOERLI]: 'https://goerli.optimism.io',
+  [ChainId.OPTIMISM_MAINNET]: 'https://opt-mainnet.g.alchemy.com/v2/6cRVjVO2uOTC9gWFCsBnquUwOM9zuWQZ',
+  [ChainId.POLYGON]: 'https://polygon-rpc.com',
+  [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
+  [ChainId.SCROLL_MAINNET]: 'https://rpc.scroll.io/ ',
+  [ChainId.XDAI]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
   [ChainId.ZK_SYNC_ERA_MAINNET]: 'https://mainnet.era.zksync.io',
   [ChainId.ZK_SYNC_ERA_TESTNET]: 'https://testnet.era.zksync.dev',
 }
