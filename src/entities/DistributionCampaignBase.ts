@@ -9,17 +9,9 @@ import { PricedTokenAmount } from './fractions/priced-token-amount'
 import { Token } from './token'
 
 const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
-  [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
-    ChainId.RINKEBY,
-  ),
-  [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
-    ChainId.MAINNET,
-  ),
-  [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
-    parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
-    ChainId.XDAI,
+  [ChainId.ARBITRUM_GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_GOERLI).decimals).toString(),
+    ChainId.ARBITRUM_GOERLI,
   ),
   [ChainId.ARBITRUM_ONE]: CurrencyAmount.nativeCurrency(
     parseUnits('0.1', Token.getNative(ChainId.ARBITRUM_ONE).decimals).toString(),
@@ -29,26 +21,6 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
     parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_RINKEBY).decimals).toString(),
     ChainId.ARBITRUM_RINKEBY,
   ),
-  [ChainId.ARBITRUM_GOERLI]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.05', Token.getNative(ChainId.ARBITRUM_GOERLI).decimals).toString(),
-    ChainId.ARBITRUM_GOERLI,
-  ),
-  [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
-    parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
-    ChainId.POLYGON,
-  ),
-  [ChainId.GOERLI]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.05', Token.getNative(ChainId.GOERLI).decimals).toString(),
-    ChainId.GOERLI,
-  ),
-  [ChainId.OPTIMISM_MAINNET]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_MAINNET).decimals).toString(),
-    ChainId.OPTIMISM_MAINNET,
-  ),
-  [ChainId.OPTIMISM_GOERLI]: CurrencyAmount.nativeCurrency(
-    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_GOERLI).decimals).toString(),
-    ChainId.OPTIMISM_GOERLI,
-  ),
   [ChainId.BSC_MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.BSC_MAINNET).decimals).toString(),
     ChainId.BSC_MAINNET,
@@ -56,6 +28,38 @@ const MINIMUM_STAKED_AMOUNT_NATIVE_CURRENCY: Record<ChainId, CurrencyAmount> = {
   [ChainId.BSC_TESTNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0.05', Token.getNative(ChainId.BSC_TESTNET).decimals).toString(),
     ChainId.BSC_TESTNET,
+  ),
+  [ChainId.GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.GOERLI).decimals).toString(),
+    ChainId.GOERLI,
+  ),
+  [ChainId.MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.1', Token.getNative(ChainId.MAINNET).decimals).toString(),
+    ChainId.MAINNET,
+  ),
+  [ChainId.OPTIMISM_GOERLI]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_GOERLI).decimals).toString(),
+    ChainId.OPTIMISM_GOERLI,
+  ),
+  [ChainId.OPTIMISM_MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.OPTIMISM_MAINNET).decimals).toString(),
+    ChainId.OPTIMISM_MAINNET,
+  ),
+  [ChainId.POLYGON]: CurrencyAmount.nativeCurrency(
+    parseUnits('0', Token.getNative(ChainId.POLYGON).decimals).toString(),
+    ChainId.POLYGON,
+  ),
+  [ChainId.RINKEBY]: CurrencyAmount.nativeCurrency(
+    parseUnits('0.05', Token.getNative(ChainId.RINKEBY).decimals).toString(),
+    ChainId.RINKEBY,
+  ),
+  [ChainId.SCROLL_MAINNET]: CurrencyAmount.nativeCurrency(
+    parseUnits('0', Token.getNative(ChainId.SCROLL_MAINNET).decimals).toString(),
+    ChainId.SCROLL_MAINNET,
+  ),
+  [ChainId.XDAI]: CurrencyAmount.nativeCurrency(
+    parseUnits('1000', Token.getNative(ChainId.XDAI).decimals).toString(),
+    ChainId.XDAI,
   ),
   [ChainId.ZK_SYNC_ERA_MAINNET]: CurrencyAmount.nativeCurrency(
     parseUnits('0', Token.getNative(ChainId.ZK_SYNC_ERA_MAINNET).decimals).toString(),

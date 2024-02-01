@@ -22,18 +22,19 @@ import { Token } from './token'
 import { UniswapV2RoutablePlatform } from './trades/routable-platform'
 
 const INITIAL_CACHE_STATE: Record<ChainId, any> = {
-  [ChainId.MAINNET]: {},
-  [ChainId.RINKEBY]: {},
+  [ChainId.ARBITRUM_GOERLI]: {},
   [ChainId.ARBITRUM_ONE]: {},
   [ChainId.ARBITRUM_RINKEBY]: {},
-  [ChainId.ARBITRUM_GOERLI]: {},
-  [ChainId.XDAI]: {},
-  [ChainId.POLYGON]: {},
-  [ChainId.GOERLI]: {},
-  [ChainId.OPTIMISM_MAINNET]: {},
-  [ChainId.OPTIMISM_GOERLI]: {},
   [ChainId.BSC_MAINNET]: {},
   [ChainId.BSC_TESTNET]: {},
+  [ChainId.GOERLI]: {},
+  [ChainId.MAINNET]: {},
+  [ChainId.OPTIMISM_GOERLI]: {},
+  [ChainId.OPTIMISM_MAINNET]: {},
+  [ChainId.POLYGON]: {},
+  [ChainId.RINKEBY]: {},
+  [ChainId.SCROLL_MAINNET]: {},
+  [ChainId.XDAI]: {},
   [ChainId.ZK_SYNC_ERA_MAINNET]: {},
   [ChainId.ZK_SYNC_ERA_TESTNET]: {},
 }

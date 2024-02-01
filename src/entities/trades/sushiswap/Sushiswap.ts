@@ -1,9 +1,11 @@
+import { Contract } from '@ethersproject/contracts'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
-import invariant from 'tiny-invariant'
+import { parseUnits } from '@ethersproject/units'
 import fetch from 'node-fetch'
+import invariant from 'tiny-invariant'
 
-import { ChainId, ONE, TradeType, _100, _10000 } from '../../../constants'
+import { _10000, ChainId, ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
@@ -11,10 +13,8 @@ import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
-import { SWAP_BASE_URL, getApiVersion } from './api'
-import { Contract } from 'ethers'
 import { SUSHISWAP_ROUTER_PROCESSOR_3_ABI } from './abi'
-import { parseUnits } from '@ethersproject/units'
+import { getApiVersion, SWAP_BASE_URL } from './api'
 
 export interface SushiswapQuoteTypes {
   amount: CurrencyAmount
@@ -77,7 +77,7 @@ export class SushiswapTrade extends Trade {
 
   static async getQuote(
     { amount, quoteCurrency, tradeType, maximumSlippage = defaultMaximumSlippage, recipient }: SushiswapQuoteTypes,
-    provider?: BaseProvider
+    provider?: BaseProvider,
   ): Promise<SushiswapTrade | null> {
     const chainId = tryGetChainId(amount, quoteCurrency)
 
@@ -90,7 +90,7 @@ export class SushiswapTrade extends Trade {
     // Ensure the provider's chainId matches the provided currencies
     invariant(
       (await provider.getNetwork()).chainId == chainId,
-      `SushiswapTrade.getQuote: currencies chainId does not match provider's chainId`
+      `SushiswapTrade.getQuote: currencies chainId does not match provider's chainId`,
     )
 
     invariant(tradeType === TradeType.EXACT_INPUT, `getQuote: Only supports exact input`)
@@ -107,16 +107,16 @@ export class SushiswapTrade extends Trade {
       params.searchParams.set('chainId', `${chainId}`)
       params.searchParams.set(
         'tokenIn',
-        `${Currency.isNative(currencyIn) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyIn.address}`
+        `${Currency.isNative(currencyIn) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyIn.address}`,
       )
       params.searchParams.set(
         'tokenOut',
-        `${Currency.isNative(currencyOut) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyOut.address}`
+        `${Currency.isNative(currencyOut) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyOut.address}`,
       )
       params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), amount.currency.decimals).toString()}`)
       params.searchParams.set(
         'maxPriceImpact',
-        `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(5)}`
+        `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(5)}`,
       )
       params.searchParams.set('to', `${recipient}`)
       params.searchParams.set('preferSushi', 'true')
@@ -210,7 +210,7 @@ export class SushiswapTrade extends Trade {
 
     return new Contract(this.approveAddress, SUSHISWAP_ROUTER_PROCESSOR_3_ABI).populateTransaction['processRoute'](
       ...params,
-      { value }
+      { value },
     )
   }
 }

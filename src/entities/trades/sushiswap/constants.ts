@@ -40,6 +40,7 @@ export const ROUTE_PROCESSOR_3_2_SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,
   ChainId.OPTIMISM_MAINNET,
   ChainId.POLYGON,
+  ChainId.SCROLL_MAINNET,
 ] as const
 
 export type RouteProcessor3_2ChainId = (typeof ROUTE_PROCESSOR_3_2_SUPPORTED_CHAIN_IDS)[number]
@@ -51,6 +52,7 @@ export const ROUTE_PROCESSOR_3_2_ADDRESS: Record<RouteProcessor3_2ChainId, `0x${
   [ChainId.MAINNET]: '0x5550D13389bB70F45fCeF58f19f6b6e87F6e747d',
   [ChainId.OPTIMISM_MAINNET]: '0xEb94EcA012eC0bbB254722FdDa2CE7475875A52B',
   [ChainId.POLYGON]: '0xE7eb31f23A5BefEEFf76dbD2ED6AdC822568a5d2',
+  [ChainId.SCROLL_MAINNET]: '0xCA6Fe749878841b96F620Ec79638B13dAaD3D320',
 } as const
 
 export const isRouteProcessor3_2ChainId = (chainId: ChainId): chainId is RouteProcessor3_2ChainId =>

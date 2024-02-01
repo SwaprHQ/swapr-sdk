@@ -44,18 +44,19 @@ export class Currency {
   public static readonly BNB: Currency = new Currency(18, 'BNB', 'Binance Coin', NULL_ADDRESS)
 
   private static readonly NATIVE_CURRENCY: Record<ChainId, Currency> = {
-    [ChainId.MAINNET]: Currency.ETHER,
-    [ChainId.RINKEBY]: Currency.ETHER,
+    [ChainId.ARBITRUM_GOERLI]: Currency.ETHER,
     [ChainId.ARBITRUM_ONE]: Currency.ETHER,
     [ChainId.ARBITRUM_RINKEBY]: Currency.ETHER,
-    [ChainId.ARBITRUM_GOERLI]: Currency.ETHER,
-    [ChainId.XDAI]: Currency.XDAI,
-    [ChainId.POLYGON]: Currency.MATIC,
-    [ChainId.GOERLI]: Currency.ETHER,
-    [ChainId.OPTIMISM_MAINNET]: Currency.OPTIMISM_ETHER,
-    [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
     [ChainId.BSC_MAINNET]: Currency.BNB,
     [ChainId.BSC_TESTNET]: Currency.BNB,
+    [ChainId.GOERLI]: Currency.ETHER,
+    [ChainId.MAINNET]: Currency.ETHER,
+    [ChainId.OPTIMISM_GOERLI]: Currency.OPTIMISM_ETHER,
+    [ChainId.OPTIMISM_MAINNET]: Currency.OPTIMISM_ETHER,
+    [ChainId.POLYGON]: Currency.MATIC,
+    [ChainId.RINKEBY]: Currency.ETHER,
+    [ChainId.SCROLL_MAINNET]: Currency.ETHER,
+    [ChainId.XDAI]: Currency.XDAI,
     [ChainId.ZK_SYNC_ERA_MAINNET]: Currency.ETHER,
     [ChainId.ZK_SYNC_ERA_TESTNET]: Currency.ETHER,
   }
