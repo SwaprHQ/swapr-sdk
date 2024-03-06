@@ -69,7 +69,7 @@ export const RPC_PROVIDER_LIST: Record<ChainId, string> = {
   [ChainId.POLYGON]: 'https://polygon-rpc.com',
   [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/e1a3bfc40093494ca4f36b286ab36f2d',
   [ChainId.SCROLL_MAINNET]: 'https://rpc.scroll.io/ ',
-  [ChainId.XDAI]: 'https://poa-xdai.gateway.pokt.network/v1/lb/627cd67433e8770039fe3dba',
+  [ChainId.XDAI]: 'https://gnosis-rpc.publicnode.com',
   [ChainId.ZK_SYNC_ERA_MAINNET]: 'https://mainnet.era.zksync.io',
   [ChainId.ZK_SYNC_ERA_TESTNET]: 'https://testnet.era.zksync.dev',
 }
