@@ -7,6 +7,7 @@ import { SigningResult, UnsignedOrder } from '@cowprotocol/cow-sdk/dist/utils/si
 import { Signer } from '@ethersproject/abstract-signer'
 import { parseUnits } from '@ethersproject/units'
 import dayjs from 'dayjs'
+import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 
 import { ChainId, ONE, TradeType, ZERO } from '../../../constants'
@@ -199,6 +200,11 @@ export class CoWTrade extends Trade {
         ? CurrencyAmount.nativeCurrency(ZERO, chainId)
         : new TokenAmount(currencyAmountIn.currency as Token, ZERO)
 
+      const sellAmount = JSBI.add(
+        JSBI.BigInt(quoteResponse.quote.sellAmount.toString()),
+        JSBI.BigInt(quoteResponse.quote.feeAmount.toString()),
+      ).toString()
+
       return new CoWTrade({
         chainId,
         maximumSlippage,
@@ -209,7 +215,7 @@ export class CoWTrade extends Trade {
           : new TokenAmount(tokenOut, quoteResponse.quote.buyAmount.toString()),
         fee,
         feeAmount,
-        quote: quoteResponse,
+        quote: { ...quoteResponse, quote: { ...quoteResponse.quote, sellAmount, feeAmount: '0' } },
       })
     } catch (error) {
       console.error('could not fetch Cow trade', error)
@@ -271,6 +277,11 @@ export class CoWTrade extends Trade {
         ? CurrencyAmount.nativeCurrency(ZERO, chainId)
         : new TokenAmount(currencyIn as Token, ZERO)
 
+      const sellAmount = JSBI.add(
+        JSBI.BigInt(quoteResponse.quote.sellAmount.toString()),
+        JSBI.BigInt(quoteResponse.quote.feeAmount.toString()),
+      ).toString()
+
       return new CoWTrade({
         chainId,
         maximumSlippage,
@@ -279,7 +290,7 @@ export class CoWTrade extends Trade {
         outputAmount,
         fee,
         feeAmount,
-        quote: quoteResponse,
+        quote: { ...quoteResponse, quote: { ...quoteResponse.quote, sellAmount, feeAmount: '0' } },
       })
     } catch (error) {
       console.error('could not fetch COW trade', error)
