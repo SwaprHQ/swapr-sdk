@@ -110,7 +110,10 @@ export class OpenoceanTrade extends Trade {
       )
       params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), amount.currency.decimals).toString()}`)
       params.searchParams.set('gasPrice', chainId === ChainId.MAINNET ? gasPrice.maxFeePerGas : gasPrice)
-      params.searchParams.set('slippage', `${maximumSlippage}`)
+      params.searchParams.set(
+        'slippage',
+        `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`,
+      )
 
       const res = await fetch(params.toString())
       const data = await res.json()
@@ -184,7 +187,7 @@ export class OpenoceanTrade extends Trade {
      */
 
     const params = {
-      //   chain: "",
+      chain: this.chainId,
       inTokenAddress: this.inputAmount.currency.address,
       outTokenAddress: this.outputAmount.currency.address,
       amount: this.inputAmount.raw.toString(),
