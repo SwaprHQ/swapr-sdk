@@ -3,9 +3,9 @@ import { ChainId } from '../../../constants'
 export const OO_API_BASE_URL = 'https://open-api.openocean.finance/v3'
 
 export enum OO_API_ENDPOINTS {
-  GET_GAS = '/gasPrice',
-  QUOTE = '/quote',
-  SWAP_QUOTE = '/swap_quote',
+  GET_GAS = 'gasPrice',
+  QUOTE = 'quote',
+  SWAP_QUOTE = 'swap_quote',
 }
 
 export type MainnetChainIds = Exclude<
