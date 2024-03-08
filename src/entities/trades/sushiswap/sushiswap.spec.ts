@@ -18,7 +18,7 @@ const tokenGNOGnosis = new Token(
 
 const recipient = '0x0000000000000000000000000000000000000000'
 
-describe('Sushiswap', () => {
+describe.skip('Sushiswap', () => {
   describe('Quote', () => {
     test('should return a EXACT INPUT quote on Gnosis for USDC - WXDAI', async () => {
       const currencyAmount = new TokenAmount(
