@@ -2,10 +2,11 @@ import { Contract } from '@ethersproject/contracts'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { parseUnits } from '@ethersproject/units'
+import { validateAndParseAddress } from '@uniswap/sdk-core'
 import fetch from 'node-fetch'
 import invariant from 'tiny-invariant'
 
-import { _10000, ChainId, ONE, TradeType } from '../../../constants'
+import { ChainId, ONE, TradeType } from '../../../constants'
 import { Currency } from '../../currency'
 import { CurrencyAmount, Fraction, Percent, Price, TokenAmount } from '../../fractions'
 import { maximumSlippage as defaultMaximumSlippage } from '../constants'
@@ -15,6 +16,7 @@ import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { OO_EXCHANGE_V2_ABI } from './abi'
 import { getApiChainCode, MainnetChainIds, OO_API_BASE_URL, OO_API_ENDPOINTS } from './api'
+import { OO_CONTRACT_ADDRESS_BY_CHAIN } from './constants'
 
 export interface OpenoceanQuoteTypes {
   amount: CurrencyAmount
@@ -117,18 +119,17 @@ export class OpenoceanTrade extends Trade {
 
       const res = await fetch(params.toString())
       const data = await res.json()
+      console.log('data: ', data)
 
       if (data && amount) {
-        const approveAddress = data.routeProcessorAddr
+        const approveAddress = data.routeProcessorAddrY
         const currencyAmountIn = Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(data.routeProcessorArgs.amountIn, chainId)
-          : new TokenAmount(wrappedCurrency(currencyIn, chainId), data.routeProcessorArgs.amountIn)
+          ? CurrencyAmount.nativeCurrency(data.data.inAmount, chainId)
+          : new TokenAmount(wrappedCurrency(currencyIn, chainId), data.data.inAmount)
 
         const currencyAmountOut = Currency.isNative(currencyOut)
-          ? CurrencyAmount.nativeCurrency(data.routeProcessorArgs.amountOutMin, chainId)
-          : new TokenAmount(wrappedCurrency(currencyOut, chainId), data.routeProcessorArgs.amountOutMin)
-
-        const priceImpact = new Percent(Math.trunc(Math.abs(data.priceImpact) * 10000).toString(), _10000)
+          ? CurrencyAmount.nativeCurrency(data.data.outAmount, chainId)
+          : new TokenAmount(wrappedCurrency(currencyOut, chainId), data.data.outAmount)
 
         return new OpenoceanTrade({
           maximumSlippage,
@@ -137,7 +138,7 @@ export class OpenoceanTrade extends Trade {
           tradeType,
           chainId,
           approveAddress,
-          priceImpact,
+          priceImpact: new Percent('0', '100'),
         })
       }
     } catch (error) {
@@ -186,22 +187,75 @@ export class OpenoceanTrade extends Trade {
      * @see https://docs.openocean.finance/dev/aggregator-api-and-sdk/aggregator-api/best-practice
      */
 
-    const params = {
-      chain: this.chainId,
-      inTokenAddress: this.inputAmount.currency.address,
-      outTokenAddress: this.outputAmount.currency.address,
-      amount: this.inputAmount.raw.toString(),
-      gasPrice: options.recipient,
-      slippage: this.maximumSlippage,
+    const inToken = this.inputAmount.currency
+    const outToken = this.outputAmount.currency
+    const amount = this.inputAmount
+    const maximumSlippage = this.maximumSlippage
+    const recipient = validateAndParseAddress(options.recipient)
+    const isNativeIn = Currency.isNative(inToken)
+    const amountIn = `0x${this.maximumAmountIn().raw.toString(16)}`
+    const value = isNativeIn ? amountIn : undefined
+
+    let tradeEstimatedGas, tradeGasPrice, tradeData
+
+    try {
+      // Ensure that the currencies are present
+      invariant(inToken.address && outToken.address, `getQuote: Currency address is required`)
+      const API_CHAIN_CODE = getApiChainCode(this.chainId as MainnetChainIds)
+      const API_WITH_CHAIN_CODE = `${OO_API_BASE_URL}/${API_CHAIN_CODE}`
+
+      const gasResponse = await fetch(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.GET_GAS}`)
+
+      if (!gasResponse.ok) throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`)
+
+      const gasData = await gasResponse.json()
+      const quoteGasPrice = gasData.without_decimals.standard
+
+      const params = new URL(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.SWAP_QUOTE}`)
+
+      params.searchParams.set(
+        'inTokenAddress',
+        `${Currency.isNative(inToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inToken.address}`,
+      )
+      params.searchParams.set(
+        'outTokenAddress',
+        `${Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`,
+      )
+      params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), amount.currency.decimals).toString()}`)
+      params.searchParams.set('gasPrice', this.chainId === ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice)
+      params.searchParams.set(
+        'slippage',
+        `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`,
+      )
+      params.searchParams.set('account', `${recipient}`)
+
+      const res = await fetch(params.toString())
+      const swapQuoteData = await res.json()
+
+      const { estimatedGas, data, gasPrice } = swapQuoteData
+
+      console.log('data: ', swapQuoteData)
+      console.log('gasData: ', gasData)
+      tradeEstimatedGas = estimatedGas
+      tradeGasPrice = gasPrice
+      tradeData = data
+    } catch (error) {
+      console.log('error: ', error)
+      console.error('Openocean.getQuote: Error fetching the trade:', error.message)
     }
 
-    const value = Currency.isNative(this.inputAmount.currency) ? params : undefined
+    const swapParams = {
+      from: recipient,
+      to: OO_CONTRACT_ADDRESS_BY_CHAIN[this.chainId as MainnetChainIds],
+      gas: tradeEstimatedGas,
+      gasPrice: tradeGasPrice,
+      data: tradeData,
+    }
 
-    return new Contract(this.approveAddress, OO_EXCHANGE_V2_ABI).populateTransaction['processRoute'](
-      { ...params },
-      {
-        value,
-      },
-    )
+    console.log('swapParams: ', swapParams)
+
+    return new Contract(this.approveAddress, OO_EXCHANGE_V2_ABI).populateTransaction['swap'](swapParams, {
+      value,
+    })
   }
 }
