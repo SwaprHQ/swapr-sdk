@@ -15,7 +15,7 @@ import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
 import { OO_EXCHANGE_V2_ABI } from './abi'
-import { getApiChainCode, MainnetChainIds, OO_API_BASE_URL, OO_API_ENDPOINTS } from './api'
+import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS } from './api'
 import { OO_CONTRACT_ADDRESS_BY_CHAIN } from './constants'
 
 export interface OpenoceanQuoteTypes {
@@ -65,6 +65,17 @@ export class OpenoceanTrade extends Trade {
     })
   }
 
+  private static async getGas(chainId: MainnetChainIds) {
+    const baseUrl = getBaseUrlWithChainCode(chainId)
+    const gasResponse = await fetch(`${baseUrl}/${OO_API_ENDPOINTS.GET_GAS}`)
+
+    if (!gasResponse.ok) throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`)
+
+    const gasData = await gasResponse.json()
+
+    return gasData.without_decimals.standard
+  }
+
   static async getQuote(
     { amount, quoteCurrency, maximumSlippage = defaultMaximumSlippage, tradeType }: OpenoceanQuoteTypes,
     provider?: BaseProvider,
@@ -90,17 +101,9 @@ export class OpenoceanTrade extends Trade {
     invariant(currencyIn.address && currencyOut.address, `getQuote: Currency address is required`)
 
     try {
-      const API_CHAIN_CODE = getApiChainCode(chainId as MainnetChainIds)
-      const API_WITH_CHAIN_CODE = `${OO_API_BASE_URL}/${API_CHAIN_CODE}`
-
-      const gasResponse = await fetch(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.GET_GAS}`)
-
-      if (!gasResponse.ok) throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`)
-
-      const gasData = await gasResponse.json()
-      const gasPrice = gasData.without_decimals.standard
-
-      const params = new URL(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.QUOTE}`)
+      const baseUrl = getBaseUrlWithChainCode(chainId as MainnetChainIds)
+      const gasPrice = await this.getGas(chainId as MainnetChainIds)
+      const params = new URL(`${baseUrl}/${OO_API_ENDPOINTS.QUOTE}`)
 
       params.searchParams.set(
         'inTokenAddress',
@@ -119,10 +122,11 @@ export class OpenoceanTrade extends Trade {
 
       const res = await fetch(params.toString())
       const data = await res.json()
+
       console.log('data: ', data)
 
       if (data && amount) {
-        const approveAddress = data.routeProcessorAddrY
+        const approveAddress = OO_CONTRACT_ADDRESS_BY_CHAIN[chainId as MainnetChainIds]
         const currencyAmountIn = Currency.isNative(currencyIn)
           ? CurrencyAmount.nativeCurrency(data.data.inAmount, chainId)
           : new TokenAmount(wrappedCurrency(currencyIn, chainId), data.data.inAmount)
@@ -201,17 +205,10 @@ export class OpenoceanTrade extends Trade {
     try {
       // Ensure that the currencies are present
       invariant(inToken.address && outToken.address, `getQuote: Currency address is required`)
-      const API_CHAIN_CODE = getApiChainCode(this.chainId as MainnetChainIds)
-      const API_WITH_CHAIN_CODE = `${OO_API_BASE_URL}/${API_CHAIN_CODE}`
 
-      const gasResponse = await fetch(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.GET_GAS}`)
-
-      if (!gasResponse.ok) throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`)
-
-      const gasData = await gasResponse.json()
-      const quoteGasPrice = gasData.without_decimals.standard
-
-      const params = new URL(`${API_WITH_CHAIN_CODE}/${OO_API_ENDPOINTS.SWAP_QUOTE}`)
+      const baseUrl = getBaseUrlWithChainCode(this.chainId as MainnetChainIds)
+      const quoteGasPrice = await OpenoceanTrade.getGas(this.chainId as MainnetChainIds)
+      const params = new URL(`${baseUrl}/${OO_API_ENDPOINTS.SWAP_QUOTE}`)
 
       params.searchParams.set(
         'inTokenAddress',
@@ -234,8 +231,7 @@ export class OpenoceanTrade extends Trade {
 
       const { estimatedGas, data, gasPrice } = swapQuoteData
 
-      console.log('data: ', swapQuoteData)
-      console.log('gasData: ', gasData)
+      console.log('quoteGasPrice: ', quoteGasPrice)
       tradeEstimatedGas = estimatedGas
       tradeGasPrice = gasPrice
       tradeData = data
@@ -253,9 +249,13 @@ export class OpenoceanTrade extends Trade {
     }
 
     console.log('swapParams: ', swapParams)
+    console.log('approveAddress: ', this.approveAddress)
 
-    return new Contract(this.approveAddress, OO_EXCHANGE_V2_ABI).populateTransaction['swap'](swapParams, {
+    const trade = new Contract(this.approveAddress, OO_EXCHANGE_V2_ABI).populateTransaction['swap'](swapParams, {
       value,
     })
+    console.log('trade: ', trade)
+
+    return trade
   }
 }

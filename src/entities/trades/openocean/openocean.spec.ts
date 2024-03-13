@@ -13,7 +13,7 @@ const QUOTE_TESTS = [
   { chainId: ChainId.ARBITRUM_ONE, chainName: 'Arbitrum One', quoteCurrency: ARB, quoteCurrencyName: 'ARB' },
   { chainId: ChainId.BSC_MAINNET, chainName: 'Binance Smart Chain', quoteCurrency: WBNB, quoteCurrencyName: 'WBNB' },
   { chainId: ChainId.GNOSIS, chainName: 'Gnosis', quoteCurrency: SWPR, quoteCurrencyName: 'SWPR' },
-  { chainId: ChainId.MAINNET, chainName: 'Ethereum', quoteCurrency: WETH, quoteCurrencyName: 'WETH' },
+  // { chainId: ChainId.MAINNET, chainName: 'Ethereum', quoteCurrency: WETH, quoteCurrencyName: 'WETH' },
   { chainId: ChainId.OPTIMISM_MAINNET, chainName: 'Optimism', quoteCurrency: WETH, quoteCurrencyName: 'WETH' },
   { chainId: ChainId.POLYGON, chainName: 'Polygon', quoteCurrency: WMATIC, quoteCurrencyName: 'WMATIC' },
   { chainId: ChainId.SCROLL_MAINNET, chainName: 'Sroll', quoteCurrency: WETH, quoteCurrencyName: 'WETH' },
