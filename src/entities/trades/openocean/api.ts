@@ -33,4 +33,8 @@ const OO_API_CHAIN_CODE = {
   [ChainId.ZK_SYNC_ERA_MAINNET]: 'zksync',
 }
 
-export const getApiChainCode = (chainId: MainnetChainIds) => OO_API_CHAIN_CODE[chainId]
+export const getBaseUrlWithChainCode = (chainId: MainnetChainIds) => {
+  const API_CHAIN_CODE = OO_API_CHAIN_CODE[chainId]
+
+  return `${OO_API_BASE_URL}/${API_CHAIN_CODE}`
+}
