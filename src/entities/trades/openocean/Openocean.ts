@@ -1,4 +1,3 @@
-import { Contract } from '@ethersproject/contracts'
 import { BaseProvider } from '@ethersproject/providers'
 import { UnsignedTransaction } from '@ethersproject/transactions'
 import { parseUnits } from '@ethersproject/units'
@@ -14,7 +13,6 @@ import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
-import { OO_EXCHANGE_V2_ABI } from './abi'
 import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS } from './api'
 import { OO_CONTRACT_ADDRESS_BY_CHAIN } from './constants'
 
@@ -196,11 +194,6 @@ export class OpenoceanTrade extends Trade {
     const amount = this.inputAmount
     const maximumSlippage = this.maximumSlippage
     const recipient = validateAndParseAddress(options.recipient)
-    const isNativeIn = Currency.isNative(inToken)
-    const amountIn = `0x${this.maximumAmountIn().raw.toString(16)}`
-    const value = isNativeIn ? amountIn : undefined
-
-    let tradeEstimatedGas, tradeGasPrice, tradeData
 
     try {
       // Ensure that the currencies are present
@@ -228,34 +221,16 @@ export class OpenoceanTrade extends Trade {
 
       const res = await fetch(params.toString())
       const swapQuoteData = await res.json()
+      const { data, gasPrice, to, value } = swapQuoteData
 
-      const { estimatedGas, data, gasPrice } = swapQuoteData
-
-      console.log('quoteGasPrice: ', quoteGasPrice)
-      tradeEstimatedGas = estimatedGas
-      tradeGasPrice = gasPrice
-      tradeData = data
+      return {
+        to,
+        gasPrice,
+        data,
+        value,
+      }
     } catch (error) {
-      console.log('error: ', error)
-      console.error('Openocean.getQuote: Error fetching the trade:', error.message)
+      throw new Error(`Openocean.getQuote: Error fetching the trade: ${error.message}`)
     }
-
-    const swapParams = {
-      from: recipient,
-      to: OO_CONTRACT_ADDRESS_BY_CHAIN[this.chainId as MainnetChainIds],
-      gas: tradeEstimatedGas,
-      gasPrice: tradeGasPrice,
-      data: tradeData,
-    }
-
-    console.log('swapParams: ', swapParams)
-    console.log('approveAddress: ', this.approveAddress)
-
-    const trade = new Contract(this.approveAddress, OO_EXCHANGE_V2_ABI).populateTransaction['swap'](swapParams, {
-      value,
-    })
-    console.log('trade: ', trade)
-
-    return trade
   }
 }
