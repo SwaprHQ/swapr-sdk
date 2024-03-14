@@ -8,8 +8,7 @@ export enum OO_API_ENDPOINTS {
   SWAP_QUOTE = 'swap_quote',
 }
 
-export type MainnetChainIds = Exclude<
-  ChainId,
+export type TestChainIds =
   | ChainId.ARBITRUM_GOERLI
   | ChainId.ARBITRUM_RINKEBY
   | ChainId.BSC_TESTNET
@@ -17,7 +16,8 @@ export type MainnetChainIds = Exclude<
   | ChainId.OPTIMISM_GOERLI
   | ChainId.ZK_SYNC_ERA_TESTNET
   | ChainId.RINKEBY
->
+
+export type MainnetChainIds = Exclude<ChainId, TestChainIds>
 
 /**
  * @see https://docs.openocean.finance/dev/supported-chains
