@@ -65,13 +65,14 @@ export class OpenoceanTrade extends Trade {
 
   private static async getGas(chainId: MainnetChainIds) {
     const baseUrl = getBaseUrlWithChainCode(chainId)
-    const gasResponse = await fetch(`${baseUrl}/${OO_API_ENDPOINTS.GET_GAS}`)
+    const gasResponse = await fetch(`${baseUrl}/${OO_API_ENDPOINTS.GAS_PRICE}`)
+    // const gasResponse = await fetch(`${baseUrl}/${OO_API_ENDPOINTS.GET_GAS}`)
 
     if (!gasResponse.ok) throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`)
 
     const gasData = await gasResponse.json()
 
-    return gasData.without_decimals.standard
+    return gasData.standard
   }
 
   static async getQuote(
@@ -111,7 +112,10 @@ export class OpenoceanTrade extends Trade {
         'outTokenAddress',
         `${Currency.isNative(currencyOut) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyOut.address}`,
       )
-      params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), amount.currency.decimals).toString()}`)
+      params.searchParams.set(
+        'amount',
+        `${parseUnits(amount.toSignificant(), amount.currency?.decimals ?? 18).toString()}`,
+      )
       params.searchParams.set('gasPrice', chainId === ChainId.MAINNET ? gasPrice.maxFeePerGas : gasPrice)
       params.searchParams.set(
         'slippage',
@@ -121,17 +125,22 @@ export class OpenoceanTrade extends Trade {
       const res = await fetch(params.toString())
       const data = await res.json()
 
-      console.log('data: ', data)
+      console.log('params data: ', params)
+      console.log('quote data: ', data)
 
       if (data && amount) {
         const approveAddress = OO_CONTRACT_ADDRESS_BY_CHAIN[chainId as MainnetChainIds]
         const currencyAmountIn = Currency.isNative(currencyIn)
-          ? CurrencyAmount.nativeCurrency(data.data.inAmount, chainId)
-          : new TokenAmount(wrappedCurrency(currencyIn, chainId), data.data.inAmount)
+          ? // ? CurrencyAmount.nativeCurrency(data.data.inAmount, chainId)
+            CurrencyAmount.nativeCurrency(data.inAmount, chainId)
+          : // : new TokenAmount(wrappedCurrency(currencyIn, chainId), data.data.inAmount)
+            new TokenAmount(wrappedCurrency(currencyIn, chainId), data.inAmount)
 
         const currencyAmountOut = Currency.isNative(currencyOut)
-          ? CurrencyAmount.nativeCurrency(data.data.outAmount, chainId)
-          : new TokenAmount(wrappedCurrency(currencyOut, chainId), data.data.outAmount)
+          ? // ? CurrencyAmount.nativeCurrency(data.data.outAmount, chainId)
+            CurrencyAmount.nativeCurrency(data.outAmount, chainId)
+          : // : new TokenAmount(wrappedCurrency(currencyOut, chainId), data.data.outAmount)
+            new TokenAmount(wrappedCurrency(currencyOut, chainId), data.outAmount)
 
         return new OpenoceanTrade({
           maximumSlippage,
@@ -201,27 +210,38 @@ export class OpenoceanTrade extends Trade {
 
       const baseUrl = getBaseUrlWithChainCode(this.chainId as MainnetChainIds)
       const quoteGasPrice = await OpenoceanTrade.getGas(this.chainId as MainnetChainIds)
-      const params = new URL(`${baseUrl}/${OO_API_ENDPOINTS.SWAP_QUOTE}`)
+      const params = new URL(`${baseUrl}/${OO_API_ENDPOINTS.SWAP}`)
 
+      params.searchParams.set('inTokenSymbol', `${inToken.symbol === 'USDC.e' ? 'USDC' : inToken.symbol}`)
       params.searchParams.set(
         'inTokenAddress',
         `${Currency.isNative(inToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inToken.address}`,
       )
+      params.searchParams.set('outTokenSymbol', `${outToken.symbol === 'USDC.e' ? 'USDC' : outToken.symbol}`)
       params.searchParams.set(
         'outTokenAddress',
         `${Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`,
       )
-      params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), amount.currency.decimals).toString()}`)
+      params.searchParams.set(
+        'amount',
+        `${parseUnits(amount.toSignificant(), amount.currency?.decimals ?? 18).toString()}`,
+      )
       params.searchParams.set('gasPrice', this.chainId === ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice)
+      params.searchParams.set('disabledDexIds', '')
       params.searchParams.set(
         'slippage',
         `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`,
       )
       params.searchParams.set('account', `${recipient}`)
+      params.searchParams.set('referrer', `${recipient}`)
+      params.searchParams.set('flags', '0')
 
       const res = await fetch(params.toString())
       const swapQuoteData = await res.json()
       const { data, gasPrice, to, value } = swapQuoteData
+
+      // console.log('swap params: ', params)
+      // console.log('swapQuoteData params: ', swapQuoteData)
 
       return {
         to,
