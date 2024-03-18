@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OpenoceanTrade = void 0;
 const tslib_1 = require("tslib");
 const units_1 = require("@ethersproject/units");
-// import { validateAndParseAddress } from '@uniswap/sdk-core'
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const tiny_invariant_1 = tslib_1.__importDefault(require("tiny-invariant"));
 const constants_1 = require("../../../constants");
@@ -38,17 +37,14 @@ class OpenoceanTrade extends trade_1.Trade {
     static getGas(chainId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const baseUrl = (0, api_1.getBaseUrlWithChainCode)(chainId);
-            // const gasResponse = await fetch(`${baseUrl}/${OO_API_ENDPOINTS.GAS_PRICE}`)
             const gasResponse = yield (0, node_fetch_1.default)(`${baseUrl}/${api_1.OO_API_ENDPOINTS.GET_GAS}`);
             if (!gasResponse.ok)
                 throw new Error(`OpenoceanTrade.getQuote: failed to get gasPrice`);
             const gasData = yield gasResponse.json();
-            console.log('gasData: ', gasData);
             return gasData.without_decimals.standard;
         });
     }
     static getQuote({ amount, quoteCurrency, maximumSlippage = constants_2.maximumSlippage, tradeType }, provider) {
-        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const chainId = (0, utils_1.tryGetChainId)(amount, quoteCurrency);
             if (!chainId) {
@@ -67,26 +63,19 @@ class OpenoceanTrade extends trade_1.Trade {
                 const params = new URL(`${baseUrl}/${api_1.OO_API_ENDPOINTS.QUOTE}`);
                 params.searchParams.set('inTokenAddress', `${currency_1.Currency.isNative(currencyIn) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyIn.address}`);
                 params.searchParams.set('outTokenAddress', `${currency_1.Currency.isNative(currencyOut) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : currencyOut.address}`);
-                params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), (_b = (_a = amount.currency) === null || _a === void 0 ? void 0 : _a.decimals) !== null && _b !== void 0 ? _b : 18).toString()}`);
+                params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), 0).toString()}`);
                 params.searchParams.set('gasPrice', chainId === constants_1.ChainId.MAINNET ? gasPrice.maxFeePerGas : gasPrice);
                 params.searchParams.set('slippage', `${new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`);
                 const res = yield (0, node_fetch_1.default)(params.toString());
                 const data = yield res.json();
-                console.log('params data: ', params);
-                console.log('quote data: ', data);
-                console.log('slippage: ', new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1));
                 if (data && amount) {
                     const approveAddress = constants_3.OO_CONTRACT_ADDRESS_BY_CHAIN[chainId];
                     const currencyAmountIn = currency_1.Currency.isNative(currencyIn)
                         ? fractions_1.CurrencyAmount.nativeCurrency(data.data.inAmount, chainId)
-                        : //  ?  CurrencyAmount.nativeCurrency(data.inAmount, chainId)
-                            new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyIn, chainId), data.data.inAmount);
-                    //  :  new TokenAmount(wrappedCurrency(currencyIn, chainId), data.inAmount)
+                        : new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyIn, chainId), data.data.inAmount);
                     const currencyAmountOut = currency_1.Currency.isNative(currencyOut)
                         ? fractions_1.CurrencyAmount.nativeCurrency(data.data.outAmount, chainId)
-                        : //  ? CurrencyAmount.nativeCurrency(data.outAmount, chainId)
-                            new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyOut, chainId), data.data.outAmount);
-                    //  :  new TokenAmount(wrappedCurrency(currencyOut, chainId), data.outAmount)
+                        : new fractions_1.TokenAmount((0, utils_1.wrappedCurrency)(currencyOut, chainId), data.data.outAmount);
                     return new OpenoceanTrade({
                         maximumSlippage,
                         inputAmount: currencyAmountIn,
@@ -137,7 +126,6 @@ class OpenoceanTrade extends trade_1.Trade {
      * @returns the unsigned transaction
      */
     swapTransaction(options) {
-        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             (0, tiny_invariant_1.default)(options, 'OpenoceanTrade.swapTransaction: Currency address is required');
             /**
@@ -147,7 +135,6 @@ class OpenoceanTrade extends trade_1.Trade {
             const outToken = this.outputAmount.currency;
             const amount = this.inputAmount;
             const maximumSlippage = this.maximumSlippage;
-            // const recipient = validateAndParseAddress(options.recipient)
             try {
                 // Ensure that the currencies are present
                 (0, tiny_invariant_1.default)(inToken.address && outToken.address, `getQuote: Currency address is required`);
@@ -158,24 +145,12 @@ class OpenoceanTrade extends trade_1.Trade {
                 params.searchParams.set('inTokenAddress', `${currency_1.Currency.isNative(inToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inToken.address}`);
                 params.searchParams.set('outTokenSymbol', `${outToken.symbol === 'USDC.e' ? 'USDC' : outToken.symbol}`);
                 params.searchParams.set('outTokenAddress', `${currency_1.Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`);
-                params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), (_b = (_a = amount.currency) === null || _a === void 0 ? void 0 : _a.decimals) !== null && _b !== void 0 ? _b : 18).toString()}`);
+                params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), 0).toString()}`);
                 params.searchParams.set('gasPrice', this.chainId === constants_1.ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice);
-                // params.searchParams.set('disabledDexIds', '')
                 params.searchParams.set('slippage', `${new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`);
-                // params.searchParams.set('account', `${recipient}`)
-                // params.searchParams.set('referrer', `${recipient}`)
-                // params.searchParams.set('flags', '0')
                 const res = yield (0, node_fetch_1.default)(params.toString());
                 const swapQuoteData = yield res.json();
                 const { data, gasPrice, to, value } = swapQuoteData;
-                console.log('swap params: ', params);
-                // console.log('swapQuoteData params: ', swapQuoteData)
-                console.log('trade data: ', {
-                    to,
-                    gasPrice,
-                    data,
-                    value,
-                });
                 return {
                     to,
                     gasPrice,
