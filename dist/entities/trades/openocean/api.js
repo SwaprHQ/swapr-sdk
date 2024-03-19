@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBaseUrlWithChainCode = exports.OO_API_ENDPOINTS = exports.OO_API_BASE_URL = void 0;
+exports.getBaseUrlWithChainCode = exports.OO_API_ENDPOINTS = exports.OO_API_SWAPR_REFERRER = exports.OO_API_BASE_URL = void 0;
 const constants_1 = require("../../../constants");
 exports.OO_API_BASE_URL = 'https://open-api.openocean.finance/v3';
+exports.OO_API_SWAPR_REFERRER = '0xdaF6CABd165Fd44c037575a97cF3562339295Ea3';
 var OO_API_ENDPOINTS;
 (function (OO_API_ENDPOINTS) {
     OO_API_ENDPOINTS["GET_GAS"] = "gasPrice";

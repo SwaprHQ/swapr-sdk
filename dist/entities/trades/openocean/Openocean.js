@@ -148,6 +148,8 @@ class OpenoceanTrade extends trade_1.Trade {
                 params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), 0).toString()}`);
                 params.searchParams.set('gasPrice', this.chainId === constants_1.ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice);
                 params.searchParams.set('slippage', `${new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`);
+                params.searchParams.set('account', options.recipient);
+                params.searchParams.set('referrer', api_1.OO_API_SWAPR_REFERRER);
                 const res = yield (0, node_fetch_1.default)(params.toString());
                 const swapQuoteData = yield res.json();
                 const { data, gasPrice, to, value } = swapQuoteData;
