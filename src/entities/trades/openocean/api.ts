@@ -1,6 +1,7 @@
 import { ChainId } from '../../../constants'
 
 export const OO_API_BASE_URL = 'https://open-api.openocean.finance/v3'
+export const OO_API_SWAPR_REFERRER = '0xdaF6CABd165Fd44c037575a97cF3562339295Ea3'
 
 export enum OO_API_ENDPOINTS {
   GET_GAS = 'gasPrice',
