@@ -6,7 +6,7 @@ import { ARB, SWPR, WBNB, WETH, WMATIC } from '../../token'
 import { USDT } from '../uniswap-v2'
 import { OpenoceanTrade } from './Openocean'
 
-const maximumSlippage = new Percent('3', '1')
+const maximumSlippage = new Percent('3', '100')
 const recipient = '0x0000000000000000000000000000000000000000'
 
 const QUOTE_TESTS = [

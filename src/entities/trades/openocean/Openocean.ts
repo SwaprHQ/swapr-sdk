@@ -12,7 +12,7 @@ import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
-import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS, OO_API_SWAPR_REFERRER } from './api'
+import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS } from './api'
 import { OO_CONTRACT_ADDRESS_BY_CHAIN } from './constants'
 
 export interface OpenoceanQuoteTypes {
@@ -191,6 +191,9 @@ export class OpenoceanTrade extends Trade {
     const amount = this.inputAmount
     const maximumSlippage = this.maximumSlippage
 
+    const receivedSlippage = new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)
+    const slippage = +receivedSlippage < 0.05 ? 0.05 : receivedSlippage
+
     try {
       // Ensure that the currencies are present
       invariant(inToken.address && outToken.address, `getQuote: Currency address is required`)
@@ -210,13 +213,9 @@ export class OpenoceanTrade extends Trade {
         `${Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`,
       )
       params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), 0).toString()}`)
-      params.searchParams.set('gasPrice', this.chainId === ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice)
-      params.searchParams.set(
-        'slippage',
-        `${new Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`,
-      )
       params.searchParams.set('account', options.recipient)
-      params.searchParams.set('referrer', OO_API_SWAPR_REFERRER)
+      params.searchParams.set('gasPrice', this.chainId === ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice)
+      params.searchParams.set('slippage', `${slippage}`)
 
       const res = await fetch(params.toString())
       const swapQuoteData = await res.json()
