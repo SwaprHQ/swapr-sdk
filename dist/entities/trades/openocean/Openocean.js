@@ -135,6 +135,8 @@ class OpenoceanTrade extends trade_1.Trade {
             const outToken = this.outputAmount.currency;
             const amount = this.inputAmount;
             const maximumSlippage = this.maximumSlippage;
+            const receivedSlippage = new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1);
+            const slippage = +receivedSlippage < 0.05 ? 0.05 : receivedSlippage;
             try {
                 // Ensure that the currencies are present
                 (0, tiny_invariant_1.default)(inToken.address && outToken.address, `getQuote: Currency address is required`);
@@ -146,13 +148,12 @@ class OpenoceanTrade extends trade_1.Trade {
                 params.searchParams.set('outTokenSymbol', `${outToken.symbol === 'USDC.e' ? 'USDC' : outToken.symbol}`);
                 params.searchParams.set('outTokenAddress', `${currency_1.Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`);
                 params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), 0).toString()}`);
-                params.searchParams.set('gasPrice', this.chainId === constants_1.ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice);
-                params.searchParams.set('slippage', `${new fractions_1.Fraction(maximumSlippage.numerator, maximumSlippage.denominator).toSignificant(1)}`);
                 params.searchParams.set('account', options.recipient);
-                params.searchParams.set('referrer', api_1.OO_API_SWAPR_REFERRER);
+                params.searchParams.set('gasPrice', this.chainId === constants_1.ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice);
+                params.searchParams.set('slippage', `${slippage}`);
                 const res = yield (0, node_fetch_1.default)(params.toString());
                 const swapQuoteData = yield res.json();
-                const { data, gasPrice, to, value } = swapQuoteData;
+                const { data, gasPrice, to, value } = swapQuoteData === null || swapQuoteData === void 0 ? void 0 : swapQuoteData.data;
                 return {
                     to,
                     gasPrice,

@@ -219,7 +219,7 @@ export class OpenoceanTrade extends Trade {
 
       const res = await fetch(params.toString())
       const swapQuoteData = await res.json()
-      const { data, gasPrice, to, value } = swapQuoteData
+      const { data, gasPrice, to, value } = swapQuoteData?.data
 
       return {
         to,
