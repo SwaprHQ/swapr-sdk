@@ -12,7 +12,7 @@ import { Trade } from '../interfaces/trade'
 import { TradeOptions } from '../interfaces/trade-options'
 import { RoutablePlatform } from '../routable-platform'
 import { getProvider, tryGetChainId, wrappedCurrency } from '../utils'
-import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS } from './api'
+import { getBaseUrlWithChainCode, MainnetChainIds, OO_API_ENDPOINTS, OO_API_SWAPR_REFERRER } from './api'
 import { OO_CONTRACT_ADDRESS_BY_CHAIN } from './constants'
 
 export interface OpenoceanQuoteTypes {
@@ -213,6 +213,7 @@ export class OpenoceanTrade extends Trade {
         `${Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`,
       )
       params.searchParams.set('amount', `${parseUnits(amount.toSignificant(), 0).toString()}`)
+      params.searchParams.set('referrer', `${OO_API_SWAPR_REFERRER}`)
       params.searchParams.set('account', options.recipient)
       params.searchParams.set('gasPrice', this.chainId === ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice)
       params.searchParams.set('slippage', `${slippage}`)

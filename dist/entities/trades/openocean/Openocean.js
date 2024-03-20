@@ -148,6 +148,7 @@ class OpenoceanTrade extends trade_1.Trade {
                 params.searchParams.set('outTokenSymbol', `${outToken.symbol === 'USDC.e' ? 'USDC' : outToken.symbol}`);
                 params.searchParams.set('outTokenAddress', `${currency_1.Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`);
                 params.searchParams.set('amount', `${(0, units_1.parseUnits)(amount.toSignificant(), 0).toString()}`);
+                params.searchParams.set('referrer', `${api_1.OO_API_SWAPR_REFERRER}`);
                 params.searchParams.set('account', options.recipient);
                 params.searchParams.set('gasPrice', this.chainId === constants_1.ChainId.MAINNET ? quoteGasPrice.maxFeePerGas : quoteGasPrice);
                 params.searchParams.set('slippage', `${slippage}`);
