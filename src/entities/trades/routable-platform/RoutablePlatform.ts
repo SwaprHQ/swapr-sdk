@@ -45,4 +45,17 @@ export class RoutablePlatform extends BaseRoutablePlatform {
     ],
     'Sushiswap',
   )
+  public static readonly OPENOCEAN = new RoutablePlatform(
+    [
+      ChainId.ARBITRUM_ONE,
+      ChainId.BSC_MAINNET,
+      ChainId.GNOSIS,
+      ChainId.MAINNET,
+      ChainId.OPTIMISM_MAINNET,
+      ChainId.POLYGON,
+      ChainId.SCROLL_MAINNET,
+      ChainId.ZK_SYNC_ERA_MAINNET,
+    ],
+    'OpenOcean',
+  )
 }
