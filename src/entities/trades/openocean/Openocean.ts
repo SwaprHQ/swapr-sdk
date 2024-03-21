@@ -202,12 +202,10 @@ export class OpenoceanTrade extends Trade {
       const quoteGasPrice = await OpenoceanTrade.getGas(this.chainId as MainnetChainIds)
       const params = new URL(`${baseUrl}/${OO_API_ENDPOINTS.SWAP_QUOTE}`)
 
-      params.searchParams.set('inTokenSymbol', `${inToken.symbol === 'USDC.e' ? 'USDC' : inToken.symbol}`)
       params.searchParams.set(
         'inTokenAddress',
         `${Currency.isNative(inToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : inToken.address}`,
       )
-      params.searchParams.set('outTokenSymbol', `${outToken.symbol === 'USDC.e' ? 'USDC' : outToken.symbol}`)
       params.searchParams.set(
         'outTokenAddress',
         `${Currency.isNative(outToken) ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : outToken.address}`,
