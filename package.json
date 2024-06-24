@@ -15,7 +15,6 @@
     "dxdao",
     "swapr"
   ],
-  "module": "dist/sdk.esm.js",
   "scripts": {
     "lint": "eslint src/ --ext .ts",
     "lint:fix": "eslint src/ --ext .ts --fix",
