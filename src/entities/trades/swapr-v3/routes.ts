@@ -1,4 +1,4 @@
-import { Currency } from '@uniswap/sdk-core'
+import { Currency, Token } from '@uniswap/sdk-core'
 
 import { Pool } from './entities/pool'
 import { Route } from './entities/route'
@@ -17,27 +17,63 @@ function poolEquals(poolA: Pool, poolB: Pool): boolean {
 }
 
 export function computeAllRoutes(
+  currencyIn: Token,
+  currencyOut: Token,
   pools: Pool[],
   chainId: number,
   currentPath: Pool[] = [],
   allPaths: Route<Currency, Currency>[] = [],
+  startCurrencyIn: Token = currencyIn,
   maxHops = 2,
 ): Route<Currency, Currency>[] {
-  for (const pool of pools) {
-    if (!pool.involvesToken(pool.token0) || currentPath.some((pathPool) => poolEquals(pool, pathPool))) continue
+  const tokenIn = new Token(
+    currencyIn.chainId,
+    currencyIn.address,
+    currencyIn.decimals,
+    currencyIn.symbol,
+    currencyIn.name,
+  )
+  const tokenOut = new Token(
+    currencyOut.chainId,
+    currencyOut.address,
+    currencyOut.decimals,
+    currencyOut.symbol,
+    currencyOut.name,
+  )
 
-    const outputToken = pool.token0.equals(pool.token0) ? pool.token1 : pool.token0
-    if (outputToken.equals(pool.token1)) {
-      allPaths.push(new Route([...currentPath, pool], pool.token0, pool.token1))
+  const startTokenIn = new Token(
+    startCurrencyIn.chainId,
+    startCurrencyIn.address,
+    startCurrencyIn.decimals,
+    startCurrencyIn.symbol,
+    startCurrencyIn.name,
+  )
+
+  if (!tokenIn || !tokenOut) throw new Error('Missing tokenIn/tokenOut')
+  for (const pool of pools) {
+    if (!pool.involvesToken(tokenIn) || currentPath.find((pathPool) => poolEquals(pool, pathPool))) continue
+
+    const outputToken = pool.token0.equals(tokenIn) ? pool.token1 : pool.token0
+    if (outputToken.equals(tokenOut)) {
+      allPaths.push(new Route([...currentPath, pool], startTokenIn, tokenOut))
     } else if (maxHops > 1) {
-      computeAllRoutes(pools, chainId, [...currentPath, pool], allPaths, maxHops - 1)
+      computeAllRoutes(
+        outputToken,
+        currencyOut,
+        pools,
+        chainId,
+        [...currentPath, pool],
+        allPaths,
+        startTokenIn,
+        maxHops - 1,
+      )
     }
   }
 
   return allPaths
 }
 
-export async function getRoutes(currencyIn: any, currencyOut: any, chainId: number) {
+export async function getRoutes(currencyIn: Token, currencyOut: Token, chainId: number) {
   const pools = await getPools(currencyIn, currencyOut)
-  return computeAllRoutes(pools, chainId, [], [], 3)
+  return computeAllRoutes(currencyIn, currencyOut, pools, chainId, [], [], currencyIn, 3)
 }

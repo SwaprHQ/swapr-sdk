@@ -84,26 +84,48 @@ export const getPools = async (currencyIn: Currency, currencyOut: Currency) => {
   })
 
   const poolsGlobalSpace = () =>
-    Promise.allSettled(poolAddresses.map((poolAddress) => fetchPoolGlobalState(poolAddress))).then((results) =>
+    Promise.allSettled(poolAddresses.map((poolAddress) => fetchPoolGlobalState(poolAddress.address))).then((results) =>
       results
         .map((result, index) => {
+          const poolAddress = poolAddresses[index]
           if (result.status === 'fulfilled') {
-            return { value: result.value, poolAddress: poolAddresses[index] }
+            return {
+              value: result.value,
+              poolAddress: poolAddress.address,
+              token0: poolAddress.token0,
+              token1: poolAddress.token1,
+            }
           } else {
-            return { value: null, poolAddress: poolAddresses[index] }
+            return {
+              value: null,
+              poolAddress: poolAddress.address,
+              token0: poolAddress.token0,
+              token1: poolAddress.token1,
+            }
           }
         })
         .filter((result) => result.value),
     )
 
   const poolsLiquidity = () =>
-    Promise.allSettled(poolAddresses.map((poolAddress) => fetchPoolLiquidity(poolAddress))).then((results) =>
+    Promise.allSettled(poolAddresses.map((poolAddress) => fetchPoolLiquidity(poolAddress.address))).then((results) =>
       results
         .map((result, index) => {
+          const poolAddress = poolAddresses[index]
           if (result.status === 'fulfilled') {
-            return { value: result.value, poolAddress: poolAddresses[index] }
+            return {
+              value: result.value,
+              poolAddress: poolAddress.address,
+              token0: poolAddress.token0,
+              token1: poolAddress.token1,
+            }
           } else {
-            return { value: null, poolAddress: poolAddresses[index] }
+            return {
+              value: null,
+              poolAddress: poolAddress.address,
+              token0: poolAddress.token0,
+              token1: poolAddress.token1,
+            }
           }
         })
         .filter((result) => result.value),
@@ -135,17 +157,17 @@ export const getPools = async (currencyIn: Currency, currencyOut: Currency) => {
 
   const combinedResults = poolAddresses.flatMap((poolAddress) => {
     const liquidityResult = liquidityResults?.find(
-      ({ poolAddress: liquidityPoolAddress }) => liquidityPoolAddress === poolAddress,
+      ({ poolAddress: liquidityPoolAddress }) => liquidityPoolAddress === poolAddress.address,
     )
 
     const globalSpaceResult = globalSpaceResults?.find(
-      ({ poolAddress: globalSpacePoolAddress }) => globalSpacePoolAddress === poolAddress,
+      ({ poolAddress: globalSpacePoolAddress }) => globalSpacePoolAddress === poolAddress.address,
     )
 
     if (globalSpaceResult && liquidityResult) {
       return new Pool(
-        tokenA,
-        tokenB,
+        poolAddress.token0,
+        poolAddress.token1,
         globalSpaceResult.value.fee,
         globalSpaceResult.value.price,
         liquidityResult ? liquidityResult.value : null,

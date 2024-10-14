@@ -2,7 +2,12 @@ import { Contract } from '@ethersproject/contracts'
 
 import { ChainId } from '../../../constants'
 import { getProvider } from '../utils'
-import { SWAPR_ALGEBRA_POOL_ABI, SWAPR_ALGEBRA_QUOTER_ABI, SWAPR_ALGEBRA_ROUTER_ABI } from './abi'
+import {
+  SWAPR_ALGEBRA_MULTICALL_ABI,
+  SWAPR_ALGEBRA_POOL_ABI,
+  SWAPR_ALGEBRA_QUOTER_ABI,
+  SWAPR_ALGEBRA_ROUTER_ABI,
+} from './abi'
 import { SWAPR_ALGEBRA_CONTRACTS } from './constants'
 
 export function getPoolsContract(pool_address: string) {
@@ -15,4 +20,8 @@ export function getRouterContract() {
 
 export function getQuoterContract() {
   return new Contract(SWAPR_ALGEBRA_CONTRACTS.quoter, SWAPR_ALGEBRA_QUOTER_ABI, getProvider(ChainId.GNOSIS))
+}
+
+export function getMulticallContract() {
+  return new Contract(SWAPR_ALGEBRA_CONTRACTS.multicall, SWAPR_ALGEBRA_MULTICALL_ABI, getProvider(ChainId.GNOSIS))
 }

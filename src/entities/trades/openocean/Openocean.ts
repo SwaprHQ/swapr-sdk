@@ -196,7 +196,7 @@ export class OpenoceanTrade extends Trade {
 
     try {
       // Ensure that the currencies are present
-      invariant(inToken.address && outToken.address, `getQuote: Currency address is required`)
+      invariant(inToken.address && outToken.address, `OpenoceanTrade.swapTransaction: Currency address is required`)
 
       const baseUrl = getBaseUrlWithChainCode(this.chainId as MainnetChainIds)
       const quoteGasPrice = await OpenoceanTrade.getGas(this.chainId as MainnetChainIds)
@@ -227,7 +227,7 @@ export class OpenoceanTrade extends Trade {
         value,
       }
     } catch (error) {
-      throw new Error(`Openocean.getQuote: Error fetching the trade: ${error.message}`)
+      throw new Error(`Openocean.swapTransaction: Error fetching the trade: ${error.message}`)
     }
   }
 }
