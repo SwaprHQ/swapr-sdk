@@ -6,6 +6,7 @@ export const POOL_INIT_CODE_HASH = '0xbce37a54eab2fcd71913a0d40723e04238970e7fc1
 export const SWAPR_ALGEBRA_CONTRACTS = {
   quoter: '0xcBaD9FDf0D2814659Eb26f600EFDeAF005Eda0F7',
   router: '0xfFB643E73f280B97809A8b41f7232AB401a04ee1',
+  multicall: '0xc4B85BaF01cD7D1C8F08a8539ba96C205782BBcf',
 }
 
 export type BaseToken = {
